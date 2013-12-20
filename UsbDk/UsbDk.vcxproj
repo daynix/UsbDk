@@ -51,19 +51,16 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Device.c" />
-    <ClCompile Include="Driver.c" />
-    <ClCompile Include="Queue.c" />
+    <ClCompile Include="Device.cpp" />
+    <ClCompile Include="Driver.cpp" />
+    <ClCompile Include="Filter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Device.h" />
     <ClInclude Include="Driver.h" />
+    <ClInclude Include="Filter.h" />
     <ClInclude Include="Public.h" />
-    <ClInclude Include="Queue.h" />
     <ClInclude Include="Trace.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Inf Include="UsbDk.inf" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{2008215F-40FE-4383-9C98-C46BF8D8C87C}</ProjectGuid>

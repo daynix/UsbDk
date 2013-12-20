@@ -1,9 +1,6 @@
 /*
  * UsbDk filter/redirector driver
  *
- * This module allows virtio devices to be used over a virtual PCI device.
- * This can be used with QEMU based VMMs like KVM or Xen.
- *
  * Copyright (c) 2013  Red Hat, Inc.
  *
  * Authors:
@@ -12,14 +9,15 @@
  */
 
 #include "driver.h"
-#include "driver.tmh"
+
+extern "C"
+{
+    #include "driver.tmh"
+}
 
 #ifdef ALLOC_PRAGMA
 #pragma alloc_text (INIT, DriverEntry)
-#pragma alloc_text (PAGE, UsbDkEvtDeviceAdd)
-#pragma alloc_text (PAGE, UsbDkEvtDriverContextCleanup)
 #endif
-
 
 NTSTATUS
 DriverEntry(
@@ -30,6 +28,8 @@ DriverEntry(
     WDF_DRIVER_CONFIG config;
     NTSTATUS status;
     WDF_OBJECT_ATTRIBUTES attributes;
+
+    KdPrint(("USBDK: %s:%d\n", __FUNCTION__, __LINE__));
 
     //
     // Initialize WPP Tracing
@@ -46,15 +46,15 @@ DriverEntry(
     attributes.EvtCleanupCallback = UsbDkEvtDriverContextCleanup;
 
     WDF_DRIVER_CONFIG_INIT(&config,
-                           UsbDkEvtDeviceAdd
-                           );
+                           UsbDkEvtDeviceAdd);
+
+    config.EvtDriverUnload = DriverUnload;
 
     status = WdfDriverCreate(DriverObject,
                              RegistryPath,
                              &attributes,
                              &config,
-                             WDF_NO_HANDLE
-                             );
+                             WDF_NO_HANDLE);
 
     if (!NT_SUCCESS(status)) {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "WdfDriverCreate failed %!STATUS!", status);
@@ -65,6 +65,19 @@ DriverEntry(
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
 
     return status;
+}
+
+VOID
+DriverUnload(IN WDFDRIVER Driver)
+{
+    UNREFERENCED_PARAMETER(Driver);
+
+    PAGED_CODE();
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
+    KdPrint(("USBDK: %s:%d\n", __FUNCTION__, __LINE__));
+
+    return;
 }
 
 NTSTATUS
@@ -80,6 +93,7 @@ UsbDkEvtDeviceAdd(
     PAGED_CODE();
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
+    KdPrint(("USBDK: %s:%d\n", __FUNCTION__, __LINE__));
 
     status = UsbDkCreateDevice(DeviceInit);
 
@@ -98,10 +112,11 @@ UsbDkEvtDriverContextCleanup(
     PAGED_CODE ();
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
+    KdPrint(("USBDK: %s:%d\n", __FUNCTION__, __LINE__));
 
     //
     // Stop WPP Tracing
     //
-    WPP_CLEANUP( WdfDriverWdmGetDriverObject(DriverObject) );
+    WPP_CLEANUP( WdfGetDriver() );
 
 }

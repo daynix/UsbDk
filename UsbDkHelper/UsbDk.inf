@@ -1,0 +1,16 @@
+; UsbDk filter/redirector driver INF file
+;
+; Copyright (c) 2013  Red Hat, Inc.
+;
+; Authors:
+;  Dmitry Fleytman  <dfleytma@redhat.com>
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+
+[UsbDk.NT.Wdf]
+KmdfService = UsbDk, UsbDk_Service_kmdfInst
+
+[UsbDk_Service_kmdfInst]
+KmdfLibraryVersion = 1.11

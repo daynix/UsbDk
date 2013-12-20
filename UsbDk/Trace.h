@@ -1,18 +1,12 @@
-/*++
-
-Module Name:
-
-    Trace.h
-
-Abstract:
-
-    Header file for the debug tracing related function defintions and macros.
-
-Environment:
-
-    Kernel mode
-
---*/
+/*
+* UsbDk filter/redirector driver
+*
+* Copyright (c) 2013  Red Hat, Inc.
+*
+* Authors:
+*  Dmitry Fleytman  <dfleytma@redhat.com>
+*
+*/
 
 //
 // Define the tracing flags.

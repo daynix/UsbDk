@@ -9,11 +9,7 @@
  */
 
 #include "driver.h"
-
-extern "C"
-{
-    #include "driver.tmh"
-}
+#include "driver.tmh"
 
 #ifdef ALLOC_PRAGMA
 #pragma alloc_text (INIT, DriverEntry)
@@ -28,8 +24,6 @@ DriverEntry(
     WDF_DRIVER_CONFIG config;
     NTSTATUS status;
     WDF_OBJECT_ATTRIBUTES attributes;
-
-    KdPrint(("USBDK: %s:%d\n", __FUNCTION__, __LINE__));
 
     //
     // Initialize WPP Tracing
@@ -75,7 +69,6 @@ DriverUnload(IN WDFDRIVER Driver)
     PAGED_CODE();
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
-    KdPrint(("USBDK: %s:%d\n", __FUNCTION__, __LINE__));
 
     return;
 }
@@ -93,7 +86,6 @@ UsbDkEvtDeviceAdd(
     PAGED_CODE();
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
-    KdPrint(("USBDK: %s:%d\n", __FUNCTION__, __LINE__));
 
     status = UsbDkCreateDevice(DeviceInit);
 
@@ -112,7 +104,6 @@ UsbDkEvtDriverContextCleanup(
     PAGED_CODE ();
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
-    KdPrint(("USBDK: %s:%d\n", __FUNCTION__, __LINE__));
 
     //
     // Stop WPP Tracing

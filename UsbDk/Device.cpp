@@ -34,7 +34,7 @@ UsbDkClonePdo(WDFDEVICE ParentDevice)
     DevInit = WdfPdoInitAllocate(ParentDevice);
 
     if (DevInit == NULL) {
-        KdPrint(("USBDK: %s:%d WdfControlDeviceInitAllocate returned NULL\n", __FUNCTION__, __LINE__));
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! WdfPdoInitAllocate returned NULL");
         return NULL;
     }
 
@@ -57,12 +57,10 @@ UsbDkClonePdo(WDFDEVICE ParentDevice)
     status = WdfDeviceCreate(&DevInit, &DevAttr, &ClonePdo);
     if (!NT_SUCCESS(status))
     {
-        KdPrint(("USBDK: %s:%d WdfDeviceCreate returned 0x%X\n", __FUNCTION__, __LINE__, status));
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! WdfDeviceCreate returned %!STATUS!", status);
         WdfDeviceInitFree(DevInit);
         return NULL;
     }
-
-    KdPrint(("USBDK: %s:%d result: 0x%X\n", __FUNCTION__, __LINE__, status));
 
     return ClonePdo;
 }
@@ -74,15 +72,8 @@ NTSTATUS UsbDkQDRPostProcess(_In_  PDEVICE_OBJECT DeviceObject, _In_  PIRP Irp, 
 
     UNREFERENCED_PARAMETER(DeviceObject);
 
-    KdPrint(("USBDK: %s:%d Relations: 0x%p\n", __FUNCTION__, __LINE__, Relations));
-
     if (Relations)
     {
-        for (ULONG i = 0; i < Relations->Count; i++)
-        {
-            KdPrint(("USBDK: %s:%d PDO indicated: 0x%p\n", __FUNCTION__, __LINE__, Relations->Objects[i]));
-        }
-
         if (Relations->Count > 0)
         {
             Ctx->ClonedPdo = Relations->Objects[0];
@@ -92,6 +83,9 @@ NTSTATUS UsbDkQDRPostProcess(_In_  PDEVICE_OBJECT DeviceObject, _In_  PIRP Irp, 
 
             Relations->Objects[0] = WdfDeviceWdmGetDeviceObject(Ctx->PdoClone);
             ObReferenceObject(Relations->Objects[0]);
+
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Replaced PDO 0x%p with 0x%p",
+                        Ctx->ClonedPdo, Relations->Objects[0]);
         }
     }
 
@@ -131,7 +125,17 @@ UsbDkSetupFiltering(_In_ PWDFDEVICE_INIT DeviceInit)
     PAGED_CODE();
 
     WdfFdoInitSetFilter(DeviceInit);
-    return WdfDeviceInitAssignWdmIrpPreprocessCallback(DeviceInit, UsbDkQDRPreprocess, IRP_MJ_PNP, &minorCode, 1);
+
+    NTSTATUS status = WdfDeviceInitAssignWdmIrpPreprocessCallback(DeviceInit,
+                                                                  UsbDkQDRPreprocess,
+                                                                  IRP_MJ_PNP, &minorCode, 1);
+
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! status: %!STATUS!", status);
+    }
+
+    return status;
 }
 
 NTSTATUS
@@ -144,9 +148,9 @@ UsbDkCreateDevice(_Inout_ PWDFDEVICE_INIT DeviceInit)
 
     PAGED_CODE();
 
-    status = UsbDkSetupFiltering(DeviceInit);
-    KdPrint(("USBDK: %s:%d status: 0x%X\n", __FUNCTION__, __LINE__, status));
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Entry");
 
+    status = UsbDkSetupFiltering(DeviceInit);
     if (!NT_SUCCESS(status))
     {
         return status;
@@ -155,23 +159,26 @@ UsbDkCreateDevice(_Inout_ PWDFDEVICE_INIT DeviceInit)
     WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&deviceAttributes, DEVICE_CONTEXT);
 
     status = WdfDeviceCreate(&DeviceInit, &deviceAttributes, &device);
-    KdPrint(("USBDK: %s:%d status: 0x%X\n", __FUNCTION__, __LINE__, status));
 
-    if (NT_SUCCESS(status))
+    if (!NT_SUCCESS(status))
     {
-        if (UsbDkShouldAttach(device))
-        {
-            deviceContext = DeviceGetContext(device);
-            deviceContext->IOTarget = WdfDeviceGetIoTarget(device);
-            deviceContext->PrivateDeviceData = 0;
-            deviceContext->PdoClone = UsbDkClonePdo(device);
-        }
-        else
-        {
-            status = STATUS_NOT_SUPPORTED;
-        }
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! WdfDeviceCreate status: %!STATUS!", status);
+        return status;
     }
 
-    KdPrint(("USBDK: %s:%d status: 0x%X\n", __FUNCTION__, __LINE__, status));
+    if (UsbDkShouldAttach(device))
+    {
+        deviceContext = DeviceGetContext(device);
+        deviceContext->IOTarget = WdfDeviceGetIoTarget(device);
+        deviceContext->PrivateDeviceData = 0;
+        deviceContext->PdoClone = UsbDkClonePdo(device);
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Attached");
+    }
+    else
+    {
+        status = STATUS_NOT_SUPPORTED;
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Not attached");
+    }
+
     return status;
 }

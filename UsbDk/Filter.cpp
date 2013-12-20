@@ -9,6 +9,8 @@
 */
 
 #include "Filter.h"
+#include "trace.h"
+#include "filter.tmh"
 
 extern "C"
 {
@@ -30,7 +32,7 @@ UsbDkIsRootHubHwId(_In_ PCWCHAR hwID)
     RtlInitUnicodeString(&uRH, L"USB\\ROOT_HUB");
     RtlInitUnicodeString(&uRH20, L"USB\\ROOT_HUB20");
 
-    KdPrint(("USBDK: %s:%d HW ID: %wZ\n", __FUNCTION__, __LINE__, &uHwID));
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTER, "%!FUNC! HW ID: %wZ", &uHwID);
 
     return RtlEqualUnicodeString(&uHwID, &uRH, TRUE) ||
            RtlEqualUnicodeString(&uHwID, &uRH20, TRUE);

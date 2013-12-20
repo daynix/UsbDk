@@ -1,18 +1,15 @@
-/*++
-
-Module Name:
-
-    device.c - Device handling events for example driver.
-
-Abstract:
-
-   This file contains the device entry points and callbacks.
-
-Environment:
-
-    Kernel-mode Driver Framework
-
---*/
+/*
+* UsbDk filter/redirector driver
+*
+* This module allows virtio devices to be used over a virtual PCI device.
+* This can be used with QEMU based VMMs like KVM or Xen.
+*
+* Copyright (c) 2013  Red Hat, Inc.
+*
+* Authors:
+*  Dmitry Fleytman  <dfleytma@redhat.com>
+*
+*/
 
 #include "driver.h"
 #include "device.tmh"
@@ -27,23 +24,6 @@ NTSTATUS
 UsbDkCreateDevice(
     _Inout_ PWDFDEVICE_INIT DeviceInit
     )
-/*++
-
-Routine Description:
-
-    Worker routine called to create a device and its software resources.
-
-Arguments:
-
-    DeviceInit - Pointer to an opaque init structure. Memory for this
-                    structure will be freed by the framework when the WdfDeviceCreate
-                    succeeds. So don't access the structure after that point.
-
-Return Value:
-
-    NTSTATUS
-
---*/
 {
     WDF_PNPPOWER_EVENT_CALLBACKS pnpPowerCallbacks;
     WDF_OBJECT_ATTRIBUTES   deviceAttributes;
@@ -105,23 +85,6 @@ UsbDkEvtDevicePrepareHardware(
     _In_ WDFCMRESLIST ResourceList,
     _In_ WDFCMRESLIST ResourceListTranslated
     )
-/*++
-
-Routine Description:
-
-    In this callback, the driver does whatever is necessary to make the
-    hardware ready to use.  In the case of a USB device, this involves
-    reading and selecting descriptors.
-
-Arguments:
-
-    Device - handle to a device
-
-Return Value:
-
-    NT status value
-
---*/
 {
     NTSTATUS status;
     PDEVICE_CONTEXT pDeviceContext;

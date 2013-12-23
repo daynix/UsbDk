@@ -9,14 +9,19 @@
 */
 
 #include "public.h"
+#include "WdfWorkitem.h"
 
 typedef struct _DEVICE_CONTEXT
 {
-    WDFUSBDEVICE UsbDevice;
-    ULONG PrivateDeviceData;  // just a placeholder
+    _DEVICE_CONTEXT() = delete;
+
     WDFIOTARGET IOTarget;
     PDEVICE_OBJECT ClonedPdo;
     WDFDEVICE PdoClone;
+    CWdfWorkitem QDRCompletionWorkItem;
+
+    //IRP_MN_QUERY_DEVICE_RELATIONS IRP being processed now or NULL
+    PIRP QDRIrp;
 } DEVICE_CONTEXT, *PDEVICE_CONTEXT;
 
 NTSTATUS UsbDkCreateDevice(_Inout_ PWDFDEVICE_INIT DeviceInit);

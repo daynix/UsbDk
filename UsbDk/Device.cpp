@@ -65,12 +65,15 @@ UsbDkClonePdo(WDFDEVICE ParentDevice)
     return ClonePdo;
 }
 
-NTSTATUS UsbDkQDRPostProcess(_In_  PDEVICE_OBJECT DeviceObject, _In_  PIRP Irp, _In_  PVOID Context)
+VOID UsbDkQDRPostProcessWi(_In_ PVOID Context)
 {
-    PDEVICE_RELATIONS Relations = (PDEVICE_RELATIONS) Irp->IoStatus.Information;
-    PDEVICE_CONTEXT Ctx = (PDEVICE_CONTEXT)Context;
+    PDEVICE_CONTEXT Ctx = (PDEVICE_CONTEXT) Context;
 
-    UNREFERENCED_PARAMETER(DeviceObject);
+    ASSERT(Ctx->QDRIrp != NULL);
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Entry");
+
+    PDEVICE_RELATIONS Relations = (PDEVICE_RELATIONS) Ctx->QDRIrp->IoStatus.Information;
 
     if (Relations)
     {
@@ -85,19 +88,38 @@ NTSTATUS UsbDkQDRPostProcess(_In_  PDEVICE_OBJECT DeviceObject, _In_  PIRP Irp, 
             ObReferenceObject(Relations->Objects[0]);
 
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Replaced PDO 0x%p with 0x%p",
-                        Ctx->ClonedPdo, Relations->Objects[0]);
+                Ctx->ClonedPdo, Relations->Objects[0]);
         }
     }
+
+    PIRP QDRIrp = Ctx->QDRIrp;
+    Ctx->QDRIrp = NULL;
+
+    IoCompleteRequest(QDRIrp, IO_NO_INCREMENT);
+}
+
+NTSTATUS UsbDkQDRPostProcess(_In_  PDEVICE_OBJECT DeviceObject, _In_  PIRP Irp, _In_  PVOID Context)
+{
+    PDEVICE_CONTEXT Ctx = (PDEVICE_CONTEXT)Context;
+
+    UNREFERENCED_PARAMETER(DeviceObject);
 
     if (Irp->PendingReturned)
     {
         IoMarkIrpPending(Irp);
     }
 
-    return STATUS_SUCCESS;
+    ASSERT(Ctx->QDRIrp == NULL);
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Queuing work item");
+
+    Ctx->QDRIrp = Irp;
+    Ctx->QDRCompletionWorkItem.Enqueue();
+
+    return STATUS_MORE_PROCESSING_REQUIRED;
 }
 
-static NTSTATUS UsbDkQDRPreprocess(_In_ WDFDEVICE Device, _Inout_  PIRP Irp)
+static NTSTATUS UsbDkQDRPreProcess(_In_ WDFDEVICE Device, _Inout_  PIRP Irp)
 {
      PDEVICE_CONTEXT ctx = DeviceGetContext(Device);
      PDEVICE_OBJECT wdmDevice = WdfDeviceWdmGetDeviceObject(Device);
@@ -127,7 +149,7 @@ UsbDkSetupFiltering(_In_ PWDFDEVICE_INIT DeviceInit)
     WdfFdoInitSetFilter(DeviceInit);
 
     NTSTATUS status = WdfDeviceInitAssignWdmIrpPreprocessCallback(DeviceInit,
-                                                                  UsbDkQDRPreprocess,
+                                                                  UsbDkQDRPreProcess,
                                                                   IRP_MJ_PNP, &minorCode, 1);
 
     if (!NT_SUCCESS(status))
@@ -170,9 +192,14 @@ UsbDkCreateDevice(_Inout_ PWDFDEVICE_INIT DeviceInit)
     {
         deviceContext = DeviceGetContext(device);
         deviceContext->IOTarget = WdfDeviceGetIoTarget(device);
-        deviceContext->PrivateDeviceData = 0;
         deviceContext->PdoClone = UsbDkClonePdo(device);
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Attached");
+        deviceContext->QDRIrp = NULL;
+
+        new (&deviceContext->QDRCompletionWorkItem) CWdfWorkitem(device, UsbDkQDRPostProcessWi, deviceContext);
+        status = deviceContext->QDRCompletionWorkItem.Create();
+
+        ULONG traceLevel = NT_SUCCESS(status) ? TRACE_LEVEL_INFORMATION : TRACE_LEVEL_ERROR;
+        TraceEvents(traceLevel, TRACE_DEVICE, "%!FUNC! Attachment status: %!STATUS!", status);
     }
     else
     {

@@ -54,6 +54,7 @@
     <ClCompile Include="Device.cpp" />
     <ClCompile Include="Driver.cpp" />
     <ClCompile Include="Filter.cpp" />
+    <ClCompile Include="WdfWorkitem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Alloc.h" />
@@ -62,6 +63,7 @@
     <ClInclude Include="Filter.h" />
     <ClInclude Include="Public.h" />
     <ClInclude Include="Trace.h" />
+    <ClInclude Include="WdfWorkitem.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{2008215F-40FE-4383-9C98-C46BF8D8C87C}</ProjectGuid>

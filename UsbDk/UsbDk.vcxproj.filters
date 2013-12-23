@@ -34,6 +34,9 @@
     <ClInclude Include="Filter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="WdfWorkitem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="Alloc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -46,6 +49,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Driver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WdfWorkitem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

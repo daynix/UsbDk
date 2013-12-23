@@ -17,11 +17,12 @@ typedef struct _DEVICE_CONTEXT
 
     WDFIOTARGET IOTarget;
     PDEVICE_OBJECT ClonedPdo;
-    WDFDEVICE PdoClone;
     CWdfWorkitem QDRCompletionWorkItem;
 
     //IRP_MN_QUERY_DEVICE_RELATIONS IRP being processed now or NULL
     PIRP QDRIrp;
+
+    BOOLEAN Initialized;
 } DEVICE_CONTEXT, *PDEVICE_CONTEXT;
 
 NTSTATUS UsbDkCreateDevice(_Inout_ PWDFDEVICE_INIT DeviceInit);

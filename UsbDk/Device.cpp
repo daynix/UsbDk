@@ -35,7 +35,7 @@ UsbDkClonePdo(WDFDEVICE ParentDevice)
 
     if (DevInit == NULL) {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! WdfPdoInitAllocate returned NULL");
-        return NULL;
+        return WDF_NO_HANDLE;
     }
 
     WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&DevAttr, PDO_CLONE_EXTENSION);
@@ -59,7 +59,7 @@ UsbDkClonePdo(WDFDEVICE ParentDevice)
     {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! WdfDeviceCreate returned %!STATUS!", status);
         WdfDeviceInitFree(DevInit);
-        return NULL;
+        return WDF_NO_HANDLE;
     }
 
     return ClonePdo;

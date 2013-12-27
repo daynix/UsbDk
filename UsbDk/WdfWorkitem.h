@@ -17,8 +17,8 @@ public:
         , m_PayloadCtx(payloadCtx)
     {}
 
-    CWdfWorkitem(const CWdfWorkitem &other) = delete;
-    CWdfWorkitem& CWdfWorkitem::operator= (const CWdfWorkitem&) = delete;
+    CWdfWorkitem(const CWdfWorkitem&) = delete;
+    CWdfWorkitem& operator= (const CWdfWorkitem&) = delete;
 
     ~CWdfWorkitem();
 

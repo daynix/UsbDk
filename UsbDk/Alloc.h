@@ -19,10 +19,10 @@ public:
         { return ExAllocatePoolWithTag(PoolType, Size, Tag); }
 
     void operator delete(void *ptr)
-        { ExFreePoolWithTag(ptr, Tag); }
+        { if(ptr) { ExFreePoolWithTag(ptr, Tag); } }
 
     void operator delete[](void *ptr)
-        { ExFreePoolWithTag(ptr, Tag); }
+        { if(ptr) { ExFreePoolWithTag(ptr, Tag); } }
 
 protected:
     CAllocatable() {};

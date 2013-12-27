@@ -22,6 +22,7 @@
         WPP_DEFINE_BIT(TRACE_DRIVER)                                   \
         WPP_DEFINE_BIT(TRACE_DEVICE)                                   \
         WPP_DEFINE_BIT(TRACE_FILTER)                                   \
+        WPP_DEFINE_BIT(TRACE_DEVACCESS)                                \
         )
 
 #define WPP_FLAG_LEVEL_LOGGER(flag, level)                                  \
@@ -44,5 +45,6 @@
 // begin_wpp config
 // FUNC Trace{FLAG=MYDRIVER_ALL_INFO}(LEVEL, MSG, ...);
 // FUNC TraceEvents(LEVEL, FLAGS, MSG, ...);
+// CUSTOM_TYPE(devprop, ItemEnum(DEVICE_REGISTRY_PROPERTY));
 // end_wpp
 //

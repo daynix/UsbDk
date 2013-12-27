@@ -52,6 +52,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Device.cpp" />
+    <ClCompile Include="DeviceAccess.cpp" />
     <ClCompile Include="Driver.cpp" />
     <ClCompile Include="Filter.cpp" />
     <ClCompile Include="MemoryBuffer.cpp" />
@@ -60,6 +61,7 @@
   <ItemGroup>
     <ClInclude Include="Alloc.h" />
     <ClInclude Include="Device.h" />
+    <ClInclude Include="DeviceAccess.h" />
     <ClInclude Include="Driver.h" />
     <ClInclude Include="Filter.h" />
     <ClInclude Include="MemoryBuffer.h" />

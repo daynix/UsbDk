@@ -9,6 +9,7 @@
 */
 
 #include "Filter.h"
+#include "DeviceAccess.h"
 #include "trace.h"
 #include "filter.tmh"
 
@@ -69,24 +70,15 @@ UsbDkShouldAttach(_In_ WDFDEVICE device)
 {
     PAGED_CODE();
 
-    WDFMEMORY hwIDsMemory;
-    BOOLEAN res = FALSE;
-
-    NTSTATUS status = WdfDeviceAllocAndQueryProperty(device,
-                                                     DevicePropertyHardwareID,
-                                                     PagedPool,
-                                                     WDF_NO_OBJECT_ATTRIBUTES,
-                                                     &hwIDsMemory);
-
-    if (NT_SUCCESS(status))
+    CObjHolder<CDeviceAccess> devAccess(CDeviceAccess::GetDeviceAccess(device));
+    if (devAccess != NULL)
     {
-        SIZE_T hwIDsSize;
-        PWCHAR hwIDsBuff = (PWCHAR) WdfMemoryGetBuffer(hwIDsMemory, &hwIDsSize);
-
-        res = UsbDkIsRootHub(hwIDsBuff, hwIDsSize);
-
-        WdfObjectDelete(hwIDsMemory);
+        CObjHolder<CMemoryBuffer> hwIDs(devAccess->GetHardwareId());
+        if (hwIDs != NULL)
+        {
+            return UsbDkIsRootHub(static_cast<PCWCHAR>(hwIDs->Ptr()), hwIDs->Size());
+        }
     }
 
-    return res;
+    return FALSE;
 }

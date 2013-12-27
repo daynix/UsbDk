@@ -28,3 +28,31 @@ protected:
     CAllocatable() {};
     ~CAllocatable() {};
 };
+
+template<typename T>
+class CObjHolder
+{
+public:
+    CObjHolder(T *Obj)
+        : m_Obj(Obj)
+    {}
+
+    ~CObjHolder()
+    { delete m_Obj; }
+
+    operator bool() { return m_Obj != NULL; }
+    operator T *() { return m_Obj; }
+    T *operator ->() { return m_Obj; }
+
+    T *detach()
+    {
+        auto ptr = m_Obj;
+        m_Obj = NULL;
+        return ptr;
+    }
+
+    CObjHolder(const CObjHolder&) = delete;
+    CObjHolder& operator= (const CObjHolder&) = delete;
+private:
+    T *m_Obj;
+};

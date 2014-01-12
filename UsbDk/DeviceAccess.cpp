@@ -1,5 +1,7 @@
 #include "DeviceAccess.h"
 #include "trace.h"
+#include "Irp.h"
+#include "RegText.h"
 #include "DeviceAccess.tmh"
 
 CDeviceAccess* CDeviceAccess::GetDeviceAccess(WDFDEVICE DevObj)
@@ -10,6 +12,13 @@ CDeviceAccess* CDeviceAccess::GetDeviceAccess(WDFDEVICE DevObj)
 CDeviceAccess* CDeviceAccess::GetDeviceAccess(PDEVICE_OBJECT DevObj)
 {
     return new CWdmDeviceAccess(DevObj);
+}
+
+PWCHAR CWdfDeviceAccess::QueryBusID(BUS_QUERY_ID_TYPE idType)
+{
+    UNREFERENCED_PARAMETER(idType);
+    ASSERT(!"NOT IMPLEMENTED");
+    return NULL;
 }
 
 CMemoryBuffer *CWdfDeviceAccess::GetDeviceProperty(DEVICE_REGISTRY_PROPERTY propertyId)
@@ -29,6 +38,40 @@ CMemoryBuffer *CWdfDeviceAccess::GetDeviceProperty(DEVICE_REGISTRY_PROPERTY prop
     }
 
     return NULL;
+}
+
+PWCHAR CWdmDeviceAccess::QueryBusID(BUS_QUERY_ID_TYPE idType)
+{
+    CIrp irp;
+
+    auto status = irp.Create(m_DevObj);
+
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVACCESS, "%!FUNC! Error %!STATUS! during IRP creation", status);
+        return NULL;
+    }
+
+    irp.Configure([idType] (PIO_STACK_LOCATION s)
+                  {
+                      s->MajorFunction = IRP_MJ_PNP;
+                      s->MinorFunction = IRP_MN_QUERY_ID;
+                      s->Parameters.QueryId.IdType = idType;
+                  });
+
+    status = irp.SendSynchronously();
+
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVACCESS, "%!FUNC! Error %!STATUS! during %!devid! query", status, idType);
+        return NULL;
+    }
+
+    PWCHAR idData;
+    irp.ReadResult([&idData](ULONG_PTR information)
+                   { idData = reinterpret_cast<PWCHAR>(information); });
+
+    return idData;
 }
 
 CMemoryBuffer *CWdmDeviceAccess::GetDeviceProperty(DEVICE_REGISTRY_PROPERTY propertyId)

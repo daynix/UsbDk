@@ -3,6 +3,7 @@
 #include "ntddk.h"
 #include "wdf.h"
 #include "Alloc.h"
+#include "RegText.h"
 #include "MemoryBuffer.h"
 
 class CDeviceAccess : public CAllocatable<PagedPool, 'ADHR'>
@@ -11,16 +12,26 @@ public:
     static CDeviceAccess* GetDeviceAccess(WDFDEVICE DevObj);
     static CDeviceAccess* GetDeviceAccess(PDEVICE_OBJECT DevObj);
 
-    CMemoryBuffer* GetHardwareId() { return GetDeviceProperty(DevicePropertyHardwareID); };
+    CRegText *GetHardwareIdProperty() { return new CRegText(GetDeviceProperty(DevicePropertyHardwareID)); };
+    CRegText *GetDeviceID() { return QueryBusIDWrapped<CRegSz>(BusQueryDeviceID); }
+    CRegText *GetHardwareIDs() { return QueryBusIDWrapped<CRegMultiSz>(BusQueryHardwareIDs); }
 
     virtual ~CDeviceAccess()
     {}
 
 protected:
     virtual CMemoryBuffer *GetDeviceProperty(DEVICE_REGISTRY_PROPERTY propertyId) = 0;
+    virtual PWCHAR QueryBusID(BUS_QUERY_ID_TYPE idType) = 0;
 
     CDeviceAccess()
     {}
+
+private:
+
+    template<typename ResT>
+    ResT *QueryBusIDWrapped(BUS_QUERY_ID_TYPE idType)
+    { return new ResT(QueryBusID(idType)); }
+
 };
 
 class CWdfDeviceAccess : public CDeviceAccess
@@ -38,6 +49,7 @@ public:
 
 private:
     virtual CMemoryBuffer *GetDeviceProperty(DEVICE_REGISTRY_PROPERTY propertyId) override;
+    virtual PWCHAR QueryBusID(BUS_QUERY_ID_TYPE idType) override;
 
     WDFDEVICE m_DevObj;
 };
@@ -57,6 +69,7 @@ public:
 
 private:
     virtual CMemoryBuffer *GetDeviceProperty(DEVICE_REGISTRY_PROPERTY propertyId) override;
+    virtual PWCHAR QueryBusID(BUS_QUERY_ID_TYPE idType) override;
 
     PDEVICE_OBJECT m_DevObj;
 };

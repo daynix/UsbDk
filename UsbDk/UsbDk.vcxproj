@@ -55,6 +55,7 @@
     <ClCompile Include="DeviceAccess.cpp" />
     <ClCompile Include="Driver.cpp" />
     <ClCompile Include="Filter.cpp" />
+    <ClCompile Include="Irp.cpp" />
     <ClCompile Include="MemoryBuffer.cpp" />
     <ClCompile Include="WdfWorkitem.cpp" />
   </ItemGroup>
@@ -64,6 +65,7 @@
     <ClInclude Include="DeviceAccess.h" />
     <ClInclude Include="Driver.h" />
     <ClInclude Include="Filter.h" />
+    <ClInclude Include="Irp.h" />
     <ClInclude Include="MemoryBuffer.h" />
     <ClInclude Include="Public.h" />
     <ClInclude Include="Trace.h" />

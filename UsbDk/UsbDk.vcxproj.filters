@@ -49,6 +49,9 @@
     <ClInclude Include="Irp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="RegText.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Filter.cpp">
@@ -70,6 +73,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Irp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RegText.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

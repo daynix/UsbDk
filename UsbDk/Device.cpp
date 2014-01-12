@@ -10,7 +10,13 @@
 
 #include "driver.h"
 #include "Filter.h"
+#include "DeviceAccess.h"
 #include "device.tmh"
+
+extern "C"
+{
+#include <ntstrsafe.h>
+}
 
 // {C0F2DADE-8235-4065-89A8-58DB74DDC9AC}
 DEFINE_GUID(GUID_USBDK_CLONE_PDO,
@@ -65,6 +71,34 @@ UsbDkClonePdo(WDFDEVICE ParentDevice)
     return ClonePdo;
 }
 
+//TODO: Temporary function, printouts only
+VOID UsbDkDumpHWIds(CDeviceAccess* devAcc)
+{
+    CObjHolder<CRegText> IDs(devAcc->GetHardwareIDs());
+
+    if (!IDs || IDs->empty())
+    {
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! No HW IDs read");
+    }
+    else
+    {
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! HW IDs read");
+        IDs->Dump();
+    }
+
+    CObjHolder<CRegText> DevIDs(devAcc->GetDeviceID());
+
+    if (!DevIDs || DevIDs->empty())
+    {
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! No Device IDs read");
+    }
+    else
+    {
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Device IDs read");
+        DevIDs->Dump();
+    }
+}
+
 VOID UsbDkQDRPostProcessWi(_In_ PVOID WdfDevice)
 {
     WDFDEVICE Device = (WDFDEVICE) WdfDevice;
@@ -81,6 +115,15 @@ VOID UsbDkQDRPostProcessWi(_In_ PVOID WdfDevice)
         if (Relations->Count > 0)
         {
             Ctx->ClonedPdo = Relations->Objects[0];
+
+            {
+                //TEMPORARY: To verify we see HW ids of PDO to be cloned
+                CObjHolder<CDeviceAccess> pdoAccess(CDeviceAccess::GetDeviceAccess(Ctx->ClonedPdo));
+                if (pdoAccess)
+                {
+                    UsbDkDumpHWIds(pdoAccess);
+                }
+            }
 
             WDFDEVICE PdoClone = UsbDkClonePdo(Device);
 

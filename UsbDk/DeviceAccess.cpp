@@ -4,12 +4,12 @@
 #include "RegText.h"
 #include "DeviceAccess.tmh"
 
-CDeviceAccess* CDeviceAccess::GetDeviceAccess(WDFDEVICE DevObj)
+CDeviceAccess *CDeviceAccess::GetDeviceAccess(WDFDEVICE DevObj)
 {
     return new CWdfDeviceAccess(DevObj);
 }
 
-CDeviceAccess* CDeviceAccess::GetDeviceAccess(PDEVICE_OBJECT DevObj)
+CDeviceAccess *CDeviceAccess::GetDeviceAccess(PDEVICE_OBJECT DevObj)
 {
     return new CWdmDeviceAccess(DevObj);
 }

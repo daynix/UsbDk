@@ -18,7 +18,7 @@ protected:
     {}
 
     PVOID m_Ptr;
-    SIZE_T m_Size;
+    size_t m_Size;
 };
 
 class CWdfMemoryBuffer : public CMemoryBuffer

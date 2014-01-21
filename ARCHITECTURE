@@ -1,0 +1,95 @@
+    Red Hat USB Redirector Client (UsbDk) Design and Architecture
+    =============================================================
+
+Red Hat USB redirector client software consists of following modules:
+
+  1. UsbDk.sys - Red Hat USB filter driver for redirected USB
+     device interception and exclusive access acquisition.
+  2. UsbDk.dll - Helper DLL to install, uninstall and configure
+     USB filter driver.
+  3. UsbDk.exe - Simple command line application for UsbDk.dll
+     API usage demonstration and verification.
+
+USB redirector client software is used by virt-viewer for USB devices
+discovery and access as required for redirection purposes.
+
+Overall system architecture
+---------------------------
+
+         +---------------------------+  +-----------+
+         |                           |  | UsbDk.exe |
+         |        virt-viewer        |  +-----------+
+         |                           |        ^
+         +------------+--------------+        |
+         |  libusbx   |  libusbredir |        |
+         +------------+--------------+        |
+                     ^ |                      |
+                     | |<---------------------+
+                     | |
+ Notifications like: | | High-level API like:
+   Device inserted   | |   InstallDriver/UninstallDriver
+   Device removed    | |   RedirectDevice
+                     | |   SendUrb, ReceiveUrb
+                     | |
+                     | V
+                +-----------+
+                | UsbDk.dll |<--+
+                +-----------+   |
+                      ^         |
+                      |         |                  User Mode
+----------------------+---------+---------------------------
+                      |         |                Kernel Mode
+      Control channel |         |
+                      |         | Data channel for redirected
+                      V         | device Tx/Rx URB transfers
+       Control device o         |
+                      |         |
++-----------+   +-----------+   V
+|PNP Manager|<->| UsbDk.sys |---o RedHat generic USB device
++-----------+   +-----------+   ^
+                      ^         |
+                      |         | Tx/Rx URB passthrough
+     Filter and patch |         | done by UsbDk.sys
+     device discovery |         |
+     messages         |         |
+                      |         |
+                      V         |
+                  +-------+     V
+                  |USB hub|-----o Redirected USB device
+                  +-------+
+                      ^
+                      |
+                      V
+            +-------------------+
+            |USB host controller|
+            +-------------------+
+
+Kernel mode component (UsbDk.sys) design and functionality
+----------------------------------------------------------
+
+UsbDk.sys is both USB filter driver and generic USB device driver.
+On installation it is being registered as USB filter driver and
+system invokes it for each new USB device being discovered including
+USB hubs. On invocation UsbDk.sys checks type of underlying device
+and creates filter instances for USB hubs only.
+
+Being a filter of USB hub UsbDk.sys receives all requests from upper
+part of USB stack including enumeration requests that originated by
+PNP manager (IRP_MJ_PNP/IRP_MN_QUERY_DEVICE_RELATIONS).
+
+Upon enumeration request completion by USB hub driver UsbDk.sys scans
+array of child devices returned and in case there are devices to be
+redirected (according to current configuration) it creates special
+"Generic Red Hat USB device" PDO and places it into the array returned
+instead of entry being redirected.
+
+As a result PNP manager doesn't see USB device being redirected, it sees
+vendor specific USB device with RedHat IDs instead.
+
+This vendor specific USB device created in special way (raw PDO) so that
+system assigns the driver who created it (UsbDk.sys) to be the device driver
+as well.
+
+At this stage any request to this vendor specific device will be forwarded
+to UsbDk.sys which in turn will patch and pass requests to/from original device
+created by USB hub as needed.

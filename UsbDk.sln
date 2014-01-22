@@ -17,6 +17,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UsbDkController", "UsbDkCon
 		{30450FDC-051A-46F0-AD53-B10622834C30} = {30450FDC-051A-46F0-AD53-B10622834C30}
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{32B6DBE0-42AC-41FB-B9AC-A46C306EF1E2}"
+	ProjectSection(SolutionItems) = preProject
+		ARCHITECTURE = ARCHITECTURE
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Win7 Debug|Win32 = Win7 Debug|Win32

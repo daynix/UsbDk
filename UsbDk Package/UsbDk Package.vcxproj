@@ -321,9 +321,116 @@
     <VerifyFlags>133563</VerifyFlags>
   </PropertyGroup>
   <ItemGroup>
+    <FilesToPackage Include="$(OutDir)UsbDkController.exe" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkController.exe" Condition="'$(Configuration)|$(Platform)'=='Win7 Release|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkController.exe" Condition="'$(Configuration)|$(Platform)'=='Win8 Debug|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkController.exe" Condition="'$(Configuration)|$(Platform)'=='Win8 Release|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkController.exe" Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkController.exe" Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug|Win32'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkController.exe" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|Win32'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkController.exe" Condition="'$(Configuration)|$(Platform)'=='Win7 Release|Win32'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkController.exe" Condition="'$(Configuration)|$(Platform)'=='Win8 Debug|Win32'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkController.exe" Condition="'$(Configuration)|$(Platform)'=='Win8 Release|Win32'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkController.exe" Condition="'$(Configuration)|$(Platform)'=='Win8.1 Release|Win32'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkController.exe" Condition="'$(Configuration)|$(Platform)'=='Win8.1 Release|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkHelper.dll" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkHelper.dll" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|Win32'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkHelper.dll" Condition="'$(Configuration)|$(Platform)'=='Win7 Release|Win32'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkHelper.dll" Condition="'$(Configuration)|$(Platform)'=='Win7 Release|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkHelper.dll" Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug|Win32'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkHelper.dll" Condition="'$(Configuration)|$(Platform)'=='Win8.1 Release|Win32'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkHelper.dll" Condition="'$(Configuration)|$(Platform)'=='Win8 Release|Win32'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkHelper.dll" Condition="'$(Configuration)|$(Platform)'=='Win8 Debug|Win32'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkHelper.dll" Condition="'$(Configuration)|$(Platform)'=='Win8 Debug|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkHelper.dll" Condition="'$(Configuration)|$(Platform)'=='Win8 Release|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkHelper.dll" Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkHelper.dll" Condition="'$(Configuration)|$(Platform)'=='Win8.1 Release|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
     <FilesToPackage Include="@(Inf->'%(CopyOutput)')" Condition="'@(Inf)'!=''" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\UsbDkController\UsbDkController.vcxproj">
+      <Project>{9141406d-bbaa-48e1-96d1-33d3294b247e}</Project>
+      <Private>true</Private>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+    </ProjectReference>
+    <ProjectReference Include="..\UsbDkHelper\UsbDkHelper.vcxproj">
+      <Project>{30450fdc-051a-46f0-ad53-b10622834c30}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\UsbDk\UsbDk.vcxproj">
       <Project>{2008215f-40fe-4383-9c98-c46bf8d8c87c}</Project>
     </ProjectReference>

@@ -33,7 +33,7 @@ template<typename T>
 class CObjHolder
 {
 public:
-    CObjHolder(T *Obj)
+    CObjHolder(T *Obj = nullptr)
         : m_Obj(Obj)
     {}
 
@@ -51,8 +51,12 @@ public:
         return ptr;
     }
 
+    void operator= (T *ptr)
+    { m_Obj = ptr; }
+
     CObjHolder(const CObjHolder&) = delete;
     CObjHolder& operator= (const CObjHolder&) = delete;
+
 private:
-    T *m_Obj;
+    T *m_Obj = nullptr;
 };

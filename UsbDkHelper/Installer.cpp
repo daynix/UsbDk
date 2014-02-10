@@ -1,6 +1,10 @@
 #include "stdafx.h"
 #include "Installer.h"
 #include "Public.h"
+#include "DeviceMgr.h"
+
+#include <initguid.h>
+#include <Usbiodef.h>
 
 //------------------------------------------------------------------------------------------
 
@@ -38,6 +42,8 @@ InstallResult UsbDkInstaller::Install()
         m_wdfCoinstaller.PostDeviceInstall(infFilePath);
 
         addUsbDkToRegistry();
+
+        DeviceMgr::ResetDeviceByClass(GUID_DEVINTERFACE_USB_HOST_CONTROLLER);
     }
     catch(const exception &e)
     {
@@ -55,6 +61,8 @@ bool UsbDkInstaller::Uninstall()
     try
     {
          removeUsbDkFromRegistry();
+
+         DeviceMgr::ResetDeviceByClass(GUID_DEVINTERFACE_USB_HOST_CONTROLLER);
 
         // copy driver to WIndows/System32/drivers folder
         unsetDriver();

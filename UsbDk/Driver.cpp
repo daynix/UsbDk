@@ -9,11 +9,14 @@
  */
 
 #include "driver.h"
+#include "ControlDevice.h"
 #include "driver.tmh"
 
 #ifdef ALLOC_PRAGMA
 #pragma alloc_text (INIT, DriverEntry)
 #endif
+
+static CUsbDkControlDevice* g_UsbDkControlDevice;
 
 NTSTATUS
 DriverEntry(
@@ -44,17 +47,22 @@ DriverEntry(
 
     config.EvtDriverUnload = DriverUnload;
 
+    WDFDRIVER Driver;
     status = WdfDriverCreate(DriverObject,
                              RegistryPath,
                              &attributes,
                              &config,
-                             WDF_NO_HANDLE);
+                             &Driver);
 
     if (!NT_SUCCESS(status)) {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "WdfDriverCreate failed %!STATUS!", status);
         WPP_CLEANUP(DriverObject);
         return status;
     }
+
+    //TODO: Temporary, object not deleted
+    g_UsbDkControlDevice = new CUsbDkControlDevice;
+    g_UsbDkControlDevice->Create(Driver);
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
 

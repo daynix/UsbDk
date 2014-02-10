@@ -39,9 +39,9 @@ InstallResult UsbDkInstaller::Install()
 
         addUsbDkToRegistry();
     }
-    catch (exception *e)
+    catch(const exception &e)
     {
-        wstring wString = __string2wstring(string(e->what()));
+        wstring wString = __string2wstring(string(e.what()));
         OutputDebugString(wString.c_str());
         return InstallFailure;
     }
@@ -67,9 +67,9 @@ bool UsbDkInstaller::Uninstall()
 
         m_wdfCoinstaller.PostDeviceRemove(infFilePath);
     }
-    catch (exception *e)
+    catch (const exception &e)
     {
-        wstring wString = __string2wstring(string(e->what()));
+        wstring wString = __string2wstring(string(e.what()));
         OutputDebugString(wString.c_str());
         return false;
     }

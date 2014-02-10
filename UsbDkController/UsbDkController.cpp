@@ -2,7 +2,7 @@
 //
 
 #include "stdafx.h"
-#include "..\UsbDkHelper\UsbDkHelper.h"
+#include "UsbDkHelper.h"
 
 
 using namespace std;

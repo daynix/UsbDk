@@ -11,6 +11,6 @@
 #include <tchar.h>
 #include <assert.h>
 #include "windows.h"
-#include <..\UsbDkHelper\tstrings.h>
+#include <tstrings.h>
 
 // TODO: reference additional headers your program requires here

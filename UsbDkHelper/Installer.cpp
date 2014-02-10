@@ -1,9 +1,9 @@
 #include "stdafx.h"
 #include "Installer.h"
+#include "Public.h"
 
 //------------------------------------------------------------------------------------------
 
-#define DRIVER_NAME            TEXT("UsbDk")
 #define SYSTEM32_DRIVERS    TEXT("\\System32\\Drivers\\")
 
 #define MAX_BUFFER_SIZE        1024
@@ -33,7 +33,7 @@ InstallResult UsbDkInstaller::Install()
             return InstallFailureNeedReboot;
         }
 
-        m_scManager.CreateServiceObject(DRIVER_NAME, driverLocation.c_str());
+        m_scManager.CreateServiceObject(USBDK_DRIVER_NAME, driverLocation.c_str());
 
         m_wdfCoinstaller.PostDeviceInstall(infFilePath);
 
@@ -63,7 +63,7 @@ bool UsbDkInstaller::Uninstall()
 
         m_wdfCoinstaller.PreDeviceRemove(infFilePath);
 
-        m_scManager.DeleteServiceObject(DRIVER_NAME);
+        m_scManager.DeleteServiceObject(USBDK_DRIVER_NAME);
 
         m_wdfCoinstaller.PostDeviceRemove(infFilePath);
     }
@@ -86,9 +86,9 @@ tstring UsbDkInstaller::setDriver()
         throw UsbDkInstallerFailedException(TEXT("UsbDkInstaller throw the exception: GetCurrentDirectory failed!"));
     }
 
-    tstring driverOrigLocationStr(tstring(currDirectory) + TEXT("\\") DRIVER_NAME TEXT(".sys"));
+    tstring driverOrigLocationStr(tstring(currDirectory) + TEXT("\\") USBDK_DRIVER_FILE_NAME);
 
-    auto driverDestLocation = buildDriverPath(DRIVER_NAME TEXT(".sys"));
+    auto driverDestLocation = buildDriverPath(USBDK_DRIVER_FILE_NAME);
 
     if (!CopyFile(driverOrigLocationStr.c_str(), driverDestLocation.c_str(), FALSE))
     {
@@ -102,7 +102,7 @@ tstring UsbDkInstaller::setDriver()
 
 void UsbDkInstaller::unsetDriver()
 {
-    auto driverDestLocation = buildDriverPath(DRIVER_NAME TEXT(".sys"));
+    auto driverDestLocation = buildDriverPath(USBDK_DRIVER_FILE_NAME);
 
     if (!DeleteFile(driverDestLocation.c_str()))
     {
@@ -129,7 +129,7 @@ tstring UsbDkInstaller::buildInfFilePath()
         throw UsbDkInstallerFailedException(L"UsbDkInstaller throw the exception: GetCurrentDirectory failed!");
     }
 
-    return tstring(currDir) + TEXT("\\") + DRIVER_NAME + TEXT(".inf");
+    return tstring(currDir) + TEXT("\\") + USBDK_DRIVER_INF_NAME;
 }
 //-------------------------------------------------------------------------------------------
 
@@ -156,10 +156,10 @@ void UsbDkInstaller::addUsbDkToRegistry()
 
         tstringlist filtersList;
         buildStringListFromVector(filtersList, valVector);
-        buildNewListWithoutEement(newfiltersList, filtersList, DRIVER_NAME);
+        buildNewListWithoutEement(newfiltersList, filtersList, USBDK_DRIVER_NAME);
     }
 
-    newfiltersList.push_back(DRIVER_NAME);
+    newfiltersList.push_back(USBDK_DRIVER_NAME);
 
     valVector.clear();
     buildMultiStringVectorFromList(valVector, newfiltersList);
@@ -197,7 +197,7 @@ void UsbDkInstaller::removeUsbDkFromRegistry()
         buildStringListFromVector(filtersList, valVector);
 
         tstringlist newfiltersList;
-        buildNewListWithoutEement(newfiltersList, filtersList, DRIVER_NAME);
+        buildNewListWithoutEement(newfiltersList, filtersList, USBDK_DRIVER_NAME);
 
         valVector.clear();
         buildMultiStringVectorFromList(valVector, newfiltersList);
@@ -250,7 +250,7 @@ void UsbDkInstaller::buildNewListWithoutEement(tstringlist &newfiltersList, tstr
 {
     for (auto filter : filtersList)
     {
-        if (filter != DRIVER_NAME)
+        if (filter != USBDK_DRIVER_NAME)
         {
             newfiltersList.push_back(filter);
         }

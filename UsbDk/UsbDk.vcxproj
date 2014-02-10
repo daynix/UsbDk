@@ -51,6 +51,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ControlDevice.cpp" />
     <ClCompile Include="Device.cpp" />
     <ClCompile Include="DeviceAccess.cpp" />
     <ClCompile Include="Driver.cpp" />
@@ -63,6 +64,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Alloc.h" />
+    <ClInclude Include="ControlDevice.h" />
     <ClInclude Include="Device.h" />
     <ClInclude Include="DeviceAccess.h" />
     <ClInclude Include="Driver.h" />

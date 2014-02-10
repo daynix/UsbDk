@@ -24,6 +24,10 @@
         WPP_DEFINE_BIT(TRACE_FILTER)                                   \
         WPP_DEFINE_BIT(TRACE_DEVACCESS)                                \
         WPP_DEFINE_BIT(TRACE_REGTEXT)                                  \
+        WPP_DEFINE_BIT(TRACE_DEVICEINIT)                               \
+        WPP_DEFINE_BIT(TRACE_CONTROLDEVICE)                            \
+        WPP_DEFINE_BIT(TRACE_WDFDEVICE)                                \
+        WPP_DEFINE_BIT(TRACE_WDFQUEUE)                                 \
         )
 
 #define WPP_FLAG_LEVEL_LOGGER(flag, level)                                  \

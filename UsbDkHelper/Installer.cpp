@@ -241,6 +241,10 @@ void UsbDkInstaller::buildStringListFromVector(tstringlist &filtersList, vector<
         }
 
         currPos += currFilter.size() + 1;
+        if (currPos >= valVector.size())
+        {
+            break;
+        }
 
     } while (!currFilter.empty());
 }

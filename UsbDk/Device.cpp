@@ -223,6 +223,7 @@ UsbDkEvtDeviceContextCleanup(_In_ WDFOBJECT DeviceObject)
     if (deviceContext->Initialized)
     {
         deviceContext->QDRCompletionWorkItem.~CWdfWorkitem();
+        UsbDkReleaseControlDevice();
     }
 }
 

@@ -16,7 +16,7 @@
 #pragma alloc_text (INIT, DriverEntry)
 #endif
 
-static CUsbDkControlDevice* g_UsbDkControlDevice;
+CRefCountingHolder<CUsbDkControlDevice> *g_UsbDkControlDevice;
 
 NTSTATUS
 DriverEntry(
@@ -60,9 +60,10 @@ DriverEntry(
         return status;
     }
 
-    //TODO: Temporary, object not deleted
-    g_UsbDkControlDevice = new CUsbDkControlDevice;
-    g_UsbDkControlDevice->Create(Driver);
+    g_UsbDkControlDevice = new CRefCountingHolder<CUsbDkControlDevice>;
+    if (g_UsbDkControlDevice == nullptr) {
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
 
@@ -78,7 +79,48 @@ DriverUnload(IN WDFDRIVER Driver)
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
 
+    delete g_UsbDkControlDevice;
+
     return;
+}
+
+static NTSTATUS
+UsbDkReferenceControlDevice(WDFDRIVER Driver)
+{
+    if (!g_UsbDkControlDevice->InitialAddRef())
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC! control device already exists");
+        return STATUS_SUCCESS;
+    }
+    else
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC! creating control device");
+    }
+
+    CUsbDkControlDevice *dev = new CUsbDkControlDevice();
+    if (dev == nullptr)
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC! cannot allocate control device");
+        g_UsbDkControlDevice->Release();
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+
+    *g_UsbDkControlDevice = dev;
+    auto status = (*g_UsbDkControlDevice)->Create(Driver);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC! cannot create control device %!STATUS!", status);
+        g_UsbDkControlDevice->Release();
+        return status;
+    }
+
+    return STATUS_SUCCESS;
+}
+
+VOID
+UsbDkReleaseControlDevice()
+{
+    g_UsbDkControlDevice->Release();
 }
 
 NTSTATUS
@@ -97,7 +139,12 @@ UsbDkEvtDeviceAdd(
 
     status = UsbDkCreateDevice(DeviceInit);
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
+    if (NT_SUCCESS(status))
+    {
+        status = UsbDkReferenceControlDevice(Driver);
+    }
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit %!STATUS!", status);
 
     return status;
 }

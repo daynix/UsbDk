@@ -32,3 +32,5 @@ DRIVER_INITIALIZE DriverEntry;
 EVT_WDF_DRIVER_UNLOAD DriverUnload;
 EVT_WDF_DRIVER_DEVICE_ADD UsbDkEvtDeviceAdd;
 EVT_WDF_OBJECT_CONTEXT_CLEANUP UsbDkEvtDriverContextCleanup;
+
+VOID UsbDkReleaseControlDevice();

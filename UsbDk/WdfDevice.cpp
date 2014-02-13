@@ -5,7 +5,13 @@
 bool CDeviceInit::Create(_In_ WDFDRIVER Driver, _In_ CONST UNICODE_STRING &SDDLString)
 {
     m_DeviceInit = WdfControlDeviceInitAllocate(Driver, &SDDLString);
-    return m_DeviceInit != nullptr;
+    if (m_DeviceInit == nullptr)
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_WDFDEVICE, "%!FUNC! Cannot allocate DeviceInit");
+        return false;
+    }
+
+    return true;
 }
 
 CDeviceInit::~CDeviceInit()
@@ -21,7 +27,7 @@ NTSTATUS CDeviceInit::SetName(const UNICODE_STRING &Name)
     auto status = WdfDeviceInitAssignName(m_DeviceInit, &Name);
 
     if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICEINIT, "%!FUNC! failed %!STATUS!", status);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_WDFDEVICE, "%!FUNC! failed %!STATUS!", status);
     }
 
     return status;
@@ -61,7 +67,7 @@ NTSTATUS CWdfQueue::Create()
 
     auto status = m_OwnerDevice.AddQueue(QueueConfig, Attributes, Queue);
     if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_WDFQUEUE, "%!FUNC! failed %!STATUS!", status);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_WDFDEVICE, "%!FUNC! failed %!STATUS!", status);
     }
 
     return status;

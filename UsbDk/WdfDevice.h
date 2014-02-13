@@ -32,6 +32,7 @@ class CWdfDevice
 {
 public:
     CWdfDevice() {}
+    ~CWdfDevice() { WdfObjectDelete(m_Device); }
 
     NTSTATUS CreateSymLink(const UNICODE_STRING &Name);
     NTSTATUS Create(CDeviceInit &DeviceInit, WDF_OBJECT_ATTRIBUTES &DeviceAttr);

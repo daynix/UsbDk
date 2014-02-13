@@ -60,3 +60,43 @@ public:
 private:
     T *m_Obj = nullptr;
 };
+
+template<typename T>
+class CRefCountingHolder : public CAllocatable < NonPagedPool, 'CRHR'>
+{
+public:
+    CRefCountingHolder() {};
+
+    bool InitialAddRef()
+    {
+        return InterlockedIncrement(&m_RefCount) == 1;
+    }
+
+    void AddRef()
+    {
+        InterlockedIncrement(&m_RefCount);
+    }
+
+    void Release()
+    {
+        if (InterlockedDecrement(&m_RefCount) == 0)
+        {
+            delete m_Obj;
+        }
+    }
+
+    operator T *() { return m_Obj; }
+    T *operator ->() { return m_Obj; }
+
+    void operator= (T *ptr)
+    {
+        m_Obj = ptr;
+    }
+
+    CRefCountingHolder(const CRefCountingHolder&) = delete;
+    CRefCountingHolder& operator= (const CRefCountingHolder&) = delete;
+
+private:
+    T *m_Obj = nullptr;
+    LONG m_RefCount = 0;
+};

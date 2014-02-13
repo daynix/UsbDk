@@ -10,7 +10,6 @@
 
 #define SYSTEM32_DRIVERS    TEXT("\\System32\\Drivers\\")
 
-#define MAX_BUFFER_SIZE        1024
 #define UPPER_FILTER_REGISTRY_SUBTREE TEXT("System\\CurrentControlSet\\Control\\Class\\{36FC9E60-C465-11CF-8056-444553540000}\\")
 #define UPPER_FILTER_REGISTRY_KEY TEXT("UpperFilters")
 
@@ -147,7 +146,7 @@ void UsbDkInstaller::addUsbDkToRegistry()
     LPCTSTR upperFiltersKeyStr = UPPER_FILTER_REGISTRY_SUBTREE;
 
     // check for value size
-    DWORD valLen = m_regAccess.ReadMultiString(upperFilterString, NULL, MAX_BUFFER_SIZE, upperFiltersKeyStr);
+    DWORD valLen = m_regAccess.ReadMultiString(upperFilterString, NULL, 0, upperFiltersKeyStr);
 
     vector<TCHAR> valVector;
     tstringlist newfiltersList;
@@ -188,7 +187,7 @@ void UsbDkInstaller::removeUsbDkFromRegistry()
     LPCTSTR upperFiltersKeyStr = UPPER_FILTER_REGISTRY_SUBTREE;
 
     // check for value size
-    DWORD valLen = m_regAccess.ReadMultiString(upperFilterString, NULL, MAX_BUFFER_SIZE, upperFiltersKeyStr);
+    DWORD valLen = m_regAccess.ReadMultiString(upperFilterString, NULL, 0, upperFiltersKeyStr);
 
     if (valLen)
     {

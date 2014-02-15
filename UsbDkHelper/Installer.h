@@ -33,8 +33,8 @@ private:
     ServiceManager m_scManager;
     UsbDkRegAccess m_regAccess;
 
-    tstring setDriver();
-    void    unsetDriver();
+    tstring CopyDriver();
+    void    DeleteDriver();
     tstring buildDriverPath(const tstring &DriverFileName);
     tstring buildInfFilePath();
 

@@ -24,8 +24,7 @@ UsbDkInstaller::UsbDkInstaller()
 
 bool UsbDkInstaller::Install()
 {
-    // copy driver to WIndows/System32/drivers folder
-    auto driverLocation = setDriver();
+    auto driverLocation = CopyDriver();
     auto infFilePath = buildInfFilePath();
     if (m_wdfCoinstaller.PreDeviceInstallEx(infFilePath))
     {
@@ -45,8 +44,7 @@ void UsbDkInstaller::Uninstall()
 
     DeviceMgr::ResetDeviceByClass(GUID_DEVINTERFACE_USB_HOST_CONTROLLER);
 
-    // copy driver to WIndows/System32/drivers folder
-    unsetDriver();
+    DeleteDriver();
 
     auto infFilePath = buildInfFilePath();
 
@@ -58,7 +56,7 @@ void UsbDkInstaller::Uninstall()
 }
 //--------------------------------------------------------------------------------
 
-tstring UsbDkInstaller::setDriver()
+tstring UsbDkInstaller::CopyDriver()
 {
     TCHAR currDirectory[MAX_PATH];
     if (!GetCurrentDirectory(MAX_PATH, currDirectory))
@@ -80,7 +78,7 @@ tstring UsbDkInstaller::setDriver()
 }
 //-------------------------------------------------------------------------------------------
 
-void UsbDkInstaller::unsetDriver()
+void UsbDkInstaller::DeleteDriver()
 {
     auto driverDestLocation = buildDriverPath(USBDK_DRIVER_FILE_NAME);
 

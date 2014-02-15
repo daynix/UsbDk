@@ -454,6 +454,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Win8.1 Release|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Win8.1 Release|x64'">Use</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="DriverAccess.cpp" />
     <ClCompile Include="Exception.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Win8 Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|Win32'">Use</PrecompiledHeader>
@@ -556,6 +557,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DriverAccess.h" />
     <ClInclude Include="Exception.h" />
     <ClInclude Include="Installer.h" />
     <ClInclude Include="RegAccess.h" />

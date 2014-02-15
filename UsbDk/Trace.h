@@ -26,7 +26,6 @@
         WPP_DEFINE_BIT(TRACE_REGTEXT)                                  \
         WPP_DEFINE_BIT(TRACE_CONTROLDEVICE)                            \
         WPP_DEFINE_BIT(TRACE_WDFDEVICE)                                \
-        WPP_DEFINE_BIT(TRACE_USBDKCONTROLQUEUE)                        \
         )
 
 #define WPP_FLAG_LEVEL_LOGGER(flag, level)                                  \

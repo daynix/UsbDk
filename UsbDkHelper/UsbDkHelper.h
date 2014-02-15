@@ -18,5 +18,6 @@ typedef enum
 extern "C"
 {
     DLL InstallResult    InstallDriver();
-    DLL bool    UninstallDriver();
+    DLL BOOL    UninstallDriver();
+    DLL BOOL    PingDriver(LPTSTR ReplyBuffer, size_t ReplyBufferLen);
 }

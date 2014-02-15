@@ -43,11 +43,32 @@ void CUsbDkControlDeviceQueue::DeviceControl(WDFQUEUE Queue,
     UNREFERENCED_PARAMETER(Queue);
     UNREFERENCED_PARAMETER(OutputBufferLength);
     UNREFERENCED_PARAMETER(InputBufferLength);
-    UNREFERENCED_PARAMETER(IoControlCode);
 
-    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_USBDKCONTROLQUEUE, "%!FUNC! Request arrived");
+    NTSTATUS status = STATUS_INVALID_DEVICE_REQUEST;
 
-    WdfRequestComplete(Request, STATUS_SUCCESS);
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "%!FUNC! Request arrived");
+
+    switch (IoControlCode)
+    {
+        case IOCTL_USBDK_PING:
+        {
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "Called IOCTL_USBDK_PING\n");
+
+            LPTSTR outBuff;
+            size_t outBuffLen;
+            status = WdfRequestRetrieveOutputBuffer(Request, 0, (PVOID *)&outBuff, &outBuffLen);
+            if (!NT_SUCCESS(status)) {
+                break;
+            }
+
+            wcsncpy(outBuff, TEXT("Pong!"), outBuffLen/sizeof(TCHAR));
+            WdfRequestSetInformation(Request, outBuffLen);
+            status = STATUS_SUCCESS;
+        }
+        break;
+    }
+
+    WdfRequestComplete(Request, status);
 }
 
 NTSTATUS CUsbDkControlDevice::Create(WDFDRIVER Driver)

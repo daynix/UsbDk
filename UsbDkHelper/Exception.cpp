@@ -71,7 +71,7 @@ UsbDkCRTErrorException::UsbDkCRTErrorException(int nErrorCode)
 }
 
 UsbDkCRTErrorException::UsbDkCRTErrorException(LPCTSTR lpzDescription, int nErrorCode)
-    : UsbDkNumErrorException(tstring(lpzDescription) + GetErrorString((DWORD)nErrorCode), (DWORD)nErrorCode)
+: UsbDkNumErrorException(tstring(lpzDescription) + TEXT(" (") + GetErrorString((DWORD) nErrorCode) + TEXT(")"), (DWORD)nErrorCode)
 {
 
 }
@@ -107,13 +107,13 @@ UsbDkW32ErrorException::UsbDkW32ErrorException(DWORD dwErrorCode)
 }
 
 UsbDkW32ErrorException::UsbDkW32ErrorException(LPCTSTR lpzDescription, DWORD dwErrorCode)
-    : UsbDkNumErrorException(tstring(lpzDescription) + GetErrorString(dwErrorCode), dwErrorCode)
+    : UsbDkNumErrorException(tstring(lpzDescription) + TEXT(" (") + GetErrorString(dwErrorCode) + TEXT(")"), dwErrorCode)
 {
 
 }
 
 UsbDkW32ErrorException::UsbDkW32ErrorException(const tstring &Description, DWORD dwErrorCode)
-    : UsbDkNumErrorException(Description + GetErrorString(dwErrorCode), dwErrorCode)
+    : UsbDkNumErrorException(Description + TEXT(" (") + GetErrorString(dwErrorCode) + TEXT(")"), dwErrorCode)
 {
 
 }

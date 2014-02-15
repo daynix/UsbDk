@@ -40,7 +40,7 @@ wstring __string2wstring(const string& str);
 #   define wstring2tstring(str) __wstring2string(str)
 #endif
 
-
 typedef list<tstring, allocator<tstring>> tstringlist;
 
+#define ARRAY_SIZE(a) (sizeof(a)/sizeof((a)[0]))
 #define TBUF_SIZEOF(a) ARRAY_SIZE(a)

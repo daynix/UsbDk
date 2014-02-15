@@ -22,66 +22,39 @@ UsbDkInstaller::UsbDkInstaller()
 }
 //--------------------------------------------------------------------------------
 
-InstallResult UsbDkInstaller::Install()
+bool UsbDkInstaller::Install()
 {
-    try
+    // copy driver to WIndows/System32/drivers folder
+    auto driverLocation = setDriver();
+    auto infFilePath = buildInfFilePath();
+    if (m_wdfCoinstaller.PreDeviceInstallEx(infFilePath))
     {
-        // copy driver to WIndows/System32/drivers folder
-        auto driverLocation = setDriver();
-
-        auto infFilePath = buildInfFilePath();
-
-        if (!m_wdfCoinstaller.PreDeviceInstallEx(infFilePath))
-        {
-            return InstallFailureNeedReboot;
-        }
-
         m_scManager.CreateServiceObject(USBDK_DRIVER_NAME, driverLocation.c_str());
-
         m_wdfCoinstaller.PostDeviceInstall(infFilePath);
-
         addUsbDkToRegistry();
-
         DeviceMgr::ResetDeviceByClass(GUID_DEVINTERFACE_USB_HOST_CONTROLLER);
+        return true;
     }
-    catch(const exception &e)
-    {
-        wstring wString = __string2wstring(string(e.what()));
-        OutputDebugString(wString.c_str());
-        return InstallFailure;
-    }
-
-    return InstallSuccess;
+    return false;
 }
 //--------------------------------------------------------------------------------
 
-bool UsbDkInstaller::Uninstall()
+void UsbDkInstaller::Uninstall()
 {
-    try
-    {
-         removeUsbDkFromRegistry();
+    removeUsbDkFromRegistry();
 
-         DeviceMgr::ResetDeviceByClass(GUID_DEVINTERFACE_USB_HOST_CONTROLLER);
+    DeviceMgr::ResetDeviceByClass(GUID_DEVINTERFACE_USB_HOST_CONTROLLER);
 
-        // copy driver to WIndows/System32/drivers folder
-        unsetDriver();
+    // copy driver to WIndows/System32/drivers folder
+    unsetDriver();
 
-        auto infFilePath = buildInfFilePath();
+    auto infFilePath = buildInfFilePath();
 
-        m_wdfCoinstaller.PreDeviceRemove(infFilePath);
+    m_wdfCoinstaller.PreDeviceRemove(infFilePath);
 
-        m_scManager.DeleteServiceObject(USBDK_DRIVER_NAME);
+    m_scManager.DeleteServiceObject(USBDK_DRIVER_NAME);
 
-        m_wdfCoinstaller.PostDeviceRemove(infFilePath);
-    }
-    catch (const exception &e)
-    {
-        wstring wString = __string2wstring(string(e.what()));
-        OutputDebugString(wString.c_str());
-        return false;
-    }
-
-    return true;
+    m_wdfCoinstaller.PostDeviceRemove(infFilePath);
 }
 //--------------------------------------------------------------------------------
 

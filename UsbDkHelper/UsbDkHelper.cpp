@@ -8,15 +8,34 @@
 //------------------------------------------------------------------------------------------
 InstallResult InstallDriver()
 {
-    UsbDkInstaller installer;
-    return installer.Install();
+    try
+    {
+        UsbDkInstaller installer;
+        return installer.Install() ? InstallSuccess : InstallFailureNeedReboot;
+    }
+    catch (const exception &e)
+    {
+        wstring wString = __string2wstring(string(e.what()));
+        OutputDebugString(wString.c_str());
+        return InstallFailure;
+    }
 }
 //-------------------------------------------------------------------------------------------
 
 BOOL UninstallDriver()
 {
-    UsbDkInstaller installer;
-    return installer.Uninstall() ? TRUE : FALSE;
+    try
+    {
+        UsbDkInstaller installer;
+        installer.Uninstall();
+        return TRUE;
+    }
+    catch (const exception &e)
+    {
+        wstring wString = __string2wstring(string(e.what()));
+        OutputDebugString(wString.c_str());
+        return FALSE;
+    }
 }
 //-------------------------------------------------------------------------------------------
 

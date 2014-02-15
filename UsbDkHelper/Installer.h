@@ -23,8 +23,8 @@ public:
 
     UsbDkInstaller();
 
-    InstallResult Install();
-    bool Uninstall();
+    bool Install();
+    void Uninstall();
 
 protected:
 private:

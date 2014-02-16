@@ -2,14 +2,20 @@
 
 #include "ntddk.h"
 #include "wdf.h"
+#include "Alloc.h"
 
-class CDeviceInit
+class CPreAllocatedDeviceInit : public CAllocatable<PagedPool, 'IDHR'>
 {
 public:
-    bool Create(_In_ WDFDRIVER Driver, _In_ CONST UNICODE_STRING &SDDLString);
-    CDeviceInit()
+    CPreAllocatedDeviceInit()
     {}
-    ~CDeviceInit();
+    virtual ~CPreAllocatedDeviceInit()
+    {}
+
+    virtual void Attach(PWDFDEVICE_INIT DeviceInit);
+    virtual PWDFDEVICE_INIT Detach();
+
+    void Free();
 
     void SetExclusive()
     { WdfDeviceInitSetExclusive(m_DeviceInit, TRUE); }
@@ -17,15 +23,35 @@ public:
     void SetIoBuffered()
     { WdfDeviceInitSetIoType(m_DeviceInit, WdfDeviceIoBuffered); }
 
+    void SetFilter()
+    { WdfFdoInitSetFilter(m_DeviceInit); }
+
+    NTSTATUS SetPreprocessCallback(PFN_WDFDEVICE_WDM_IRP_PREPROCESS Callback, UCHAR MajorFunction, UCHAR MinorFunction);
+
     NTSTATUS SetName(const UNICODE_STRING &Name);
 
-    operator PWDFDEVICE_INIT*()
-    { return &m_DeviceInit; }
+    CPreAllocatedDeviceInit(const CPreAllocatedDeviceInit&) = delete;
+    CPreAllocatedDeviceInit& operator= (const CPreAllocatedDeviceInit&) = delete;
+private:
+    PWDFDEVICE_INIT m_DeviceInit = nullptr;
+};
+
+class CDeviceInit : public CPreAllocatedDeviceInit
+{
+public:
+    bool Create(_In_ WDFDRIVER Driver, _In_ CONST UNICODE_STRING &SDDLString);
+    CDeviceInit()
+    {}
+    virtual ~CDeviceInit();
+
+    virtual void Attach(PWDFDEVICE_INIT DeviceInit) override;
+    virtual PWDFDEVICE_INIT Detach() override;
 
     CDeviceInit(const CDeviceInit&) = delete;
     CDeviceInit& operator= (const CDeviceInit&) = delete;
+
 private:
-    PWDFDEVICE_INIT m_DeviceInit = nullptr;
+    bool m_Attached = false;
 };
 
 class CWdfDevice
@@ -35,7 +61,7 @@ public:
     ~CWdfDevice() { WdfObjectDelete(m_Device); }
 
     NTSTATUS CreateSymLink(const UNICODE_STRING &Name);
-    NTSTATUS Create(CDeviceInit &DeviceInit, WDF_OBJECT_ATTRIBUTES &DeviceAttr);
+    NTSTATUS Create(CPreAllocatedDeviceInit &DeviceInit, WDF_OBJECT_ATTRIBUTES &DeviceAttr);
 
     CWdfDevice(const CWdfDevice&) = delete;
     CWdfDevice& operator= (const CWdfDevice&) = delete;

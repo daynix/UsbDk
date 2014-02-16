@@ -4,25 +4,39 @@
 
 bool CDeviceInit::Create(_In_ WDFDRIVER Driver, _In_ CONST UNICODE_STRING &SDDLString)
 {
-    m_DeviceInit = WdfControlDeviceInitAllocate(Driver, &SDDLString);
-    if (m_DeviceInit == nullptr)
+    auto DeviceInit = WdfControlDeviceInitAllocate(Driver, &SDDLString);
+    if (DeviceInit == nullptr)
     {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_WDFDEVICE, "%!FUNC! Cannot allocate DeviceInit");
         return false;
     }
+
+    Attach(DeviceInit);
 
     return true;
 }
 
 CDeviceInit::~CDeviceInit()
 {
-    if (m_DeviceInit != nullptr)
+    if (m_Attached)
     {
-        WdfDeviceInitFree(m_DeviceInit);
+        Free();
     }
 }
 
-NTSTATUS CDeviceInit::SetName(const UNICODE_STRING &Name)
+void CDeviceInit::Attach(PWDFDEVICE_INIT DevInit)
+{
+    m_Attached = true;
+    CPreAllocatedDeviceInit::Attach(DevInit);
+}
+
+PWDFDEVICE_INIT CDeviceInit::Detach()
+{
+    m_Attached = false;
+    return CPreAllocatedDeviceInit::Detach();
+}
+
+NTSTATUS CPreAllocatedDeviceInit::SetName(const UNICODE_STRING &Name)
 {
     auto status = WdfDeviceInitAssignName(m_DeviceInit, &Name);
 
@@ -30,6 +44,33 @@ NTSTATUS CDeviceInit::SetName(const UNICODE_STRING &Name)
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_WDFDEVICE, "%!FUNC! failed %!STATUS!", status);
     }
 
+    return status;
+}
+
+void CPreAllocatedDeviceInit::Free()
+{
+    WdfDeviceInitFree(m_DeviceInit);
+}
+
+void CPreAllocatedDeviceInit::Attach(PWDFDEVICE_INIT DeviceInit)
+{
+    m_DeviceInit = DeviceInit;
+}
+
+PWDFDEVICE_INIT CPreAllocatedDeviceInit::Detach()
+{
+    auto DevInit = m_DeviceInit;
+    m_DeviceInit = nullptr;
+    return DevInit;
+}
+
+NTSTATUS CPreAllocatedDeviceInit::SetPreprocessCallback(PFN_WDFDEVICE_WDM_IRP_PREPROCESS Callback, UCHAR MajorFunction, UCHAR MinorFunction)
+{
+    auto status = WdfDeviceInitAssignWdmIrpPreprocessCallback(m_DeviceInit, Callback, MajorFunction, &MinorFunction, 1);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_WDFDEVICE, "%!FUNC! status: %!STATUS!", status);
+    }
     return status;
 }
 
@@ -42,16 +83,17 @@ NTSTATUS CWdfDevice::CreateSymLink(const UNICODE_STRING &Name)
     return status;
 }
 
-NTSTATUS CWdfDevice::Create(CDeviceInit &DeviceInit, WDF_OBJECT_ATTRIBUTES &DeviceAttr)
+NTSTATUS CWdfDevice::Create(CPreAllocatedDeviceInit &DeviceInit, WDF_OBJECT_ATTRIBUTES &DeviceAttr)
 {
-    auto status = WdfDeviceCreate(DeviceInit, &DeviceAttr, &m_Device);
+    auto DevInitObj = DeviceInit.Detach();
+
+    auto status = WdfDeviceCreate(&DevInitObj, &DeviceAttr, &m_Device);
     if (!NT_SUCCESS(status))
     {
+        DeviceInit.Attach(DevInitObj);
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_WDFDEVICE, "%!FUNC! failed %!STATUS!", status);
-        return status;
     }
-
-    return STATUS_SUCCESS;
+    return status;
 }
 
 NTSTATUS CWdfQueue::Create()

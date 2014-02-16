@@ -116,6 +116,13 @@ public:
         return GetCount();
     }
 
+    void Remove(TEntryType *Entry)
+    {
+        CLockedContext<TAccessStrategy> LockedContext(*this);
+        RemoveEntryList(Entry->GetListEntry());
+        CounterDecrement();
+    }
+
     template <typename TFunctor>
     void ForEachDetached(TFunctor Functor)
     {

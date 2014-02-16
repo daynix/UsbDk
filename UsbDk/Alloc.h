@@ -86,6 +86,7 @@ public:
     }
 
     operator T *() { return m_Obj; }
+    T *Get() { return m_Obj; }
     T *operator ->() { return m_Obj; }
 
     void operator= (T *ptr)

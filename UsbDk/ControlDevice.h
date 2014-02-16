@@ -4,6 +4,7 @@
 #include "wdf.h"
 #include "WdfDevice.h"
 #include "Alloc.h"
+#include "UsbDkUtil.h"
 
 class CUsbDkControlDeviceQueue : public CWdfDefaultQueue, public CAllocatable<PagedPool, 'QCHR'>
 {

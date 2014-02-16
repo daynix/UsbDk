@@ -31,17 +31,25 @@ public:
     CUsbDkControlDevice() {}
 
     NTSTATUS Create(WDFDRIVER hDriver);
+
+    static bool Allocate();
+    static void Deallocate()
+    { delete m_UsbDkControlDevice; }
+    static CUsbDkControlDevice* Reference(WDFDRIVER Driver);
+    static void Release()
+    { m_UsbDkControlDevice->Release(); }
+
 private:
     CObjHolder<CUsbDkControlDeviceQueue> m_DeviceQueue;
+    static CRefCountingHolder<CUsbDkControlDevice> *m_UsbDkControlDevice;
 };
 
 typedef struct _USBDK_CONTROL_DEVICE_EXTENSION {
 
-    CUsbDkControlDevice UsbDkControl; // Store your control data here
+    CUsbDkControlDevice *UsbDkControl; // Store your control data here
 
     _USBDK_CONTROL_DEVICE_EXTENSION(const _USBDK_CONTROL_DEVICE_EXTENSION&) = delete;
     _USBDK_CONTROL_DEVICE_EXTENSION& operator= (const _USBDK_CONTROL_DEVICE_EXTENSION&) = delete;
 
 } USBDK_CONTROL_DEVICE_EXTENSION, *PUSBDK_CONTROL_DEVICE_EXTENSION;
-
-WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(USBDK_CONTROL_DEVICE_EXTENSION, UsbDkControlGetContext)
+WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(USBDK_CONTROL_DEVICE_EXTENSION, UsbDkControlGetContext);

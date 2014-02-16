@@ -21,14 +21,14 @@ VOID CWdfWorkitem::Callback(_In_ WDFWORKITEM WorkItem)
     ctx->workItem->m_Payload(ctx->workItem->m_PayloadCtx);
 }
 
-NTSTATUS CWdfWorkitem::Create()
+NTSTATUS CWdfWorkitem::Create(WDFOBJECT parent)
 {
     WDF_OBJECT_ATTRIBUTES  attributes;
     WDF_WORKITEM_CONFIG  workitemConfig;
 
     WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
     WDF_OBJECT_ATTRIBUTES_SET_CONTEXT_TYPE(&attributes, WdfWorkItemContext);
-    attributes.ParentObject = m_hParent;
+    attributes.ParentObject = parent;
     WDF_WORKITEM_CONFIG_INIT(&workitemConfig, Callback);
 
     auto status = WdfWorkItemCreate(&workitemConfig, &attributes, &m_hWorkItem);

@@ -10,13 +10,12 @@
 
 #include "driver.h"
 #include "ControlDevice.h"
+#include "FilterDevice.h"
 #include "driver.tmh"
 
 #ifdef ALLOC_PRAGMA
 #pragma alloc_text (INIT, DriverEntry)
 #endif
-
-CRefCountingHolder<CUsbDkControlDevice> *g_UsbDkControlDevice;
 
 NTSTATUS
 DriverEntry(
@@ -60,14 +59,14 @@ DriverEntry(
         return status;
     }
 
-    g_UsbDkControlDevice = new CRefCountingHolder<CUsbDkControlDevice>;
-    if (g_UsbDkControlDevice == nullptr) {
+    if (!CUsbDkControlDevice::Allocate())
+    {
         return STATUS_INSUFFICIENT_RESOURCES;
     }
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
 
-    return status;
+    return STATUS_SUCCESS;
 }
 
 VOID
@@ -79,48 +78,9 @@ DriverUnload(IN WDFDRIVER Driver)
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
 
-    delete g_UsbDkControlDevice;
+    CUsbDkControlDevice::Deallocate();
 
     return;
-}
-
-static NTSTATUS
-UsbDkReferenceControlDevice(WDFDRIVER Driver)
-{
-    if (!g_UsbDkControlDevice->InitialAddRef())
-    {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC! control device already exists");
-        return STATUS_SUCCESS;
-    }
-    else
-    {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC! creating control device");
-    }
-
-    CUsbDkControlDevice *dev = new CUsbDkControlDevice();
-    if (dev == nullptr)
-    {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC! cannot allocate control device");
-        g_UsbDkControlDevice->Release();
-        return STATUS_INSUFFICIENT_RESOURCES;
-    }
-
-    *g_UsbDkControlDevice = dev;
-    auto status = (*g_UsbDkControlDevice)->Create(Driver);
-    if (!NT_SUCCESS(status))
-    {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC! cannot create control device %!STATUS!", status);
-        g_UsbDkControlDevice->Release();
-        return status;
-    }
-
-    return STATUS_SUCCESS;
-}
-
-VOID
-UsbDkReleaseControlDevice()
-{
-    g_UsbDkControlDevice->Release();
 }
 
 NTSTATUS
@@ -129,20 +89,19 @@ UsbDkEvtDeviceAdd(
     _Inout_ PWDFDEVICE_INIT DeviceInit
     )
 {
-    NTSTATUS status;
-
     UNREFERENCED_PARAMETER(Driver);
 
     PAGED_CODE();
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
 
-    status = UsbDkCreateDevice(DeviceInit);
-
-    if (NT_SUCCESS(status))
+    auto FilterDevice = new CUsbDkFilterDevice();
+    if (FilterDevice == nullptr)
     {
-        status = UsbDkReferenceControlDevice(Driver);
+        return STATUS_INSUFFICIENT_RESOURCES;
     }
+
+    auto status = FilterDevice->Create(DeviceInit, Driver);
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit %!STATUS!", status);
 

@@ -2,6 +2,7 @@
 #include "trace.h"
 #include "ControlDevice.tmh"
 #include "Public.h"
+#include "DeviceAccess.h"
 
 class CUsbDkControlDeviceInit : public CDeviceInit
 {
@@ -98,12 +99,58 @@ NTSTATUS CUsbDkControlDevice::Create(WDFDRIVER Driver)
 
     m_DeviceQueue = new CUsbDkControlDeviceQueue(*this, WdfIoQueueDispatchSequential);
     status = m_DeviceQueue->Create();
-    if (!NT_SUCCESS(status))
+    if (NT_SUCCESS(status))
     {
-        return status;
+        FinishInitializing();
     }
 
-    FinishInitializing();
+    return status;
+}
 
-    return STATUS_SUCCESS;
+CRefCountingHolder<CUsbDkControlDevice> *CUsbDkControlDevice::m_UsbDkControlDevice = nullptr;
+
+CUsbDkControlDevice* CUsbDkControlDevice::Reference(WDFDRIVER Driver)
+{
+    if (!m_UsbDkControlDevice->InitialAddRef())
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! control device already exists");
+        return m_UsbDkControlDevice->Get();
+    }
+    else
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! creating control device");
+    }
+
+    CUsbDkControlDevice *dev = new CUsbDkControlDevice();
+    if (dev == nullptr)
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! cannot allocate control device");
+        m_UsbDkControlDevice->Release();
+        return nullptr;
+    }
+
+    *m_UsbDkControlDevice = dev;
+    auto status = (*m_UsbDkControlDevice)->Create(Driver);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! cannot create control device %!STATUS!", status);
+        m_UsbDkControlDevice->Release();
+        return nullptr;
+    }
+
+    return dev;
+}
+
+bool CUsbDkControlDevice::Allocate()
+{
+    ASSERT(m_UsbDkControlDevice == nullptr);
+
+    m_UsbDkControlDevice = new CRefCountingHolder<CUsbDkControlDevice>;
+    if (m_UsbDkControlDevice == nullptr)
+    {
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "%!FUNC! Cannot allocate control device holder");
+        return false;
+    }
+
+    return true;
 }

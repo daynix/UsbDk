@@ -25,6 +25,7 @@
         WPP_DEFINE_BIT(TRACE_DEVACCESS)                                \
         WPP_DEFINE_BIT(TRACE_REGTEXT)                                  \
         WPP_DEFINE_BIT(TRACE_CONTROLDEVICE)                            \
+        WPP_DEFINE_BIT(TRACE_FILTERDEVICE)                             \
         WPP_DEFINE_BIT(TRACE_WDFDEVICE)                                \
         )
 

@@ -197,6 +197,7 @@ CUsbDkFilterDevice::~CUsbDkFilterDevice()
 {
     if (m_ControlDevice != nullptr)
     {
+        m_ControlDevice->UnregisterFilter(*this);
         CUsbDkControlDevice::Release();
     }
 }
@@ -212,7 +213,14 @@ NTSTATUS CUsbDkFilterDevice::Create(PWDFDEVICE_INIT DevInit, WDFDRIVER Driver)
     }
 
     m_ControlDevice = CUsbDkControlDevice::Reference(Driver);
-    return (m_ControlDevice != nullptr) ? STATUS_SUCCESS : STATUS_INSUFFICIENT_RESOURCES;
+
+    if (m_ControlDevice == nullptr)
+    {
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+
+    m_ControlDevice->RegisterFilter(*this);
+    return STATUS_SUCCESS;
 }
 
 NTSTATUS CUsbDkFilterDevice::CreateFilterDevice(PWDFDEVICE_INIT DevInit)

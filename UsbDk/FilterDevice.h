@@ -31,6 +31,12 @@ public:
 
     NTSTATUS Create(PWDFDEVICE_INIT DevInit, WDFDRIVER Driver);
     NTSTATUS CreateFilterDevice(PWDFDEVICE_INIT DevInit);
+
+    PLIST_ENTRY GetListEntry()
+    { return &m_ListEntry; }
+    static CUsbDkFilterDevice *GetByListEntry(PLIST_ENTRY entry)
+    { return static_cast<CUsbDkFilterDevice*>(CONTAINING_RECORD(entry, CUsbDkFilterDevice, m_ListEntry)); }
+
 private:
     static void ContextCleanup(_In_ WDFOBJECT DeviceObject);
 
@@ -53,4 +59,6 @@ private:
     PIRP m_QDRIrp = nullptr;
     PDEVICE_OBJECT m_ClonedPdo = nullptr;
     CUsbDkControlDevice *m_ControlDevice = nullptr;
+
+    LIST_ENTRY m_ListEntry;
 };

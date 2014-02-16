@@ -5,6 +5,7 @@
 #include "WdfDevice.h"
 #include "Alloc.h"
 #include "UsbDkUtil.h"
+#include "FilterDevice.h"
 
 class CUsbDkControlDeviceQueue : public CWdfDefaultQueue, public CAllocatable<PagedPool, 'QCHR'>
 {
@@ -30,7 +31,11 @@ class CUsbDkControlDevice : private CWdfControlDevice, public CAllocatable<NonPa
 public:
     CUsbDkControlDevice() {}
 
-    NTSTATUS Create(WDFDRIVER hDriver);
+    NTSTATUS Create(WDFDRIVER Driver);
+    void RegisterFilter(CUsbDkFilterDevice &FilterDevice)
+    { m_FilterDevices.PushBack(&FilterDevice); }
+    void UnregisterFilter(CUsbDkFilterDevice &FilterDevice)
+    { m_FilterDevices.Remove(&FilterDevice); }
 
     static bool Allocate();
     static void Deallocate()
@@ -42,6 +47,8 @@ public:
 private:
     CObjHolder<CUsbDkControlDeviceQueue> m_DeviceQueue;
     static CRefCountingHolder<CUsbDkControlDevice> *m_UsbDkControlDevice;
+
+    CWdmList<CUsbDkFilterDevice, CLockedAccess, CNonCountingObject> m_FilterDevices;
 };
 
 typedef struct _USBDK_CONTROL_DEVICE_EXTENSION {

@@ -3,7 +3,7 @@
 #include "Alloc.h"
 #include "MemoryBuffer.h"
 
-class CRegText : public CAllocatable<PagedPool, 'TRHR'>
+class CRegText : public CAllocatable<NonPagedPool, 'TRHR'>
 {
 public:
     class iterator

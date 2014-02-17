@@ -71,6 +71,7 @@
     <ClInclude Include="MemoryBuffer.h" />
     <ClInclude Include="Public.h" />
     <ClInclude Include="RegText.h" />
+    <ClInclude Include="UsbDkData.h" />
     <ClInclude Include="UsbDkUtil.h" />
     <ClInclude Include="Trace.h" />
     <ClInclude Include="WdfDevice.h" />

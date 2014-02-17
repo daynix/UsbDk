@@ -1,8 +1,10 @@
 #include "ControlDevice.h"
 #include "trace.h"
 #include "ControlDevice.tmh"
+
+#define MAX_DEVICE_ID_LEN (200)
+
 #include "Public.h"
-#include "DeviceAccess.h"
 
 class CUsbDkControlDeviceInit : public CDeviceInit
 {

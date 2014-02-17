@@ -8,6 +8,10 @@
 *
 */
 
+#pragma once
+
+#include "UsbDkData.h"
+
 //
 // Define an Interface Guid so that app can find the device and talk to it.
 //

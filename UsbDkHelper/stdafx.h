@@ -10,6 +10,7 @@
 #include <assert.h>
 #include <tchar.h>
 #include <windows.h>
+#include <cfgmgr32.h>
 
 #include <ios>
 #include <vector>

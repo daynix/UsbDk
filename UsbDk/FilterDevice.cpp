@@ -5,6 +5,13 @@
 #include "DeviceAccess.h"
 #include "ControlDevice.h"
 
+void CUsbDkChildDevice::Dump()
+{
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Child device:");
+    m_DeviceID->Dump();
+    m_InstanceID->Dump();
+}
+
 class CUsbDkFilterDeviceInit : public CPreAllocatedDeviceInit
 {
 public:

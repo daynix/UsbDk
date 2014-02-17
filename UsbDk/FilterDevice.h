@@ -6,6 +6,7 @@
 #include "WdfWorkitem.h"
 #include "Alloc.h"
 #include "UsbDkUtil.h"
+#include "RegText.h"
 
 class CUsbDkControlDevice;
 class CUsbDkFilterDevice;
@@ -19,6 +20,34 @@ typedef struct _USBDK_FILTER_DEVICE_EXTENSION {
 
 } USBDK_FILTER_DEVICE_EXTENSION, *PUSBDK_FILTER_DEVICE_EXTENSION;
 WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(USBDK_FILTER_DEVICE_EXTENSION, UsbDkFilterGetContext);
+
+class CUsbDkChildDevice : public CAllocatable<NonPagedPool, 'DCHR'>
+{
+public:
+    CUsbDkChildDevice(CRegText *DeviceID, CRegText *InstanceID)
+        : m_DeviceID(DeviceID)
+        , m_InstanceID(InstanceID)
+    {}
+
+    PCWCHAR DeviceID() { m_DeviceID->begin(); }
+    PCWCHAR InstanceID() { m_InstanceID->begin(); }
+
+    void Dump();
+
+    PLIST_ENTRY GetListEntry()
+    { return &m_ListEntry; }
+    static CUsbDkChildDevice *GetByListEntry(PLIST_ENTRY entry)
+    { return static_cast<CUsbDkChildDevice*>(CONTAINING_RECORD(entry, CUsbDkChildDevice, m_ListEntry)); }
+
+private:
+    CObjHolder<CRegText> m_DeviceID;
+    CObjHolder<CRegText> m_InstanceID;
+
+    LIST_ENTRY m_ListEntry;
+
+    CUsbDkChildDevice(const CUsbDkChildDevice&) = delete;
+    CUsbDkChildDevice& operator= (const CUsbDkChildDevice&) = delete;
+};
 
 class CUsbDkFilterDevice : private CWdfDevice, public CAllocatable<NonPagedPool, 'DFHR'>
 {

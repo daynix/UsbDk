@@ -96,8 +96,7 @@ public:
     TEntryType *Pop()
     {
         CLockedContext<TAccessStrategy> LockedContext(*this);
-        CounterDecrement();
-        return TEntryType::GetByListEntry(RemoveHeadList(&m_List));
+        return Pop_LockLess();
     }
 
     ULONG Push(TEntryType *Entry)
@@ -129,7 +128,7 @@ public:
         CLockedContext<TAccessStrategy> LockedContext(*this);
         while (!IsListEmpty(&m_List))
         {
-            Functor(Pop());
+            Functor(Pop_LockLess());
         }
     }
 
@@ -164,6 +163,12 @@ private:
                 Functor(Object);
             }
         }
+    }
+
+    TEntryType *Pop_LockLess()
+    {
+        CounterDecrement();
+        return TEntryType::GetByListEntry(RemoveHeadList(&m_List));
     }
 
     LIST_ENTRY m_List;

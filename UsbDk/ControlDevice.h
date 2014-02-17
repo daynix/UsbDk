@@ -37,6 +37,9 @@ public:
     void UnregisterFilter(CUsbDkFilterDevice &FilterDevice)
     { m_FilterDevices.Remove(&FilterDevice); }
 
+    //TODO: Temporary, until enumeration implementation
+    void DumpAllChildren();
+
     static bool Allocate();
     static void Deallocate()
     { delete m_UsbDkControlDevice; }

@@ -57,6 +57,12 @@ void CUsbDkControlDeviceQueue::DeviceControl(WDFQUEUE Queue,
         {
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "Called IOCTL_USBDK_PING\n");
 
+            //TEMP: Dump children devices
+            {
+                auto devExt = UsbDkControlGetContext(WdfIoQueueGetDevice(Queue));
+                devExt->UsbDkControl->DumpAllChildren();
+            }
+
             LPTSTR outBuff;
             size_t outBuffLen;
             status = WdfRequestRetrieveOutputBuffer(Request, 0, (PVOID *)&outBuff, &outBuffLen);
@@ -72,6 +78,14 @@ void CUsbDkControlDeviceQueue::DeviceControl(WDFQUEUE Queue,
     }
 
     WdfRequestComplete(Request, status);
+}
+
+void CUsbDkControlDevice::DumpAllChildren()
+{
+    m_FilterDevices.ForEach([](CUsbDkFilterDevice *Filter)
+                            {
+                                Filter->EnumerateChildren([](CUsbDkChildDevice *Child){ Child->Dump(); });
+                            });
 }
 
 NTSTATUS CUsbDkControlDevice::Create(WDFDRIVER Driver)
@@ -103,6 +117,9 @@ NTSTATUS CUsbDkControlDevice::Create(WDFDRIVER Driver)
     status = m_DeviceQueue->Create();
     if (NT_SUCCESS(status))
     {
+        auto deviceContext = UsbDkControlGetContext(m_Device);
+        deviceContext->UsbDkControl = this;
+
         FinishInitializing();
     }
 

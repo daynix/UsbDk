@@ -61,6 +61,10 @@ public:
     NTSTATUS Create(PWDFDEVICE_INIT DevInit, WDFDRIVER Driver);
     NTSTATUS CreateFilterDevice(PWDFDEVICE_INIT DevInit);
 
+    template <typename TFunctor>
+    void EnumerateChildren(TFunctor Functor)
+    { m_ChildDevices.ForEach(Functor); }
+
     PLIST_ENTRY GetListEntry()
     { return &m_ListEntry; }
     static CUsbDkFilterDevice *GetByListEntry(PLIST_ENTRY entry)
@@ -82,12 +86,15 @@ private:
     void CUsbDkFilterDevice::QDRPostProcessWi();
 
     bool ShouldAttach();
+    void ClearChildrenList();
 
     CWdfWorkitem m_QDRCompletionWorkItem;
 
     PIRP m_QDRIrp = nullptr;
     PDEVICE_OBJECT m_ClonedPdo = nullptr;
     CUsbDkControlDevice *m_ControlDevice = nullptr;
+
+    CWdmList<CUsbDkChildDevice, CLockedAccess, CNonCountingObject> m_ChildDevices;
 
     LIST_ENTRY m_ListEntry;
 

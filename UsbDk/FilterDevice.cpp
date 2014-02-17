@@ -1,7 +1,6 @@
 #include "FilterDevice.h"
 #include "trace.h"
 #include "FilterDevice.tmh"
-#include "Public.h"
 #include "DeviceAccess.h"
 #include "ControlDevice.h"
 
@@ -121,35 +120,12 @@ UsbDkClonePdo(WDFDEVICE ParentDevice)
 
     return ClonePdo;
 }
-
-//TODO: Temporary function, printouts only
-VOID UsbDkDumpHWIds(CDeviceAccess* devAcc)
-{
-    CObjHolder<CRegText> IDs(devAcc->GetHardwareIDs());
-
-    if (!IDs || IDs->empty())
-    {
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! No HW IDs read");
-    }
-    else
-    {
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! HW IDs read");
-        IDs->Dump();
-    }
-
-    CObjHolder<CRegText> DevIDs(devAcc->GetDeviceID());
-
-    if (!DevIDs || DevIDs->empty())
-    {
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! No Device IDs read");
-    }
-    else
-    {
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Device IDs read");
-        DevIDs->Dump();
-    }
-}
 ///////////////////////////////////////////////////////////////////////////////////////////////
+
+void CUsbDkFilterDevice::ClearChildrenList()
+{
+    m_ChildDevices.ForEachDetached([] (CUsbDkChildDevice* Child) { delete Child; });
+}
 
 void CUsbDkFilterDevice::QDRPostProcessWi()
 {
@@ -157,22 +133,48 @@ void CUsbDkFilterDevice::QDRPostProcessWi()
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Entry");
 
-    PDEVICE_RELATIONS Relations = (PDEVICE_RELATIONS) m_QDRIrp->IoStatus.Information;
+    ClearChildrenList();
+
+    auto Relations = (PDEVICE_RELATIONS) m_QDRIrp->IoStatus.Information;
 
     if (Relations)
     {
+        for (ULONG i = 0; i < Relations->Count; i++)
+        {
+            CObjHolder<CDeviceAccess> pdoAccess(CDeviceAccess::GetDeviceAccess(Relations->Objects[i]));
+            CObjHolder<CRegText> DevID(pdoAccess->GetDeviceID());
+
+            if (!DevID || DevID->empty())
+            {
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! No Device IDs read");
+                continue;
+            }
+
+            CObjHolder<CRegText> InstanceID(pdoAccess->GetInstanceID());
+
+            if (!InstanceID || InstanceID->empty())
+            {
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! No Instance ID read");
+                continue;
+            }
+
+            CUsbDkChildDevice *Device = new CUsbDkChildDevice(DevID, InstanceID);
+
+            if (Device == nullptr)
+            {
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Cannot allocate child device instance");
+                continue;
+            }
+
+            DevID.detach();
+            InstanceID.detach();
+
+            m_ChildDevices.PushBack(Device);
+        }
+
         if (Relations->Count > 0)
         {
             m_ClonedPdo = Relations->Objects[0];
-
-            {
-                //TEMPORARY: To verify we see HW ids of PDO to be cloned
-                CObjHolder<CDeviceAccess> pdoAccess(CDeviceAccess::GetDeviceAccess(m_ClonedPdo));
-                if (pdoAccess)
-                {
-                    UsbDkDumpHWIds(pdoAccess);
-                }
-            }
 
             WDFDEVICE PdoClone = UsbDkClonePdo(m_Device);
 
@@ -202,6 +204,7 @@ void CUsbDkFilterDevice::QDRPostProcessWi()
 
 CUsbDkFilterDevice::~CUsbDkFilterDevice()
 {
+    ClearChildrenList();
     if (m_ControlDevice != nullptr)
     {
         m_ControlDevice->UnregisterFilter(*this);

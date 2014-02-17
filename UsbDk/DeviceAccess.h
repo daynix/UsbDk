@@ -14,6 +14,7 @@ public:
 
     CRegText *GetHardwareIdProperty() { return new CRegText(GetDeviceProperty(DevicePropertyHardwareID)); };
     CRegText *GetDeviceID() { return QueryBusIDWrapped<CRegSz>(BusQueryDeviceID); }
+    CRegText *GetInstanceID() { return QueryBusIDWrapped<CRegSz>(BusQueryInstanceID); }
     CRegText *GetHardwareIDs() { return QueryBusIDWrapped<CRegMultiSz>(BusQueryHardwareIDs); }
 
     virtual ~CDeviceAccess()

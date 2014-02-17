@@ -90,4 +90,7 @@ private:
     CUsbDkControlDevice *m_ControlDevice = nullptr;
 
     LIST_ENTRY m_ListEntry;
+
+    CUsbDkFilterDevice(const CUsbDkFilterDevice&) = delete;
+    CUsbDkFilterDevice& operator= (const CUsbDkFilterDevice&) = delete;
 };

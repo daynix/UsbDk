@@ -18,6 +18,8 @@ using namespace std;
 
 UsbDkInstaller::UsbDkInstaller()
 {
+    validatePlatform();
+
     m_regAccess.SetPrimaryKey(HKEY_LOCAL_MACHINE);
 }
 //--------------------------------------------------------------------------------
@@ -257,5 +259,32 @@ void UsbDkInstaller::buildNewListWithoutEement(tstringlist &newfiltersList, tstr
             newfiltersList.push_back(filter);
         }
     }
+}
+//----------------------------------------------------------------------------
+
+void UsbDkInstaller::validatePlatform()
+{
+    if (isWow64B())
+    {
+        throw UsbDkInstallerFailedException(TEXT("Running 32Bit package on 64Bit OS not supported."));
+    }
+}
+//----------------------------------------------------------------------------
+
+bool UsbDkInstaller::isWow64B()
+{
+    BOOL bIsWow64 = FALSE;
+
+    typedef BOOL(WINAPI *LPFN_ISWOW64PROCESS) (HANDLE, PBOOL);
+
+    LPFN_ISWOW64PROCESS  fnIsWow64Process = reinterpret_cast<LPFN_ISWOW64PROCESS>(GetProcAddress(GetModuleHandle(TEXT("kernel32")), "IsWow64Process"));
+    if (nullptr != fnIsWow64Process)
+    {
+        if (!fnIsWow64Process(GetCurrentProcess(), &bIsWow64))
+        {
+            return false;
+        }
+    }
+    return bIsWow64 ? true : false;
 }
 //----------------------------------------------------------------------------

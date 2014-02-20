@@ -153,12 +153,13 @@ DWORD UsbDkRegAccess::ReadString(LPCTSTR lpzValueName,
 }
 //-----------------------------------------------------------------------------------------
 
-DWORD UsbDkRegAccess::ReadMultiString(LPCTSTR lpzValueName,
+LONG UsbDkRegAccess::ReadMultiString(LPCTSTR lpzValueName,
                                       LPTSTR  lpzData,
                                       DWORD   dwNumberOfElements,
+                                      DWORD &dwRes,
                                       LPCTSTR lpzSubKey)
 {
-    DWORD dwRes = 0;
+    dwRes = 0;
     DWORD dwType = REG_MULTI_SZ;
     HKEY hkReadKeyHandle = NULL;
     TCHAR tcaFullRegPath[DEFAULT_REG_ENTRY_DATA_LEN];
@@ -171,24 +172,21 @@ DWORD UsbDkRegAccess::ReadMultiString(LPCTSTR lpzValueName,
 
     FormatFullRegPath(tcaFullRegPath, TBUF_SIZEOF(tcaFullRegPath), lpzSubKey);
 
-    if (RegOpenKeyEx(m_hkPrimaryHKey,
-        tcaFullRegPath,
-        0,
-        KEY_QUERY_VALUE,
-        &hkReadKeyHandle) == ERROR_SUCCESS)
+    LONG errorCode = RegOpenKeyEx(m_hkPrimaryHKey, tcaFullRegPath, 0, KEY_QUERY_VALUE, &hkReadKeyHandle);
+
+    if (errorCode == ERROR_SUCCESS)
     {
-        if (RegQueryValueEx(hkReadKeyHandle,
-            lpzValueName,
-            NULL,
-            &dwType,
-            (LPBYTE)lpzData,
-            &dwBuffSize) == ERROR_SUCCESS)
+        errorCode = RegQueryValueEx(hkReadKeyHandle, lpzValueName, NULL, &dwType, (LPBYTE)lpzData, &dwBuffSize);
+
+        if (errorCode == ERROR_SUCCESS)
+        {
             dwRes = dwBuffSize / sizeof(lpzData[0]);
+        }
 
         RegCloseKey(hkReadKeyHandle);
     }
 
-    return dwRes;
+    return errorCode;
 }
 //-----------------------------------------------------------------------------------------
 

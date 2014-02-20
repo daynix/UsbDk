@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "WdfCoinstaller.h"
+#include "tstrings.h"
 
 
 
@@ -60,7 +61,7 @@ bool WdfCoinstaller::PreDeviceInstallEx(const tstring &infFilePath)
     WDF_COINSTALLER_INSTALL_OPTIONS clientOptions;
     WDF_COINSTALLER_INSTALL_OPTIONS_INIT(&clientOptions);
 
-    DWORD res = m_pfnWdfPreDeviceInstallEx(infFilePath.c_str(), WDF_SECTION_NAME, &clientOptions);
+    ULONG res = m_pfnWdfPreDeviceInstallEx(infFilePath.c_str(), WDF_SECTION_NAME, &clientOptions);
 
     if (res != ERROR_SUCCESS)
     {
@@ -70,7 +71,7 @@ bool WdfCoinstaller::PreDeviceInstallEx(const tstring &infFilePath)
         }
         else
         {
-            throw UsbDkWdfCoinstallerFailedException(TEXT("m_pfnWdfPreDeviceInstallEx failed!"));
+            throw UsbDkWdfCoinstallerFailedException(TEXT("m_pfnWdfPreDeviceInstallEx failed!"), res);
         }
     }
 
@@ -80,27 +81,30 @@ bool WdfCoinstaller::PreDeviceInstallEx(const tstring &infFilePath)
 
 void WdfCoinstaller::PostDeviceInstall(const tstring &infFilePath)
 {
-    if (ERROR_SUCCESS != m_pfnWdfPostDeviceInstall(infFilePath.c_str(), WDF_SECTION_NAME))
+    ULONG res = m_pfnWdfPostDeviceInstall(infFilePath.c_str(), WDF_SECTION_NAME);
+    if (ERROR_SUCCESS != res)
     {
-        throw UsbDkWdfCoinstallerFailedException(TEXT("WdfCoinstaller throw the exception. pfnWdfPostDeviceInstall failed!"));
+        throw UsbDkWdfCoinstallerFailedException(TEXT("pfnWdfPostDeviceInstall failed!"), res);
     }
 }
 //--------------------------------------------------------------------------------
 
 void WdfCoinstaller::PreDeviceRemove(const tstring &infFilePath)
 {
-    if (ERROR_SUCCESS != m_pfnWdfPreDeviceRemove(infFilePath.c_str(), WDF_SECTION_NAME))
+    ULONG res = m_pfnWdfPreDeviceRemove(infFilePath.c_str(), WDF_SECTION_NAME);
+    if (ERROR_SUCCESS != res)
     {
-        throw UsbDkWdfCoinstallerFailedException(L"pfnWdfPreDeviceRemove failed!");
+        throw UsbDkWdfCoinstallerFailedException(TEXT("pfnWdfPreDeviceRemove failed!"), res);
     }
 }
 //--------------------------------------------------------------------------------
 
 void WdfCoinstaller::PostDeviceRemove(const tstring &infFilePath)
 {
-    if (ERROR_SUCCESS != m_pfnWdfPostDeviceRemove(infFilePath.c_str(), WDF_SECTION_NAME))
+    ULONG res = m_pfnWdfPostDeviceRemove(infFilePath.c_str(), WDF_SECTION_NAME);
+    if (ERROR_SUCCESS != res)
     {
-        throw  UsbDkWdfCoinstallerFailedException(L"m_pfnWdfPostDeviceRemove failed!");
+        throw  UsbDkWdfCoinstallerFailedException(TEXT("m_pfnWdfPostDeviceRemove failed!"), res);
     }
 }
 //--------------------------------------------------------------------------------

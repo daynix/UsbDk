@@ -45,13 +45,18 @@ void ServiceManager::DeleteServiceObject(const tstring &ServiceName)
     auto schService = OpenService(m_schSCManager, ServiceName.c_str(), SERVICE_ALL_ACCESS);
     if (NULL == schService)
     {
-        throw UsbDkServiceManagerFailedException(TEXT("OpenService failed"));
+        auto  err = GetLastError();
+        if (err != ERROR_SERVICE_DOES_NOT_EXIST)
+        {
+            throw UsbDkServiceManagerFailedException(TEXT("OpenService failed with error "), err);
+        }
     }
 
     if (!DeleteService(schService))
     {
+        auto  err = GetLastError();
         CloseServiceHandle(schService);
-        throw UsbDkServiceManagerFailedException(TEXT("DeleteService failed"));
+        throw UsbDkServiceManagerFailedException(TEXT("DeleteService failed"), err);
     }
 
     CloseServiceHandle(schService);

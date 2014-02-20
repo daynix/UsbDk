@@ -11,7 +11,7 @@ class UsbDkRegAccessConstructorFailedException : public UsbDkException
 public:
     UsbDkRegAccessConstructorFailedException() :
         UsbDkException(TEXT("Can't construct UsbDkRegAccess object"))
-    { }
+    {}
 };
 
 class UsbDkRegAccess
@@ -57,9 +57,10 @@ public:
                      LPTSTR  lpzData,
                      DWORD   dwNumberOfElements,
                      LPCTSTR lpzSubKey=NULL);
-    DWORD ReadMultiString(LPCTSTR lpzValueName,
+    LONG ReadMultiString(LPCTSTR lpzValueName,
                           LPTSTR  lpzData,
                           DWORD   dwNumberOfElements,
+                          DWORD   &dwRes,
                           LPCTSTR lpzSubKey = NULL);
     DWORD ReadBinary(LPCTSTR lpzValueName,
                      LPBYTE  lpzData,

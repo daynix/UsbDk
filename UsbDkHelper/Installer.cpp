@@ -83,8 +83,12 @@ void UsbDkInstaller::DeleteDriver()
 
     if (!DeleteFile(driverDestLocation.c_str()))
     {
-        tstring errorMsg(tstring(TEXT("UsbDkInstaller throw the exception: DeleteFile ")) + driverDestLocation + TEXT(" failed."));
-        throw UsbDkInstallerFailedException(errorMsg);
+        auto errCode = GetLastError();
+        if (errCode != ERROR_FILE_NOT_FOUND)
+        {
+            throw UsbDkInstallerFailedException(TEXT("DeleteFile failed."), errCode);
+        }
+        return;
     }
 }
 //-------------------------------------------------------------------------------------------
@@ -116,7 +120,13 @@ void UsbDkInstaller::addUsbDkToRegistry()
     LPCTSTR upperFiltersKeyStr = UPPER_FILTER_REGISTRY_SUBTREE;
 
     // check for value size
-    DWORD valLen = m_regAccess.ReadMultiString(upperFilterString, NULL, 0, upperFiltersKeyStr);
+    DWORD valLen = 0;
+    auto errCode = m_regAccess.ReadMultiString(upperFilterString, NULL, 0, valLen, upperFiltersKeyStr);
+
+    if (errCode != ERROR_FILE_NOT_FOUND && errCode != ERROR_SUCCESS)
+    {
+        throw UsbDkInstallerFailedException(TEXT("addUsbDkToRegistry failed in ReadMultiString!"), errCode);
+    }
 
     vector<TCHAR> valVector;
     tstringlist newfiltersList;
@@ -124,11 +134,11 @@ void UsbDkInstaller::addUsbDkToRegistry()
     {
         // get the value
         valVector.resize(valLen);
-        valLen = m_regAccess.ReadMultiString(upperFilterString, &valVector[0], valLen, upperFiltersKeyStr);
+        errCode = m_regAccess.ReadMultiString(upperFilterString, &valVector[0], valLen, valLen, upperFiltersKeyStr);
 
-        if (!valLen)
+        if (errCode != ERROR_FILE_NOT_FOUND && errCode != ERROR_SUCCESS)
         {
-            throw UsbDkInstallerFailedException(TEXT("UsbDkInstaller throw the exception: addUsbDkToRegistry failed in ReadMultiString!"));
+            throw UsbDkInstallerFailedException(TEXT("addUsbDkToRegistry failed in ReadMultiString!"), errCode);
         }
 
         tstringlist filtersList;
@@ -157,17 +167,28 @@ void UsbDkInstaller::removeUsbDkFromRegistry()
     LPCTSTR upperFiltersKeyStr = UPPER_FILTER_REGISTRY_SUBTREE;
 
     // check for value size
-    DWORD valLen = m_regAccess.ReadMultiString(upperFilterString, NULL, 0, upperFiltersKeyStr);
+    DWORD valLen = 0;
+    auto errCode = m_regAccess.ReadMultiString(upperFilterString, NULL, 0, valLen, upperFiltersKeyStr);
+
+    if (errCode != ERROR_FILE_NOT_FOUND && errCode != ERROR_SUCCESS)
+    {
+        throw UsbDkInstallerFailedException(TEXT("addUsbDkToRegistry failed in ReadMultiString!"), errCode);
+    }
 
     if (valLen)
     {
         // get the value
         vector<TCHAR> valVector(valLen);
-        valLen = m_regAccess.ReadMultiString(upperFilterString, &valVector[0], valLen, upperFiltersKeyStr);
+        errCode = m_regAccess.ReadMultiString(upperFilterString, &valVector[0], valLen, valLen, upperFiltersKeyStr);
+
+        if (errCode != ERROR_FILE_NOT_FOUND && errCode != ERROR_SUCCESS)
+        {
+            throw UsbDkInstallerFailedException(TEXT("addUsbDkToRegistry failed in ReadMultiString!"), errCode);
+        }
 
         if (!valLen)
         {
-            throw UsbDkInstallerFailedException(TEXT("UsbDkInstaller throw the exception: addUsbDkToRegistry failed in ReadMultiString!"));
+            return;
         }
 
         tstringlist filtersList;
@@ -182,7 +203,7 @@ void UsbDkInstaller::removeUsbDkFromRegistry()
         // set new value to registry
         if (!m_regAccess.WriteMultiString(upperFilterString, &valVector[0], 2 * valVector.size(), upperFiltersKeyStr))
         {
-            throw UsbDkInstallerFailedException(TEXT("UsbDkInstaller throw the exception: addUsbDkToRegistry failed in WriteMultiString."));
+            return;
         }
     }
 }

@@ -30,6 +30,7 @@ wstring __string2wstring(const string& str);
 #   define string2tstring(str) __string2wstring(str)
 #   define tstring2wstring(str) (str)
 #   define wstring2tstring(str) (str)
+#   define to_tstring to_wstring
 #else
     typedef string tstring;
     typedef stringstream tstringstream;
@@ -38,6 +39,7 @@ wstring __string2wstring(const string& str);
 #   define string2tstring(str) (str)
 #   define tstring2wstring(str) __string2wstring(str)
 #   define wstring2tstring(str) __wstring2string(str)
+#   define to_tstring to_string
 #endif
 
 typedef list<tstring, allocator<tstring>> tstringlist;

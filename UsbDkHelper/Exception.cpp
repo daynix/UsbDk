@@ -147,6 +147,7 @@ tstring UsbDkW32ErrorException::GetErrorString(DWORD dwErrorCode)
     {
         tstring strResult((LPCTSTR)lpMsgBuf, msgLen);
         ::LocalFree( lpMsgBuf );
+        strResult += tstring(TEXT(" Error code = ")) + to_tstring(dwErrorCode);
         return strResult;
     }
 }

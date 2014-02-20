@@ -5,6 +5,15 @@
 #include "Installer.h"
 #include "DriverAccess.h"
 
+//-------------------------------------------------------------------------------------------
+
+void printExceptionString(const char *errorStr)
+{
+    auto tString = string2tstring(string(errorStr));
+    OutputDebugString(tString.c_str());
+    tcout << tString;
+}
+
 //------------------------------------------------------------------------------------------
 InstallResult InstallDriver()
 {
@@ -15,8 +24,7 @@ InstallResult InstallDriver()
     }
     catch (const exception &e)
     {
-        wstring wString = __string2wstring(string(e.what()));
-        OutputDebugString(wString.c_str());
+        printExceptionString(e.what());
         return InstallFailure;
     }
 }
@@ -32,8 +40,7 @@ BOOL UninstallDriver()
     }
     catch (const exception &e)
     {
-        wstring wString = __string2wstring(string(e.what()));
-        OutputDebugString(wString.c_str());
+        printExceptionString(e.what());
         return FALSE;
     }
 }
@@ -53,8 +60,8 @@ BOOL PingDriver(LPTSTR ReplyBuffer, size_t ReplyBufferLen)
     }
     catch (const exception &e)
     {
-        wstring wString = __string2wstring(string(e.what()));
-        OutputDebugString(wString.c_str());
+        printExceptionString(e.what());
         return FALSE;
     }
 }
+//-------------------------------------------------------------------------------------------

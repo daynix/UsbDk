@@ -61,7 +61,7 @@ tstring UsbDkInstaller::CopyDriver()
     TCHAR currDirectory[MAX_PATH];
     if (!GetCurrentDirectory(MAX_PATH, currDirectory))
     {
-        throw UsbDkInstallerFailedException(TEXT("UsbDkInstaller throw the exception: GetCurrentDirectory failed!"));
+        throw UsbDkInstallerFailedException(TEXT("GetCurrentDirectory failed!"));
     }
 
     tstring driverOrigLocationStr(tstring(currDirectory) + TEXT("\\") USBDK_DRIVER_FILE_NAME);
@@ -70,8 +70,7 @@ tstring UsbDkInstaller::CopyDriver()
 
     if (!CopyFile(driverOrigLocationStr.c_str(), driverDestLocation.c_str(), FALSE))
     {
-        tstring errorMsg(tstring(TEXT("UsbDkInstaller throw the exception: CopyFile from")) + driverOrigLocationStr + TEXT(" to ") + driverDestLocation + TEXT(" failed."));
-        throw UsbDkInstallerFailedException(errorMsg);
+        throw UsbDkInstallerFailedException(tstring(TEXT("CopyFile from ")) + driverOrigLocationStr + TEXT(" to ") + driverDestLocation + TEXT(" failed."));
     }
 
     return driverDestLocation;
@@ -104,7 +103,7 @@ tstring UsbDkInstaller::buildInfFilePath()
     TCHAR currDir[MAX_PATH];
     if (GetCurrentDirectory(MAX_PATH, currDir) == 0)
     {
-        throw UsbDkInstallerFailedException(L"UsbDkInstaller throw the exception: GetCurrentDirectory failed!");
+        throw UsbDkInstallerFailedException(TEXT("GetCurrentDirectory failed!"));
     }
 
     return tstring(currDir) + TEXT("\\") + USBDK_DRIVER_INF_NAME;
@@ -145,7 +144,7 @@ void UsbDkInstaller::addUsbDkToRegistry()
     // set new value to registry
     if (!m_regAccess.WriteMultiString(upperFilterString, &valVector[0], 2*valVector.size(), upperFiltersKeyStr))
     {
-        throw UsbDkInstallerFailedException(TEXT("UsbDkInstaller throw the exception: addUsbDkToRegistry failed in WriteMultiString."));
+        throw UsbDkInstallerFailedException(TEXT("addUsbDkToRegistry failed in WriteMultiString."));
     }
 }
 //----------------------------------------------------------------------------

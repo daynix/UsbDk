@@ -8,7 +8,7 @@ InstallResult DeviceMgr::ResetDeviceByClass(const GUID &ClassGuid)
     auto hDevInfo = SetupDiGetClassDevsEx(&ClassGuid, NULL, NULL, DIGCF_DEVICEINTERFACE | DIGCF_PRESENT, NULL, NULL, NULL);
     if (hDevInfo == INVALID_HANDLE_VALUE)
     {
-        throw UsbDkDeviceMgrException(TEXT("DeviceMgr throw the exception: SetupDiGetClassDevsEx() failed!!"));
+        throw UsbDkDeviceMgrException(TEXT("SetupDiGetClassDevsEx() failed!!"));
     }
 
     SP_DEVINFO_LIST_DETAIL_DATA devInfoListDetail;
@@ -16,7 +16,7 @@ InstallResult DeviceMgr::ResetDeviceByClass(const GUID &ClassGuid)
     if (!SetupDiGetDeviceInfoListDetail(hDevInfo, &devInfoListDetail))
     {
         SetupDiDestroyDeviceInfoList(hDevInfo);
-        throw UsbDkDeviceMgrException(TEXT("DeviceMgr throw the exception: SetupDiGetDeviceInfoListDetail() failed!!"));
+        throw UsbDkDeviceMgrException(TEXT("SetupDiGetDeviceInfoListDetail() failed!!"));
     }
 
     InstallResult   installRes = InstallSuccess;

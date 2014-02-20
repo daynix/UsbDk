@@ -2,12 +2,16 @@
 
 
 //-----------------------------------------------------------------------------------
+#define SERVICE_MANAGER_EXCEPTION_STRING TEXT("ServiceManager throw the exception. ")
 
 class UsbDkServiceManagerFailedException : public UsbDkW32ErrorException
 {
 public:
-    UsbDkServiceManagerFailedException() : UsbDkW32ErrorException(TEXT("ServiceManager throw the exception")){}
-    UsbDkServiceManagerFailedException(LPCTSTR lpzMessage) : UsbDkW32ErrorException(lpzMessage){}
+    UsbDkServiceManagerFailedException() : UsbDkW32ErrorException(SERVICE_MANAGER_EXCEPTION_STRING){}
+    UsbDkServiceManagerFailedException(LPCTSTR lpzMessage) : UsbDkW32ErrorException(tstring(SERVICE_MANAGER_EXCEPTION_STRING) + lpzMessage){}
+    UsbDkServiceManagerFailedException(LPCTSTR lpzMessage, DWORD dwErrorCode) : UsbDkW32ErrorException(tstring(SERVICE_MANAGER_EXCEPTION_STRING) + lpzMessage, dwErrorCode){}
+    UsbDkServiceManagerFailedException(tstring errMsg) : UsbDkW32ErrorException(tstring(SERVICE_MANAGER_EXCEPTION_STRING) + errMsg){}
+    UsbDkServiceManagerFailedException(tstring errMsg, DWORD dwErrorCode) : UsbDkW32ErrorException(tstring(SERVICE_MANAGER_EXCEPTION_STRING) + errMsg, dwErrorCode){}
 };
 //-----------------------------------------------------------------------------------
 class ServiceManager

@@ -27,7 +27,7 @@ void WdfCoinstaller::loadWdfCoinstaller()
      TCHAR    currDir[MAX_PATH];
     if (GetCurrentDirectory(MAX_PATH, currDir) == 0)
     {
-        throw UsbDkWdfCoinstallerFailedException(L"WdfCoinstaller throw the exception. GetCurrentDirectory failed!");
+        throw UsbDkWdfCoinstallerFailedException(TEXT("GetCurrentDirectory failed!"));
     }
 
     tstringstream coinstallerFullPath;
@@ -37,9 +37,7 @@ void WdfCoinstaller::loadWdfCoinstaller()
 
     if (NULL == m_wdfCoinstallerLibrary)
     {
-        TCHAR msgBuffer[MAX_PATH];
-        _stprintf_s(msgBuffer, L"WdfCoinstaller throw the exception: LoadLibrary(%s) failed", currDir);
-        throw UsbDkWdfCoinstallerFailedException(msgBuffer);
+        throw UsbDkWdfCoinstallerFailedException(tstring(TEXT("LoadLibrary(")) + currDir + TEXT(") failed"));
     }
 
     try
@@ -72,7 +70,7 @@ bool WdfCoinstaller::PreDeviceInstallEx(const tstring &infFilePath)
         }
         else
         {
-            throw UsbDkWdfCoinstallerFailedException(L"WdfCoinstaller throw the exception.m_pfnWdfPreDeviceInstallEx failed!");
+            throw UsbDkWdfCoinstallerFailedException(TEXT("m_pfnWdfPreDeviceInstallEx failed!"));
         }
     }
 
@@ -84,7 +82,7 @@ void WdfCoinstaller::PostDeviceInstall(const tstring &infFilePath)
 {
     if (ERROR_SUCCESS != m_pfnWdfPostDeviceInstall(infFilePath.c_str(), WDF_SECTION_NAME))
     {
-        throw UsbDkWdfCoinstallerFailedException(L"WdfCoinstaller throw the exception. pfnWdfPostDeviceInstall failed!");
+        throw UsbDkWdfCoinstallerFailedException(TEXT("WdfCoinstaller throw the exception. pfnWdfPostDeviceInstall failed!"));
     }
 }
 //--------------------------------------------------------------------------------
@@ -93,7 +91,7 @@ void WdfCoinstaller::PreDeviceRemove(const tstring &infFilePath)
 {
     if (ERROR_SUCCESS != m_pfnWdfPreDeviceRemove(infFilePath.c_str(), WDF_SECTION_NAME))
     {
-        throw UsbDkWdfCoinstallerFailedException(L"WdfCoinstaller throw the exception. pfnWdfPreDeviceRemove failed!");
+        throw UsbDkWdfCoinstallerFailedException(L"pfnWdfPreDeviceRemove failed!");
     }
 }
 //--------------------------------------------------------------------------------
@@ -102,7 +100,7 @@ void WdfCoinstaller::PostDeviceRemove(const tstring &infFilePath)
 {
     if (ERROR_SUCCESS != m_pfnWdfPostDeviceRemove(infFilePath.c_str(), WDF_SECTION_NAME))
     {
-        throw  UsbDkWdfCoinstallerFailedException(L"WdfCoinstaller throw the exception. m_pfnWdfPostDeviceRemove failed!");
+        throw  UsbDkWdfCoinstallerFailedException(L"m_pfnWdfPostDeviceRemove failed!");
     }
 }
 //--------------------------------------------------------------------------------

@@ -3,12 +3,16 @@
 #include <wdfinstaller.h>
 
 //-----------------------------------------------------------------------------------
+#define WDF_COINSTALLER_EXCEPTION_STRING TEXT("WdfCoinstaller throw the exception. ")
 
 class UsbDkWdfCoinstallerFailedException : public UsbDkW32ErrorException
 {
 public:
-    UsbDkWdfCoinstallerFailedException() : UsbDkW32ErrorException(TEXT("WdfCoinstaller throw the exception")){}
-    UsbDkWdfCoinstallerFailedException(LPCTSTR lpzMessage) : UsbDkW32ErrorException(lpzMessage){}
+    UsbDkWdfCoinstallerFailedException() : UsbDkW32ErrorException(WDF_COINSTALLER_EXCEPTION_STRING){}
+    UsbDkWdfCoinstallerFailedException(LPCTSTR lpzMessage) : UsbDkW32ErrorException(tstring(WDF_COINSTALLER_EXCEPTION_STRING) + lpzMessage){}
+    UsbDkWdfCoinstallerFailedException(LPCTSTR lpzMessage, DWORD dwErrorCode) : UsbDkW32ErrorException(tstring(WDF_COINSTALLER_EXCEPTION_STRING) + lpzMessage, dwErrorCode){}
+    UsbDkWdfCoinstallerFailedException(tstring errMsg) : UsbDkW32ErrorException(tstring(WDF_COINSTALLER_EXCEPTION_STRING) + errMsg){}
+    UsbDkWdfCoinstallerFailedException(tstring errMsg, DWORD dwErrorCode) : UsbDkW32ErrorException(tstring(WDF_COINSTALLER_EXCEPTION_STRING) + errMsg, dwErrorCode){}
 };
 //-----------------------------------------------------------------------------------
 class WdfCoinstaller

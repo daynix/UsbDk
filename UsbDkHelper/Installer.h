@@ -7,13 +7,16 @@
 #include "RegAccess.h"
 
 //-----------------------------------------------------------------------------------
+#define INSTALLER_EXCEPTION_STRING TEXT("UsbDkInstaller throw the exception. ")
 
 class UsbDkInstallerFailedException : public UsbDkW32ErrorException
 {
 public:
-    UsbDkInstallerFailedException() : UsbDkW32ErrorException(TEXT("UsbDkHelper throw the exception")){}
-    UsbDkInstallerFailedException(LPCTSTR lpzMessage) : UsbDkW32ErrorException(lpzMessage){}
-    UsbDkInstallerFailedException(tstring errMsg) : UsbDkW32ErrorException(errMsg){}
+    UsbDkInstallerFailedException() : UsbDkW32ErrorException(INSTALLER_EXCEPTION_STRING){}
+    UsbDkInstallerFailedException(LPCTSTR lpzMessage) : UsbDkW32ErrorException(tstring(INSTALLER_EXCEPTION_STRING) + lpzMessage){}
+    UsbDkInstallerFailedException(LPCTSTR lpzMessage, DWORD dwErrorCode) : UsbDkW32ErrorException(tstring(INSTALLER_EXCEPTION_STRING) + lpzMessage, dwErrorCode){}
+    UsbDkInstallerFailedException(tstring errMsg) : UsbDkW32ErrorException(tstring(INSTALLER_EXCEPTION_STRING) + errMsg){}
+    UsbDkInstallerFailedException(tstring errMsg, DWORD dwErrorCode) : UsbDkW32ErrorException(tstring(INSTALLER_EXCEPTION_STRING) + errMsg, dwErrorCode){}
 };
 //-----------------------------------------------------------------------------------
 

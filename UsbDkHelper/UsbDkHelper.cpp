@@ -25,6 +25,7 @@ InstallResult InstallDriver()
     catch (const exception &e)
     {
         printExceptionString(e.what());
+        UninstallDriver();
         return InstallFailure;
     }
 }

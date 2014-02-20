@@ -93,3 +93,141 @@ as well.
 At this stage any request to this vendor specific device will be forwarded
 to UsbDk.sys which in turn will patch and pass requests to/from original device
 created by USB hub as needed.
+
+
+Kernel Mode architecture after reset
+------------------------------------
+
+                +-----------+
+                |PNP Manager|
+                +-----------+
+                      ^
+                      |
+                      V
+                +-----------+
+                | UsbDk.sys |  as filter driver of USB Root Hub
+                +-----------+
+                      ^
+                      |
+                      V
+                  +-------+
+                  |USB hub|
+                  +-------+
+                      ^
+                      |
+                      V
+            +-------------------+
+            |USB host controller|
+            +-------------------+
+
+
+Time flow after reset USB Host Controller (or reboot of machine)
+----------------------------------------------------------------
+
+PNP Manager                     UsbDk driver                    USB Root Hub
+    |                               |                               |
+    |                               |                               |
+    |       enumerate devices       |                               |
+    |------------------------------>|                               |
+    |                               |       enumerate devices       |
+    |                               |------------------------------>|
+    |                               |     array of child devices    |
+    |                               |<------------------------------|
+    |                           store array                         |
+    |                           of devices                          |
+    |                               |                               |
+    |       array of devices        |                               |
+    |<------------------------------|                               |
+
+
+Time flow of configuration UsbDk driver
+--------------------------------------
+
+UsbDkHelper.dll                 UsbDk.sys                       Specific PDO
+                                                            (Mouse for example)
+    |                               |                               |
+    |                               |                               |
+    |     LetDevices                |                               |
+    |------------------------------>|                               |
+    |                               |                               |
+    |   Array of devices            |                               |
+    |(include VID, PID, Serial Number)                              |
+    |<------------------------------|                               |
+    |                               |                               |
+    |    Redirect specific device   |                               |
+    |    (VID, PID, Serial Number)  |                               |
+    |------------------------------>|                               |
+    |                               |                               |
+    |                   set state for device (redirected)           |
+    |                               |                               |
+    |                               |          Reset device         |
+    |                               |------------------------------>|
+    ~                               ~                               ~
+    ~                               ~                               ~
+    |         Stop redirect         |                               |
+    |------------------------------>|                               |
+    |                               |                               |
+    |                    reset state for device                     |
+    |                               |                               |
+    |                               |          Reset device         |
+    |                               |------------------------------>|
+
+
+Time flow of enumeration after reset specific device
+----------------------------------------------------
+
+PNP Manager                     UsbDk driver                    USB Root Hub
+    |                               |                               |
+    |                               |                               |
+    |       enumerate devices       |                               |
+    |------------------------------>|                               |
+    |                               |       enumerate devices       |
+    |                               |------------------------------>|
+    |                               |     array of child devices    |
+    |                               |<------------------------------|
+    |                           create generic                      |
+    |                           UsbDk device PDO                    |
+    |                               |                               |
+    |       array of devices        |                               |
+    |       where spcific device    |                               |
+    |     is replaced by UsbDk PDO  |                               |
+    |<------------------------------|                               |
+
+
+
+Architecture after initialisation
+------------------------
+
+             +-----------------+
+             | UsbDkHelper.dll |
+             +-----------------+
+                      ^
+                      |                               User Mode
+----------------------+----------------------------------------
+                      |                             Kernel Mode
+                      |
+                      |
+                      |
+             +---------------+
+             | FDO, raw PDO  |
+             | UsbDk.sys WDF |
+             +---------------+
+                      ^
+                      |
+                      V
+          +---------------------+
+          | Specific device PDO |
+          | (Mouse for example) |
+          +---------------------+
+                      ^
+                      |
+                      V
+                  +-------+
+                  |USB hub|
+                  +-------+
+                      ^
+                      |
+                      V
+            +-------------------+
+            |USB host controller|
+            +-------------------+

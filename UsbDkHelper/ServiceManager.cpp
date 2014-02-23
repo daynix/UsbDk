@@ -50,6 +50,7 @@ void ServiceManager::DeleteServiceObject(const tstring &ServiceName)
         {
             throw UsbDkServiceManagerFailedException(TEXT("OpenService failed with error "), err);
         }
+        return;
     }
 
     if (!DeleteService(schService))

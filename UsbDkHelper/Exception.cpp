@@ -65,19 +65,19 @@ UsbDkNumErrorException::UsbDkNumErrorException(const UsbDkNumErrorException& Oth
 }
 
 UsbDkCRTErrorException::UsbDkCRTErrorException(int nErrorCode)
-    : UsbDkNumErrorException(GetErrorString(nErrorCode), (DWORD)nErrorCode)
+    : UsbDkNumErrorException(GetErrorString(nErrorCode) + TEXT("\n"), (DWORD)nErrorCode)
 {
 
 }
 
 UsbDkCRTErrorException::UsbDkCRTErrorException(LPCTSTR lpzDescription, int nErrorCode)
-: UsbDkNumErrorException(tstring(lpzDescription) + TEXT(" (") + GetErrorString((DWORD) nErrorCode) + TEXT(")"), (DWORD)nErrorCode)
+: UsbDkNumErrorException(tstring(lpzDescription) + TEXT(" (") + GetErrorString((DWORD)nErrorCode) + TEXT(")") + TEXT("\n"), (DWORD)nErrorCode)
 {
 
 }
 
 UsbDkCRTErrorException::UsbDkCRTErrorException(const tstring &Description, int nErrorCode)
-: UsbDkNumErrorException(Description + GetErrorString((DWORD)nErrorCode), (DWORD)nErrorCode)
+: UsbDkNumErrorException(Description + GetErrorString((DWORD)nErrorCode) + TEXT("\n"), (DWORD)nErrorCode)
 {
 
 }
@@ -101,19 +101,19 @@ tstring UsbDkCRTErrorException::GetErrorString(DWORD dwErrorCode)
 
 #ifdef WIN32
 UsbDkW32ErrorException::UsbDkW32ErrorException(DWORD dwErrorCode)
-    : UsbDkNumErrorException(GetErrorString(m_dwErrorCode), dwErrorCode)
+: UsbDkNumErrorException(GetErrorString(m_dwErrorCode) + TEXT("\n"), dwErrorCode)
 {
 
 }
 
 UsbDkW32ErrorException::UsbDkW32ErrorException(LPCTSTR lpzDescription, DWORD dwErrorCode)
-    : UsbDkNumErrorException(tstring(lpzDescription) + TEXT(" (") + GetErrorString(dwErrorCode) + TEXT(")"), dwErrorCode)
+: UsbDkNumErrorException(tstring(lpzDescription) + TEXT(" (") + GetErrorString(dwErrorCode) + TEXT(")") + TEXT("\n"), dwErrorCode)
 {
 
 }
 
 UsbDkW32ErrorException::UsbDkW32ErrorException(const tstring &Description, DWORD dwErrorCode)
-    : UsbDkNumErrorException(Description + TEXT(" (") + GetErrorString(dwErrorCode) + TEXT(")"), dwErrorCode)
+: UsbDkNumErrorException(Description + TEXT(" (") + GetErrorString(dwErrorCode) + TEXT(")") + TEXT("\n"), dwErrorCode)
 {
 
 }

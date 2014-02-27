@@ -2,8 +2,8 @@
 //
 
 #include "stdafx.h"
-#include "UsbDkHelper.h"
 
+#include "UsbDkHelper.h"
 
 using namespace std;
 //-------------------------------------------------------------------------------
@@ -16,6 +16,7 @@ void ShowUsage()
     tcout << TEXT("UsbDkController -i  - install UsbDk driver") << endl;
     tcout << TEXT("UsbDkController -u  - uninstall UsbDk driver") << endl;
     tcout << TEXT("UsbDkController -p  - TEMP: ping driver (verify control device is functional)") << endl;
+    tcout << TEXT("UsbDkController -n  - enumerate USB devices") << endl;
     tcout << endl;
 }
 //-------------------------------------------------------------------------------
@@ -69,6 +70,28 @@ int __cdecl _tmain(int argc, _TCHAR* argv[])
             else
             {
                 tcout << TEXT("UsbDk ping failed") << endl;
+            }
+        }
+        else if (_tcsicmp(L"-n", argv[1]) == 0)
+        {
+            PUSB_DK_DEVICE_ID   devicesArray;
+            ULONG               numberDevices;
+            tcout << TEXT("Enumerate USB devices") << endl;
+            if (GetDevicesList(&devicesArray, &numberDevices))
+            {
+                tcout << TEXT("Found ") << to_tstring(numberDevices) << TEXT(" USB devices:") << endl;
+
+                for (ULONG deviceIndex = 0; deviceIndex < numberDevices; ++deviceIndex)
+                {
+                    tcout << to_tstring(deviceIndex) + TEXT(". ") + devicesArray[deviceIndex].DeviceID + TEXT(", ") + devicesArray[deviceIndex].InstanceID << endl;
+                }
+
+                tcout << TEXT("release devices") << endl;
+                ReleaseDeviceList(devicesArray);
+            }
+            else
+            {
+                tcout << TEXT("Enumeration failed") << endl;
             }
         }
         else

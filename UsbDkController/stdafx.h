@@ -12,5 +12,6 @@
 #include <assert.h>
 #include "windows.h"
 #include <tstrings.h>
+#include <cfgmgr32.h>
 
 // TODO: reference additional headers your program requires here

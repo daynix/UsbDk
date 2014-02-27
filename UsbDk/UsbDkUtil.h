@@ -128,7 +128,10 @@ public:
         CLockedContext<TAccessStrategy> LockedContext(*this);
         while (!IsListEmpty(&m_List))
         {
-            Functor(Pop_LockLess());
+            if (!Functor(Pop_LockLess()))
+            {
+                return;
+            }
         }
     }
 
@@ -160,7 +163,10 @@ private:
             if (Predicate(Object))
             {
                 Prepare(CurrEntry);
-                Functor(Object);
+                if (!Functor(Object))
+                {
+                    return;
+                }
             }
         }
     }

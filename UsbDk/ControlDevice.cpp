@@ -3,7 +3,6 @@
 #include "ControlDevice.tmh"
 
 #define MAX_DEVICE_ID_LEN (200)
-
 #include "Public.h"
 
 class CUsbDkControlDeviceInit : public CDeviceInit
@@ -47,7 +46,7 @@ void CUsbDkControlDeviceQueue::DeviceControl(WDFQUEUE Queue,
     UNREFERENCED_PARAMETER(OutputBufferLength);
     UNREFERENCED_PARAMETER(InputBufferLength);
 
-    NTSTATUS status = STATUS_INVALID_DEVICE_REQUEST;
+    NTSTATUS status;
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "%!FUNC! Request arrived");
 
@@ -73,12 +72,89 @@ void CUsbDkControlDeviceQueue::DeviceControl(WDFQUEUE Queue,
             wcsncpy(outBuff, TEXT("Pong!"), outBuffLen/sizeof(TCHAR));
             WdfRequestSetInformation(Request, outBuffLen);
             status = STATUS_SUCCESS;
+            break;
         }
-        break;
+        case IOCTL_USBDK_COUNT_DEVICES:
+        {
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "Called IOCTL_USBDK_COUNT_DEVICES\n");
+            status = CountDevices(Request, Queue);
+            break;
+        }
+        case IOCTL_USBDK_ENUM_DEVICES:
+        {
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "Called IOCTL_USBDK_ENUM_DEVICES\n");
+            status = EnumerateDevices(Request, Queue);
+            break;
+        }
+        default:
+        {
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "Wrong IoControlCode\n");
+            status = STATUS_INVALID_DEVICE_REQUEST;
+            break;
+        }
     }
 
     WdfRequestComplete(Request, status);
 }
+//------------------------------------------------------------------------------------------------------------
+
+NTSTATUS CUsbDkControlDeviceQueue::CountDevices(WDFREQUEST Request, WDFQUEUE Queue)
+{
+    ULONG   *numberDevices;
+    size_t          outBuffLen;
+    auto  status = WdfRequestRetrieveOutputBuffer(Request, 0, (PVOID *)&numberDevices, &outBuffLen);
+    if (!NT_SUCCESS(status))
+    {
+        return status;
+    }
+
+    if (outBuffLen < sizeof(*numberDevices))
+    {
+        return STATUS_BUFFER_TOO_SMALL;
+    }
+
+    auto devExt = UsbDkControlGetContext(WdfIoQueueGetDevice(Queue));
+
+    *numberDevices = devExt->UsbDkControl->CountDevices();
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "%!FUNC! CountDevices returned %d", *numberDevices);
+
+    WdfRequestSetInformation(Request, sizeof(*numberDevices));
+
+    return STATUS_SUCCESS;
+}
+//------------------------------------------------------------------------------------------------------------
+
+NTSTATUS CUsbDkControlDeviceQueue::EnumerateDevices(WDFREQUEST Request, WDFQUEUE Queue)
+{
+    USB_DK_DEVICE_ID    *outBuff;
+    size_t              outBuffLen;
+    auto status = WdfRequestRetrieveOutputBuffer(Request, 0, (PVOID *)&outBuff, &outBuffLen);
+    if (!NT_SUCCESS(status))
+    {
+        return status;
+    }
+
+    auto devExt = UsbDkControlGetContext(WdfIoQueueGetDevice(Queue));
+
+    auto    numberAllocatedDevices = outBuffLen / sizeof(USB_DK_DEVICE_ID);
+    size_t  numberExistingDevices = 0;
+    auto res = devExt->UsbDkControl->EnumerateDevices(outBuff, numberAllocatedDevices, numberExistingDevices);
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "%!FUNC! EnumerateDevices returned %llu devices", numberExistingDevices);
+
+    if (res)
+    {
+        WdfRequestSetInformation(Request, outBuffLen);
+        return STATUS_SUCCESS;
+    }
+    else
+    {
+        WdfRequestSetInformation(Request, 0);
+        return STATUS_BUFFER_TOO_SMALL;
+    }
+}
+//------------------------------------------------------------------------------------------------------------
 
 void CUsbDkControlDevice::DumpAllChildren()
 {
@@ -88,6 +164,59 @@ void CUsbDkControlDevice::DumpAllChildren()
         return true;
     });
 }
+//------------------------------------------------------------------------------------------------------------
+
+ULONG CUsbDkControlDevice::CountDevices()
+{
+    ULONG numberDevices = 0;
+
+    m_FilterDevices.ForEach([&numberDevices](CUsbDkFilterDevice *Filter)
+    {
+        numberDevices += Filter->GetChildrenCount();
+        return true;
+    });
+
+    return numberDevices;
+}
+//------------------------------------------------------------------------------------------------------------
+
+bool CUsbDkControlDevice::EnumerateDevices(USB_DK_DEVICE_ID *outBuff, size_t numberAllocatedDevices, size_t &numberExistingDevices)
+{
+    numberExistingDevices = 0;
+    bool hasEnoughPlace;
+    m_FilterDevices.ForEach([this, &outBuff, numberAllocatedDevices, &numberExistingDevices, &hasEnoughPlace](CUsbDkFilterDevice *Filter) -> bool
+    {
+        hasEnoughPlace = EnumerateFilterChildren(Filter, outBuff, numberAllocatedDevices, numberExistingDevices);
+        return hasEnoughPlace;
+    });
+    return hasEnoughPlace;
+}
+//------------------------------------------------------------------------------------------------------------
+
+bool CUsbDkControlDevice::EnumerateFilterChildren(CUsbDkFilterDevice *Filter, USB_DK_DEVICE_ID *outBuff, size_t numberAllocatedDevices, size_t &numberExistingDevices)
+{
+    bool hasEnoughPlace = true;
+    Filter->EnumerateChildren
+    (
+        [this, &outBuff, numberAllocatedDevices, &numberExistingDevices, &hasEnoughPlace](CUsbDkChildDevice *Child) -> bool
+        {
+            if (numberExistingDevices == numberAllocatedDevices)
+            {
+                TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! FAILED! Number existing devices is more than allocated buffer!");
+                hasEnoughPlace = false;
+                return false;
+            }
+
+            wcsncpy(outBuff->DeviceID, Child->DeviceID(), MAX_DEVICE_ID_LEN);
+            wcsncpy(outBuff->InstanceID, Child->InstanceID(), MAX_DEVICE_ID_LEN);
+            outBuff++;
+            numberExistingDevices++;
+            return true;
+        }
+    );
+    return hasEnoughPlace;
+}
+//------------------------------------------------------------------------------------------------------------
 
 NTSTATUS CUsbDkControlDevice::Create(WDFDRIVER Driver)
 {

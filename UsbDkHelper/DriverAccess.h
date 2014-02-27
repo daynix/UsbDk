@@ -1,5 +1,6 @@
 #pragma once
 
+#include "UsbDkData.h"
 
 //-----------------------------------------------------------------------------------
 #define DRIVER_ACCESS_EXCEPTION_STRING TEXT("Driver operation error. ")
@@ -21,6 +22,8 @@ public:
     virtual ~UsbDkDriverAccess();
 
     tstring Ping();
+    void GetDevicesList(PUSB_DK_DEVICE_ID &DevicesArray, ULONG &NumberDevice);
+    static void ReleaseDeviceList(PUSB_DK_DEVICE_ID DevicesArray);
 private:
     HANDLE m_hDriver;
 };

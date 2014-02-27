@@ -66,3 +66,32 @@ BOOL PingDriver(LPTSTR ReplyBuffer, size_t ReplyBufferLen)
     }
 }
 //-------------------------------------------------------------------------------------------
+
+BOOL GetDevicesList(PUSB_DK_DEVICE_ID *DevicesArray, ULONG *NumberDevices)
+{
+    try
+    {
+        UsbDkDriverAccess driver;
+        driver.GetDevicesList(*DevicesArray, *NumberDevices);
+        return TRUE;
+    }
+    catch (const exception &e)
+    {
+        printExceptionString(e.what());
+        return FALSE;
+    }
+}
+//-------------------------------------------------------------------------------------------
+
+void ReleaseDeviceList(PUSB_DK_DEVICE_ID DevicesArray)
+{
+    try
+    {
+        UsbDkDriverAccess::ReleaseDeviceList(DevicesArray);
+    }
+    catch (const exception &e)
+    {
+        printExceptionString(e.what());
+    }
+}
+//-------------------------------------------------------------------------------------------

@@ -22,6 +22,6 @@ class DeviceMgr
 public:
     static InstallResult    ResetDeviceByClass(const GUID &ClassGuid);
 private:
-    static InstallResult    ResetDevice(HDEVINFO devs, PSP_DEVINFO_DATA devInfo, PSP_DEVINFO_LIST_DETAIL_DATA devInfoListDetail);
+    static InstallResult    ResetDevice(HDEVINFO devs, PSP_DEVINFO_DATA devInfo);
 };
 //-----------------------------------------------------------------------------------

@@ -11,20 +11,12 @@ InstallResult DeviceMgr::ResetDeviceByClass(const GUID &ClassGuid)
         throw UsbDkDeviceMgrException(TEXT("SetupDiGetClassDevsEx() failed!!"));
     }
 
-    SP_DEVINFO_LIST_DETAIL_DATA devInfoListDetail;
-    devInfoListDetail.cbSize = sizeof(devInfoListDetail);
-    if (!SetupDiGetDeviceInfoListDetail(hDevInfo, &devInfoListDetail))
-    {
-        SetupDiDestroyDeviceInfoList(hDevInfo);
-        throw UsbDkDeviceMgrException(TEXT("SetupDiGetDeviceInfoListDetail() failed!!"));
-    }
-
     InstallResult   installRes = InstallSuccess;
     SP_DEVINFO_DATA devInfo;
     devInfo.cbSize = sizeof(devInfo);
     for (DWORD devIndex = 0; SetupDiEnumDeviceInfo(hDevInfo, devIndex, &devInfo); devIndex++)
     {
-        installRes = ResetDevice(hDevInfo, &devInfo, &devInfoListDetail);
+        installRes = ResetDevice(hDevInfo, &devInfo);
         if (installRes != InstallSuccess)
         {
             break;
@@ -37,7 +29,7 @@ InstallResult DeviceMgr::ResetDeviceByClass(const GUID &ClassGuid)
 }
 //--------------------------------------------------------------------------------
 
-InstallResult DeviceMgr::ResetDevice(HDEVINFO devs, PSP_DEVINFO_DATA devInfo, PSP_DEVINFO_LIST_DETAIL_DATA devInfoListDetail)
+InstallResult DeviceMgr::ResetDevice(HDEVINFO devs, PSP_DEVINFO_DATA devInfo)
 {
     InstallResult installRes = InstallSuccess;
 

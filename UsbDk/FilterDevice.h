@@ -29,8 +29,8 @@ public:
         , m_InstanceID(InstanceID)
     {}
 
-    PCWCHAR DeviceID() { m_DeviceID->begin(); }
-    PCWCHAR InstanceID() { m_InstanceID->begin(); }
+     PCWCHAR DeviceID() { return *m_DeviceID->begin(); }
+     PCWCHAR InstanceID() { return *m_InstanceID->begin(); }
 
     void Dump();
 
@@ -70,6 +70,9 @@ public:
     static CUsbDkFilterDevice *GetByListEntry(PLIST_ENTRY entry)
     { return static_cast<CUsbDkFilterDevice*>(CONTAINING_RECORD(entry, CUsbDkFilterDevice, m_ListEntry)); }
 
+    ULONG GetChildrenCount()
+    { return m_ChildDevices.GetCount(); }
+
 private:
     static void ContextCleanup(_In_ WDFOBJECT DeviceObject);
 
@@ -94,7 +97,7 @@ private:
     PDEVICE_OBJECT m_ClonedPdo = nullptr;
     CUsbDkControlDevice *m_ControlDevice = nullptr;
 
-    CWdmList<CUsbDkChildDevice, CLockedAccess, CNonCountingObject> m_ChildDevices;
+    CWdmList<CUsbDkChildDevice, CLockedAccess, CCountingObject> m_ChildDevices;
 
     LIST_ENTRY m_ListEntry;
 

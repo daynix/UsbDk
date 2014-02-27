@@ -83,9 +83,10 @@ void CUsbDkControlDeviceQueue::DeviceControl(WDFQUEUE Queue,
 void CUsbDkControlDevice::DumpAllChildren()
 {
     m_FilterDevices.ForEach([](CUsbDkFilterDevice *Filter)
-                            {
-                                Filter->EnumerateChildren([](CUsbDkChildDevice *Child){ Child->Dump(); });
-                            });
+    {
+        Filter->EnumerateChildren([](CUsbDkChildDevice *Child){ Child->Dump(); return true; });
+        return true;
+    });
 }
 
 NTSTATUS CUsbDkControlDevice::Create(WDFDRIVER Driver)

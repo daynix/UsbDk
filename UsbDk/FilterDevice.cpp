@@ -124,7 +124,7 @@ UsbDkClonePdo(WDFDEVICE ParentDevice)
 
 void CUsbDkFilterDevice::ClearChildrenList()
 {
-    m_ChildDevices.ForEachDetached([] (CUsbDkChildDevice* Child) { delete Child; });
+    m_ChildDevices.ForEachDetached([](CUsbDkChildDevice* Child) { delete Child; return true; });
 }
 
 void CUsbDkFilterDevice::QDRPostProcessWi()

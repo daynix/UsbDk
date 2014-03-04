@@ -24,13 +24,18 @@ WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(USBDK_FILTER_DEVICE_EXTENSION, UsbDkFilterGet
 class CUsbDkChildDevice : public CAllocatable<NonPagedPool, 'DCHR'>
 {
 public:
-    CUsbDkChildDevice(CRegText *DeviceID, CRegText *InstanceID)
+    CUsbDkChildDevice(CRegText *DeviceID, CRegText *InstanceID, PDEVICE_OBJECT PDO)
         : m_DeviceID(DeviceID)
         , m_InstanceID(InstanceID)
+        , m_PDO(PDO)
     {}
 
      PCWCHAR DeviceID() { return *m_DeviceID->begin(); }
      PCWCHAR InstanceID() { return *m_InstanceID->begin(); }
+     PDEVICE_OBJECT PDO() { ObReferenceObject(m_PDO); return m_PDO;}
+
+     bool Match(PCWCHAR deviceID, PCWCHAR instanceID)
+     { return m_DeviceID->Match(deviceID) && m_InstanceID->Match(instanceID); }
 
     void Dump();
 
@@ -42,6 +47,7 @@ public:
 private:
     CObjHolder<CRegText> m_DeviceID;
     CObjHolder<CRegText> m_InstanceID;
+    PDEVICE_OBJECT m_PDO;
 
     LIST_ENTRY m_ListEntry;
 

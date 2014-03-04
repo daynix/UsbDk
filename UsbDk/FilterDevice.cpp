@@ -141,7 +141,8 @@ void CUsbDkFilterDevice::QDRPostProcessWi()
     {
         for (ULONG i = 0; i < Relations->Count; i++)
         {
-            CWdmDeviceAccess pdoAccess(Relations->Objects[i]);
+            auto PDO = Relations->Objects[i];
+            CWdmDeviceAccess pdoAccess(PDO);
             CObjHolder<CRegText> DevID(pdoAccess.GetDeviceID());
 
             if (!DevID || DevID->empty())
@@ -158,7 +159,7 @@ void CUsbDkFilterDevice::QDRPostProcessWi()
                 continue;
             }
 
-            CUsbDkChildDevice *Device = new CUsbDkChildDevice(DevID, InstanceID);
+            CUsbDkChildDevice *Device = new CUsbDkChildDevice(DevID, InstanceID, PDO);
 
             if (Device == nullptr)
             {

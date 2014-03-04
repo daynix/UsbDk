@@ -1,5 +1,6 @@
 #include "ControlDevice.h"
 #include "trace.h"
+#include "DeviceAccess.h"
 #include "ControlDevice.tmh"
 
 #define MAX_DEVICE_ID_LEN (200)
@@ -86,6 +87,12 @@ void CUsbDkControlDeviceQueue::DeviceControl(WDFQUEUE Queue,
             status = EnumerateDevices(Request, Queue);
             break;
         }
+        case IOCTL_USBDK_RESET_DEVICE:
+        {
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "Called IOCTL_USBDK_RESET_DEVICE\n");
+            status = ResetDevice(Request, Queue);
+            break;
+        }
         default:
         {
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "Wrong IoControlCode\n");
@@ -156,6 +163,30 @@ NTSTATUS CUsbDkControlDeviceQueue::EnumerateDevices(WDFREQUEST Request, WDFQUEUE
 }
 //------------------------------------------------------------------------------------------------------------
 
+NTSTATUS CUsbDkControlDeviceQueue::ResetDevice(WDFREQUEST Request, WDFQUEUE Queue)
+{
+    USB_DK_DEVICE_ID *deviceId;
+    size_t inBuffLen;
+    auto status = WdfRequestRetrieveInputBuffer(Request, 0, (PVOID *)&deviceId, &inBuffLen);
+    if (!NT_SUCCESS(status))
+    {
+        return status;
+    }
+
+    if (inBuffLen < sizeof(*deviceId))
+    {
+        return STATUS_BUFFER_TOO_SMALL;
+    }
+
+    auto devExt = UsbDkControlGetContext(WdfIoQueueGetDevice(Queue));
+    auto res = devExt->UsbDkControl->ResetUsbDevice(*deviceId);
+
+    WdfRequestSetInformation(Request, 0);
+
+    return res;
+}
+//------------------------------------------------------------------------------------------------------------
+
 void CUsbDkControlDevice::DumpAllChildren()
 {
     UsbDevicesForEachIf(ConstTrue,
@@ -196,6 +227,31 @@ bool CUsbDkControlDevice::EnumerateDevices(USB_DK_DEVICE_ID *outBuff, size_t num
                                    numberExistingDevices++;
                                    return true;
                                });
+}
+//------------------------------------------------------------------------------------------------------------
+
+NTSTATUS CUsbDkControlDevice::ResetUsbDevice(const USB_DK_DEVICE_ID &DeviceID)
+{
+    PDEVICE_OBJECT PDO = nullptr;
+
+    UsbDevicesForEachIf([&DeviceID](CUsbDkChildDevice *Child) { return Child->Match(DeviceID.DeviceID, DeviceID.InstanceID); },
+                        [&PDO](CUsbDkChildDevice *Child) -> bool
+                        {
+                            PDO = Child->PDO();
+                            return false;
+                        });
+
+    if (PDO == nullptr)
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! PDO was not found");
+        return STATUS_NOT_FOUND;
+    }
+
+    CWdmUsbDeviceAccess pdoAccess(PDO);
+    auto status = pdoAccess.Reset();
+    ObDereferenceObject(PDO);
+
+    return status;
 }
 //------------------------------------------------------------------------------------------------------------
 

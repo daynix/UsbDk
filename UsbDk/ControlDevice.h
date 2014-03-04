@@ -27,6 +27,7 @@ private:
 
     static NTSTATUS CountDevices(WDFREQUEST Request, WDFQUEUE Queue);
     static NTSTATUS EnumerateDevices(WDFREQUEST Request, WDFQUEUE Queue);
+    static NTSTATUS ResetDevice(WDFREQUEST Request, WDFQUEUE Queue);
 
     CUsbDkControlDeviceQueue(const CUsbDkControlDeviceQueue&) = delete;
     CUsbDkControlDeviceQueue& operator= (const CUsbDkControlDeviceQueue&) = delete;
@@ -47,6 +48,7 @@ public:
     void DumpAllChildren();
     ULONG CountDevices();
     bool EnumerateDevices(USB_DK_DEVICE_ID *outBuff, size_t numberAllocatedDevices, size_t &numberExistingDevices);
+    NTSTATUS ResetUsbDevice(const USB_DK_DEVICE_ID &DeviceId);
 
     static bool Allocate();
     static void Deallocate()

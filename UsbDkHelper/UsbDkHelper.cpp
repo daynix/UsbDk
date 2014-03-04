@@ -95,3 +95,18 @@ void ReleaseDeviceList(PUSB_DK_DEVICE_ID DevicesArray)
     }
 }
 //-------------------------------------------------------------------------------------------
+
+BOOL ResetDevice(PUSB_DK_DEVICE_ID DeviceID)
+{
+    try
+    {
+        UsbDkDriverAccess driver;
+        return driver.ResetDevice(*DeviceID);
+    }
+    catch (const exception &e)
+    {
+        printExceptionString(e.what());
+        return FALSE;
+    }
+}
+//-------------------------------------------------------------------------------------------

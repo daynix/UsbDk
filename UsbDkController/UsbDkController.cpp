@@ -17,13 +17,14 @@ void ShowUsage()
     tcout << TEXT("UsbDkController -u  - uninstall UsbDk driver") << endl;
     tcout << TEXT("UsbDkController -p  - TEMP: ping driver (verify control device is functional)") << endl;
     tcout << TEXT("UsbDkController -n  - enumerate USB devices") << endl;
+    tcout << TEXT("UsbDkController -r ID SN - Reset USB device by ID and serial number") << endl;
     tcout << endl;
 }
 //-------------------------------------------------------------------------------
 
 int __cdecl _tmain(int argc, _TCHAR* argv[])
 {
-    if (argc == 2)
+    if (argc > 1)
     {
         if (_tcsicmp(L"-i", argv[1]) == 0)
         {
@@ -92,6 +93,28 @@ int __cdecl _tmain(int argc, _TCHAR* argv[])
             else
             {
                 tcout << TEXT("Enumeration failed") << endl;
+            }
+        }
+        else if (_tcsicmp(L"-r", argv[1]) == 0)
+        {
+            if (argc < 4)
+            {
+                ShowUsage();
+                return 0;
+            }
+
+            USB_DK_DEVICE_ID   deviceID;
+            wcscpy_s(deviceID.DeviceID, MAX_DEVICE_ID_LEN, tstring2wstring(argv[2]));
+            wcscpy_s(deviceID.InstanceID, MAX_DEVICE_ID_LEN, tstring2wstring(argv[3]));
+
+            tcout << TEXT("Reset USB device ") << deviceID.DeviceID << TEXT(", ") << deviceID.InstanceID << endl;
+            if (ResetDevice(&deviceID))
+            {
+                tcout << TEXT("USB device was reset successfully") << endl;
+            }
+            else
+            {
+                tcout << TEXT("Reset of USB device failed") << endl;
             }
         }
         else

@@ -1,4 +1,5 @@
 #include "Irp.h"
+#include "UsbDkUtil.h"
 
 CIrp::~CIrp()
 {
@@ -43,23 +44,20 @@ NTSTATUS CIrp::SynchronousCompletion(PDEVICE_OBJECT DeviceObject, PIRP Irp, PVOI
 
     ASSERT(Context != NULL);
 
-    KeSetEvent(static_cast<PKEVENT>(Context), IO_NO_INCREMENT, FALSE);
+    static_cast<CWdmEvent *>(Context)->Set();
 
     return STATUS_MORE_PROCESSING_REQUIRED;
 }
 
 NTSTATUS CIrp::SendSynchronously()
 {
-    KEVENT event;
-
-    KeInitializeEvent(&event, SynchronizationEvent, FALSE);
-
-    IoSetCompletionRoutine(m_Irp, SynchronousCompletion, &event,
+    CWdmEvent Event;
+    IoSetCompletionRoutine(m_Irp, SynchronousCompletion, &Event,
                            TRUE, TRUE, TRUE);
 
     auto status = IoCallDriver(m_TargetDevice, m_Irp);
     if (status == STATUS_PENDING) {
-        KeWaitForSingleObject(&event, Executive, KernelMode, FALSE, NULL);
+        Event.Wait();
         status = m_Irp->IoStatus.Status;
     }
 

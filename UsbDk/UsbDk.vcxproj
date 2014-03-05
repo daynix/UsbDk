@@ -58,6 +58,7 @@
     <ClCompile Include="Irp.cpp" />
     <ClCompile Include="MemoryBuffer.cpp" />
     <ClCompile Include="RegText.cpp" />
+    <ClCompile Include="UsbDkUtil.cpp" />
     <ClCompile Include="WdfDevice.cpp" />
     <ClCompile Include="WdfWorkitem.cpp" />
   </ItemGroup>

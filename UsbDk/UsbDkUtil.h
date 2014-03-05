@@ -180,3 +180,26 @@ private:
     LIST_ENTRY m_List;
     ULONG m_NumEntries = 0;
 };
+
+class CWdmEvent : public CAllocatable<NonPagedPool, 'VEHR'>
+{
+public:
+    CWdmEvent(EVENT_TYPE Type = SynchronizationEvent, BOOLEAN InitialState = FALSE)
+    { KeInitializeEvent(&m_Event, Type, InitialState); };
+
+    NTSTATUS Wait(bool WithTimeout = false, LONGLONG Timeout = 0, bool Alertable = false);
+
+    bool Set(KPRIORITY Increment = IO_NO_INCREMENT, bool Wait = false)
+    { return KeSetEvent(&m_Event, Increment, Wait ? TRUE : FALSE) ? true : false; }
+    void Clear()
+    { KeClearEvent(&m_Event); }
+    bool Reset()
+    { return KeResetEvent(&m_Event) ? true : false; }
+
+    operator PKEVENT () { return &m_Event; }
+
+    CWdmEvent(const CWdmEvent&) = delete;
+    CWdmEvent& operator= (const CWdmEvent&) = delete;
+private:
+    KEVENT m_Event;
+};

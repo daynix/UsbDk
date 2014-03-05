@@ -1,0 +1,7 @@
+*.suo
+*.sdf
+Win*Debug
+Win*Release
+*.opensdf
+*.ipch
+*.vcxproj.user

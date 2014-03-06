@@ -61,7 +61,7 @@ private:
 
     CWdmList<CUsbDkFilterDevice, CLockedAccess, CNonCountingObject> m_FilterDevices;
 
-    bool EnumerateFilterChildren(CUsbDkFilterDevice *Filter, USB_DK_DEVICE_ID *outBuff, size_t numberAllocatedDevices, size_t &numberExistingDevices);
+    bool EnumerateFilterChildren(CUsbDkFilterDevice *Filter, USB_DK_DEVICE_ID *&outBuff, size_t numberAllocatedDevices, size_t &numberExistingDevices);
 };
 
 typedef struct _USBDK_CONTROL_DEVICE_EXTENSION {

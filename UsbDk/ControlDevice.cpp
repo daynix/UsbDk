@@ -193,7 +193,7 @@ bool CUsbDkControlDevice::EnumerateDevices(USB_DK_DEVICE_ID *outBuff, size_t num
 }
 //------------------------------------------------------------------------------------------------------------
 
-bool CUsbDkControlDevice::EnumerateFilterChildren(CUsbDkFilterDevice *Filter, USB_DK_DEVICE_ID *outBuff, size_t numberAllocatedDevices, size_t &numberExistingDevices)
+bool CUsbDkControlDevice::EnumerateFilterChildren(CUsbDkFilterDevice *Filter, USB_DK_DEVICE_ID *&outBuff, size_t numberAllocatedDevices, size_t &numberExistingDevices)
 {
     bool hasEnoughPlace = true;
     Filter->EnumerateChildren

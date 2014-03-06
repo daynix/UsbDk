@@ -158,11 +158,8 @@ NTSTATUS CUsbDkControlDeviceQueue::EnumerateDevices(WDFREQUEST Request, WDFQUEUE
 
 void CUsbDkControlDevice::DumpAllChildren()
 {
-    m_FilterDevices.ForEach([](CUsbDkFilterDevice *Filter)
-    {
-        Filter->EnumerateChildren([](CUsbDkChildDevice *Child){ Child->Dump(); return true; });
-        return true;
-    });
+    UsbDevicesForEachIf(ConstTrue,
+                        [](CUsbDkChildDevice *Child) -> bool { Child->Dump(); return true; });
 }
 //------------------------------------------------------------------------------------------------------------
 
@@ -183,38 +180,22 @@ ULONG CUsbDkControlDevice::CountDevices()
 bool CUsbDkControlDevice::EnumerateDevices(USB_DK_DEVICE_ID *outBuff, size_t numberAllocatedDevices, size_t &numberExistingDevices)
 {
     numberExistingDevices = 0;
-    bool hasEnoughPlace;
-    m_FilterDevices.ForEach([this, &outBuff, numberAllocatedDevices, &numberExistingDevices, &hasEnoughPlace](CUsbDkFilterDevice *Filter) -> bool
-    {
-        hasEnoughPlace = EnumerateFilterChildren(Filter, outBuff, numberAllocatedDevices, numberExistingDevices);
-        return hasEnoughPlace;
-    });
-    return hasEnoughPlace;
-}
-//------------------------------------------------------------------------------------------------------------
 
-bool CUsbDkControlDevice::EnumerateFilterChildren(CUsbDkFilterDevice *Filter, USB_DK_DEVICE_ID *&outBuff, size_t numberAllocatedDevices, size_t &numberExistingDevices)
-{
-    bool hasEnoughPlace = true;
-    Filter->EnumerateChildren
-    (
-        [this, &outBuff, numberAllocatedDevices, &numberExistingDevices, &hasEnoughPlace](CUsbDkChildDevice *Child) -> bool
-        {
-            if (numberExistingDevices == numberAllocatedDevices)
-            {
-                TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! FAILED! Number existing devices is more than allocated buffer!");
-                hasEnoughPlace = false;
-                return false;
-            }
+    return UsbDevicesForEachIf(ConstTrue,
+                               [&outBuff, numberAllocatedDevices, &numberExistingDevices](CUsbDkChildDevice *Child) -> bool
+                               {
+                                   if (numberExistingDevices == numberAllocatedDevices)
+                                   {
+                                       TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! FAILED! Number existing devices is more than allocated buffer!");
+                                       return false;
+                                   }
 
-            wcsncpy(outBuff->DeviceID, Child->DeviceID(), MAX_DEVICE_ID_LEN);
-            wcsncpy(outBuff->InstanceID, Child->InstanceID(), MAX_DEVICE_ID_LEN);
-            outBuff++;
-            numberExistingDevices++;
-            return true;
-        }
-    );
-    return hasEnoughPlace;
+                                   wcsncpy(outBuff->DeviceID, Child->DeviceID(), MAX_DEVICE_ID_LEN);
+                                   wcsncpy(outBuff->InstanceID, Child->InstanceID(), MAX_DEVICE_ID_LEN);
+                                   outBuff++;
+                                   numberExistingDevices++;
+                                   return true;
+                               });
 }
 //------------------------------------------------------------------------------------------------------------
 

@@ -61,7 +61,9 @@ private:
 
     CWdmList<CUsbDkFilterDevice, CLockedAccess, CNonCountingObject> m_FilterDevices;
 
-    bool EnumerateFilterChildren(CUsbDkFilterDevice *Filter, USB_DK_DEVICE_ID *&outBuff, size_t numberAllocatedDevices, size_t &numberExistingDevices);
+    template <typename TPredicate, typename TFunctor>
+    bool UsbDevicesForEachIf(TPredicate Predicate, TFunctor Functor)
+    { return m_FilterDevices.ForEach([&](CUsbDkFilterDevice* Dev){ return Dev->EnumerateChildrenIf(Predicate, Functor); }); }
 };
 
 typedef struct _USBDK_CONTROL_DEVICE_EXTENSION {

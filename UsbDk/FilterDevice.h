@@ -65,6 +65,10 @@ public:
     void EnumerateChildren(TFunctor Functor)
     { m_ChildDevices.ForEach(Functor); }
 
+    template <typename TPredicate, typename TFunctor>
+    bool EnumerateChildrenIf(TPredicate Predicate, TFunctor Functor)
+    { return m_ChildDevices.ForEachIf(Predicate, Functor); }
+
     PLIST_ENTRY GetListEntry()
     { return &m_ListEntry; }
     static CUsbDkFilterDevice *GetByListEntry(PLIST_ENTRY entry)

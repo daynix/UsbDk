@@ -3,22 +3,22 @@
 
 CIrp::~CIrp()
 {
-    if (m_Irp != NULL)
+    if (m_Irp != nullptr)
     {
         Destroy();
     }
 }
 
-VOID CIrp::Destroy()
+void CIrp::Destroy()
 {
-    ASSERT(m_Irp != NULL);
-    ASSERT(m_TargetDevice != NULL);
+    ASSERT(m_Irp != nullptr);
+    ASSERT(m_TargetDevice != nullptr);
 
     IoFreeIrp(m_Irp);
-    m_Irp = NULL;
+    m_Irp = nullptr;
 
     ObDereferenceObject(m_TargetDevice);
-    m_TargetDevice = NULL;
+    m_TargetDevice = nullptr;
 }
 
 NTSTATUS CIrp::Create(PDEVICE_OBJECT TargetDevice)
@@ -28,7 +28,7 @@ NTSTATUS CIrp::Create(PDEVICE_OBJECT TargetDevice)
 
     m_Irp = IoAllocateIrp(TargetDevice->StackSize, FALSE);
 
-    if (m_Irp != NULL)
+    if (m_Irp != nullptr)
     {
         m_Irp->IoStatus.Status = STATUS_NOT_SUPPORTED;
         return STATUS_SUCCESS;
@@ -42,7 +42,7 @@ NTSTATUS CIrp::SynchronousCompletion(PDEVICE_OBJECT DeviceObject, PIRP Irp, PVOI
     UNREFERENCED_PARAMETER(DeviceObject);
     UNREFERENCED_PARAMETER(Irp);
 
-    ASSERT(Context != NULL);
+    ASSERT(Context != nullptr);
 
     static_cast<CWdmEvent *>(Context)->Set();
 

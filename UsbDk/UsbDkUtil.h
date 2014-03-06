@@ -190,6 +190,9 @@ private:
     ULONG m_NumEntries = 0;
 };
 
+static inline bool ConstTrue(...) { return true; }
+static inline bool ConstFalse(...) { return false; }
+
 class CWdmEvent : public CAllocatable<NonPagedPool, 'VEHR'>
 {
 public:

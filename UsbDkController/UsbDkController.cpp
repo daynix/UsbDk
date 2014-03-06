@@ -68,10 +68,9 @@ int __cdecl _tmain(int argc, _TCHAR* argv[])
 
                 for (ULONG deviceIndex = 0; deviceIndex < numberDevices; ++deviceIndex)
                 {
-                    tcout << to_tstring(deviceIndex) + TEXT(". ") + devicesArray[deviceIndex].DeviceID + TEXT(", ") + devicesArray[deviceIndex].InstanceID << endl;
+                    tcout << to_tstring(deviceIndex) + TEXT(". ") + devicesArray[deviceIndex].DeviceID + TEXT(" ") + devicesArray[deviceIndex].InstanceID << endl;
                 }
 
-                tcout << TEXT("release devices") << endl;
                 ReleaseDeviceList(devicesArray);
             }
             else

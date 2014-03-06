@@ -77,50 +77,50 @@ typedef struct _CONTROL_DEVICE_EXTENSION {
 
 WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(PDO_CLONE_EXTENSION, PdoCloneGetData)
 
-static WDFDEVICE
-UsbDkClonePdo(WDFDEVICE ParentDevice)
-{
-    WDFDEVICE              ClonePdo;
-    NTSTATUS               status;
-    PWDFDEVICE_INIT        DevInit;
-    WDF_OBJECT_ATTRIBUTES  DevAttr;
-
-    PAGED_CODE();
-
-    DevInit = WdfPdoInitAllocate(ParentDevice);
-
-    if (DevInit == NULL) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! WdfPdoInitAllocate returned NULL");
-        return WDF_NO_HANDLE;
-    }
-
-    WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&DevAttr, PDO_CLONE_EXTENSION);
-
-#define CLONE_HARDWARE_IDS      L"USB\\Vid_FEED&Pid_CAFE&Rev_0001\0USB\\Vid_FEED&Pid_CAFE\0"
-#define CLONE_COMPATIBLE_IDS    L"USB\\Class_FF&SubClass_FF&Prot_FF\0USB\\Class_FF&SubClass_FF\0USB\\Class_FF\0"
-#define CLONE_INSTANCE_ID       L"111222333"
-
-    DECLARE_CONST_UNICODE_STRING(CloneHwId, CLONE_HARDWARE_IDS);
-    DECLARE_CONST_UNICODE_STRING(CloneCompatId, CLONE_COMPATIBLE_IDS);
-    DECLARE_CONST_UNICODE_STRING(CloneInstanceId, CLONE_INSTANCE_ID);
-
-    //TODO: Check error codes
-    WdfPdoInitAssignDeviceID(DevInit, &CloneHwId);
-    WdfPdoInitAddCompatibleID(DevInit, &CloneCompatId);
-    WdfPdoInitAddHardwareID(DevInit, &CloneCompatId);
-    WdfPdoInitAssignInstanceID(DevInit, &CloneInstanceId);
-
-    status = WdfDeviceCreate(&DevInit, &DevAttr, &ClonePdo);
-    if (!NT_SUCCESS(status))
-    {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! WdfDeviceCreate returned %!STATUS!", status);
-        WdfDeviceInitFree(DevInit);
-        return WDF_NO_HANDLE;
-    }
-
-    return ClonePdo;
-}
-///////////////////////////////////////////////////////////////////////////////////////////////
+// static WDFDEVICE
+// UsbDkClonePdo(WDFDEVICE ParentDevice)
+// {
+//     WDFDEVICE              ClonePdo;
+//     NTSTATUS               status;
+//     PWDFDEVICE_INIT        DevInit;
+//     WDF_OBJECT_ATTRIBUTES  DevAttr;
+//
+//     PAGED_CODE();
+//
+//     DevInit = WdfPdoInitAllocate(ParentDevice);
+//
+//     if (DevInit == NULL) {
+//         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! WdfPdoInitAllocate returned NULL");
+//         return WDF_NO_HANDLE;
+//     }
+//
+//     WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&DevAttr, PDO_CLONE_EXTENSION);
+//
+// #define CLONE_HARDWARE_IDS      L"USB\\Vid_FEED&Pid_CAFE&Rev_0001\0USB\\Vid_FEED&Pid_CAFE\0"
+// #define CLONE_COMPATIBLE_IDS    L"USB\\Class_FF&SubClass_FF&Prot_FF\0USB\\Class_FF&SubClass_FF\0USB\\Class_FF\0"
+// #define CLONE_INSTANCE_ID       L"111222333"
+//
+//     DECLARE_CONST_UNICODE_STRING(CloneHwId, CLONE_HARDWARE_IDS);
+//     DECLARE_CONST_UNICODE_STRING(CloneCompatId, CLONE_COMPATIBLE_IDS);
+//     DECLARE_CONST_UNICODE_STRING(CloneInstanceId, CLONE_INSTANCE_ID);
+//
+//     //TODO: Check error codes
+//     WdfPdoInitAssignDeviceID(DevInit, &CloneHwId);
+//     WdfPdoInitAddCompatibleID(DevInit, &CloneCompatId);
+//     WdfPdoInitAddHardwareID(DevInit, &CloneCompatId);
+//     WdfPdoInitAssignInstanceID(DevInit, &CloneInstanceId);
+//
+//     status = WdfDeviceCreate(&DevInit, &DevAttr, &ClonePdo);
+//     if (!NT_SUCCESS(status))
+//     {
+//         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! WdfDeviceCreate returned %!STATUS!", status);
+//         WdfDeviceInitFree(DevInit);
+//         return WDF_NO_HANDLE;
+//     }
+//
+//     return ClonePdo;
+// }
+// ///////////////////////////////////////////////////////////////////////////////////////////////
 
 void CUsbDkFilterDevice::ClearChildrenList()
 {
@@ -173,28 +173,28 @@ void CUsbDkFilterDevice::QDRPostProcessWi()
             m_ChildDevices.PushBack(Device);
         }
 
-        if (Relations->Count > 0)
-        {
-            m_ClonedPdo = Relations->Objects[0];
-
-            WDFDEVICE PdoClone = UsbDkClonePdo(m_Device);
-
-            if (PdoClone != WDF_NO_HANDLE)
-            {
-                Relations->Objects[0] = WdfDeviceWdmGetDeviceObject(PdoClone);
-                ObReferenceObject(Relations->Objects[0]);
-
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Replaced PDO 0x%p with 0x%p",
-                    m_ClonedPdo, Relations->Objects[0]);
-
-                //TODO: Temporary to allow normal USB hub driver unload
-                ObDereferenceObject(m_ClonedPdo);
-            }
-            else
-            {
-                TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! Failed to create clone PDO");
-            }
-        }
+//         if (Relations->Count > 0)
+//         {
+//             m_ClonedPdo = Relations->Objects[0];
+//
+//             WDFDEVICE PdoClone = UsbDkClonePdo(m_Device);
+//
+//             if (PdoClone != WDF_NO_HANDLE)
+//             {
+//                 Relations->Objects[0] = WdfDeviceWdmGetDeviceObject(PdoClone);
+//                 ObReferenceObject(Relations->Objects[0]);
+//
+//                 TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Replaced PDO 0x%p with 0x%p",
+//                     m_ClonedPdo, Relations->Objects[0]);
+//
+//                 //TODO: Temporary to allow normal USB hub driver unload
+//                 ObDereferenceObject(m_ClonedPdo);
+//             }
+//             else
+//             {
+//                 TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! Failed to create clone PDO");
+//             }
+//         }
     }
 
     auto QDRIrp = m_QDRIrp;

@@ -27,6 +27,8 @@ public:
 
 private:
     static NTSTATUS SynchronousCompletion(PDEVICE_OBJECT DeviceObject, PIRP Irp, PVOID Context);
+    void DestroyIrp();
+    void ReleaseTarget();
 
     PIRP m_Irp = nullptr;
     PDEVICE_OBJECT m_TargetDevice = nullptr;

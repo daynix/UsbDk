@@ -5,36 +5,47 @@ CIrp::~CIrp()
 {
     if (m_Irp != nullptr)
     {
-        Destroy();
+        DestroyIrp();
+        ReleaseTarget();
     }
 }
 
-void CIrp::Destroy()
+void CIrp::DestroyIrp()
 {
     ASSERT(m_Irp != nullptr);
-    ASSERT(m_TargetDevice != nullptr);
 
     IoFreeIrp(m_Irp);
     m_Irp = nullptr;
+}
+
+void CIrp::ReleaseTarget()
+{
+    ASSERT(m_TargetDevice != nullptr);
 
     ObDereferenceObject(m_TargetDevice);
     m_TargetDevice = nullptr;
 }
 
+void CIrp::Destroy()
+{
+    DestroyIrp();
+    ReleaseTarget();
+}
+
 NTSTATUS CIrp::Create(PDEVICE_OBJECT TargetDevice)
 {
-    m_TargetDevice = TargetDevice;
-    ObReferenceObject(m_TargetDevice);
+    ASSERT(m_TargetDevice == nullptr);
+    ASSERT(m_Irp == nullptr);
 
     m_Irp = IoAllocateIrp(TargetDevice->StackSize, FALSE);
-
-    if (m_Irp != nullptr)
+    if (m_Irp == nullptr)
     {
-        m_Irp->IoStatus.Status = STATUS_NOT_SUPPORTED;
-        return STATUS_SUCCESS;
+        return STATUS_INSUFFICIENT_RESOURCES;
     }
 
-    return STATUS_INSUFFICIENT_RESOURCES;
+    ObReferenceObject(TargetDevice);
+    m_TargetDevice = TargetDevice;
+    return STATUS_SUCCESS;
 }
 
 NTSTATUS CIrp::SynchronousCompletion(PDEVICE_OBJECT DeviceObject, PIRP Irp, PVOID Context)

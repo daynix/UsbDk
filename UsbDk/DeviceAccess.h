@@ -9,9 +9,6 @@
 class CDeviceAccess : public CAllocatable<PagedPool, 'ADHR'>
 {
 public:
-    static CDeviceAccess* GetDeviceAccess(WDFDEVICE DevObj);
-    static CDeviceAccess* GetDeviceAccess(PDEVICE_OBJECT DevObj);
-
     CRegText *GetHardwareIdProperty() { return new CRegText(GetDeviceProperty(DevicePropertyHardwareID)); };
     CRegText *GetDeviceID() { return QueryBusIDWrapped<CRegSz>(BusQueryDeviceID); }
     CRegText *GetInstanceID() { return QueryBusIDWrapped<CRegSz>(BusQueryInstanceID); }

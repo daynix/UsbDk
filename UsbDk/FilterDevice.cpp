@@ -141,8 +141,8 @@ void CUsbDkFilterDevice::QDRPostProcessWi()
     {
         for (ULONG i = 0; i < Relations->Count; i++)
         {
-            CObjHolder<CDeviceAccess> pdoAccess(CDeviceAccess::GetDeviceAccess(Relations->Objects[i]));
-            CObjHolder<CRegText> DevID(pdoAccess->GetDeviceID());
+            CWdmDeviceAccess pdoAccess(Relations->Objects[i]);
+            CObjHolder<CRegText> DevID(pdoAccess.GetDeviceID());
 
             if (!DevID || DevID->empty())
             {
@@ -150,7 +150,7 @@ void CUsbDkFilterDevice::QDRPostProcessWi()
                 continue;
             }
 
-            CObjHolder<CRegText> InstanceID(pdoAccess->GetInstanceID());
+            CObjHolder<CRegText> InstanceID(pdoAccess.GetInstanceID());
 
             if (!InstanceID || InstanceID->empty())
             {
@@ -288,16 +288,13 @@ bool CUsbDkFilterDevice::ShouldAttach()
 {
     PAGED_CODE();
 
-    CObjHolder<CDeviceAccess> devAccess(CDeviceAccess::GetDeviceAccess(m_Device));
-    if (devAccess)
+    CWdfDeviceAccess devAccess(m_Device);
+    CObjHolder<CRegText> hwIDs(devAccess.GetHardwareIdProperty());
+    if (hwIDs)
     {
-        CObjHolder<CRegText> hwIDs(devAccess->GetHardwareIdProperty());
-        if (hwIDs)
-        {
-            hwIDs->Dump();
-            return hwIDs->Match(L"USB\\ROOT_HUB") ||
-                   hwIDs->Match(L"USB\\ROOT_HUB20");
-        }
+        hwIDs->Dump();
+        return hwIDs->Match(L"USB\\ROOT_HUB") ||
+                hwIDs->Match(L"USB\\ROOT_HUB20");
     }
 
     return false;

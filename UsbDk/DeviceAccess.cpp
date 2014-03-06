@@ -4,16 +4,6 @@
 #include "RegText.h"
 #include "DeviceAccess.tmh"
 
-CDeviceAccess *CDeviceAccess::GetDeviceAccess(WDFDEVICE DevObj)
-{
-    return new CWdfDeviceAccess(DevObj);
-}
-
-CDeviceAccess *CDeviceAccess::GetDeviceAccess(PDEVICE_OBJECT DevObj)
-{
-    return new CWdmDeviceAccess(DevObj);
-}
-
 PWCHAR CWdfDeviceAccess::QueryBusID(BUS_QUERY_ID_TYPE idType)
 {
     UNREFERENCED_PARAMETER(idType);

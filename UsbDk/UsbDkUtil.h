@@ -123,39 +123,40 @@ public:
     }
 
     template <typename TFunctor>
-    void ForEachDetached(TFunctor Functor)
+    bool ForEachDetached(TFunctor Functor)
     {
         CLockedContext<TAccessStrategy> LockedContext(*this);
         while (!IsListEmpty(&m_List))
         {
             if (!Functor(Pop_LockLess()))
             {
-                return;
+                return false;
             }
         }
+        return true;
     }
 
     template <typename TPredicate, typename TFunctor>
-    void ForEachDetachedIf(TPredicate Predicate, TFunctor Functor)
+    bool ForEachDetachedIf(TPredicate Predicate, TFunctor Functor)
     {
-        ForEachPrepareIf(Predicate, [](PLIST_ENTRY Entry){ RemoveEntryList(Entry); }, Functor);
+        return ForEachPrepareIf(Predicate, [](PLIST_ENTRY Entry){ RemoveEntryList(Entry); }, Functor);
     }
 
     template <typename TFunctor>
-    void ForEach(TFunctor Functor)
+    bool ForEach(TFunctor Functor)
     {
-        ForEachPrepareIf([](TEntryType*) { return true; }, [](PLIST_ENTRY){}, Functor);
+        return ForEachPrepareIf([](TEntryType*) { return true; }, [](PLIST_ENTRY){}, Functor);
     }
 
     template <typename TPredicate, typename TFunctor>
-    void ForEachIf(TPredicate Predicate, TFunctor Functor)
+    bool ForEachIf(TPredicate Predicate, TFunctor Functor)
     {
-        ForEachPrepareIf(Predicate, [](PLIST_ENTRY){}, Functor);
+        return ForEachPrepareIf(Predicate, [](PLIST_ENTRY){}, Functor);
     }
 
 private:
     template <typename TPredicate, typename TPrepareFunctor, typename TFunctor>
-    void ForEachPrepareIf(TPredicate Predicate, TPrepareFunctor Prepare, TFunctor Functor)
+    bool ForEachPrepareIf(TPredicate Predicate, TPrepareFunctor Prepare, TFunctor Functor)
     {
         CLockedContext<TAccessStrategy> LockedContext(*this);
 
@@ -171,10 +172,12 @@ private:
                 Prepare(CurrEntry);
                 if (!Functor(Object))
                 {
-                    return;
+                    return false;
                 }
             }
         }
+
+        return true;
     }
 
     TEntryType *Pop_LockLess()

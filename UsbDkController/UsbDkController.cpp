@@ -15,7 +15,6 @@ void ShowUsage()
     tcout << endl;
     tcout << TEXT("UsbDkController -i  - install UsbDk driver") << endl;
     tcout << TEXT("UsbDkController -u  - uninstall UsbDk driver") << endl;
-    tcout << TEXT("UsbDkController -p  - TEMP: ping driver (verify control device is functional)") << endl;
     tcout << TEXT("UsbDkController -n  - enumerate USB devices") << endl;
     tcout << TEXT("UsbDkController -r ID SN - Reset USB device by ID and serial number") << endl;
     tcout << endl;
@@ -56,21 +55,6 @@ int __cdecl _tmain(int argc, _TCHAR* argv[])
             else
             {
                 tcout << TEXT("UsbDk driver uninstall failed") << endl;
-            }
-        }
-        else if (_tcsicmp(L"-p", argv[1]) == 0)
-        {
-            //TODO: Ping logic is temporary, to be removed after enumeration
-            //logic implemented
-            TCHAR Reply[10];
-            tcout << TEXT("Pinging UsbDk driver") << endl;
-            if (PingDriver(Reply, TBUF_SIZEOF(Reply)))
-            {
-                tcout << TEXT("UsbDk driver replied \"") << Reply << TEXT("\"") << endl;
-            }
-            else
-            {
-                tcout << TEXT("UsbDk ping failed") << endl;
             }
         }
         else if (_tcsicmp(L"-n", argv[1]) == 0)

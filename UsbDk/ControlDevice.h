@@ -44,8 +44,6 @@ public:
     void UnregisterFilter(CUsbDkFilterDevice &FilterDevice)
     { m_FilterDevices.Remove(&FilterDevice); }
 
-    //TODO: Temporary, until enumeration implementation
-    void DumpAllChildren();
     ULONG CountDevices();
     bool EnumerateDevices(USB_DK_DEVICE_ID *outBuff, size_t numberAllocatedDevices, size_t &numberExistingDevices);
     NTSTATUS ResetUsbDevice(const USB_DK_DEVICE_ID &DeviceId);

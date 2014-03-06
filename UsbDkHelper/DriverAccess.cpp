@@ -27,27 +27,6 @@ UsbDkDriverAccess::~UsbDkDriverAccess()
 }
 //------------------------------------------------------------------------------------------------
 
-tstring UsbDkDriverAccess::Ping()
-{
-    std::vector<TCHAR> reply(10);
-    DWORD replySize;
-
-    if(!DeviceIoControl(m_hDriver,
-                        IOCTL_USBDK_PING,
-                        nullptr,
-                        0,
-                        &reply[0],
-                        reply.size() * sizeof(TCHAR),
-                        &replySize,
-                        NULL))
-    {
-        throw UsbDkDriverAccessException(TEXT("Ping failed"));
-    }
-
-    return tstring(reply.begin(), reply.end());
-}
-//------------------------------------------------------------------------------------------------
-
 void UsbDkDriverAccess::GetDevicesList(PUSB_DK_DEVICE_ID &DevicesArray, ULONG &NumberDevice)
 {
     DevicesArray = nullptr;

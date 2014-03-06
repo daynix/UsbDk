@@ -53,28 +53,6 @@ void CUsbDkControlDeviceQueue::DeviceControl(WDFQUEUE Queue,
 
     switch (IoControlCode)
     {
-        case IOCTL_USBDK_PING:
-        {
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "Called IOCTL_USBDK_PING\n");
-
-            //TEMP: Dump children devices
-            {
-                auto devExt = UsbDkControlGetContext(WdfIoQueueGetDevice(Queue));
-                devExt->UsbDkControl->DumpAllChildren();
-            }
-
-            LPTSTR outBuff;
-            size_t outBuffLen;
-            status = WdfRequestRetrieveOutputBuffer(Request, 0, (PVOID *)&outBuff, &outBuffLen);
-            if (!NT_SUCCESS(status)) {
-                break;
-            }
-
-            wcsncpy(outBuff, TEXT("Pong!"), outBuffLen/sizeof(TCHAR));
-            WdfRequestSetInformation(Request, outBuffLen);
-            status = STATUS_SUCCESS;
-            break;
-        }
         case IOCTL_USBDK_COUNT_DEVICES:
         {
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "Called IOCTL_USBDK_COUNT_DEVICES\n");
@@ -184,13 +162,6 @@ NTSTATUS CUsbDkControlDeviceQueue::ResetDevice(WDFREQUEST Request, WDFQUEUE Queu
     WdfRequestSetInformation(Request, 0);
 
     return res;
-}
-//------------------------------------------------------------------------------------------------------------
-
-void CUsbDkControlDevice::DumpAllChildren()
-{
-    UsbDevicesForEachIf(ConstTrue,
-                        [](CUsbDkChildDevice *Child) -> bool { Child->Dump(); return true; });
 }
 //------------------------------------------------------------------------------------------------------------
 

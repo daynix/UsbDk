@@ -21,7 +21,6 @@ extern "C"
 {
     DLL InstallResult    InstallDriver();
     DLL BOOL    UninstallDriver();
-    DLL BOOL    PingDriver(LPTSTR ReplyBuffer, size_t ReplyBufferLen);
     DLL BOOL    GetDevicesList(PUSB_DK_DEVICE_ID *DevicesArray, ULONG *NumberDevices);
     DLL void    ReleaseDeviceList(PUSB_DK_DEVICE_ID DevicesArray);
     DLL BOOL    ResetDevice(PUSB_DK_DEVICE_ID DeviceID);

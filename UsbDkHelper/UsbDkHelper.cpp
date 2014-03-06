@@ -47,26 +47,6 @@ BOOL UninstallDriver()
 }
 //-------------------------------------------------------------------------------------------
 
-BOOL PingDriver(LPTSTR ReplyBuffer, size_t ReplyBufferLen)
-{
-    try
-    {
-        UsbDkDriverAccess driver;
-        auto reply = driver.Ping();
-
-        wcsncpy_s(ReplyBuffer, ReplyBufferLen, reply.c_str(), ReplyBufferLen);
-        ReplyBuffer[ReplyBufferLen - 1] = TEXT('\0');
-
-        return TRUE;
-    }
-    catch (const exception &e)
-    {
-        printExceptionString(e.what());
-        return FALSE;
-    }
-}
-//-------------------------------------------------------------------------------------------
-
 BOOL GetDevicesList(PUSB_DK_DEVICE_ID *DevicesArray, ULONG *NumberDevices)
 {
     try

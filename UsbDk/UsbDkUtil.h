@@ -147,6 +147,12 @@ public:
         ForEachPrepareIf([](TEntryType*) { return true; }, [](PLIST_ENTRY){}, Functor);
     }
 
+    template <typename TPredicate, typename TFunctor>
+    void ForEachIf(TPredicate Predicate, TFunctor Functor)
+    {
+        ForEachPrepareIf(Predicate, [](PLIST_ENTRY){}, Functor);
+    }
+
 private:
     template <typename TPredicate, typename TPrepareFunctor, typename TFunctor>
     void ForEachPrepareIf(TPredicate Predicate, TPrepareFunctor Prepare, TFunctor Functor)

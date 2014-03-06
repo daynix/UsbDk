@@ -65,9 +65,23 @@ public:
     CWdmDeviceAccess(const CWdmDeviceAccess&) = delete;
     CWdmDeviceAccess& operator= (const CWdmDeviceAccess&) = delete;
 
+protected:
+    PDEVICE_OBJECT m_DevObj;
+
 private:
     virtual CMemoryBuffer *GetDeviceProperty(DEVICE_REGISTRY_PROPERTY propertyId) override;
     virtual PWCHAR QueryBusID(BUS_QUERY_ID_TYPE idType) override;
+};
 
-    PDEVICE_OBJECT m_DevObj;
+class CWdmUsbDeviceAccess : public CWdmDeviceAccess
+{
+public:
+    CWdmUsbDeviceAccess(PDEVICE_OBJECT WdmDevice)
+        : CWdmDeviceAccess(WdmDevice)
+    { }
+
+    NTSTATUS Reset();
+
+    CWdmUsbDeviceAccess(const CWdmUsbDeviceAccess&) = delete;
+    CWdmUsbDeviceAccess& operator= (const CWdmUsbDeviceAccess&) = delete;
 };

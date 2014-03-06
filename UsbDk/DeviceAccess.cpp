@@ -4,6 +4,8 @@
 #include "RegText.h"
 #include "DeviceAccess.tmh"
 
+#include "UsbIOCtl.h"
+
 PWCHAR CWdfDeviceAccess::QueryBusID(BUS_QUERY_ID_TYPE idType)
 {
     UNREFERENCED_PARAMETER(idType);
@@ -106,4 +108,25 @@ CMemoryBuffer *CWdmDeviceAccess::GetDeviceProperty(DEVICE_REGISTRY_PROPERTY prop
     }
 
     return NULL;
+}
+
+NTSTATUS CWdmUsbDeviceAccess::Reset()
+{
+    CIoControlIrp Irp;
+    auto status = Irp.Create(m_DevObj, IOCTL_INTERNAL_USB_CYCLE_PORT);
+
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVACCESS, "%!FUNC! Error %!STATUS! during IOCTL IRP creation", status);
+        return status;
+    }
+
+    status = Irp.SendSynchronously();
+
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVACCESS, "%!FUNC! Send IOCTL IRP Error %!STATUS!", status);
+    }
+
+    return status;
 }

@@ -193,6 +193,69 @@ private:
 static inline bool ConstTrue(...) { return true; }
 static inline bool ConstFalse(...) { return false; }
 
+template <typename TEntryType, typename TAccessStrategy, typename TCountingStrategy>
+class CWdmSet : private TAccessStrategy, public TCountingStrategy
+{
+public:
+    bool Add(TEntryType *NewEntry)
+    {
+        CLockedContext<TAccessStrategy> LockedContext(*this);
+        if (!Contains_LockLess(NewEntry))
+        {
+            m_Objects.PushBack(NewEntry);
+            CounterIncrement();
+            return true;
+        }
+
+        return false;
+    }
+
+    template <typename TEntryId>
+    bool Delete(TEntryId *Id)
+    {
+        auto Removed = false;
+        CLockedContext<TAccessStrategy> LockedContext(*this);
+
+        m_Objects.ForEachDetachedIf([Id](TEntryType *ExistingEntry) { return *ExistingEntry == *Id; },
+                                    [this, &Removed](TEntryType *ExistingEntry)
+                                    {
+                                            delete ExistingEntry;
+                                            CounterDecrement();
+                                            Removed = true;
+                                            return false;
+                                    });
+
+        return Removed;
+    }
+
+    void Dump()
+    {
+        CLockedContext<TAccessStrategy> LockedContext(*this);
+        m_Objects.ForEach([](TEntryType *Entry) { Entry->Dump(); return true; });
+    }
+
+    template <typename TEntryId>
+    bool Contains(TEntryId *Id)
+    {
+        CLockedContext<TAccessStrategy> LockedContext(*this);
+        return Contains_LockLess(Entry);
+    }
+private:
+    template <typename TEntryId>
+    bool Contains_LockLess(TEntryId *Id)
+    {
+        auto MatchFound = false;
+
+        m_Objects.ForEachIf([Id](TEntryType *ExistingEntry) { return *ExistingEntry == *Id; },
+                            [&MatchFound](TEntryType *) { MatchFound = true; return false; });
+
+        return MatchFound;
+    }
+
+
+    CWdmList<TEntryType, CRawAccess, CNonCountingObject> m_Objects;
+};
+
 class CWdmEvent : public CAllocatable<NonPagedPool, 'VEHR'>
 {
 public:

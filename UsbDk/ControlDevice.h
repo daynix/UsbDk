@@ -9,6 +9,7 @@
 
 typedef struct tag_USB_DK_DEVICE_ID USB_DK_DEVICE_ID;
 class CUsbDkFilterDevice;
+class CWdfRequest;
 
 class CUsbDkControlDeviceQueue : public CWdfDefaultQueue, public CAllocatable<PagedPool, 'QCHR'>
 {
@@ -25,9 +26,9 @@ private:
                               size_t InputBufferLength,
                               ULONG IoControlCode);
 
-    static NTSTATUS CountDevices(WDFREQUEST Request, WDFQUEUE Queue);
-    static NTSTATUS EnumerateDevices(WDFREQUEST Request, WDFQUEUE Queue);
-    static NTSTATUS ResetDevice(WDFREQUEST Request, WDFQUEUE Queue);
+    static void CountDevices(CWdfRequest &Request, WDFQUEUE Queue);
+    static void EnumerateDevices(CWdfRequest &Request, WDFQUEUE Queue);
+    static void ResetDevice(CWdfRequest &Request, WDFQUEUE Queue);
 
     CUsbDkControlDeviceQueue(const CUsbDkControlDeviceQueue&) = delete;
     CUsbDkControlDeviceQueue& operator= (const CUsbDkControlDeviceQueue&) = delete;

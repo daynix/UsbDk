@@ -1,6 +1,7 @@
 #include "ControlDevice.h"
 #include "trace.h"
 #include "DeviceAccess.h"
+#include "WdfRequest.h"
 #include "ControlDevice.tmh"
 
 #define MAX_DEVICE_ID_LEN (200)
@@ -43,11 +44,10 @@ void CUsbDkControlDeviceQueue::DeviceControl(WDFQUEUE Queue,
                                              size_t InputBufferLength,
                                              ULONG IoControlCode)
 {
-    UNREFERENCED_PARAMETER(Queue);
     UNREFERENCED_PARAMETER(OutputBufferLength);
     UNREFERENCED_PARAMETER(InputBufferLength);
 
-    NTSTATUS status;
+    CWdfRequest WdfRequest(Request);
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "%!FUNC! Request arrived");
 
@@ -56,112 +56,90 @@ void CUsbDkControlDeviceQueue::DeviceControl(WDFQUEUE Queue,
         case IOCTL_USBDK_COUNT_DEVICES:
         {
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "Called IOCTL_USBDK_COUNT_DEVICES\n");
-            status = CountDevices(Request, Queue);
+            CountDevices(WdfRequest, Queue);
             break;
         }
         case IOCTL_USBDK_ENUM_DEVICES:
         {
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "Called IOCTL_USBDK_ENUM_DEVICES\n");
-            status = EnumerateDevices(Request, Queue);
+            EnumerateDevices(WdfRequest, Queue);
             break;
         }
         case IOCTL_USBDK_RESET_DEVICE:
         {
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "Called IOCTL_USBDK_RESET_DEVICE\n");
-            status = ResetDevice(Request, Queue);
+            ResetDevice(WdfRequest, Queue);
             break;
         }
         default:
         {
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "Wrong IoControlCode\n");
-            status = STATUS_INVALID_DEVICE_REQUEST;
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "Wrong IoControlCode 0x%X\n", IoControlCode);
+            WdfRequest.SetStatus(STATUS_INVALID_DEVICE_REQUEST);
             break;
         }
     }
-
-    WdfRequestComplete(Request, status);
 }
 //------------------------------------------------------------------------------------------------------------
 
-NTSTATUS CUsbDkControlDeviceQueue::CountDevices(WDFREQUEST Request, WDFQUEUE Queue)
+void CUsbDkControlDeviceQueue::CountDevices(CWdfRequest &Request, WDFQUEUE Queue)
 {
-    ULONG   *numberDevices;
-    size_t          outBuffLen;
-    auto  status = WdfRequestRetrieveOutputBuffer(Request, 0, (PVOID *)&numberDevices, &outBuffLen);
-    if (!NT_SUCCESS(status))
+    ULONG *numberDevices;
+    auto status = Request.FetchOutputObject(numberDevices);
+    if (NT_SUCCESS(status))
     {
-        return status;
+        auto devExt = UsbDkControlGetContext(WdfIoQueueGetDevice(Queue));
+        *numberDevices = devExt->UsbDkControl->CountDevices();
+
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "%!FUNC! CountDevices returned %d", *numberDevices);
+
+        Request.SetOutputDataLen(sizeof(*numberDevices));
     }
 
-    if (outBuffLen < sizeof(*numberDevices))
-    {
-        return STATUS_BUFFER_TOO_SMALL;
-    }
-
-    auto devExt = UsbDkControlGetContext(WdfIoQueueGetDevice(Queue));
-
-    *numberDevices = devExt->UsbDkControl->CountDevices();
-
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "%!FUNC! CountDevices returned %d", *numberDevices);
-
-    WdfRequestSetInformation(Request, sizeof(*numberDevices));
-
-    return STATUS_SUCCESS;
+    Request.SetStatus(status);
 }
 //------------------------------------------------------------------------------------------------------------
 
-NTSTATUS CUsbDkControlDeviceQueue::EnumerateDevices(WDFREQUEST Request, WDFQUEUE Queue)
+void CUsbDkControlDeviceQueue::EnumerateDevices(CWdfRequest &Request, WDFQUEUE Queue)
 {
-    USB_DK_DEVICE_ID    *outBuff;
-    size_t              outBuffLen;
-    auto status = WdfRequestRetrieveOutputBuffer(Request, 0, (PVOID *)&outBuff, &outBuffLen);
-    if (!NT_SUCCESS(status))
-    {
-        return status;
-    }
-
-    auto devExt = UsbDkControlGetContext(WdfIoQueueGetDevice(Queue));
-
-    auto    numberAllocatedDevices = outBuffLen / sizeof(USB_DK_DEVICE_ID);
+    USB_DK_DEVICE_ID *existingDevices;
     size_t  numberExistingDevices = 0;
-    auto res = devExt->UsbDkControl->EnumerateDevices(outBuff, numberAllocatedDevices, numberExistingDevices);
+    size_t numberAllocatedDevices;
+
+    auto status = Request.FetchOutputArray(existingDevices, numberAllocatedDevices);
+    if (!NT_SUCCESS(status))
+    {
+        Request.SetStatus(status);
+        return;
+    }
+
+    auto devExt = UsbDkControlGetContext(WdfIoQueueGetDevice(Queue));
+    auto res = devExt->UsbDkControl->EnumerateDevices(existingDevices, numberAllocatedDevices, numberExistingDevices);
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "%!FUNC! EnumerateDevices returned %llu devices", numberExistingDevices);
 
     if (res)
     {
-        WdfRequestSetInformation(Request, outBuffLen);
-        return STATUS_SUCCESS;
+        Request.SetOutputDataLen(numberExistingDevices * sizeof(USB_DK_DEVICE_ID));
+        Request.SetStatus(STATUS_SUCCESS);
     }
     else
     {
-        WdfRequestSetInformation(Request, 0);
-        return STATUS_BUFFER_TOO_SMALL;
+        Request.SetStatus(STATUS_BUFFER_TOO_SMALL);
     }
 }
 //------------------------------------------------------------------------------------------------------------
 
-NTSTATUS CUsbDkControlDeviceQueue::ResetDevice(WDFREQUEST Request, WDFQUEUE Queue)
+void CUsbDkControlDeviceQueue::ResetDevice(CWdfRequest &Request, WDFQUEUE Queue)
 {
     USB_DK_DEVICE_ID *deviceId;
-    size_t inBuffLen;
-    auto status = WdfRequestRetrieveInputBuffer(Request, 0, (PVOID *)&deviceId, &inBuffLen);
-    if (!NT_SUCCESS(status))
+    auto status = Request.FetchInputObject(deviceId);
+    if (NT_SUCCESS(status))
     {
-        return status;
+        auto devExt = UsbDkControlGetContext(WdfIoQueueGetDevice(Queue));
+        status = devExt->UsbDkControl->ResetUsbDevice(*deviceId);
     }
 
-    if (inBuffLen < sizeof(*deviceId))
-    {
-        return STATUS_BUFFER_TOO_SMALL;
-    }
-
-    auto devExt = UsbDkControlGetContext(WdfIoQueueGetDevice(Queue));
-    auto res = devExt->UsbDkControl->ResetUsbDevice(*deviceId);
-
-    WdfRequestSetInformation(Request, 0);
-
-    return res;
+    Request.SetStatus(status);
 }
 //------------------------------------------------------------------------------------------------------------
 

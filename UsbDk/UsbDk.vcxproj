@@ -76,6 +76,7 @@
     <ClInclude Include="UsbDkUtil.h" />
     <ClInclude Include="Trace.h" />
     <ClInclude Include="WdfDevice.h" />
+    <ClInclude Include="WdfRequest.h" />
     <ClInclude Include="WdfWorkitem.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

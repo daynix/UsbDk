@@ -147,7 +147,7 @@ void CUsbDkFilterDevice::QDRPostProcessWi()
 
             if (!DevID || DevID->empty())
             {
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! No Device IDs read");
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! No Device IDs read");
                 continue;
             }
 
@@ -155,7 +155,7 @@ void CUsbDkFilterDevice::QDRPostProcessWi()
 
             if (!InstanceID || InstanceID->empty())
             {
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! No Instance ID read");
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! No Instance ID read");
                 continue;
             }
 
@@ -163,7 +163,7 @@ void CUsbDkFilterDevice::QDRPostProcessWi()
 
             if (Device == nullptr)
             {
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Cannot allocate child device instance");
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Cannot allocate child device instance");
                 continue;
             }
 

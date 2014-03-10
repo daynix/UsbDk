@@ -29,6 +29,9 @@ private:
     static void CountDevices(CWdfRequest &Request, WDFQUEUE Queue);
     static void EnumerateDevices(CWdfRequest &Request, WDFQUEUE Queue);
     static void ResetDevice(CWdfRequest &Request, WDFQUEUE Queue);
+    static void AddRedirect(CWdfRequest &Request, WDFQUEUE Queue);
+    static void RemoveRedirect(CWdfRequest &Request, WDFQUEUE Queue);
+
     typedef NTSTATUS(CUsbDkControlDevice::*USBDevControlMethod)(const USB_DK_DEVICE_ID&);
     static void DoUSBDeviceOp(CWdfRequest &Request, WDFQUEUE Queue, USBDevControlMethod Method);
 
@@ -71,6 +74,8 @@ public:
     ULONG CountDevices();
     bool EnumerateDevices(USB_DK_DEVICE_ID *outBuff, size_t numberAllocatedDevices, size_t &numberExistingDevices);
     NTSTATUS ResetUsbDevice(const USB_DK_DEVICE_ID &DeviceId);
+    NTSTATUS AddRedirect(const USB_DK_DEVICE_ID &DeviceId);
+    NTSTATUS RemoveRedirect(const USB_DK_DEVICE_ID &DeviceId);
 
     static bool Allocate();
     static void Deallocate()
@@ -84,6 +89,7 @@ private:
     static CRefCountingHolder<CUsbDkControlDevice> *m_UsbDkControlDevice;
 
     CWdmList<CUsbDkFilterDevice, CLockedAccess, CNonCountingObject> m_FilterDevices;
+    CWdmSet<CUsbDkRedirection, CLockedAccess, CNonCountingObject> m_Redirections;
 
     template <typename TPredicate, typename TFunctor>
     bool UsbDevicesForEachIf(TPredicate Predicate, TFunctor Functor)

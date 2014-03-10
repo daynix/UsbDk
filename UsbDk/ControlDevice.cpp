@@ -71,6 +71,18 @@ void CUsbDkControlDeviceQueue::DeviceControl(WDFQUEUE Queue,
             ResetDevice(WdfRequest, Queue);
             break;
         }
+        case IOCTL_USBDK_ADD_REDIRECT:
+        {
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "Called IOCTL_USBDK_ADD_REDIRECT\n");
+            AddRedirect(WdfRequest, Queue);
+            break;
+        }
+        case IOCTL_USBDK_REMOVE_REDIRECT:
+        {
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "Called IOCTL_USBDK_REMOVE_REDIRECT\n");
+            RemoveRedirect(WdfRequest, Queue);
+            break;
+        }
         default:
         {
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "Wrong IoControlCode 0x%X\n", IoControlCode);
@@ -151,6 +163,18 @@ void CUsbDkControlDeviceQueue::DoUSBDeviceOp(CWdfRequest &Request, WDFQUEUE Queu
 void CUsbDkControlDeviceQueue::ResetDevice(CWdfRequest &Request, WDFQUEUE Queue)
 {
     DoUSBDeviceOp(Request, Queue, &CUsbDkControlDevice::ResetUsbDevice);
+}
+//------------------------------------------------------------------------------------------------------------
+
+void CUsbDkControlDeviceQueue::AddRedirect(CWdfRequest &Request, WDFQUEUE Queue)
+{
+    DoUSBDeviceOp(Request, Queue, &CUsbDkControlDevice::AddRedirect);
+}
+//------------------------------------------------------------------------------------------------------------
+
+void CUsbDkControlDeviceQueue::RemoveRedirect(CWdfRequest &Request, WDFQUEUE Queue)
+{
+    DoUSBDeviceOp(Request, Queue, &CUsbDkControlDevice::RemoveRedirect);
 }
 //------------------------------------------------------------------------------------------------------------
 
@@ -299,6 +323,48 @@ bool CUsbDkControlDevice::Allocate()
     }
 
     return true;
+}
+
+NTSTATUS CUsbDkControlDevice::AddRedirect(const USB_DK_DEVICE_ID &DeviceId)
+{
+    CObjHolder<CUsbDkRedirection> newRedir(new CUsbDkRedirection());
+
+    if (!newRedir)
+    {
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+
+    auto status = newRedir->Create(DeviceId);
+    if (!NT_SUCCESS(status))
+    {
+        return status;
+    }
+
+    if (!m_Redirections.Add(newRedir))
+    {
+        return STATUS_OBJECT_NAME_COLLISION;
+    }
+
+    newRedir.detach();
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "%!FUNC! Success. New redirections list:");
+    m_Redirections.Dump();
+
+    return STATUS_SUCCESS;
+}
+
+NTSTATUS CUsbDkControlDevice::RemoveRedirect(const USB_DK_DEVICE_ID &DeviceId)
+{
+    auto res = m_Redirections.Delete(&DeviceId);
+
+    if (res)
+    {
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "%!FUNC! Success. New redirections list:");
+        m_Redirections.Dump();
+        return STATUS_SUCCESS;
+    }
+
+    return STATUS_OBJECT_NAME_NOT_FOUND;
 }
 
 NTSTATUS CUsbDkRedirection::Create(const USB_DK_DEVICE_ID &Id)

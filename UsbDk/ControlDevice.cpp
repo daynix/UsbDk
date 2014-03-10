@@ -300,3 +300,33 @@ bool CUsbDkControlDevice::Allocate()
 
     return true;
 }
+
+NTSTATUS CUsbDkRedirection::Create(const USB_DK_DEVICE_ID &Id)
+{
+    auto status = m_DeviceID.Create(Id.DeviceID);
+    if (!NT_SUCCESS(status))
+    {
+        return status;
+    }
+
+    return m_InstanceID.Create(Id.InstanceID);
+}
+
+void CUsbDkRedirection::Dump() const
+{
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE,
+                "%!FUNC! Redirect: DevID: %wZ, InstanceID: %wZ",
+                m_DeviceID, m_InstanceID);
+}
+
+bool CUsbDkRedirection::operator==(const USB_DK_DEVICE_ID &Id)
+{
+    return (m_DeviceID == Id.DeviceID) &&
+           (m_InstanceID == Id.InstanceID);
+}
+
+bool CUsbDkRedirection::operator==(const CUsbDkRedirection &Other)
+{
+    return (m_DeviceID == Other.m_DeviceID) &&
+           (m_InstanceID == Other.m_InstanceID);
+}

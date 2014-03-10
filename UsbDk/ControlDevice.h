@@ -36,6 +36,27 @@ private:
     CUsbDkControlDeviceQueue& operator= (const CUsbDkControlDeviceQueue&) = delete;
 };
 
+class CUsbDkRedirection : public CAllocatable<NonPagedPool, 'NRHR'>
+{
+public:
+    NTSTATUS Create(const USB_DK_DEVICE_ID &Id);
+
+    bool operator==(const USB_DK_DEVICE_ID &Id);
+    bool operator==(const CUsbDkRedirection &Other);
+
+    PLIST_ENTRY GetListEntry()
+    { return &m_ListEntry; }
+    static CUsbDkRedirection *GetByListEntry(PLIST_ENTRY entry)
+    { return static_cast<CUsbDkRedirection*>(CONTAINING_RECORD(entry, CUsbDkRedirection, m_ListEntry)); }
+
+    void Dump() const;
+private:
+    CString m_DeviceID;
+    CString m_InstanceID;
+
+    LIST_ENTRY m_ListEntry;
+};
+
 class CUsbDkControlDevice : private CWdfControlDevice, public CAllocatable<NonPagedPool, 'DCHR'>
 {
 public:

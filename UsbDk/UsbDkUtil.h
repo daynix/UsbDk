@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ntddk.h>
+#include <Ntstrsafe.h>
 
 class CWdmSpinLock
 {
@@ -277,4 +278,67 @@ public:
     CWdmEvent& operator= (const CWdmEvent&) = delete;
 private:
     KEVENT m_Event;
+};
+
+class CStringComparator
+{
+public:
+    bool operator== (const CStringComparator &Other)
+    { return RtlEqualUnicodeString(&m_String, &Other.m_String, FALSE) ? true : false; }
+
+    bool operator== (const UNICODE_STRING& Str)
+    { return RtlEqualUnicodeString(&m_String, &Str, FALSE) ? true : false; }
+
+    bool operator== (PCWSTR Other)
+    {
+        UNICODE_STRING str;
+        if (NT_SUCCESS(RtlUnicodeStringInit(&str, Other)))
+        {
+            return *this == str;
+        }
+        return false;
+    }
+
+    operator PCUNICODE_STRING() const { return &m_String; };
+protected:
+    CStringComparator(const CStringComparator&) = delete;
+    CStringComparator& operator= (const CStringComparator&) = delete;
+    CStringComparator() {};
+    ~CStringComparator() {};
+
+    UNICODE_STRING m_String;
+};
+class CStringHolder : public CStringComparator
+{
+public:
+    NTSTATUS Attach(NTSTRSAFE_PCWSTR String)
+    { return RtlUnicodeStringInit(&m_String, String); }
+
+    //This initialization may be done in-class without
+    //constructor definition but MS compiler crashes with internal error
+    CStringHolder()
+    { m_String = {}; }
+
+private:
+    CStringHolder(const CStringHolder&) = delete;
+    CStringHolder& operator= (const CStringHolder&) = delete;
+};
+
+class CString : public CStringComparator
+{
+public:
+    NTSTATUS Create(NTSTRSAFE_PCWSTR String);
+    void Destroy();
+
+    //This initialization may be done in-class without
+    //constructor definition but MS compiler crashes with internal error
+    CString()
+    { m_String = {}; }
+
+    ~CString()
+    { Destroy(); }
+
+private:
+    CString(const CString&) = delete;
+    CString& operator= (const CString&) = delete;
 };

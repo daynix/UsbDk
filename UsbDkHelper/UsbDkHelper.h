@@ -24,5 +24,7 @@ extern "C"
     DLL BOOL    GetDevicesList(PUSB_DK_DEVICE_ID *DevicesArray, ULONG *NumberDevices);
     DLL void    ReleaseDeviceList(PUSB_DK_DEVICE_ID DevicesArray);
     DLL BOOL    ResetDevice(PUSB_DK_DEVICE_ID DeviceID);
+    DLL BOOL    AddRedirect(PUSB_DK_DEVICE_ID DeviceID);
+    DLL BOOL    RemoveRedirect(PUSB_DK_DEVICE_ID DeviceID);
 }
 

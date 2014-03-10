@@ -86,6 +86,18 @@ void UsbDkDriverAccess::ResetDevice(USB_DK_DEVICE_ID &DeviceID)
 }
 //------------------------------------------------------------------------------------------------
 
+void UsbDkDriverAccess::AddRedirect(USB_DK_DEVICE_ID &DeviceID)
+{
+    SendIoctlWithDeviceId(IOCTL_USBDK_ADD_REDIRECT, DeviceID);
+}
+//------------------------------------------------------------------------------------------------
+
+void UsbDkDriverAccess::RemoveRedirect(USB_DK_DEVICE_ID &DeviceID)
+{
+    SendIoctlWithDeviceId(IOCTL_USBDK_REMOVE_REDIRECT, DeviceID);
+}
+//------------------------------------------------------------------------------------------------
+
 void UsbDkDriverAccess::SendIoctlWithDeviceId(DWORD ControlCode,
                                               USB_DK_DEVICE_ID &Id)
 {

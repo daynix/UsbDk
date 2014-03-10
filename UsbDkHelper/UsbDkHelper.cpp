@@ -98,3 +98,15 @@ BOOL ResetDevice(PUSB_DK_DEVICE_ID DeviceID)
     return DoDriverBoolOp([&DeviceID](UsbDkDriverAccess &drv){ drv.ResetDevice(*DeviceID); });
 }
 //-------------------------------------------------------------------------------------------
+
+BOOL AddRedirect(PUSB_DK_DEVICE_ID DeviceID)
+{
+    return DoDriverBoolOp([&DeviceID](UsbDkDriverAccess &drv){ drv.AddRedirect(*DeviceID); });
+}
+//-------------------------------------------------------------------------------------------
+
+BOOL RemoveRedirect(PUSB_DK_DEVICE_ID DeviceID)
+{
+    return DoDriverBoolOp([&DeviceID](UsbDkDriverAccess &drv){ drv.RemoveRedirect(*DeviceID); });
+}
+//-------------------------------------------------------------------------------------------

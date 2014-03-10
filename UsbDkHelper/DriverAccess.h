@@ -26,6 +26,7 @@ public:
     void ResetDevice(USB_DK_DEVICE_ID &DeviceID);
 
 private:
+    void SendIoctlWithDeviceId(DWORD ControlCode, USB_DK_DEVICE_ID &Id);
     HANDLE m_hDriver;
 };
 //-----------------------------------------------------------------------------------

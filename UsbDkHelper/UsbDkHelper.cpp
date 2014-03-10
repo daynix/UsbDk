@@ -76,12 +76,13 @@ void ReleaseDeviceList(PUSB_DK_DEVICE_ID DevicesArray)
 }
 //-------------------------------------------------------------------------------------------
 
-BOOL ResetDevice(PUSB_DK_DEVICE_ID DeviceID)
+template <typename TFunc>
+static BOOL DoDriverBoolOp(TFunc Func)
 {
     try
     {
         UsbDkDriverAccess driver;
-        driver.ResetDevice(*DeviceID);
+        Func(driver);
         return TRUE;
     }
     catch (const exception &e)
@@ -89,5 +90,11 @@ BOOL ResetDevice(PUSB_DK_DEVICE_ID DeviceID)
         printExceptionString(e.what());
         return FALSE;
     }
+}
+//-------------------------------------------------------------------------------------------
+
+BOOL ResetDevice(PUSB_DK_DEVICE_ID DeviceID)
+{
+    return DoDriverBoolOp([&DeviceID](UsbDkDriverAccess &drv){ drv.ResetDevice(*DeviceID); });
 }
 //-------------------------------------------------------------------------------------------

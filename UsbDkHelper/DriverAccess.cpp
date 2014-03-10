@@ -82,17 +82,17 @@ void UsbDkDriverAccess::ReleaseDeviceList(PUSB_DK_DEVICE_ID DevicesArray)
 
 void UsbDkDriverAccess::ResetDevice(USB_DK_DEVICE_ID &DeviceID)
 {
-    DWORD   bytesReturned;
-    if (!DeviceIoControl(m_hDriver,
-        IOCTL_USBDK_RESET_DEVICE,
-        &DeviceID,
-        sizeof(USB_DK_DEVICE_ID),
-        nullptr,
-        0,
-        &bytesReturned,
-        nullptr))
-    {
-        throw UsbDkDriverAccessException(TEXT("Reset device failed"));
-    }
+    SendIoctlWithDeviceId(IOCTL_USBDK_RESET_DEVICE, DeviceID);
 }
 //------------------------------------------------------------------------------------------------
+
+void UsbDkDriverAccess::SendIoctlWithDeviceId(DWORD ControlCode,
+                                              USB_DK_DEVICE_ID &Id)
+{
+    DWORD   bytesReturned;
+    if (!DeviceIoControl(m_hDriver, ControlCode, &Id, sizeof(Id),
+                         nullptr, 0, &bytesReturned, nullptr))
+    {
+        throw UsbDkDriverAccessException(TEXT("Ioctl failed"));
+    }
+}

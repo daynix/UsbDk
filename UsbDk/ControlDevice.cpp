@@ -129,17 +129,28 @@ void CUsbDkControlDeviceQueue::EnumerateDevices(CWdfRequest &Request, WDFQUEUE Q
 }
 //------------------------------------------------------------------------------------------------------------
 
-void CUsbDkControlDeviceQueue::ResetDevice(CWdfRequest &Request, WDFQUEUE Queue)
+void CUsbDkControlDeviceQueue::DoUSBDeviceOp(CWdfRequest &Request, WDFQUEUE Queue, USBDevControlMethod Method)
 {
     USB_DK_DEVICE_ID *deviceId;
     auto status = Request.FetchInputObject(deviceId);
     if (NT_SUCCESS(status))
     {
         auto devExt = UsbDkControlGetContext(WdfIoQueueGetDevice(Queue));
-        status = devExt->UsbDkControl->ResetUsbDevice(*deviceId);
+        status = (devExt->UsbDkControl->*Method)(*deviceId);
+    }
+
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! Fail with code: %!STATUS!", status);
     }
 
     Request.SetStatus(status);
+}
+//------------------------------------------------------------------------------------------------------------
+
+void CUsbDkControlDeviceQueue::ResetDevice(CWdfRequest &Request, WDFQUEUE Queue)
+{
+    DoUSBDeviceOp(Request, Queue, &CUsbDkControlDevice::ResetUsbDevice);
 }
 //------------------------------------------------------------------------------------------------------------
 

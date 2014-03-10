@@ -81,7 +81,8 @@ BOOL ResetDevice(PUSB_DK_DEVICE_ID DeviceID)
     try
     {
         UsbDkDriverAccess driver;
-        return driver.ResetDevice(*DeviceID);
+        driver.ResetDevice(*DeviceID);
+        return TRUE;
     }
     catch (const exception &e)
     {

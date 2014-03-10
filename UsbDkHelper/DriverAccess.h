@@ -23,7 +23,7 @@ public:
 
     void GetDevicesList(PUSB_DK_DEVICE_ID &DevicesArray, ULONG &NumberDevice);
     static void ReleaseDeviceList(PUSB_DK_DEVICE_ID DevicesArray);
-    bool ResetDevice(USB_DK_DEVICE_ID &DeviceID);
+    void ResetDevice(USB_DK_DEVICE_ID &DeviceID);
 
 private:
     HANDLE m_hDriver;

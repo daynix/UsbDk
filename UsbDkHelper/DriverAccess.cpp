@@ -80,7 +80,7 @@ void UsbDkDriverAccess::ReleaseDeviceList(PUSB_DK_DEVICE_ID DevicesArray)
 }
 //------------------------------------------------------------------------------------------------
 
-bool UsbDkDriverAccess::ResetDevice(USB_DK_DEVICE_ID &DeviceID)
+void UsbDkDriverAccess::ResetDevice(USB_DK_DEVICE_ID &DeviceID)
 {
     DWORD   bytesReturned;
     if (!DeviceIoControl(m_hDriver,
@@ -94,7 +94,5 @@ bool UsbDkDriverAccess::ResetDevice(USB_DK_DEVICE_ID &DeviceID)
     {
         throw UsbDkDriverAccessException(TEXT("Reset device failed"));
     }
-
-    return true;
 }
 //------------------------------------------------------------------------------------------------

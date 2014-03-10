@@ -17,6 +17,8 @@ void ShowUsage()
     tcout << TEXT("UsbDkController -u  - uninstall UsbDk driver") << endl;
     tcout << TEXT("UsbDkController -n  - enumerate USB devices") << endl;
     tcout << TEXT("UsbDkController -r ID SN - Reset USB device by ID and serial number") << endl;
+    tcout << TEXT("UsbDkController -a ID SN - Redirect USB device by ID and serial number") << endl;
+    tcout << TEXT("UsbDkController -s ID SN - Stop redirection of USB device by ID and serial number") << endl;
     tcout << endl;
 }
 //-------------------------------------------------------------------------------
@@ -78,7 +80,7 @@ int __cdecl _tmain(int argc, _TCHAR* argv[])
                 tcout << TEXT("Enumeration failed") << endl;
             }
         }
-        else if (_tcsicmp(L"-r", argv[1]) == 0)
+        else if ((_tcsicmp(L"-r", argv[1]) == 0) || (_tcsicmp(L"-a", argv[1]) == 0) || (_tcsicmp(L"-s", argv[1]) == 0))
         {
             if (argc < 4)
             {
@@ -90,14 +92,41 @@ int __cdecl _tmain(int argc, _TCHAR* argv[])
             wcscpy_s(deviceID.DeviceID, MAX_DEVICE_ID_LEN, tstring2wstring(argv[2]));
             wcscpy_s(deviceID.InstanceID, MAX_DEVICE_ID_LEN, tstring2wstring(argv[3]));
 
-            tcout << TEXT("Reset USB device ") << deviceID.DeviceID << TEXT(", ") << deviceID.InstanceID << endl;
-            if (ResetDevice(&deviceID))
+            if (_tcsicmp(L"-a", argv[1]) == 0)
             {
-                tcout << TEXT("USB device was reset successfully") << endl;
+                tcout << TEXT("Redirect USB device ") << deviceID.DeviceID << TEXT(", ") << deviceID.InstanceID << endl;
+                if (AddRedirect(&deviceID))
+                {
+                    tcout << TEXT("USB device was redirected successfully") << endl;
+                }
+                else
+                {
+                    tcout << TEXT("Redirect of USB device failed") << endl;
+                }
+            }
+            else if (_tcsicmp(L"-s", argv[1]) == 0)
+            {
+                tcout << TEXT("Restore USB device ") << deviceID.DeviceID << TEXT(", ") << deviceID.InstanceID << endl;
+                if (RemoveRedirect(&deviceID))
+                {
+                    tcout << TEXT("USB device was restored successfully") << endl;
+                }
+                else
+                {
+                    tcout << TEXT("Restore of USB device failed") << endl;
+                }
             }
             else
             {
-                tcout << TEXT("Reset of USB device failed") << endl;
+                tcout << TEXT("Reset USB device ") << deviceID.DeviceID << TEXT(", ") << deviceID.InstanceID << endl;
+                if (ResetDevice(&deviceID))
+                {
+                    tcout << TEXT("USB device was reset successfully") << endl;
+                }
+                else
+                {
+                    tcout << TEXT("Reset of USB device failed") << endl;
+                }
             }
         }
         else

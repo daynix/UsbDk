@@ -15,7 +15,7 @@ void printExceptionString(const char *errorStr)
 }
 
 //------------------------------------------------------------------------------------------
-InstallResult InstallDriver()
+InstallResult InstallDriver(void)
 {
     try
     {
@@ -31,7 +31,7 @@ InstallResult InstallDriver()
 }
 //-------------------------------------------------------------------------------------------
 
-BOOL UninstallDriver()
+BOOL UninstallDriver(void)
 {
     try
     {

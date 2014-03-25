@@ -58,7 +58,7 @@ class CWdfDevice
 {
 public:
     CWdfDevice() {}
-    ~CWdfDevice() { WdfObjectDelete(m_Device); }
+    ~CWdfDevice();
 
     NTSTATUS CreateSymLink(const UNICODE_STRING &Name);
     NTSTATUS Create(CPreAllocatedDeviceInit &DeviceInit, WDF_OBJECT_ATTRIBUTES &DeviceAttr);
@@ -66,7 +66,7 @@ public:
     CWdfDevice(const CWdfDevice&) = delete;
     CWdfDevice& operator= (const CWdfDevice&) = delete;
 protected:
-    WDFDEVICE m_Device;
+    WDFDEVICE m_Device = WDF_NO_HANDLE;
 
 private:
     NTSTATUS AddQueue(WDF_IO_QUEUE_CONFIG &Config, WDF_OBJECT_ATTRIBUTES &Attributes, WDFQUEUE &Queue);

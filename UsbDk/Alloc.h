@@ -40,9 +40,9 @@ public:
     ~CObjHolder()
     { delete m_Obj; }
 
-    operator bool() { return m_Obj != NULL; }
-    operator T *() { return m_Obj; }
-    T *operator ->() { return m_Obj; }
+    operator bool() const { return m_Obj != NULL; }
+    operator T *() const { return m_Obj; }
+    T *operator ->() const { return m_Obj; }
 
     T *detach()
     {

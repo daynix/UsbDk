@@ -220,6 +220,11 @@ bool CUsbDkControlDevice::EnumUsbDevicesByID(const USB_DK_DEVICE_ID &ID, TFuncto
     return UsbDevicesForEachIf([&ID](CUsbDkChildDevice *c) { return c->Match(ID.DeviceID, ID.InstanceID); }, Functor);
 }
 
+bool CUsbDkControlDevice::UsbDeviceExists(const USB_DK_DEVICE_ID &ID)
+{
+    return !EnumUsbDevicesByID(ID, ConstFalse);
+}
+
 NTSTATUS CUsbDkControlDevice::ResetUsbDevice(const USB_DK_DEVICE_ID &DeviceID)
 {
     PDEVICE_OBJECT PDO = nullptr;
@@ -344,6 +349,11 @@ NTSTATUS CUsbDkControlDevice::AddRedirect(const USB_DK_DEVICE_ID &DeviceId)
     if (!NT_SUCCESS(status))
     {
         return status;
+    }
+
+    if (!UsbDeviceExists(DeviceId))
+    {
+        return STATUS_OBJECT_NAME_NOT_FOUND;
     }
 
     if (!m_Redirections.Add(newRedir))

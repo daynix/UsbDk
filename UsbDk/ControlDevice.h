@@ -97,6 +97,8 @@ private:
 
     template <typename TFunctor>
     bool EnumUsbDevicesByID(const USB_DK_DEVICE_ID &ID, TFunctor Functor);
+
+    bool UsbDeviceExists(const USB_DK_DEVICE_ID &ID);
 };
 
 typedef struct _USBDK_CONTROL_DEVICE_EXTENSION {

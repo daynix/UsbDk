@@ -410,6 +410,12 @@ bool CUsbDkRedirection::operator==(const USB_DK_DEVICE_ID &Id)
            (m_InstanceID == Id.InstanceID);
 }
 
+bool CUsbDkRedirection::operator==(const CUsbDkChildDevice &Dev)
+{
+    return (m_DeviceID == Dev.DeviceID()) &&
+           (m_InstanceID == Dev.InstanceID());
+}
+
 bool CUsbDkRedirection::operator==(const CUsbDkRedirection &Other)
 {
     return (m_DeviceID == Other.m_DeviceID) &&

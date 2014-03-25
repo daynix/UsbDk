@@ -45,6 +45,7 @@ public:
     NTSTATUS Create(const USB_DK_DEVICE_ID &Id);
 
     bool operator==(const USB_DK_DEVICE_ID &Id);
+    bool operator==(const CUsbDkChildDevice &Dev);
     bool operator==(const CUsbDkRedirection &Other);
 
     PLIST_ENTRY GetListEntry()
@@ -83,6 +84,9 @@ public:
     static CUsbDkControlDevice* Reference(WDFDRIVER Driver);
     static void Release()
     { m_UsbDkControlDevice->Release(); }
+
+    bool ShouldRedirect(const CUsbDkChildDevice &Dev)
+    { return m_Redirections.Contains(&Dev); }
 
 private:
     CObjHolder<CUsbDkControlDeviceQueue> m_DeviceQueue;

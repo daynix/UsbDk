@@ -250,7 +250,7 @@ public:
     bool Contains(TEntryId *Id)
     {
         CLockedContext<TAccessStrategy> LockedContext(*this);
-        return Contains_LockLess(Entry);
+        return Contains_LockLess(Id);
     }
 private:
     template <typename TEntryId>

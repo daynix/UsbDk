@@ -38,8 +38,7 @@ private:
 
 class CDeviceInit : public CPreAllocatedDeviceInit
 {
-public:
-    bool Create(_In_ WDFDRIVER Driver, _In_ CONST UNICODE_STRING &SDDLString);
+protected:
     CDeviceInit()
     {}
     virtual ~CDeviceInit();

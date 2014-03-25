@@ -21,11 +21,14 @@ public:
 
 NTSTATUS CUsbDkControlDeviceInit::Create(WDFDRIVER Driver)
 {
-    if (!CDeviceInit::Create(Driver, SDDL_DEVOBJ_SYS_ALL_ADM_RWX_WORLD_RWX_RES_RWX))
+    auto DeviceInit = WdfControlDeviceInitAllocate(Driver, &SDDL_DEVOBJ_SYS_ALL_ADM_RWX_WORLD_RWX_RES_RWX);
+    if (DeviceInit == nullptr)
     {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_WDFDEVICE, "%!FUNC! Cannot allocate DeviceInit");
         return STATUS_INSUFFICIENT_RESOURCES;
     }
 
+    Attach(DeviceInit);
     SetExclusive();
     SetIoBuffered();
 

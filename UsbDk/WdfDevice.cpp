@@ -2,20 +2,6 @@
 #include "trace.h"
 #include "WdfDevice.tmh"
 
-bool CDeviceInit::Create(_In_ WDFDRIVER Driver, _In_ CONST UNICODE_STRING &SDDLString)
-{
-    auto DeviceInit = WdfControlDeviceInitAllocate(Driver, &SDDLString);
-    if (DeviceInit == nullptr)
-    {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_WDFDEVICE, "%!FUNC! Cannot allocate DeviceInit");
-        return false;
-    }
-
-    Attach(DeviceInit);
-
-    return true;
-}
-
 CDeviceInit::~CDeviceInit()
 {
     if (m_Attached)

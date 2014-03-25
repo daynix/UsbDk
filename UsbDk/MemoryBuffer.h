@@ -10,8 +10,8 @@ public:
     static CMemoryBuffer* GetMemoryBuffer(WDFMEMORY MemObj);
     static CMemoryBuffer* GetMemoryBuffer(PVOID Buffer, SIZE_T Size);
 
-    virtual PVOID Ptr() { return m_Ptr; }
-    virtual SIZE_T Size() { return m_Size; }
+    virtual PVOID Ptr() const { return m_Ptr; }
+    virtual SIZE_T Size() const { return m_Size; }
 
 protected:
     CMemoryBuffer()

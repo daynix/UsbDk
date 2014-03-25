@@ -69,11 +69,11 @@ public:
 
     template <typename TFunctor>
     void EnumerateChildren(TFunctor Functor)
-    { m_ChildDevices.ForEach(Functor); }
+    { m_ChildrenDevices.ForEach(Functor); }
 
     template <typename TPredicate, typename TFunctor>
     bool EnumerateChildrenIf(TPredicate Predicate, TFunctor Functor)
-    { return m_ChildDevices.ForEachIf(Predicate, Functor); }
+    { return m_ChildrenDevices.ForEachIf(Predicate, Functor); }
 
     PLIST_ENTRY GetListEntry()
     { return &m_ListEntry; }
@@ -81,7 +81,7 @@ public:
     { return static_cast<CUsbDkFilterDevice*>(CONTAINING_RECORD(entry, CUsbDkFilterDevice, m_ListEntry)); }
 
     ULONG GetChildrenCount()
-    { return m_ChildDevices.GetCount(); }
+    { return m_ChildrenDevices.GetCount(); }
 
 private:
     static void ContextCleanup(_In_ WDFOBJECT DeviceObject);
@@ -107,7 +107,7 @@ private:
     PDEVICE_OBJECT m_ClonedPdo = nullptr;
     CUsbDkControlDevice *m_ControlDevice = nullptr;
 
-    CWdmList<CUsbDkChildDevice, CLockedAccess, CCountingObject> m_ChildDevices;
+    CWdmList<CUsbDkChildDevice, CLockedAccess, CCountingObject> m_ChildrenDevices;
 
     LIST_ENTRY m_ListEntry;
 

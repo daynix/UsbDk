@@ -124,7 +124,7 @@ WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(PDO_CLONE_EXTENSION, PdoCloneGetData)
 
 void CUsbDkFilterDevice::ClearChildrenList()
 {
-    m_ChildDevices.ForEachDetached([](CUsbDkChildDevice* Child) { delete Child; return true; });
+    m_ChildrenDevices.ForEachDetached([](CUsbDkChildDevice* Child) { delete Child; return true; });
 }
 
 void CUsbDkFilterDevice::QDRPostProcessWi()
@@ -170,7 +170,7 @@ void CUsbDkFilterDevice::QDRPostProcessWi()
             DevID.detach();
             InstanceID.detach();
 
-            m_ChildDevices.PushBack(Device);
+            m_ChildrenDevices.PushBack(Device);
         }
 
 //         if (Relations->Count > 0)

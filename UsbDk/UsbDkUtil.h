@@ -91,6 +91,12 @@ public:
     CWdmList()
     { InitializeListHead(&m_List); }
 
+    ~CWdmList()
+    { Clear(); }
+
+    void Clear()
+    { ForEachDetached([](TEntryType* Entry) { delete Entry; return true; }); }
+
     bool IsEmpty()
     { return IsListEmpty(&m_List) ? true : false; }
 

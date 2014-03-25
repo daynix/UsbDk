@@ -94,6 +94,9 @@ private:
     template <typename TPredicate, typename TFunctor>
     bool UsbDevicesForEachIf(TPredicate Predicate, TFunctor Functor)
     { return m_FilterDevices.ForEach([&](CUsbDkFilterDevice* Dev){ return Dev->EnumerateChildrenIf(Predicate, Functor); }); }
+
+    template <typename TFunctor>
+    bool EnumUsbDevicesByID(const USB_DK_DEVICE_ID &ID, TFunctor Functor);
 };
 
 typedef struct _USBDK_CONTROL_DEVICE_EXTENSION {

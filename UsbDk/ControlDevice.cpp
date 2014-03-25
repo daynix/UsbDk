@@ -214,16 +214,22 @@ bool CUsbDkControlDevice::EnumerateDevices(USB_DK_DEVICE_ID *outBuff, size_t num
 }
 //------------------------------------------------------------------------------------------------------------
 
+template <typename TFunctor>
+bool CUsbDkControlDevice::EnumUsbDevicesByID(const USB_DK_DEVICE_ID &ID, TFunctor Functor)
+{
+    return UsbDevicesForEachIf([&ID](CUsbDkChildDevice *c) { return c->Match(ID.DeviceID, ID.InstanceID); }, Functor);
+}
+
 NTSTATUS CUsbDkControlDevice::ResetUsbDevice(const USB_DK_DEVICE_ID &DeviceID)
 {
     PDEVICE_OBJECT PDO = nullptr;
 
-    UsbDevicesForEachIf([&DeviceID](CUsbDkChildDevice *Child) { return Child->Match(DeviceID.DeviceID, DeviceID.InstanceID); },
-                        [&PDO](CUsbDkChildDevice *Child) -> bool
-                        {
-                            PDO = Child->PDO();
-                            return false;
-                        });
+    EnumUsbDevicesByID(DeviceID,
+                       [&PDO](CUsbDkChildDevice *Child) -> bool
+                       {
+                           PDO = Child->PDO();
+                           return false;
+                       });
 
     if (PDO == nullptr)
     {

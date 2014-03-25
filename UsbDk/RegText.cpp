@@ -17,7 +17,7 @@ SIZE_T CRegMultiSz::GetBufferLength(PWCHAR Data)
     return Size;
 }
 
-bool CRegText::Match(PCWSTR String)
+bool CRegText::Match(PCWSTR String) const
 {
     for (auto idData : *this)
     {
@@ -29,7 +29,7 @@ bool CRegText::Match(PCWSTR String)
     return false;
 }
 
-void CRegText::Dump()
+void CRegText::Dump() const
 {
     for (auto idData : *this)
     {

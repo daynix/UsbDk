@@ -11,8 +11,8 @@ public:
     public:
         iterator(PWCHAR Ptr) : m_Ptr(Ptr) {}
         iterator operator++() { m_Ptr += wcslen(m_Ptr) + 1; return m_Ptr; }
-        bool operator!=(const iterator& other) { return m_Ptr != other.m_Ptr; }
-        PWCHAR operator *() { return m_Ptr; }
+        bool operator!=(const iterator& other) const { return m_Ptr != other.m_Ptr; }
+        PWCHAR operator *() const { return m_Ptr; }
 
     private:
         PWCHAR m_Ptr;
@@ -20,12 +20,12 @@ public:
 
     virtual ~CRegText() {}
 
-    iterator begin() { return static_cast<PWCHAR> (m_Data->Ptr()); }
-    iterator end() { return reinterpret_cast<PWCHAR>(static_cast<PCHAR>(m_Data->Ptr()) + m_Data->Size()); }
-    bool empty() { return (m_Data->Size() == 0); }
+    iterator begin() const { return static_cast<PWCHAR> (m_Data->Ptr()); }
+    iterator end() const { return reinterpret_cast<PWCHAR>(static_cast<PCHAR>(m_Data->Ptr()) + m_Data->Size()); }
+    bool empty() const { return (m_Data->Size() == 0); }
 
-    bool Match(PCWSTR String);
-    void Dump();
+    bool Match(PCWSTR String) const;
+    void Dump() const;
 
     CRegText(CMemoryBuffer* Data)
         : m_Data(Data) {}

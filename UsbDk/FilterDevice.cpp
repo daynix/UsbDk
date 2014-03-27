@@ -215,56 +215,16 @@ void CUsbDkFilterDevice::RegisterNewChild(PDEVICE_OBJECT PDO)
     m_ChildrenDevices.PushBack(Device);
 }
 
-void CUsbDkFilterDevice::ClearChildrenList()
-{
-    m_ChildrenDevices.ForEachDetached([](CUsbDkChildDevice* Child) { delete Child; return true; });
-}
-
 void CUsbDkFilterDevice::QDRPostProcessWi()
 {
     ASSERT(m_QDRIrp != NULL);
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Entry");
 
-    ClearChildrenList();
+    CDeviceRelations Relations((PDEVICE_RELATIONS)m_QDRIrp->IoStatus.Information);
 
-    auto Relations = (PDEVICE_RELATIONS) m_QDRIrp->IoStatus.Information;
-
-    if (Relations)
-    {
-        for (ULONG i = 0; i < Relations->Count; i++)
-        {
-            auto PDO = Relations->Objects[i];
-            CWdmDeviceAccess pdoAccess(PDO);
-            CObjHolder<CRegText> DevID(pdoAccess.GetDeviceID());
-
-            if (!DevID || DevID->empty())
-            {
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! No Device IDs read");
-                continue;
-            }
-
-            CObjHolder<CRegText> InstanceID(pdoAccess.GetInstanceID());
-
-            if (!InstanceID || InstanceID->empty())
-            {
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! No Instance ID read");
-                continue;
-            }
-
-            CUsbDkChildDevice *Device = new CUsbDkChildDevice(DevID, InstanceID, PDO);
-
-            if (Device == nullptr)
-            {
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Cannot allocate child device instance");
-                continue;
-            }
-
-            DevID.detach();
-            InstanceID.detach();
-
-            m_ChildrenDevices.PushBack(Device);
-        }
+    DropRemovedDevices(Relations);
+    AddNewDevices(Relations);
 
 //         if (Relations->Count > 0)
 //         {
@@ -288,7 +248,6 @@ void CUsbDkFilterDevice::QDRPostProcessWi()
 //                 TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! Failed to create clone PDO");
 //             }
 //         }
-    }
 
     auto QDRIrp = m_QDRIrp;
     m_QDRIrp = NULL;
@@ -298,7 +257,6 @@ void CUsbDkFilterDevice::QDRPostProcessWi()
 
 CUsbDkFilterDevice::~CUsbDkFilterDevice()
 {
-    ClearChildrenList();
     if (m_ControlDevice != nullptr)
     {
         m_ControlDevice->UnregisterFilter(*this);

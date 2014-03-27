@@ -104,7 +104,6 @@ private:
     void CUsbDkFilterDevice::QDRPostProcessWi();
 
     bool ShouldAttach();
-    void ClearChildrenList();
 
     void DropRemovedDevices(const CDeviceRelations &Relations);
     void AddNewDevices(const CDeviceRelations &Relations);

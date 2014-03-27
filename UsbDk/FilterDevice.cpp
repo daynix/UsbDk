@@ -6,7 +6,7 @@
 
 void CUsbDkChildDevice::Dump()
 {
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Child device:");
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Child device 0x%p (redirector PDO 0x%p):", m_PDO, m_RedirectorPDO);
     m_DeviceID->Dump();
     m_InstanceID->Dump();
 }
@@ -70,53 +70,6 @@ NTSTATUS CUsbDkFilterDevice::QDRPostProcess(PIRP Irp)
     return STATUS_MORE_PROCESSING_REQUIRED;
 }
 
-//////////////////////////////////////////////////////////////////////////
-//TODO: TEMP
-
-// static WDFDEVICE
-// UsbDkClonePdo(WDFDEVICE ParentDevice)
-// {
-//     WDFDEVICE              ClonePdo;
-//     NTSTATUS               status;
-//     PWDFDEVICE_INIT        DevInit;
-//     WDF_OBJECT_ATTRIBUTES  DevAttr;
-//
-//     PAGED_CODE();
-//
-//     DevInit = WdfPdoInitAllocate(ParentDevice);
-//
-//     if (DevInit == NULL) {
-//         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! WdfPdoInitAllocate returned NULL");
-//         return WDF_NO_HANDLE;
-//     }
-//
-//     WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&DevAttr, PDO_CLONE_EXTENSION);
-//
-// #define CLONE_HARDWARE_IDS      L"USB\\Vid_FEED&Pid_CAFE&Rev_0001\0USB\\Vid_FEED&Pid_CAFE\0"
-// #define CLONE_COMPATIBLE_IDS    L"USB\\Class_FF&SubClass_FF&Prot_FF\0USB\\Class_FF&SubClass_FF\0USB\\Class_FF\0"
-// #define CLONE_INSTANCE_ID       L"111222333"
-//
-//     DECLARE_CONST_UNICODE_STRING(CloneHwId, CLONE_HARDWARE_IDS);
-//     DECLARE_CONST_UNICODE_STRING(CloneCompatId, CLONE_COMPATIBLE_IDS);
-//     DECLARE_CONST_UNICODE_STRING(CloneInstanceId, CLONE_INSTANCE_ID);
-//
-//     //TODO: Check error codes
-//     WdfPdoInitAssignDeviceID(DevInit, &CloneHwId);
-//     WdfPdoInitAddCompatibleID(DevInit, &CloneCompatId);
-//     WdfPdoInitAddHardwareID(DevInit, &CloneCompatId);
-//     WdfPdoInitAssignInstanceID(DevInit, &CloneInstanceId);
-//
-//     status = WdfDeviceCreate(&DevInit, &DevAttr, &ClonePdo);
-//     if (!NT_SUCCESS(status))
-//     {
-//         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! WdfDeviceCreate returned %!STATUS!", status);
-//         WdfDeviceInitFree(DevInit);
-//         return WDF_NO_HANDLE;
-//     }
-//
-//     return ClonePdo;
-// }
-// ///////////////////////////////////////////////////////////////////////////////////////////////
 typedef struct _USBDK_REDIRECTOR_PDO_EXTENSION {
 } USBDK_REDIRECTOR_PDO_EXTENSION, *PUSBDK_REDIRECTOR_PDO_EXTENSION;
 
@@ -212,7 +165,32 @@ void CUsbDkFilterDevice::RegisterNewChild(PDEVICE_OBJECT PDO)
     DevID.detach();
     InstanceID.detach();
 
+    ApplyRedirectionPolicy(*Device);
+
     m_ChildrenDevices.PushBack(Device);
+}
+
+void CUsbDkFilterDevice::ApplyRedirectionPolicy(CUsbDkChildDevice &Device)
+{
+    if (m_ControlDevice->ShouldRedirect(Device))
+    {
+        auto redirectorPDO = CreateRedirectorPDO();
+        if (redirectorPDO != WDF_NO_HANDLE)
+        {
+            Device.MakeRedirected(WdfDeviceWdmGetDeviceObject(redirectorPDO));
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Adding new PDO 0x%p as redirected initially", Device.PDO());
+        }
+        else
+        {
+            Device.MakeNonRedirected();
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Failed to create redirector PDO for 0x%p", Device.PDO());
+        }
+    }
+    else
+    {
+        Device.MakeNonRedirected();
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Adding new PDO 0x%p as non-redirected initially", Device.PDO());
+    }
 }
 
 class CUsbDkRedirectorPDOInit : public CDeviceInit
@@ -310,6 +288,35 @@ NTSTATUS CUsbDkRedirectorPDODevice::Create(WDFDEVICE ParentDevice)
     return CWdfDevice::Create(devInit, attr);
 }
 
+WDFDEVICE CUsbDkFilterDevice::CreateRedirectorPDO()
+{
+    CObjHolder<CUsbDkRedirectorPDODevice> Device(new CUsbDkRedirectorPDODevice);
+
+    if (!Device)
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Failed to create CUsbDkRedirectorPDODevice instance");
+        return WDF_NO_HANDLE;
+    }
+
+    if (!NT_SUCCESS(Device->Create(m_Device)))
+    {
+        return WDF_NO_HANDLE;
+    }
+
+    auto res = Device->RawObject();
+    Device.detach();
+    return res;
+}
+
+void CUsbDkFilterDevice::FillRelationsArray(CDeviceRelations &Relations)
+{
+    m_ChildrenDevices.ForEach([this, &Relations](CUsbDkChildDevice *Child) -> bool
+                              {
+                                  Relations.PushBack(Child->IsRedirected() ? Child->RedirectorPDO() : Child->PDO());
+                                  return true;
+                              });
+}
+
 void CUsbDkFilterDevice::QDRPostProcessWi()
 {
     ASSERT(m_QDRIrp != NULL);
@@ -320,29 +327,7 @@ void CUsbDkFilterDevice::QDRPostProcessWi()
 
     DropRemovedDevices(Relations);
     AddNewDevices(Relations);
-
-//         if (Relations->Count > 0)
-//         {
-//             m_ClonedPdo = Relations->Objects[0];
-//
-//             WDFDEVICE PdoClone = UsbDkClonePdo(m_Device);
-//
-//             if (PdoClone != WDF_NO_HANDLE)
-//             {
-//                 Relations->Objects[0] = WdfDeviceWdmGetDeviceObject(PdoClone);
-//                 ObReferenceObject(Relations->Objects[0]);
-//
-//                 TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Replaced PDO 0x%p with 0x%p",
-//                     m_ClonedPdo, Relations->Objects[0]);
-//
-//                 //TODO: Temporary to allow normal USB hub driver unload
-//                 ObDereferenceObject(m_ClonedPdo);
-//             }
-//             else
-//             {
-//                 TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! Failed to create clone PDO");
-//             }
-//         }
+    FillRelationsArray(Relations);
 
     auto QDRIrp = m_QDRIrp;
     m_QDRIrp = NULL;

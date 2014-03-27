@@ -30,9 +30,33 @@ public:
         , m_PDO(PDO)
     {}
 
+    ~CUsbDkChildDevice()
+    { ObDereferenceObject(m_PDO); }
+
     PCWCHAR DeviceID() const { return *m_DeviceID->begin(); }
     PCWCHAR InstanceID() const { return *m_InstanceID->begin(); }
     PDEVICE_OBJECT PDO() const { return m_PDO; }
+    PDEVICE_OBJECT RedirectorPDO() const { return m_RedirectorPDO; }
+
+    void MakeRedirected(PDEVICE_OBJECT PDO)
+    {
+        ASSERT(!m_RedirectionSpecified);
+        m_RedirectorPDO = ReferencedPDO(PDO);
+        m_RedirectionSpecified = true;
+    }
+
+    void MakeNonRedirected()
+    {
+        ASSERT(!m_RedirectionSpecified);
+        ObReferenceObject(m_PDO);
+        m_RedirectionSpecified = true;
+    }
+
+    bool IsRedirected() const
+    {
+        ASSERT(m_RedirectionSpecified);
+        return m_RedirectorPDO != nullptr;
+    }
 
      bool Match(PCWCHAR deviceID, PCWCHAR instanceID) const
      { return m_DeviceID->Match(deviceID) && m_InstanceID->Match(instanceID); }
@@ -51,8 +75,16 @@ private:
     CObjHolder<CRegText> m_DeviceID;
     CObjHolder<CRegText> m_InstanceID;
     PDEVICE_OBJECT m_PDO;
+    PDEVICE_OBJECT m_RedirectorPDO = nullptr;
+    bool m_RedirectionSpecified = false;
 
     LIST_ENTRY m_ListEntry;
+
+    static PDEVICE_OBJECT ReferencedPDO(PDEVICE_OBJECT PDO)
+    {
+        ObReferenceObject(PDO);
+        return PDO;
+    }
 
     CUsbDkChildDevice(const CUsbDkChildDevice&) = delete;
     CUsbDkChildDevice& operator= (const CUsbDkChildDevice&) = delete;
@@ -110,11 +142,13 @@ private:
     bool IsChildRegistered(PDEVICE_OBJECT PDO)
     { return !m_ChildrenDevices.ForEachIf([PDO](CUsbDkChildDevice *Child){ return Child->Match(PDO); }, ConstFalse); }
     void RegisterNewChild(PDEVICE_OBJECT PDO);
+    void ApplyRedirectionPolicy(CUsbDkChildDevice &Device);
+    void FillRelationsArray(CDeviceRelations &Relations);
+    WDFDEVICE CreateRedirectorPDO();
 
     CWdfWorkitem m_QDRCompletionWorkItem;
 
     PIRP m_QDRIrp = nullptr;
-    PDEVICE_OBJECT m_ClonedPdo = nullptr;
     CUsbDkControlDevice *m_ControlDevice = nullptr;
 
     CWdmList<CUsbDkChildDevice, CLockedAccess, CCountingObject> m_ChildrenDevices;

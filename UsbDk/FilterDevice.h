@@ -30,9 +30,9 @@ public:
         , m_PDO(PDO)
     {}
 
-     PCWCHAR DeviceID() { return *m_DeviceID->begin(); }
-     PCWCHAR InstanceID() { return *m_InstanceID->begin(); }
-     PDEVICE_OBJECT PDO() { ObReferenceObject(m_PDO); return m_PDO;}
+    PCWCHAR DeviceID() const { return *m_DeviceID->begin(); }
+    PCWCHAR InstanceID() const { return *m_InstanceID->begin(); }
+    PDEVICE_OBJECT PDO() const { ObReferenceObject(m_PDO); return m_PDO; }
 
      bool Match(PCWCHAR deviceID, PCWCHAR instanceID)
      { return m_DeviceID->Match(deviceID) && m_InstanceID->Match(instanceID); }

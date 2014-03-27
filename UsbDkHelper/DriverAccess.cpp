@@ -67,7 +67,7 @@ void UsbDkDriverAccess::GetDevicesList(PUSB_DK_DEVICE_ID &DevicesArray, ULONG &N
             }
             else
             {
-                UsbDkDriverAccessException(TEXT("Enumiration devices failed in DeviceIoControl."), err);
+                UsbDkDriverAccessException(TEXT("Enumeration failed in IOCTL_USBDK_ENUM_DEVICES."), err);
             }
         }
         NumberDevice = bytesReturned / sizeof(USB_DK_DEVICE_ID);

@@ -236,6 +236,7 @@ NTSTATUS CUsbDkControlDevice::ResetUsbDevice(const USB_DK_DEVICE_ID &DeviceID)
                        [&PDO](CUsbDkChildDevice *Child) -> bool
                        {
                            PDO = Child->PDO();
+                           ObReferenceObject(PDO);
                            return false;
                        });
 

@@ -170,6 +170,51 @@ void CDeviceRelations::PushBack(PDEVICE_OBJECT Relation)
     m_Relations->Objects[m_PushPosition++] = Relation;
 }
 
+void CUsbDkFilterDevice::DropRemovedDevices(const CDeviceRelations &Relations)
+{
+    m_ChildrenDevices.ForEachDetachedIf([&Relations](CUsbDkChildDevice *Child) { return !Relations.Contains(*Child); },
+                                        [](CUsbDkChildDevice *Child) -> bool { delete Child; return true; });
+}
+
+void CUsbDkFilterDevice::AddNewDevices(const CDeviceRelations &Relations)
+{
+    Relations.ForEachIf([this](PDEVICE_OBJECT PDO){ return !IsChildRegistered(PDO); },
+                        [this](PDEVICE_OBJECT PDO){ RegisterNewChild(PDO); return true; });
+}
+
+void CUsbDkFilterDevice::RegisterNewChild(PDEVICE_OBJECT PDO)
+{
+    CWdmDeviceAccess pdoAccess(PDO);
+    CObjHolder<CRegText> DevID(pdoAccess.GetDeviceID());
+
+    if (!DevID || DevID->empty())
+    {
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! No Device IDs read");
+        return;
+    }
+
+    CObjHolder<CRegText> InstanceID(pdoAccess.GetInstanceID());
+
+    if (!InstanceID || InstanceID->empty())
+    {
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! No Instance ID read");
+        return;
+    }
+
+    CUsbDkChildDevice *Device = new CUsbDkChildDevice(DevID, InstanceID, PDO);
+
+    if (Device == nullptr)
+    {
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Cannot allocate child device instance");
+        return;
+    }
+
+    DevID.detach();
+    InstanceID.detach();
+
+    m_ChildrenDevices.PushBack(Device);
+}
+
 void CUsbDkFilterDevice::ClearChildrenList()
 {
     m_ChildrenDevices.ForEachDetached([](CUsbDkChildDevice* Child) { delete Child; return true; });

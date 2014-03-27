@@ -34,8 +34,11 @@ public:
     PCWCHAR InstanceID() const { return *m_InstanceID->begin(); }
     PDEVICE_OBJECT PDO() const { ObReferenceObject(m_PDO); return m_PDO; }
 
-     bool Match(PCWCHAR deviceID, PCWCHAR instanceID)
+     bool Match(PCWCHAR deviceID, PCWCHAR instanceID) const
      { return m_DeviceID->Match(deviceID) && m_InstanceID->Match(instanceID); }
+
+     bool Match(PDEVICE_OBJECT PDO) const
+     { return m_PDO == PDO; }
 
     void Dump();
 
@@ -54,6 +57,8 @@ private:
     CUsbDkChildDevice(const CUsbDkChildDevice&) = delete;
     CUsbDkChildDevice& operator= (const CUsbDkChildDevice&) = delete;
 };
+
+class CDeviceRelations;
 
 class CUsbDkFilterDevice : private CWdfDevice, public CAllocatable<NonPagedPool, 'DFHR'>
 {
@@ -100,6 +105,12 @@ private:
 
     bool ShouldAttach();
     void ClearChildrenList();
+
+    void DropRemovedDevices(const CDeviceRelations &Relations);
+    void AddNewDevices(const CDeviceRelations &Relations);
+    bool IsChildRegistered(PDEVICE_OBJECT PDO)
+    { return !m_ChildrenDevices.ForEachIf([PDO](CUsbDkChildDevice *Child){ return Child->Match(PDO); }, ConstFalse); }
+    void RegisterNewChild(PDEVICE_OBJECT PDO);
 
     CWdfWorkitem m_QDRCompletionWorkItem;
 

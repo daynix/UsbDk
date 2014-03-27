@@ -72,10 +72,6 @@ NTSTATUS CUsbDkFilterDevice::QDRPostProcess(PIRP Irp)
 
 //////////////////////////////////////////////////////////////////////////
 //TODO: TEMP
-typedef struct _CONTROL_DEVICE_EXTENSION {
-} PDO_CLONE_EXTENSION, *PPDO_CLONE_EXTENSION;
-
-WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(PDO_CLONE_EXTENSION, PdoCloneGetData)
 
 // static WDFDEVICE
 // UsbDkClonePdo(WDFDEVICE ParentDevice)
@@ -121,6 +117,10 @@ WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(PDO_CLONE_EXTENSION, PdoCloneGetData)
 //     return ClonePdo;
 // }
 // ///////////////////////////////////////////////////////////////////////////////////////////////
+typedef struct _USBDK_REDIRECTOR_PDO_EXTENSION {
+} USBDK_REDIRECTOR_PDO_EXTENSION, *PUSBDK_REDIRECTOR_PDO_EXTENSION;
+
+WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(USBDK_REDIRECTOR_PDO_EXTENSION, RedirectorPdoGetData)
 
 class CDeviceRelations
 {
@@ -213,6 +213,101 @@ void CUsbDkFilterDevice::RegisterNewChild(PDEVICE_OBJECT PDO)
     InstanceID.detach();
 
     m_ChildrenDevices.PushBack(Device);
+}
+
+class CUsbDkRedirectorPDOInit : public CDeviceInit
+{
+public:
+    CUsbDkRedirectorPDOInit()
+    {}
+
+    NTSTATUS Create(const WDFDEVICE ParentDevice);
+
+    CUsbDkRedirectorPDOInit(const CUsbDkRedirectorPDOInit&) = delete;
+    CUsbDkRedirectorPDOInit& operator= (const CUsbDkRedirectorPDOInit&) = delete;
+};
+
+NTSTATUS CUsbDkRedirectorPDOInit::Create(const WDFDEVICE ParentDevice)
+{
+    PAGED_CODE();
+
+    auto DevInit = WdfPdoInitAllocate(ParentDevice);
+
+    if (DevInit == nullptr)
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Cannot allocate DeviceInit for PDO");
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+
+    Attach(DevInit);
+
+//TODO: Put real values
+#define REDIRECTOR_HARDWARE_IDS      L"USB\\Vid_FEED&Pid_CAFE&Rev_0001\0USB\\Vid_FEED&Pid_CAFE\0"
+#define REDIRECTOR_COMPATIBLE_IDS    L"USB\\Class_FF&SubClass_FF&Prot_FF\0USB\\Class_FF&SubClass_FF\0USB\\Class_FF\0"
+#define REDIRECTOR_INSTANCE_ID       L"111222333"
+
+    DECLARE_CONST_UNICODE_STRING(RedirectorHwId, REDIRECTOR_HARDWARE_IDS);
+    DECLARE_CONST_UNICODE_STRING(RedirectorCompatId, REDIRECTOR_COMPATIBLE_IDS);
+    DECLARE_CONST_UNICODE_STRING(RedirectorInstanceId, REDIRECTOR_INSTANCE_ID);
+
+    auto status = WdfPdoInitAssignDeviceID(DevInit, &RedirectorHwId);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! WdfPdoInitAssignDeviceID failed");
+        return status;
+    }
+
+    status = WdfPdoInitAddCompatibleID(DevInit, &RedirectorCompatId);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! WdfPdoInitAddCompatibleID failed");
+        return status;
+    }
+
+    status = WdfPdoInitAddHardwareID(DevInit, &RedirectorCompatId);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! WdfPdoInitAddHardwareID failed");
+        return status;
+    }
+
+    status = WdfPdoInitAssignInstanceID(DevInit, &RedirectorInstanceId);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! WdfPdoInitAssignInstanceID failed");
+        return status;
+    }
+
+    return STATUS_SUCCESS;
+}
+
+class CUsbDkRedirectorPDODevice : public CWdfDevice, public CAllocatable<NonPagedPool, 'PRHR'>
+{
+public:
+    CUsbDkRedirectorPDODevice()
+    {}
+
+    NTSTATUS Create(WDFDEVICE ParentDevice);
+
+    WDFDEVICE RawObject() const { return m_Device; }
+
+    CUsbDkRedirectorPDODevice(const CUsbDkRedirectorPDODevice&) = delete;
+    CUsbDkRedirectorPDODevice& operator= (const CUsbDkRedirectorPDODevice&) = delete;
+};
+
+NTSTATUS CUsbDkRedirectorPDODevice::Create(WDFDEVICE ParentDevice)
+{
+    CUsbDkRedirectorPDOInit devInit;
+
+    auto status = devInit.Create(ParentDevice);
+    if (!NT_SUCCESS(status))
+    {
+        return status;
+    }
+
+    WDF_OBJECT_ATTRIBUTES attr;
+    WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&attr, USBDK_REDIRECTOR_PDO_EXTENSION);
+    return CWdfDevice::Create(devInit, attr);
 }
 
 void CUsbDkFilterDevice::QDRPostProcessWi()

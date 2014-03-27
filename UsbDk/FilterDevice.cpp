@@ -122,6 +122,54 @@ WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(PDO_CLONE_EXTENSION, PdoCloneGetData)
 // }
 // ///////////////////////////////////////////////////////////////////////////////////////////////
 
+class CDeviceRelations
+{
+public:
+    CDeviceRelations(PDEVICE_RELATIONS Relations)
+        : m_Relations(Relations)
+    {}
+
+    template <typename TPredicate, typename TFunctor>
+    ForEachIf(TPredicate Predicate, TFunctor Functor) const
+    {
+        if (m_Relations != nullptr)
+        {
+            for (ULONG i = 0; i < m_Relations->Count; i++)
+            {
+                if (Predicate(m_Relations->Objects[i]) &&
+                    !Functor(m_Relations->Objects[i]))
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    template <typename TFunctor>
+    ForEach(TFunctor Functor) const
+    { return ForEachIf(ConstTrue, Functor); }
+
+    bool Contains(const CUsbDkChildDevice &Dev) const
+    { return !ForEach([&Dev](PDEVICE_OBJECT Relation) { return !Dev.Match(Relation); }); }
+
+    void PushBack(PDEVICE_OBJECT Relation);
+
+private:
+    PDEVICE_RELATIONS m_Relations;
+    ULONG m_PushPosition = 0;
+
+    CDeviceRelations(const CDeviceRelations&) = delete;
+    CDeviceRelations& operator= (const CDeviceRelations&) = delete;
+};
+
+void CDeviceRelations::PushBack(PDEVICE_OBJECT Relation)
+{
+    ASSERT(m_Relations != nullptr);
+    ASSERT(m_PushPosition < m_Relations->Count);
+    m_Relations->Objects[m_PushPosition++] = Relation;
+}
+
 void CUsbDkFilterDevice::ClearChildrenList()
 {
     m_ChildrenDevices.ForEachDetached([](CUsbDkChildDevice* Child) { delete Child; return true; });

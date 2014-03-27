@@ -119,8 +119,7 @@ public:
     void Remove(TEntryType *Entry)
     {
         CLockedContext<TAccessStrategy> LockedContext(*this);
-        RemoveEntryList(Entry->GetListEntry());
-        CounterDecrement();
+        Remove_LockLess(Entry->GetListEntry());
     }
 
     template <typename TFunctor>
@@ -140,7 +139,7 @@ public:
     template <typename TPredicate, typename TFunctor>
     bool ForEachDetachedIf(TPredicate Predicate, TFunctor Functor)
     {
-        return ForEachPrepareIf(Predicate, [](PLIST_ENTRY Entry){ RemoveEntryList(Entry); }, Functor);
+        return ForEachPrepareIf(Predicate, [this](PLIST_ENTRY Entry){ Remove_LockLess(Entry); }, Functor);
     }
 
     template <typename TFunctor>
@@ -185,6 +184,12 @@ private:
     {
         CounterDecrement();
         return TEntryType::GetByListEntry(RemoveHeadList(&m_List));
+    }
+
+    void Remove_LockLess(PLIST_ENTRY Entry)
+    {
+        RemoveEntryList(Entry);
+        CounterDecrement();
     }
 
     LIST_ENTRY m_List;

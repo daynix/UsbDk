@@ -280,6 +280,12 @@ NTSTATUS CUsbDkControlDevice::Create(WDFDRIVER Driver)
     }
 
     m_DeviceQueue = new CUsbDkControlDeviceQueue(*this, WdfIoQueueDispatchSequential);
+    if (m_DeviceQueue == nullptr)
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! Device queue allocation failed");
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+
     status = m_DeviceQueue->Create();
     if (NT_SUCCESS(status))
     {

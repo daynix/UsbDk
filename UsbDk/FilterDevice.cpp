@@ -70,10 +70,13 @@ NTSTATUS CUsbDkFilterDevice::QDRPostProcess(PIRP Irp)
     return STATUS_MORE_PROCESSING_REQUIRED;
 }
 
+class CUsbDkRedirectorPDODevice;
+
 typedef struct _USBDK_REDIRECTOR_PDO_EXTENSION {
+    CUsbDkRedirectorPDODevice *UsbDkRedirectorPDO;
 } USBDK_REDIRECTOR_PDO_EXTENSION, *PUSBDK_REDIRECTOR_PDO_EXTENSION;
 
-WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(USBDK_REDIRECTOR_PDO_EXTENSION, RedirectorPdoGetData)
+WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(USBDK_REDIRECTOR_PDO_EXTENSION, UsbDkRedirectorPdoGetData)
 
 class CDeviceRelations
 {
@@ -256,6 +259,11 @@ NTSTATUS CUsbDkRedirectorPDOInit::Create(const WDFDEVICE ParentDevice)
         return status;
     }
 
+    SetExclusive();
+
+    //TODO: Must be direct
+    SetIoBuffered();
+
     return STATUS_SUCCESS;
 }
 
@@ -264,6 +272,7 @@ class CUsbDkRedirectorPDODevice : public CWdfDevice, public CAllocatable<NonPage
 public:
     CUsbDkRedirectorPDODevice()
     {}
+    ~CUsbDkRedirectorPDODevice();
 
     NTSTATUS Create(WDFDEVICE ParentDevice);
 
@@ -271,7 +280,17 @@ public:
 
     CUsbDkRedirectorPDODevice(const CUsbDkRedirectorPDODevice&) = delete;
     CUsbDkRedirectorPDODevice& operator= (const CUsbDkRedirectorPDODevice&) = delete;
+
+private:
+    static void ContextCleanup(_In_ WDFOBJECT DeviceObject);
 };
+
+CUsbDkRedirectorPDODevice::~CUsbDkRedirectorPDODevice()
+{
+    //Life cycle of this device in controlled by PnP manager outside of WDF,
+    //We detach WDF object here to avoid explicit deletion
+    m_Device = WDF_NO_HANDLE;
+}
 
 NTSTATUS CUsbDkRedirectorPDODevice::Create(WDFDEVICE ParentDevice)
 {
@@ -285,7 +304,31 @@ NTSTATUS CUsbDkRedirectorPDODevice::Create(WDFDEVICE ParentDevice)
 
     WDF_OBJECT_ATTRIBUTES attr;
     WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&attr, USBDK_REDIRECTOR_PDO_EXTENSION);
-    return CWdfDevice::Create(devInit, attr);
+
+    attr.EvtCleanupCallback = CUsbDkRedirectorPDODevice::ContextCleanup;
+
+    status = CWdfDevice::Create(devInit, attr);
+    if (!NT_SUCCESS(status))
+    {
+        return status;
+    }
+
+    auto deviceContext = UsbDkRedirectorPdoGetData(m_Device);
+    deviceContext->UsbDkRedirectorPDO = this;
+
+    return STATUS_SUCCESS;
+}
+
+void CUsbDkRedirectorPDODevice::ContextCleanup(_In_ WDFOBJECT DeviceObject)
+{
+    PAGED_CODE();
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Entry");
+
+    auto deviceContext = UsbDkRedirectorPdoGetData(DeviceObject);
+    UNREFERENCED_PARAMETER(deviceContext);
+
+    delete deviceContext->UsbDkRedirectorPDO;
 }
 
 WDFDEVICE CUsbDkFilterDevice::CreateRedirectorPDO()

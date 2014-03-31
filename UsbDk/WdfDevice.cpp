@@ -50,9 +50,16 @@ PWDFDEVICE_INIT CPreAllocatedDeviceInit::Detach()
     return DevInit;
 }
 
-NTSTATUS CPreAllocatedDeviceInit::SetPreprocessCallback(PFN_WDFDEVICE_WDM_IRP_PREPROCESS Callback, UCHAR MajorFunction, UCHAR MinorFunction)
+NTSTATUS CPreAllocatedDeviceInit::SetPreprocessCallback(PFN_WDFDEVICE_WDM_IRP_PREPROCESS Callback,
+                                                        UCHAR MajorFunction,
+                                                        PUCHAR MinorFunctions,
+                                                        ULONG NumMinorFunctions)
 {
-    auto status = WdfDeviceInitAssignWdmIrpPreprocessCallback(m_DeviceInit, Callback, MajorFunction, &MinorFunction, 1);
+    auto status = WdfDeviceInitAssignWdmIrpPreprocessCallback(m_DeviceInit,
+                                                              Callback,
+                                                              MajorFunction,
+                                                              MinorFunctions,
+                                                              NumMinorFunctions);
     if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_WDFDEVICE, "%!FUNC! status: %!STATUS!", status);

@@ -26,7 +26,20 @@ public:
     void SetFilter()
     { WdfFdoInitSetFilter(m_DeviceInit); }
 
-    NTSTATUS SetPreprocessCallback(PFN_WDFDEVICE_WDM_IRP_PREPROCESS Callback, UCHAR MajorFunction, UCHAR MinorFunction);
+    NTSTATUS CPreAllocatedDeviceInit::SetPreprocessCallback(PFN_WDFDEVICE_WDM_IRP_PREPROCESS Callback,
+                                                            UCHAR MajorFunction,
+                                                            PUCHAR MinorFunctions,
+                                                            ULONG NumMinorFunctions);
+
+    NTSTATUS SetPreprocessCallback(PFN_WDFDEVICE_WDM_IRP_PREPROCESS Callback, UCHAR MajorFunction, UCHAR MinorFunction)
+    {
+        return SetPreprocessCallback(Callback, MajorFunction, &MinorFunction, 1);
+    }
+
+    NTSTATUS SetPreprocessCallback(PFN_WDFDEVICE_WDM_IRP_PREPROCESS Callback, UCHAR MajorFunction)
+    {
+        return SetPreprocessCallback(Callback, MajorFunction, NULL, 0);
+    }
 
     NTSTATUS SetName(const UNICODE_STRING &Name);
 

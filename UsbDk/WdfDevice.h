@@ -20,8 +20,14 @@ public:
     void SetExclusive()
     { WdfDeviceInitSetExclusive(m_DeviceInit, TRUE); }
 
+    NTSTATUS SetRaw(CONST GUID* DeviceClassGuid)
+    { return WdfPdoInitAssignRawDevice(m_DeviceInit, DeviceClassGuid); }
+
     void SetIoBuffered()
     { WdfDeviceInitSetIoType(m_DeviceInit, WdfDeviceIoBuffered); }
+
+    void SetIoDirect()
+    { WdfDeviceInitSetIoType(m_DeviceInit, WdfDeviceIoDirect); }
 
     void SetFilter()
     { WdfFdoInitSetFilter(m_DeviceInit); }

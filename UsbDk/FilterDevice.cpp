@@ -177,7 +177,7 @@ void CUsbDkFilterDevice::ApplyRedirectionPolicy(CUsbDkChildDevice &Device)
 {
     if (m_ControlDevice->ShouldRedirect(Device))
     {
-        auto redirectorPDO = CreateRedirectorPDO();
+        auto redirectorPDO = CreateRedirectorPDO(Device.PDO());
         if (redirectorPDO != WDF_NO_HANDLE)
         {
             Device.MakeRedirected(WdfDeviceWdmGetDeviceObject(redirectorPDO));
@@ -202,13 +202,15 @@ public:
     CUsbDkRedirectorPDOInit()
     {}
 
-    NTSTATUS Create(const WDFDEVICE ParentDevice);
+    NTSTATUS Create(const WDFDEVICE ParentDevice,
+                    PFN_WDFDEVICE_WDM_IRP_PREPROCESS PNPPreProcess);
 
     CUsbDkRedirectorPDOInit(const CUsbDkRedirectorPDOInit&) = delete;
     CUsbDkRedirectorPDOInit& operator= (const CUsbDkRedirectorPDOInit&) = delete;
 };
 
-NTSTATUS CUsbDkRedirectorPDOInit::Create(const WDFDEVICE ParentDevice)
+NTSTATUS CUsbDkRedirectorPDOInit::Create(const WDFDEVICE ParentDevice,
+                                         PFN_WDFDEVICE_WDM_IRP_PREPROCESS PNPPreProcess)
 {
     PAGED_CODE();
 
@@ -259,10 +261,26 @@ NTSTATUS CUsbDkRedirectorPDOInit::Create(const WDFDEVICE ParentDevice)
         return status;
     }
 
-    SetExclusive();
+    // {52AF46D0-AB11-4A38-96A5-BC0AC6ABD2AF}
+    static const GUID GUID_USBDK_REDIRECTED_DEVICE =
+        { 0x52af46d0, 0xab11, 0x4a38, { 0x96, 0xa5, 0xbc, 0xa, 0xc6, 0xab, 0xd2, 0xaf } };
 
-    //TODO: Must be direct
-    SetIoBuffered();
+    status = SetRaw(&GUID_USBDK_REDIRECTED_DEVICE);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! WdfPdoInitAssignRawDevice failed");
+        return status;
+    }
+
+    SetExclusive();
+    SetIoDirect();
+
+    status = SetPreprocessCallback(PNPPreProcess, IRP_MJ_PNP);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Setting pre-process callback for IRP_MJ_PNP failed");
+        return status;
+    }
 
     return STATUS_SUCCESS;
 }
@@ -274,7 +292,7 @@ public:
     {}
     ~CUsbDkRedirectorPDODevice();
 
-    NTSTATUS Create(WDFDEVICE ParentDevice);
+    NTSTATUS Create(WDFDEVICE ParentDevice, const PDEVICE_OBJECT OrigPDO);
 
     WDFDEVICE RawObject() const { return m_Device; }
 
@@ -283,6 +301,8 @@ public:
 
 private:
     static void ContextCleanup(_In_ WDFOBJECT DeviceObject);
+
+    PDEVICE_OBJECT m_RequestTarget = nullptr;
 };
 
 CUsbDkRedirectorPDODevice::~CUsbDkRedirectorPDODevice()
@@ -292,11 +312,13 @@ CUsbDkRedirectorPDODevice::~CUsbDkRedirectorPDODevice()
     m_Device = WDF_NO_HANDLE;
 }
 
-NTSTATUS CUsbDkRedirectorPDODevice::Create(WDFDEVICE ParentDevice)
+NTSTATUS CUsbDkRedirectorPDODevice::Create(WDFDEVICE ParentDevice, const PDEVICE_OBJECT OrigPDO)
 {
     CUsbDkRedirectorPDOInit devInit;
 
-    auto status = devInit.Create(ParentDevice);
+    auto status = devInit.Create(ParentDevice,
+                                 [](_In_ WDFDEVICE Device, _Inout_  PIRP Irp)
+                                 { return UsbDkRedirectorPdoGetData(Device)->UsbDkRedirectorPDO->PNPPreProcess(Irp); });
     if (!NT_SUCCESS(status))
     {
         return status;
@@ -316,7 +338,15 @@ NTSTATUS CUsbDkRedirectorPDODevice::Create(WDFDEVICE ParentDevice)
     auto deviceContext = UsbDkRedirectorPdoGetData(m_Device);
     deviceContext->UsbDkRedirectorPDO = this;
 
-    return STATUS_SUCCESS;
+    auto redirectorDevObj = WdfDeviceWdmGetDeviceObject(m_Device);
+    m_RequestTarget = IoAttachDeviceToDeviceStack(redirectorDevObj, OrigPDO);
+    if (m_RequestTarget == nullptr)
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Failed to attach device to device stack");
+        status = STATUS_UNSUCCESSFUL;
+    }
+
+    return status;
 }
 
 void CUsbDkRedirectorPDODevice::ContextCleanup(_In_ WDFOBJECT DeviceObject)
@@ -331,7 +361,7 @@ void CUsbDkRedirectorPDODevice::ContextCleanup(_In_ WDFOBJECT DeviceObject)
     delete deviceContext->UsbDkRedirectorPDO;
 }
 
-WDFDEVICE CUsbDkFilterDevice::CreateRedirectorPDO()
+WDFDEVICE CUsbDkFilterDevice::CreateRedirectorPDO(const PDEVICE_OBJECT origPDO)
 {
     CObjHolder<CUsbDkRedirectorPDODevice> Device(new CUsbDkRedirectorPDODevice);
 
@@ -341,7 +371,7 @@ WDFDEVICE CUsbDkFilterDevice::CreateRedirectorPDO()
         return WDF_NO_HANDLE;
     }
 
-    if (!NT_SUCCESS(Device->Create(m_Device)))
+    if (!NT_SUCCESS(Device->Create(m_Device, origPDO)))
     {
         return WDF_NO_HANDLE;
     }

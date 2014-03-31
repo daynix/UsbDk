@@ -144,7 +144,7 @@ private:
     void RegisterNewChild(PDEVICE_OBJECT PDO);
     void ApplyRedirectionPolicy(CUsbDkChildDevice &Device);
     void FillRelationsArray(CDeviceRelations &Relations);
-    WDFDEVICE CreateRedirectorPDO();
+    WDFDEVICE CreateRedirectorPDO(const PDEVICE_OBJECT origPDO);
 
     CWdfWorkitem m_QDRCompletionWorkItem;
 

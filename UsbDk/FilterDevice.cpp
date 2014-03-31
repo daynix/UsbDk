@@ -302,6 +302,18 @@ public:
 private:
     static void ContextCleanup(_In_ WDFOBJECT DeviceObject);
 
+    NTSTATUS PNPPreProcess(_Inout_  PIRP Irp);
+
+    NTSTATUS PassThroughPreProcess(_Inout_  PIRP Irp)
+    {
+        IoSkipCurrentIrpStackLocation(Irp);
+        return IoCallDriver(m_RequestTarget, Irp);
+    }
+
+    NTSTATUS PassThroughPreProcessWithCompletion(_Inout_  PIRP Irp, PIO_COMPLETION_ROUTINE CompletionRoutine);
+
+    NTSTATUS QueryCapabilitiesPostProcess(_Inout_  PIRP Irp);
+
     PDEVICE_OBJECT m_RequestTarget = nullptr;
 };
 
@@ -310,6 +322,57 @@ CUsbDkRedirectorPDODevice::~CUsbDkRedirectorPDODevice()
     //Life cycle of this device in controlled by PnP manager outside of WDF,
     //We detach WDF object here to avoid explicit deletion
     m_Device = WDF_NO_HANDLE;
+}
+
+NTSTATUS CUsbDkRedirectorPDODevice::PassThroughPreProcessWithCompletion(_Inout_  PIRP Irp,
+                                                                        PIO_COMPLETION_ROUTINE CompletionRoutine)
+{
+    IoCopyCurrentIrpStackLocationToNext(Irp);
+
+    IoSetCompletionRoutineEx(WdfDeviceWdmGetDeviceObject(m_Device),
+                             Irp,
+                             CompletionRoutine,
+                             this,
+                             TRUE, FALSE, FALSE);
+
+    return IoCallDriver(m_RequestTarget, Irp);
+}
+
+NTSTATUS CUsbDkRedirectorPDODevice::PNPPreProcess(_Inout_  PIRP Irp)
+{
+    PIO_STACK_LOCATION  irpStack = IoGetCurrentIrpStackLocation(Irp);
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Entry, IRP [%x:%x]", irpStack->MajorFunction, irpStack->MinorFunction);
+
+    switch (irpStack->MinorFunction)
+    {
+    case IRP_MN_QUERY_ID:
+    case IRP_MN_DEVICE_ENUMERATED:
+    case IRP_MN_START_DEVICE:
+        IoSkipCurrentIrpStackLocation(Irp);
+        return WdfDeviceWdmDispatchPreprocessedIrp(m_Device, Irp);
+    case IRP_MN_QUERY_CAPABILITIES:
+        return PassThroughPreProcessWithCompletion(Irp,
+                                                   [](_In_ PDEVICE_OBJECT, _In_  PIRP Irp, PVOID Context) -> NTSTATUS
+                                                   {
+                                                       auto This = static_cast<CUsbDkRedirectorPDODevice *>(Context);
+                                                       return This->QueryCapabilitiesPostProcess(Irp);
+                                                   });
+    default:
+        return PassThroughPreProcess(Irp);
+    }
+}
+
+NTSTATUS CUsbDkRedirectorPDODevice::QueryCapabilitiesPostProcess(_Inout_  PIRP Irp)
+{
+    if (Irp->PendingReturned)
+    {
+        IoMarkIrpPending(Irp);
+    }
+
+    auto irpStack = IoGetCurrentIrpStackLocation(Irp);
+    irpStack->Parameters.DeviceCapabilities.Capabilities->RawDeviceOK = 1;
+
+    return STATUS_CONTINUE_COMPLETION;
 }
 
 NTSTATUS CUsbDkRedirectorPDODevice::Create(WDFDEVICE ParentDevice, const PDEVICE_OBJECT OrigPDO)

@@ -8,8 +8,6 @@
 *
 */
 
-#define INITGUID
-
 extern "C"
 {
     #include <ntddk.h>

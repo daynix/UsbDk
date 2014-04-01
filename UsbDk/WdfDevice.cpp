@@ -38,6 +38,14 @@ void CPreAllocatedDeviceInit::Free()
     WdfDeviceInitFree(m_DeviceInit);
 }
 
+void CPreAllocatedDeviceInit::SetPowerCallbacks(PFN_WDF_DEVICE_SELF_MANAGED_IO_INIT SelfManagedIoFunc)
+{
+    WDF_PNPPOWER_EVENT_CALLBACKS  Callbacks;
+    WDF_PNPPOWER_EVENT_CALLBACKS_INIT(&Callbacks);
+    Callbacks.EvtDeviceSelfManagedIoInit = SelfManagedIoFunc;
+    WdfDeviceInitSetPnpPowerEventCallbacks(m_DeviceInit, &Callbacks);
+}
+
 void CPreAllocatedDeviceInit::Attach(PWDFDEVICE_INIT DeviceInit)
 {
     m_DeviceInit = DeviceInit;

@@ -32,6 +32,8 @@ public:
     void SetFilter()
     { WdfFdoInitSetFilter(m_DeviceInit); }
 
+    void SetPowerCallbacks(PFN_WDF_DEVICE_SELF_MANAGED_IO_INIT SelfManagedIoFunc);
+
     NTSTATUS CPreAllocatedDeviceInit::SetPreprocessCallback(PFN_WDFDEVICE_WDM_IRP_PREPROCESS Callback,
                                                             UCHAR MajorFunction,
                                                             PUCHAR MinorFunctions,

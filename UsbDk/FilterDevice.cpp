@@ -3,6 +3,7 @@
 #include "FilterDevice.tmh"
 #include "DeviceAccess.h"
 #include "ControlDevice.h"
+#include "UsbDkNames.h"
 
 void CUsbDkChildDevice::Dump()
 {
@@ -282,7 +283,8 @@ NTSTATUS CUsbDkRedirectorPDOInit::Create(const WDFDEVICE ParentDevice,
         return status;
     }
 
-    return STATUS_SUCCESS;
+    DECLARE_CONST_UNICODE_STRING(ntDeviceName, USBDK_TEMP_REDIRECTOR_DEVICE_NAME);
+    return SetName(ntDeviceName);
 }
 
 class CUsbDkRedirectorPDODevice : public CWdfDevice, public CAllocatable<NonPagedPool, 'PRHR'>

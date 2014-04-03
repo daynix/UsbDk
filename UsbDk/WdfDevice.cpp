@@ -60,7 +60,7 @@ PWDFDEVICE_INIT CPreAllocatedDeviceInit::Detach()
 
 NTSTATUS CPreAllocatedDeviceInit::SetPreprocessCallback(PFN_WDFDEVICE_WDM_IRP_PREPROCESS Callback,
                                                         UCHAR MajorFunction,
-                                                        PUCHAR MinorFunctions,
+                                                        const PUCHAR MinorFunctions,
                                                         ULONG NumMinorFunctions)
 {
     auto status = WdfDeviceInitAssignWdmIrpPreprocessCallback(m_DeviceInit,

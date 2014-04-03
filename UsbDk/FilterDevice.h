@@ -42,11 +42,11 @@ public:
     PCWCHAR InstanceID() const { return *m_InstanceID->begin(); }
     PDEVICE_OBJECT PDO() const { return m_PDO; }
 
-     bool Match(PCWCHAR deviceID, PCWCHAR instanceID) const
-     { return m_DeviceID->Match(deviceID) && m_InstanceID->Match(instanceID); }
+    bool Match(PCWCHAR deviceID, PCWCHAR instanceID) const
+    { return m_DeviceID->Match(deviceID) && m_InstanceID->Match(instanceID); }
 
-     bool Match(PDEVICE_OBJECT PDO) const
-     { return m_PDO == PDO; }
+    bool Match(PDEVICE_OBJECT PDO) const
+    { return m_PDO == PDO; }
 
     PDEVICE_OBJECT PNPMgrPDO() const;
 

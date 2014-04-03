@@ -57,6 +57,7 @@
     <ClCompile Include="FilterDevice.cpp" />
     <ClCompile Include="Irp.cpp" />
     <ClCompile Include="MemoryBuffer.cpp" />
+    <ClCompile Include="RedirectorDevice.cpp" />
     <ClCompile Include="RegText.cpp" />
     <ClCompile Include="UsbDkUtil.cpp" />
     <ClCompile Include="WdfDevice.cpp" />
@@ -71,6 +72,7 @@
     <ClInclude Include="Irp.h" />
     <ClInclude Include="MemoryBuffer.h" />
     <ClInclude Include="Public.h" />
+    <ClInclude Include="RedirectorDevice.h" />
     <ClInclude Include="RegText.h" />
     <ClInclude Include="UsbDkData.h" />
     <ClInclude Include="UsbDkNames.h" />

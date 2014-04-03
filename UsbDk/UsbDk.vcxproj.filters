@@ -67,6 +67,9 @@
     <ClInclude Include="UsbDkNames.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="RedirectorDevice.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Driver.cpp">
@@ -97,6 +100,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="UsbDkUtil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RedirectorDevice.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

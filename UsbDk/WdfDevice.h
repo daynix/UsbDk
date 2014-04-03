@@ -85,6 +85,9 @@ public:
 
     CWdfDevice(const CWdfDevice&) = delete;
     CWdfDevice& operator= (const CWdfDevice&) = delete;
+
+    WDFDEVICE WdfObject() const { return m_Device; }
+    PDEVICE_OBJECT WdmObject() const { return WdfDeviceWdmGetDeviceObject(m_Device); };
 protected:
     WDFDEVICE m_Device = WDF_NO_HANDLE;
 

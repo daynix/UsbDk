@@ -14,8 +14,6 @@ public:
 
     NTSTATUS Create(WDFDEVICE ParentDevice, const PDEVICE_OBJECT OrigPDO);
 
-    WDFDEVICE RawObject() const { return m_Device; }
-
     CUsbDkRedirectorDevice(const CUsbDkRedirectorDevice&) = delete;
     CUsbDkRedirectorDevice& operator= (const CUsbDkRedirectorDevice&) = delete;
 

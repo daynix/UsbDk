@@ -187,6 +187,7 @@ NTSTATUS CUsbDkRedirectorDevice::Create(WDFDEVICE ParentDevice, const PDEVICE_OB
                                  { return UsbDkRedirectorDeviceGetData(Device)->UsbDkRedirector->SelfManagedIoInit(); });
     if (!NT_SUCCESS(status))
     {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! Failed to create device init for redirector");
         return status;
     }
 
@@ -198,6 +199,7 @@ NTSTATUS CUsbDkRedirectorDevice::Create(WDFDEVICE ParentDevice, const PDEVICE_OB
     status = CWdfDevice::Create(devInit, attr);
     if (!NT_SUCCESS(status))
     {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! Failed to create WDF device for redirector");
         return status;
     }
 

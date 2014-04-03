@@ -5,27 +5,27 @@
 #include "ControlDevice.h"
 #include "UsbDkNames.h"
 
-typedef struct _USBDK_REDIRECTOR_PDO_EXTENSION {
-    CUsbDkRedirectorPDODevice *UsbDkRedirectorPDO;
-} USBDK_REDIRECTOR_PDO_EXTENSION, *PUSBDK_REDIRECTOR_PDO_EXTENSION;
+typedef struct _USBDK_REDIRECTOR_DEVICE_EXTENSION {
+    CUsbDkRedirectorDevice *UsbDkRedirector;
+} USBDK_REDIRECTOR_DEVICE_EXTENSION, *PUSBDK_REDIRECTOR_DEVICE_EXTENSION;
 
-WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(USBDK_REDIRECTOR_PDO_EXTENSION, UsbDkRedirectorPdoGetData)
+WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(USBDK_REDIRECTOR_DEVICE_EXTENSION, UsbDkRedirectorDeviceGetData)
 
-class CUsbDkRedirectorPDOInit : public CDeviceInit
+class CUsbDkRedirectorDeviceInit : public CDeviceInit
 {
 public:
-    CUsbDkRedirectorPDOInit()
+    CUsbDkRedirectorDeviceInit()
     {}
 
     NTSTATUS Create(const WDFDEVICE ParentDevice,
                     PFN_WDFDEVICE_WDM_IRP_PREPROCESS PNPPreProcess,
                     PFN_WDF_DEVICE_SELF_MANAGED_IO_INIT SelfManagedIoInit);
 
-    CUsbDkRedirectorPDOInit(const CUsbDkRedirectorPDOInit&) = delete;
-    CUsbDkRedirectorPDOInit& operator= (const CUsbDkRedirectorPDOInit&) = delete;
+    CUsbDkRedirectorDeviceInit(const CUsbDkRedirectorDeviceInit&) = delete;
+    CUsbDkRedirectorDeviceInit& operator= (const CUsbDkRedirectorDeviceInit&) = delete;
 };
 
-NTSTATUS CUsbDkRedirectorPDOInit::Create(const WDFDEVICE ParentDevice,
+NTSTATUS CUsbDkRedirectorDeviceInit::Create(const WDFDEVICE ParentDevice,
                                          PFN_WDFDEVICE_WDM_IRP_PREPROCESS PNPPreProcess,
                                          PFN_WDF_DEVICE_SELF_MANAGED_IO_INIT SelfManagedIoInit)
 {
@@ -104,14 +104,14 @@ NTSTATUS CUsbDkRedirectorPDOInit::Create(const WDFDEVICE ParentDevice,
     return SetName(ntDeviceName);
 }
 
-CUsbDkRedirectorPDODevice::~CUsbDkRedirectorPDODevice()
+CUsbDkRedirectorDevice::~CUsbDkRedirectorDevice()
 {
     //Life cycle of this device in controlled by PnP manager outside of WDF,
     //We detach WDF object here to avoid explicit deletion
     m_Device = WDF_NO_HANDLE;
 }
 
-NTSTATUS CUsbDkRedirectorPDODevice::PassThroughPreProcessWithCompletion(_Inout_  PIRP Irp,
+NTSTATUS CUsbDkRedirectorDevice::PassThroughPreProcessWithCompletion(_Inout_  PIRP Irp,
                                                                         PIO_COMPLETION_ROUTINE CompletionRoutine)
 {
     IoCopyCurrentIrpStackLocationToNext(Irp);
@@ -125,7 +125,7 @@ NTSTATUS CUsbDkRedirectorPDODevice::PassThroughPreProcessWithCompletion(_Inout_ 
     return IoCallDriver(m_RequestTarget, Irp);
 }
 
-NTSTATUS CUsbDkRedirectorPDODevice::PNPPreProcess(_Inout_  PIRP Irp)
+NTSTATUS CUsbDkRedirectorDevice::PNPPreProcess(_Inout_  PIRP Irp)
 {
     PIO_STACK_LOCATION  irpStack = IoGetCurrentIrpStackLocation(Irp);
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_REDIRECTOR, "%!FUNC! Entry, IRP [%x:%x]", irpStack->MajorFunction, irpStack->MinorFunction);
@@ -141,7 +141,7 @@ NTSTATUS CUsbDkRedirectorPDODevice::PNPPreProcess(_Inout_  PIRP Irp)
         return PassThroughPreProcessWithCompletion(Irp,
                                                    [](_In_ PDEVICE_OBJECT, _In_  PIRP Irp, PVOID Context) -> NTSTATUS
                                                    {
-                                                       auto This = static_cast<CUsbDkRedirectorPDODevice *>(Context);
+                                                       auto This = static_cast<CUsbDkRedirectorDevice *>(Context);
                                                        return This->QueryCapabilitiesPostProcess(Irp);
                                                    });
     default:
@@ -149,7 +149,7 @@ NTSTATUS CUsbDkRedirectorPDODevice::PNPPreProcess(_Inout_  PIRP Irp)
     }
 }
 
-NTSTATUS CUsbDkRedirectorPDODevice::QueryCapabilitiesPostProcess(_Inout_  PIRP Irp)
+NTSTATUS CUsbDkRedirectorDevice::QueryCapabilitiesPostProcess(_Inout_  PIRP Irp)
 {
     if (Irp->PendingReturned)
     {
@@ -162,7 +162,7 @@ NTSTATUS CUsbDkRedirectorPDODevice::QueryCapabilitiesPostProcess(_Inout_  PIRP I
     return STATUS_CONTINUE_COMPLETION;
 }
 
-NTSTATUS CUsbDkRedirectorPDODevice::SelfManagedIoInit()
+NTSTATUS CUsbDkRedirectorDevice::SelfManagedIoInit()
 {
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_REDIRECTOR, "%!FUNC! Entry");
 
@@ -176,24 +176,24 @@ NTSTATUS CUsbDkRedirectorPDODevice::SelfManagedIoInit()
     return status;
 }
 
-NTSTATUS CUsbDkRedirectorPDODevice::Create(WDFDEVICE ParentDevice, const PDEVICE_OBJECT OrigPDO)
+NTSTATUS CUsbDkRedirectorDevice::Create(WDFDEVICE ParentDevice, const PDEVICE_OBJECT OrigPDO)
 {
-    CUsbDkRedirectorPDOInit devInit;
+    CUsbDkRedirectorDeviceInit devInit;
 
     auto status = devInit.Create(ParentDevice,
                                  [](_In_ WDFDEVICE Device, _Inout_  PIRP Irp)
-                                 { return UsbDkRedirectorPdoGetData(Device)->UsbDkRedirectorPDO->PNPPreProcess(Irp); },
+                                 { return UsbDkRedirectorDeviceGetData(Device)->UsbDkRedirector->PNPPreProcess(Irp); },
                                  [](_In_ WDFDEVICE Device)
-                                 { return UsbDkRedirectorPdoGetData(Device)->UsbDkRedirectorPDO->SelfManagedIoInit(); });
+                                 { return UsbDkRedirectorDeviceGetData(Device)->UsbDkRedirector->SelfManagedIoInit(); });
     if (!NT_SUCCESS(status))
     {
         return status;
     }
 
     WDF_OBJECT_ATTRIBUTES attr;
-    WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&attr, USBDK_REDIRECTOR_PDO_EXTENSION);
+    WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&attr, USBDK_REDIRECTOR_DEVICE_EXTENSION);
 
-    attr.EvtCleanupCallback = CUsbDkRedirectorPDODevice::ContextCleanup;
+    attr.EvtCleanupCallback = CUsbDkRedirectorDevice::ContextCleanup;
 
     status = CWdfDevice::Create(devInit, attr);
     if (!NT_SUCCESS(status))
@@ -201,8 +201,8 @@ NTSTATUS CUsbDkRedirectorPDODevice::Create(WDFDEVICE ParentDevice, const PDEVICE
         return status;
     }
 
-    auto deviceContext = UsbDkRedirectorPdoGetData(m_Device);
-    deviceContext->UsbDkRedirectorPDO = this;
+    auto deviceContext = UsbDkRedirectorDeviceGetData(m_Device);
+    deviceContext->UsbDkRedirector = this;
 
     auto redirectorDevObj = WdfDeviceWdmGetDeviceObject(m_Device);
     m_RequestTarget = IoAttachDeviceToDeviceStack(redirectorDevObj, OrigPDO);
@@ -215,14 +215,14 @@ NTSTATUS CUsbDkRedirectorPDODevice::Create(WDFDEVICE ParentDevice, const PDEVICE
     return status;
 }
 
-void CUsbDkRedirectorPDODevice::ContextCleanup(_In_ WDFOBJECT DeviceObject)
+void CUsbDkRedirectorDevice::ContextCleanup(_In_ WDFOBJECT DeviceObject)
 {
     PAGED_CODE();
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_REDIRECTOR, "%!FUNC! Entry");
 
-    auto deviceContext = UsbDkRedirectorPdoGetData(DeviceObject);
+    auto deviceContext = UsbDkRedirectorDeviceGetData(DeviceObject);
     UNREFERENCED_PARAMETER(deviceContext);
 
-    delete deviceContext->UsbDkRedirectorPDO;
+    delete deviceContext->UsbDkRedirector;
 }

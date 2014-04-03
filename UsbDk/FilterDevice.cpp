@@ -192,7 +192,7 @@ void CUsbDkFilterDevice::ApplyRedirectionPolicy(CUsbDkChildDevice &Device)
 
 WDFDEVICE CUsbDkFilterDevice::CreateRedirectorPDO(const PDEVICE_OBJECT origPDO)
 {
-    CObjHolder<CUsbDkRedirectorPDODevice> Device(new CUsbDkRedirectorPDODevice);
+    CObjHolder<CUsbDkRedirectorDevice> Device(new CUsbDkRedirectorDevice);
 
     if (!Device)
     {

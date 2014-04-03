@@ -5,19 +5,19 @@
 #include "WdfDevice.h"
 #include "Alloc.h"
 
-class CUsbDkRedirectorPDODevice : public CWdfDevice, public CAllocatable<NonPagedPool, 'PRHR'>
+class CUsbDkRedirectorDevice : public CWdfDevice, public CAllocatable<NonPagedPool, 'PRHR'>
 {
 public:
-    CUsbDkRedirectorPDODevice()
+    CUsbDkRedirectorDevice()
     {}
-    ~CUsbDkRedirectorPDODevice();
+    ~CUsbDkRedirectorDevice();
 
     NTSTATUS Create(WDFDEVICE ParentDevice, const PDEVICE_OBJECT OrigPDO);
 
     WDFDEVICE RawObject() const { return m_Device; }
 
-    CUsbDkRedirectorPDODevice(const CUsbDkRedirectorPDODevice&) = delete;
-    CUsbDkRedirectorPDODevice& operator= (const CUsbDkRedirectorPDODevice&) = delete;
+    CUsbDkRedirectorDevice(const CUsbDkRedirectorDevice&) = delete;
+    CUsbDkRedirectorDevice& operator= (const CUsbDkRedirectorDevice&) = delete;
 
 private:
     static void ContextCleanup(_In_ WDFOBJECT DeviceObject);

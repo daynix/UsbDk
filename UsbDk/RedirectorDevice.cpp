@@ -211,10 +211,11 @@ NTSTATUS CUsbDkRedirectorDevice::Create(WDFDEVICE ParentDevice, const PDEVICE_OB
     if (m_RequestTarget == nullptr)
     {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! Failed to attach device to device stack");
-        status = STATUS_UNSUCCESSFUL;
+        return STATUS_UNSUCCESSFUL;
     }
 
-    return status;
+    ObReferenceObject(redirectorDevObj);
+    return STATUS_SUCCESS;
 }
 
 void CUsbDkRedirectorDevice::ContextCleanup(_In_ WDFOBJECT DeviceObject)

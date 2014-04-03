@@ -7,6 +7,7 @@
 #include "Alloc.h"
 #include "UsbDkUtil.h"
 #include "RegText.h"
+#include "RedirectorDevice.h"
 
 class CUsbDkControlDevice;
 class CUsbDkFilterDevice;
@@ -24,9 +25,13 @@ WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(USBDK_FILTER_DEVICE_EXTENSION, UsbDkFilterGet
 class CUsbDkChildDevice : public CAllocatable<NonPagedPool, 'DCHR'>
 {
 public:
-    CUsbDkChildDevice(CRegText *DeviceID, CRegText *InstanceID, PDEVICE_OBJECT PDO)
+    CUsbDkChildDevice(CRegText *DeviceID,
+                      CRegText *InstanceID,
+                      const CUsbDkFilterDevice &ParentDevice,
+                      PDEVICE_OBJECT PDO)
         : m_DeviceID(DeviceID)
         , m_InstanceID(InstanceID)
+        , m_ParentDevice(ParentDevice)
         , m_PDO(PDO)
     {}
 
@@ -36,33 +41,17 @@ public:
     PCWCHAR DeviceID() const { return *m_DeviceID->begin(); }
     PCWCHAR InstanceID() const { return *m_InstanceID->begin(); }
     PDEVICE_OBJECT PDO() const { return m_PDO; }
-    PDEVICE_OBJECT RedirectorPDO() const { return m_RedirectorPDO; }
-
-    void MakeRedirected(PDEVICE_OBJECT PDO)
-    {
-        ASSERT(!m_RedirectionSpecified);
-        m_RedirectorPDO = ReferencedPDO(PDO);
-        m_RedirectionSpecified = true;
-    }
-
-    void MakeNonRedirected()
-    {
-        ASSERT(!m_RedirectionSpecified);
-        ObReferenceObject(m_PDO);
-        m_RedirectionSpecified = true;
-    }
-
-    bool IsRedirected() const
-    {
-        ASSERT(m_RedirectionSpecified);
-        return m_RedirectorPDO != nullptr;
-    }
 
      bool Match(PCWCHAR deviceID, PCWCHAR instanceID) const
      { return m_DeviceID->Match(deviceID) && m_InstanceID->Match(instanceID); }
 
      bool Match(PDEVICE_OBJECT PDO) const
      { return m_PDO == PDO; }
+
+    PDEVICE_OBJECT PNPMgrPDO() const;
+
+    bool MakeRedirected();
+    void MakeNonRedirected();
 
     void Dump();
 
@@ -75,16 +64,13 @@ private:
     CObjHolder<CRegText> m_DeviceID;
     CObjHolder<CRegText> m_InstanceID;
     PDEVICE_OBJECT m_PDO;
-    PDEVICE_OBJECT m_RedirectorPDO = nullptr;
+    CObjHolder<CUsbDkRedirectorDevice> m_RedirectorDevice;
+    const CUsbDkFilterDevice &m_ParentDevice;
     bool m_RedirectionSpecified = false;
 
     LIST_ENTRY m_ListEntry;
 
-    static PDEVICE_OBJECT ReferencedPDO(PDEVICE_OBJECT PDO)
-    {
-        ObReferenceObject(PDO);
-        return PDO;
-    }
+    bool CreateRedirectorDevice(const PDEVICE_OBJECT origPDO);
 
     CUsbDkChildDevice(const CUsbDkChildDevice&) = delete;
     CUsbDkChildDevice& operator= (const CUsbDkChildDevice&) = delete;
@@ -92,7 +78,7 @@ private:
 
 class CDeviceRelations;
 
-class CUsbDkFilterDevice : private CWdfDevice, public CAllocatable<NonPagedPool, 'DFHR'>
+class CUsbDkFilterDevice : public CWdfDevice, public CAllocatable<NonPagedPool, 'DFHR'>
 {
 public:
     CUsbDkFilterDevice()
@@ -144,7 +130,6 @@ private:
     void RegisterNewChild(PDEVICE_OBJECT PDO);
     void ApplyRedirectionPolicy(CUsbDkChildDevice &Device);
     void FillRelationsArray(CDeviceRelations &Relations);
-    WDFDEVICE CreateRedirectorPDO(const PDEVICE_OBJECT origPDO);
 
     CWdfWorkitem m_QDRCompletionWorkItem;
 

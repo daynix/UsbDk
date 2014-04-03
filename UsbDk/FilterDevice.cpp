@@ -8,7 +8,7 @@
 
 void CUsbDkChildDevice::Dump()
 {
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Child device 0x%p (redirector PDO 0x%p):", m_PDO, m_RedirectorPDO);
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Child device 0x%p:", m_PDO);
     m_DeviceID->Dump();
     m_InstanceID->Dump();
 }
@@ -151,7 +151,7 @@ void CUsbDkFilterDevice::RegisterNewChild(PDEVICE_OBJECT PDO)
         return;
     }
 
-    CUsbDkChildDevice *Device = new CUsbDkChildDevice(DevID, InstanceID, PDO);
+    CUsbDkChildDevice *Device = new CUsbDkChildDevice(DevID, InstanceID, *this, PDO);
 
     if (Device == nullptr)
     {
@@ -171,15 +171,12 @@ void CUsbDkFilterDevice::ApplyRedirectionPolicy(CUsbDkChildDevice &Device)
 {
     if (m_ControlDevice->ShouldRedirect(Device))
     {
-        auto redirectorPDO = CreateRedirectorPDO(Device.PDO());
-        if (redirectorPDO != WDF_NO_HANDLE)
+        if (Device.MakeRedirected())
         {
-            Device.MakeRedirected(WdfDeviceWdmGetDeviceObject(redirectorPDO));
             TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Adding new PDO 0x%p as redirected initially", Device.PDO());
         }
         else
         {
-            Device.MakeNonRedirected();
             TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Failed to create redirector PDO for 0x%p", Device.PDO());
         }
     }
@@ -190,31 +187,58 @@ void CUsbDkFilterDevice::ApplyRedirectionPolicy(CUsbDkChildDevice &Device)
     }
 }
 
-WDFDEVICE CUsbDkFilterDevice::CreateRedirectorPDO(const PDEVICE_OBJECT origPDO)
+bool CUsbDkChildDevice::MakeRedirected()
 {
-    CObjHolder<CUsbDkRedirectorDevice> Device(new CUsbDkRedirectorDevice);
+    ASSERT(!m_RedirectionSpecified);
 
-    if (!Device)
+    if (!CreateRedirectorDevice(m_PDO))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Failed to create CUsbDkRedirectorPDODevice instance");
-        return WDF_NO_HANDLE;
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Failed to create redirector for child");
+        MakeNonRedirected();
+        return false;
     }
 
-    if (!NT_SUCCESS(Device->Create(m_Device, origPDO)))
+    m_RedirectionSpecified = true;
+    return true;
+}
+
+void CUsbDkChildDevice::MakeNonRedirected()
+{
+    ASSERT(!m_RedirectionSpecified);
+    ObReferenceObject(m_PDO);
+    m_RedirectionSpecified = true;
+}
+
+PDEVICE_OBJECT CUsbDkChildDevice::PNPMgrPDO() const
+{
+    return m_RedirectorDevice ? m_RedirectorDevice->WdmObject()
+                              : m_PDO;
+}
+
+bool CUsbDkChildDevice::CreateRedirectorDevice(const PDEVICE_OBJECT origPDO)
+{
+    m_RedirectorDevice = new CUsbDkRedirectorDevice;
+
+    if (!m_RedirectorDevice)
     {
-        return WDF_NO_HANDLE;
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Failed to allocate redirector device");
+        return false;
     }
 
-    auto res = Device->RawObject();
-    Device.detach();
-    return res;
+    if (!NT_SUCCESS(m_RedirectorDevice->Create(m_ParentDevice.WdfObject(), origPDO)))
+    {
+        delete m_RedirectorDevice.detach();
+        return false;
+    }
+
+    return true;
 }
 
 void CUsbDkFilterDevice::FillRelationsArray(CDeviceRelations &Relations)
 {
     m_ChildrenDevices.ForEach([this, &Relations](CUsbDkChildDevice *Child) -> bool
                               {
-                                  Relations.PushBack(Child->IsRedirected() ? Child->RedirectorPDO() : Child->PDO());
+                                  Relations.PushBack(Child->PNPMgrPDO());
                                   return true;
                               });
 }

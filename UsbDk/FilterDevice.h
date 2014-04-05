@@ -84,7 +84,6 @@ class CUsbDkFilterDevice : public CWdfDevice, public CAllocatable<NonPagedPool, 
 {
 public:
     CUsbDkFilterDevice()
-        : m_QDRCompletionWorkItem(CUsbDkFilterDevice::QDRPostProcessWiWrap, this)
     {}
 
     ~CUsbDkFilterDevice();
@@ -118,13 +117,7 @@ private:
     { return UsbDkFilterGetContext(Device)->UsbDkFilter->QDRPreProcess(Irp); }
     NTSTATUS QDRPreProcess(PIRP Irp);
 
-    static NTSTATUS QDRPostProcessWrap(_In_  PDEVICE_OBJECT, _In_  PIRP Irp, _In_  CUsbDkFilterDevice *This)
-    { return This->QDRPostProcess(Irp); }
-    NTSTATUS QDRPostProcess(PIRP Irp);
-
-    static VOID CUsbDkFilterDevice::QDRPostProcessWiWrap(_In_ PVOID This)
-    { static_cast<CUsbDkFilterDevice*>(This)->QDRPostProcessWi(); }
-    void CUsbDkFilterDevice::QDRPostProcessWi();
+    void CUsbDkFilterDevice::QDRPostProcess(PIRP Irp);
 
     bool ShouldAttach();
 
@@ -136,9 +129,6 @@ private:
     void ApplyRedirectionPolicy(CUsbDkChildDevice &Device);
     void FillRelationsArray(CDeviceRelations &Relations);
 
-    CWdfWorkitem m_QDRCompletionWorkItem;
-
-    PIRP m_QDRIrp = nullptr;
     CUsbDkControlDevice *m_ControlDevice = nullptr;
 
     WDFDRIVER m_Driver = WDF_NO_HANDLE;

@@ -5,6 +5,7 @@
 #include "ControlDevice.h"
 #include "RedirectorDevice.h"
 #include "UsbDkNames.h"
+#include "Irp.h"
 
 void CUsbDkChildDevice::Dump()
 {
@@ -35,41 +36,28 @@ NTSTATUS CUsbDkFilterDeviceInit::Configure(PFN_WDFDEVICE_WDM_IRP_PREPROCESS QDRP
 
 NTSTATUS CUsbDkFilterDevice::QDRPreProcess(PIRP Irp)
 {
-    PDEVICE_OBJECT wdmDevice = WdfDeviceWdmGetDeviceObject(m_Device);
-    PIO_STACK_LOCATION  irpStack = IoGetCurrentIrpStackLocation(Irp);
+    PIO_STACK_LOCATION irpStack = IoGetCurrentIrpStackLocation(Irp);
 
     if (BusRelations != irpStack->Parameters.QueryDeviceRelations.Type)
     {
         IoSkipCurrentIrpStackLocation(Irp);
+        return WdfDeviceWdmDispatchPreprocessedIrp(m_Device, Irp);
     }
     else
     {
         IoCopyCurrentIrpStackLocationToNext(Irp);
-        IoSetCompletionRoutineEx(wdmDevice,
-                                 Irp,
-                                 (PIO_COMPLETION_ROUTINE) CUsbDkFilterDevice::QDRPostProcessWrap,
-                                 this,
-                                 TRUE, FALSE, FALSE);
+
+        auto status = CIrp::ForwardAndWait(Irp, [this, Irp]()
+                                                { return WdfDeviceWdmDispatchPreprocessedIrp(m_Device, Irp); });
+
+        if (NT_SUCCESS(status))
+        {
+            QDRPostProcess(Irp);
+        }
+
+        IoCompleteRequest(Irp, IO_NO_INCREMENT);
+        return status;
     }
-
-    return WdfDeviceWdmDispatchPreprocessedIrp(m_Device, Irp);
-}
-
-NTSTATUS CUsbDkFilterDevice::QDRPostProcess(PIRP Irp)
-{
-    if (Irp->PendingReturned)
-    {
-        IoMarkIrpPending(Irp);
-    }
-
-    ASSERT(m_QDRIrp == nullptr);
-
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Queuing work item");
-
-    m_QDRIrp = Irp;
-    m_QDRCompletionWorkItem.Enqueue();
-
-    return STATUS_MORE_PROCESSING_REQUIRED;
 }
 
 class CDeviceRelations
@@ -247,22 +235,15 @@ void CUsbDkFilterDevice::FillRelationsArray(CDeviceRelations &Relations)
                               });
 }
 
-void CUsbDkFilterDevice::QDRPostProcessWi()
+void CUsbDkFilterDevice::QDRPostProcess(PIRP Irp)
 {
-    ASSERT(m_QDRIrp != NULL);
-
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Entry");
 
-    CDeviceRelations Relations((PDEVICE_RELATIONS)m_QDRIrp->IoStatus.Information);
+    CDeviceRelations Relations((PDEVICE_RELATIONS)Irp->IoStatus.Information);
 
     DropRemovedDevices(Relations);
     AddNewDevices(Relations);
     FillRelationsArray(Relations);
-
-    auto QDRIrp = m_QDRIrp;
-    m_QDRIrp = NULL;
-
-    IoCompleteRequest(QDRIrp, IO_NO_INCREMENT);
 }
 
 CUsbDkFilterDevice::~CUsbDkFilterDevice()
@@ -324,18 +305,14 @@ NTSTATUS CUsbDkFilterDevice::CreateFilterDevice(PWDFDEVICE_INIT DevInit)
 
     if (ShouldAttach())
     {
-        status = m_QDRCompletionWorkItem.Create(m_Device);
-
-        ULONG traceLevel = NT_SUCCESS(status) ? TRACE_LEVEL_INFORMATION : TRACE_LEVEL_ERROR;
-        TraceEvents(traceLevel, TRACE_FILTERDEVICE, "%!FUNC! Attachment status: %!STATUS!", status);
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Attached");
+        return STATUS_SUCCESS;
     }
     else
     {
-        status = STATUS_NOT_SUPPORTED;
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Not attached");
+        return STATUS_NOT_SUPPORTED;
     }
-
-    return status;
 }
 
 void CUsbDkFilterDevice::ContextCleanup(_In_ WDFOBJECT DeviceObject)

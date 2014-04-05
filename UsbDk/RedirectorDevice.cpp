@@ -218,7 +218,6 @@ void CUsbDkRedirectorDevice::ContextCleanup(_In_ WDFOBJECT DeviceObject)
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_REDIRECTOR, "%!FUNC! Entry");
 
     auto deviceContext = UsbDkRedirectorDeviceGetData(DeviceObject);
-    UNREFERENCED_PARAMETER(deviceContext);
 
     delete deviceContext->UsbDkRedirector;
 }

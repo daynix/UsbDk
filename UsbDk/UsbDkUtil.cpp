@@ -44,3 +44,13 @@ void CString::Destroy()
         m_String.Buffer = nullptr;
     }
 }
+
+bool CStringComparator::operator== (const UNICODE_STRING& Str)
+{
+    if (m_String.Length != Str.Length)
+    {
+        return false;
+    }
+
+    return RtlEqualMemory(m_String.Buffer, Str.Buffer, Str.Length);
+}

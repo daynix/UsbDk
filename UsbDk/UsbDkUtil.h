@@ -297,10 +297,9 @@ class CStringComparator
 {
 public:
     bool operator== (const CStringComparator &Other)
-    { return RtlEqualUnicodeString(&m_String, &Other.m_String, FALSE) ? true : false; }
+    { return *this == Other.m_String; }
 
-    bool operator== (const UNICODE_STRING& Str)
-    { return RtlEqualUnicodeString(&m_String, &Str, FALSE) ? true : false; }
+    bool operator== (const UNICODE_STRING& Str);
 
     bool operator== (PCWSTR Other)
     {

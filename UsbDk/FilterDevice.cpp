@@ -225,9 +225,9 @@ bool CUsbDkChildDevice::CreateRedirectorDevice(const PDEVICE_OBJECT origPDO)
         return false;
     }
 
-    if (!NT_SUCCESS(m_RedirectorDevice->Create(m_ParentDevice.WdfObject(), origPDO)))
+    if (!NT_SUCCESS(m_RedirectorDevice->Create(m_ParentDevice.GetDriverHandle(), origPDO)))
     {
-        delete m_RedirectorDevice.detach();
+        m_RedirectorDevice.detach();
         return false;
     }
 

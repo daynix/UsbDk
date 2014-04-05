@@ -17,17 +17,17 @@ public:
     CUsbDkRedirectorDeviceInit()
     {}
 
-    NTSTATUS Create(const WDFDEVICE ParentDevice);
+    NTSTATUS Create(WDFDRIVER Driver);
 
     CUsbDkRedirectorDeviceInit(const CUsbDkRedirectorDeviceInit&) = delete;
     CUsbDkRedirectorDeviceInit& operator= (const CUsbDkRedirectorDeviceInit&) = delete;
 };
 
-NTSTATUS CUsbDkRedirectorDeviceInit::Create(const WDFDEVICE ParentDevice)
+NTSTATUS CUsbDkRedirectorDeviceInit::Create(WDFDRIVER Driver)
 {
     PAGED_CODE();
 
-    auto DevInit = WdfPdoInitAllocate(ParentDevice);
+    auto DevInit = WdfControlDeviceInitAllocate(Driver, &SDDL_DEVOBJ_SYS_ALL_ADM_RWX_WORLD_RWX_RES_RWX);
 
     if (DevInit == nullptr)
     {
@@ -37,66 +37,13 @@ NTSTATUS CUsbDkRedirectorDeviceInit::Create(const WDFDEVICE ParentDevice)
 
     Attach(DevInit);
 
-//TODO: Put real values
-#define REDIRECTOR_HARDWARE_IDS      L"USB\\Vid_FEED&Pid_CAFE&Rev_0001\0USB\\Vid_FEED&Pid_CAFE\0"
-#define REDIRECTOR_COMPATIBLE_IDS    L"USB\\Class_FF&SubClass_FF&Prot_FF\0USB\\Class_FF&SubClass_FF\0USB\\Class_FF\0"
-#define REDIRECTOR_INSTANCE_ID       L"111222333"
-
-    DECLARE_CONST_UNICODE_STRING(RedirectorHwId, REDIRECTOR_HARDWARE_IDS);
-    DECLARE_CONST_UNICODE_STRING(RedirectorCompatId, REDIRECTOR_COMPATIBLE_IDS);
-    DECLARE_CONST_UNICODE_STRING(RedirectorInstanceId, REDIRECTOR_INSTANCE_ID);
-
-    auto status = WdfPdoInitAssignDeviceID(DevInit, &RedirectorHwId);
-    if (!NT_SUCCESS(status))
-    {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! WdfPdoInitAssignDeviceID failed");
-        return status;
-    }
-
-    status = WdfPdoInitAddCompatibleID(DevInit, &RedirectorCompatId);
-    if (!NT_SUCCESS(status))
-    {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! WdfPdoInitAddCompatibleID failed");
-        return status;
-    }
-
-    status = WdfPdoInitAddHardwareID(DevInit, &RedirectorCompatId);
-    if (!NT_SUCCESS(status))
-    {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! WdfPdoInitAddHardwareID failed");
-        return status;
-    }
-
-    status = WdfPdoInitAssignInstanceID(DevInit, &RedirectorInstanceId);
-    if (!NT_SUCCESS(status))
-    {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! WdfPdoInitAssignInstanceID failed");
-        return status;
-    }
-
-    // {52AF46D0-AB11-4A38-96A5-BC0AC6ABD2AF}
-    static const GUID GUID_USBDK_REDIRECTED_DEVICE =
-        { 0x52af46d0, 0xab11, 0x4a38, { 0x96, 0xa5, 0xbc, 0xa, 0xc6, 0xab, 0xd2, 0xaf } };
-
-    status = SetRaw(&GUID_USBDK_REDIRECTED_DEVICE);
-    if (!NT_SUCCESS(status))
-    {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! WdfPdoInitAssignRawDevice failed");
-        return status;
-    }
-
     SetExclusive();
     SetIoDirect();
-
-    auto SMIOInitCallback = [](_In_ WDFDEVICE Device)
-                            { return UsbDkRedirectorDeviceGetData(Device)->UsbDkRedirector->SelfManagedIoInit(); };
-
-    SetPowerCallbacks(SMIOInitCallback);
 
     auto PNPCallback = [](_In_ WDFDEVICE Device, _Inout_ PIRP Irp)
                        { return UsbDkRedirectorDeviceGetData(Device)->UsbDkRedirector->PNPPreProcess(Irp); };
 
-    status = SetPreprocessCallback(PNPCallback, IRP_MJ_PNP);
+    auto status = SetPreprocessCallback(PNPCallback, IRP_MJ_PNP);
     if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! Setting pre-process callback for IRP_MJ_PNP failed");
@@ -121,18 +68,77 @@ NTSTATUS CUsbDkRedirectorDevice::PassThroughPreProcessWithCompletion(_Inout_  PI
     return IoCallDriver(m_RequestTarget, Irp);
 }
 
+NTSTATUS CUsbDkRedirectorDevice::QueryIdPreProcess(_Inout_  PIRP Irp)
+{
+    static const WCHAR RedirectorDeviceId[] = L"USB\\Vid_FEED&Pid_CAFE&Rev_0001";
+    static const WCHAR RedirectorInstanceId[] = L"111222333";
+    static const WCHAR RedirectorHardwareIds[] = L"USB\\Vid_FEED&Pid_CAFE&Rev_0001\0USB\\Vid_FEED&Pid_CAFE\0";
+    static const WCHAR RedirectorCompatibleIds[] = L"USB\\Class_FF&SubClass_FF&Prot_FF\0USB\\Class_FF&SubClass_FF\0USB\\Class_FF\0";
+
+    const WCHAR *Buffer;
+    SIZE_T Size = 0;
+
+    PIO_STACK_LOCATION  irpStack = IoGetCurrentIrpStackLocation(Irp);
+
+    switch (irpStack->Parameters.QueryId.IdType)
+    {
+        case BusQueryDeviceID:
+            Buffer = &RedirectorDeviceId[0];
+            Size = sizeof(RedirectorDeviceId);
+            break;
+
+        case BusQueryInstanceID:
+            Buffer = &RedirectorInstanceId[0];
+            Size = sizeof(RedirectorInstanceId);
+            break;
+
+        case BusQueryHardwareIDs:
+            Buffer = &RedirectorHardwareIds[0];
+            Size = sizeof(RedirectorHardwareIds);
+            break;
+
+        case BusQueryCompatibleIDs:
+            Buffer = &RedirectorCompatibleIds[0];
+            Size = sizeof(RedirectorCompatibleIds);
+            break;
+
+        default:
+            Buffer = nullptr;
+            break;
+    }
+
+    if (Buffer == nullptr)
+    {
+        Irp->IoStatus.Status = STATUS_INVALID_DEVICE_REQUEST;
+        IoCompleteRequest(Irp, IO_NO_INCREMENT);
+        return STATUS_INVALID_DEVICE_REQUEST;
+    }
+
+    auto Result = DuplicateStaticBuffer(Buffer, Size);
+    auto Status = (Result != nullptr) ? STATUS_SUCCESS : STATUS_INSUFFICIENT_RESOURCES;
+
+    Irp->IoStatus.Information = reinterpret_cast<ULONG_PTR>(Result);
+    Irp->IoStatus.Status = Status;
+
+    IoCompleteRequest(Irp, IO_NO_INCREMENT);
+    return Status;
+}
+
 NTSTATUS CUsbDkRedirectorDevice::PNPPreProcess(_Inout_  PIRP Irp)
 {
     PIO_STACK_LOCATION  irpStack = IoGetCurrentIrpStackLocation(Irp);
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_REDIRECTOR, "%!FUNC! Entry, IRP [%x:%x]", irpStack->MajorFunction, irpStack->MinorFunction);
 
     switch (irpStack->MinorFunction)
     {
+    case IRP_MN_REMOVE_DEVICE:
+        //TODO: This is temporary stup to allow driver unload
+        //PNP requests must be forwarded properly to original device
+        Delete();
+        Irp->IoStatus.Status = STATUS_SUCCESS;
+        IoCompleteRequest(Irp, IO_NO_INCREMENT);
+        return STATUS_SUCCESS;
     case IRP_MN_QUERY_ID:
-    case IRP_MN_DEVICE_ENUMERATED:
-    case IRP_MN_START_DEVICE:
-        IoSkipCurrentIrpStackLocation(Irp);
-        return WdfDeviceWdmDispatchPreprocessedIrp(m_Device, Irp);
+        return QueryIdPreProcess(Irp);
     case IRP_MN_QUERY_CAPABILITIES:
         return PassThroughPreProcessWithCompletion(Irp,
                                                    [](_In_ PDEVICE_OBJECT, _In_  PIRP Irp, PVOID Context) -> NTSTATUS
@@ -141,7 +147,9 @@ NTSTATUS CUsbDkRedirectorDevice::PNPPreProcess(_Inout_  PIRP Irp)
                                                        return This->QueryCapabilitiesPostProcess(Irp);
                                                    });
     default:
-        return PassThroughPreProcess(Irp);
+//         return PassThroughPreProcess(Irp);
+        IoSkipCurrentIrpStackLocation(Irp);
+        return WdfDeviceWdmDispatchPreprocessedIrp(m_Device, Irp);
     }
 }
 
@@ -158,25 +166,11 @@ NTSTATUS CUsbDkRedirectorDevice::QueryCapabilitiesPostProcess(_Inout_  PIRP Irp)
     return STATUS_CONTINUE_COMPLETION;
 }
 
-NTSTATUS CUsbDkRedirectorDevice::SelfManagedIoInit()
-{
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_REDIRECTOR, "%!FUNC! Entry");
-
-    DECLARE_CONST_UNICODE_STRING(ntDosDeviceName, USBDK_TEMP_REDIRECTOR_NAME);
-    auto status = CreateSymLink(ntDosDeviceName);
-    if (!NT_SUCCESS(status))
-    {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! Failed to create a symbolic link for a redirector device (%!STATUS!)", status);
-    }
-
-    return status;
-}
-
-NTSTATUS CUsbDkRedirectorDevice::Create(WDFDEVICE ParentDevice, const PDEVICE_OBJECT OrigPDO)
+NTSTATUS CUsbDkRedirectorDevice::Create(WDFDRIVER Driver, const PDEVICE_OBJECT OrigPDO)
 {
     CUsbDkRedirectorDeviceInit devInit;
 
-    auto status = devInit.Create(ParentDevice);
+    auto status = devInit.Create(Driver);
     if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! Failed to create device init for redirector");
@@ -188,7 +182,7 @@ NTSTATUS CUsbDkRedirectorDevice::Create(WDFDEVICE ParentDevice, const PDEVICE_OB
 
     attr.EvtCleanupCallback = CUsbDkRedirectorDevice::ContextCleanup;
 
-    status = CWdfDevice::Create(devInit, attr);
+    status = CWdfControlDevice::Create(devInit, attr);
     if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! Failed to create WDF device for redirector");
@@ -198,15 +192,23 @@ NTSTATUS CUsbDkRedirectorDevice::Create(WDFDEVICE ParentDevice, const PDEVICE_OB
     auto deviceContext = UsbDkRedirectorDeviceGetData(m_Device);
     deviceContext->UsbDkRedirector = this;
 
-    auto redirectorDevObj = WdfDeviceWdmGetDeviceObject(m_Device);
-    m_RequestTarget = IoAttachDeviceToDeviceStack(redirectorDevObj, OrigPDO);
-    if (m_RequestTarget == nullptr)
+    DECLARE_CONST_UNICODE_STRING(ntDosDeviceName, USBDK_TEMP_REDIRECTOR_NAME);
+    status = CreateSymLink(ntDosDeviceName);
+    if (!NT_SUCCESS(status))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! Failed to attach device to device stack");
-        return STATUS_UNSUCCESSFUL;
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! Failed to create a symbolic link for a redirector device (%!STATUS!)", status);
+        Delete();
+        return status;
     }
 
+    m_RequestTarget = OrigPDO;
+    auto redirectorDevObj = WdfDeviceWdmGetDeviceObject(m_Device);
+    redirectorDevObj->StackSize = m_RequestTarget->StackSize + 1;
+
     ObReferenceObject(redirectorDevObj);
+
+    FinishInitializing();
+
     return STATUS_SUCCESS;
 }
 

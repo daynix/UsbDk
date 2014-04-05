@@ -5,13 +5,13 @@
 #include "WdfDevice.h"
 #include "Alloc.h"
 
-class CUsbDkRedirectorDevice : public CWdfDevice, public CAllocatable<NonPagedPool, 'PRHR'>
+class CUsbDkRedirectorDevice : public CWdfControlDevice, public CAllocatable<NonPagedPool, 'PRHR'>
 {
 public:
     CUsbDkRedirectorDevice()
     {}
 
-    NTSTATUS Create(WDFDEVICE ParentDevice, const PDEVICE_OBJECT OrigPDO);
+    NTSTATUS Create(WDFDRIVER Driver, const PDEVICE_OBJECT OrigPDO);
 
     CUsbDkRedirectorDevice(const CUsbDkRedirectorDevice&) = delete;
     CUsbDkRedirectorDevice& operator= (const CUsbDkRedirectorDevice&) = delete;
@@ -20,6 +20,7 @@ private:
     static void ContextCleanup(_In_ WDFOBJECT DeviceObject);
 
     NTSTATUS PNPPreProcess(_Inout_  PIRP Irp);
+    NTSTATUS QueryIdPreProcess(_Inout_  PIRP Irp);
 
     NTSTATUS PassThroughPreProcess(_Inout_  PIRP Irp)
     {
@@ -30,8 +31,6 @@ private:
     NTSTATUS PassThroughPreProcessWithCompletion(_Inout_  PIRP Irp, PIO_COMPLETION_ROUTINE CompletionRoutine);
 
     NTSTATUS QueryCapabilitiesPostProcess(_Inout_  PIRP Irp);
-
-    NTSTATUS SelfManagedIoInit();
 
     PDEVICE_OBJECT m_RequestTarget = nullptr;
 

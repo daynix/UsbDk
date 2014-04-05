@@ -73,7 +73,11 @@ template<typename T>
 class CRefCountingHolder : public CAllocatable < NonPagedPool, 'CRHR'>
 {
 public:
-    CRefCountingHolder() {};
+    typedef void(*TDeleteFunc)(T *Obj);
+
+    CRefCountingHolder(TDeleteFunc DeleteFunc = [](T *Obj){ delete Obj; })
+        : m_DeleteFunc(DeleteFunc)
+    {};
 
     bool InitialAddRef()
     {
@@ -87,9 +91,9 @@ public:
 
     void Release()
     {
-        if (InterlockedDecrement(&m_RefCount) == 0)
+        if ((InterlockedDecrement(&m_RefCount) == 0) && (m_Obj != nullptr))
         {
-            delete m_Obj;
+            m_DeleteFunc(m_Obj);
         }
     }
 
@@ -108,4 +112,5 @@ public:
 private:
     T *m_Obj = nullptr;
     LONG m_RefCount = 0;
+    TDeleteFunc m_DeleteFunc;
 };

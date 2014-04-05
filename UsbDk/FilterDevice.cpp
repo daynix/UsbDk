@@ -122,8 +122,12 @@ void CDeviceRelations::PushBack(PDEVICE_OBJECT Relation)
 
 void CUsbDkFilterDevice::DropRemovedDevices(const CDeviceRelations &Relations)
 {
+    //Child device must be deleted on PASSIVE_LEVEL
+    //So we put those to non-locked list and let its destructor do the job
+
+    CWdmList<CUsbDkChildDevice, CRawAccess, CNonCountingObject> ToBeDeleted;
     m_ChildrenDevices.ForEachDetachedIf([&Relations](CUsbDkChildDevice *Child) { return !Relations.Contains(*Child); },
-                                        [](CUsbDkChildDevice *Child) -> bool { delete Child; return true; });
+                                        [&ToBeDeleted](CUsbDkChildDevice *Child) -> bool { ToBeDeleted.PushBack(Child); return true; });
 }
 
 void CUsbDkFilterDevice::AddNewDevices(const CDeviceRelations &Relations)

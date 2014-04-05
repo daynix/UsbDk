@@ -71,6 +71,9 @@ protected:
 private:
     virtual CMemoryBuffer *GetDeviceProperty(DEVICE_REGISTRY_PROPERTY propertyId) override;
     virtual PWCHAR QueryBusID(BUS_QUERY_ID_TYPE idType) override;
+
+    static PWCHAR MakeNonPagedDuplicate(BUS_QUERY_ID_TYPE idType, PWCHAR idData);
+    static SIZE_T GetIdBufferLength(BUS_QUERY_ID_TYPE idType, PWCHAR idData);
 };
 
 class CWdmUsbDeviceAccess : public CWdmDeviceAccess

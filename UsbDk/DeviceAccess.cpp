@@ -20,7 +20,7 @@ CMemoryBuffer *CWdfDeviceAccess::GetDeviceProperty(DEVICE_REGISTRY_PROPERTY prop
 
     NTSTATUS status = WdfDeviceAllocAndQueryProperty(m_DevObj,
                                                      propertyId,
-                                                     PagedPool,
+                                                     NonPagedPool,
                                                      WDF_NO_OBJECT_ATTRIBUTES,
                                                      &devProperty);
 
@@ -63,7 +63,39 @@ PWCHAR CWdmDeviceAccess::QueryBusID(BUS_QUERY_ID_TYPE idType)
     irp.ReadResult([&idData](ULONG_PTR information)
                    { idData = reinterpret_cast<PWCHAR>(information); });
 
+    idData = MakeNonPagedDuplicate(idType, idData);
+
     return idData;
+}
+
+SIZE_T CWdmDeviceAccess::GetIdBufferLength(BUS_QUERY_ID_TYPE idType, PWCHAR idData)
+{
+    switch (idType)
+    {
+    case BusQueryHardwareIDs:
+    case BusQueryCompatibleIDs:
+        return CRegMultiSz::GetBufferLength(idData) + sizeof(WCHAR);
+    default:
+        return CRegSz::GetBufferLength(idData);
+    }
+}
+
+PWCHAR CWdmDeviceAccess::MakeNonPagedDuplicate(BUS_QUERY_ID_TYPE idType, PWCHAR idData)
+{
+    auto bufferLength = GetIdBufferLength(idType, idData);
+
+    auto newIdData = ExAllocatePoolWithTag(NonPagedPool, bufferLength, 'IDHR');
+    if (newIdData != nullptr)
+    {
+        RtlCopyMemory(newIdData, idData, bufferLength);
+    }
+    else
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVACCESS, "%!FUNC! Failed to allocate non-paged buffer for %!devid!", idType);
+    }
+
+    ExFreePool(idData);
+    return static_cast<PWCHAR>(newIdData);
 }
 
 CMemoryBuffer *CWdmDeviceAccess::GetDeviceProperty(DEVICE_REGISTRY_PROPERTY propertyId)
@@ -82,7 +114,7 @@ CMemoryBuffer *CWdmDeviceAccess::GetDeviceProperty(DEVICE_REGISTRY_PROPERTY prop
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVACCESS,
                 "%!FUNC! Property %!devprop! size for device 0x%p is %lu bytes", propertyId, m_DevObj, bytesNeeded);
 
-            CObjHolder<CMemoryBuffer> buffer(new CWdmMemoryBuffer(bytesNeeded, PagedPool));
+            CObjHolder<CMemoryBuffer> buffer(new CWdmMemoryBuffer(bytesNeeded, NonPagedPool));
             if (buffer)
             {
                 status = IoGetDeviceProperty(m_DevObj, propertyId, static_cast<ULONG>(buffer->Size()), buffer->Ptr(), &bytesNeeded);

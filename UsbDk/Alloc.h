@@ -33,12 +33,19 @@ template<typename T>
 class CObjHolder
 {
 public:
-    CObjHolder(T *Obj = nullptr)
+    typedef void(*TDeleteFunc)(T *Obj);
+
+    CObjHolder(T *Obj = nullptr, TDeleteFunc DeleteFunc = [](T *Obj){ delete Obj; })
         : m_Obj(Obj)
+        , m_DeleteFunc(DeleteFunc)
     {}
 
     ~CObjHolder()
-    { delete m_Obj; }
+    { if (*this)
+      {
+        m_DeleteFunc(m_Obj);
+      }
+    }
 
     operator bool() const { return m_Obj != nullptr; }
     operator T *() const { return m_Obj; }
@@ -59,6 +66,7 @@ public:
 
 private:
     T *m_Obj = nullptr;
+    TDeleteFunc m_DeleteFunc;
 };
 
 template<typename T>

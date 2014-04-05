@@ -254,6 +254,17 @@ NTSTATUS CUsbDkControlDevice::ResetUsbDevice(const USB_DK_DEVICE_ID &DeviceID)
 }
 //------------------------------------------------------------------------------------------------------------
 
+void CUsbDkControlDevice::ContextCleanup(_In_ WDFOBJECT DeviceObject)
+{
+    PAGED_CODE();
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "%!FUNC! Entry");
+
+    auto deviceContext = UsbDkControlGetContext(DeviceObject);
+    delete deviceContext->UsbDkControl;
+}
+//------------------------------------------------------------------------------------------------------------
+
 NTSTATUS CUsbDkControlDevice::Create(WDFDRIVER Driver)
 {
     CUsbDkControlDeviceInit DeviceInit;
@@ -266,6 +277,8 @@ NTSTATUS CUsbDkControlDevice::Create(WDFDRIVER Driver)
 
     WDF_OBJECT_ATTRIBUTES attr;
     WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&attr, USBDK_CONTROL_DEVICE_EXTENSION);
+    attr.EvtCleanupCallback = ContextCleanup;
+
     status = CWdfControlDevice::Create(DeviceInit, attr);
     if (!NT_SUCCESS(status))
     {
@@ -336,7 +349,9 @@ bool CUsbDkControlDevice::Allocate()
 {
     ASSERT(m_UsbDkControlDevice == nullptr);
 
-    m_UsbDkControlDevice = new CRefCountingHolder<CUsbDkControlDevice>;
+    m_UsbDkControlDevice =
+        new CRefCountingHolder<CUsbDkControlDevice>([](CUsbDkControlDevice *Dev){ Dev->Delete(); });
+
     if (m_UsbDkControlDevice == nullptr)
     {
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "%!FUNC! Cannot allocate control device holder");

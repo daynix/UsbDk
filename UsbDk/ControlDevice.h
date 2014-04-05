@@ -103,6 +103,8 @@ private:
     bool EnumUsbDevicesByID(const USB_DK_DEVICE_ID &ID, TFunctor Functor);
 
     bool UsbDeviceExists(const USB_DK_DEVICE_ID &ID);
+
+    static void ContextCleanup(_In_ WDFOBJECT DeviceObject);
 };
 
 typedef struct _USBDK_CONTROL_DEVICE_EXTENSION {

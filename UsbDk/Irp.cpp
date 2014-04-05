@@ -50,11 +50,13 @@ NTSTATUS CIrp::Create(PDEVICE_OBJECT TargetDevice)
 NTSTATUS CIrp::SynchronousCompletion(PDEVICE_OBJECT DeviceObject, PIRP Irp, PVOID Context)
 {
     UNREFERENCED_PARAMETER(DeviceObject);
-    UNREFERENCED_PARAMETER(Irp);
 
     ASSERT(Context != nullptr);
 
-    static_cast<CWdmEvent *>(Context)->Set();
+    if (Irp->PendingReturned)
+    {
+        static_cast<CWdmEvent *>(Context)->Set();
+    }
 
     return STATUS_MORE_PROCESSING_REQUIRED;
 }

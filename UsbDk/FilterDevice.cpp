@@ -319,11 +319,11 @@ NTSTATUS CUsbDkFilterDevice::CreateFilterDevice(PWDFDEVICE_INIT DevInit)
         return status;
     }
 
+    auto deviceContext = UsbDkFilterGetContext(m_Device);
+    deviceContext->UsbDkFilter = this;
+
     if (ShouldAttach())
     {
-        auto deviceContext = UsbDkFilterGetContext(m_Device);
-        deviceContext->UsbDkFilter = this;
-
         status = m_QDRCompletionWorkItem.Create(m_Device);
 
         ULONG traceLevel = NT_SUCCESS(status) ? TRACE_LEVEL_INFORMATION : TRACE_LEVEL_ERROR;

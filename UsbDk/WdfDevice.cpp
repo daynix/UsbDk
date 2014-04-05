@@ -97,14 +97,6 @@ NTSTATUS CWdfDevice::Create(CPreAllocatedDeviceInit &DeviceInit, WDF_OBJECT_ATTR
     return status;
 }
 
-CWdfDevice::~CWdfDevice()
-{
-    if (m_Device != WDF_NO_HANDLE)
-    {
-        WdfObjectDelete(m_Device);
-    }
-}
-
 NTSTATUS CWdfQueue::Create()
 {
     WDF_IO_QUEUE_CONFIG      QueueConfig;

@@ -78,7 +78,6 @@ class CWdfDevice
 {
 public:
     CWdfDevice() {}
-    ~CWdfDevice();
 
     NTSTATUS CreateSymLink(const UNICODE_STRING &Name);
     NTSTATUS Create(CPreAllocatedDeviceInit &DeviceInit, WDF_OBJECT_ATTRIBUTES &DeviceAttr);
@@ -88,6 +87,8 @@ public:
 
     WDFDEVICE WdfObject() const { return m_Device; }
     PDEVICE_OBJECT WdmObject() const { return WdfDeviceWdmGetDeviceObject(m_Device); };
+
+    void Delete() { WdfObjectDelete(m_Device); }
 protected:
     WDFDEVICE m_Device = WDF_NO_HANDLE;
 

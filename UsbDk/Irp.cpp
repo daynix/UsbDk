@@ -47,36 +47,6 @@ NTSTATUS CIrp::Create(PDEVICE_OBJECT TargetDevice)
     return STATUS_SUCCESS;
 }
 
-NTSTATUS CIrp::SynchronousCompletion(PDEVICE_OBJECT DeviceObject, PIRP Irp, PVOID Context)
-{
-    UNREFERENCED_PARAMETER(DeviceObject);
-
-    ASSERT(Context != nullptr);
-
-    if (Irp->PendingReturned)
-    {
-        static_cast<CWdmEvent *>(Context)->Set();
-    }
-
-    return STATUS_MORE_PROCESSING_REQUIRED;
-}
-
-NTSTATUS CIrp::SendSynchronously()
-{
-    CWdmEvent Event;
-    IoSetCompletionRoutine(m_Irp, SynchronousCompletion, &Event,
-                           TRUE, TRUE, TRUE);
-
-    auto status = IoCallDriver(m_TargetDevice, m_Irp);
-    if (status == STATUS_PENDING) {
-        Event.Wait();
-        status = m_Irp->IoStatus.Status;
-    }
-
-    return status;
-}
-//-----------------------------------------------------------------------------------------------------
-
 CIoControlIrp::~CIoControlIrp()
 {
     if (m_TargetDevice != nullptr)

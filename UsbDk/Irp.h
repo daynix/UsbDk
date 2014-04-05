@@ -12,7 +12,39 @@ public:
 
     NTSTATUS Create(PDEVICE_OBJECT TargetDevice);
     void Destroy();
-    NTSTATUS SendSynchronously();
+
+    NTSTATUS SendSynchronously()
+    { return ForwardAndWait(m_Irp, m_TargetDevice); }
+
+    static NTSTATUS ForwardAndWait(PIRP Irp, PDEVICE_OBJECT Target)
+    { return ForwardAndWait(Irp, [Irp, Target](){ return IoCallDriver(Target, Irp); }); }
+
+    template<typename SendFuncT>
+    static NTSTATUS ForwardAndWait(PIRP Irp, SendFuncT SendFunc)
+    {
+        CWdmEvent Event;
+        IoSetCompletionRoutine(Irp,
+                               [](PDEVICE_OBJECT, PIRP Irp, PVOID Context) -> NTSTATUS
+                               {
+                                    if (Irp->PendingReturned)
+                                    {
+                                        static_cast<CWdmEvent *>(Context)->Set();
+                                    }
+                                    return STATUS_MORE_PROCESSING_REQUIRED;
+                               },
+                               &Event,
+                               TRUE, TRUE, TRUE);
+
+        auto status = SendFunc();
+        if (status == STATUS_PENDING)
+        {
+            Event.Wait();
+            return Irp->IoStatus.Status;
+        }
+
+        return status;
+    }
+
 
     template<typename ConfiguratorT>
     void Configure(ConfiguratorT Configurator)
@@ -26,7 +58,6 @@ public:
     CIrp& operator= (const CIrp&) = delete;
 
 private:
-    static NTSTATUS SynchronousCompletion(PDEVICE_OBJECT DeviceObject, PIRP Irp, PVOID Context);
     void DestroyIrp();
     void ReleaseTarget();
 

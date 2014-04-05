@@ -104,13 +104,6 @@ NTSTATUS CUsbDkRedirectorDeviceInit::Create(const WDFDEVICE ParentDevice,
     return SetName(ntDeviceName);
 }
 
-CUsbDkRedirectorDevice::~CUsbDkRedirectorDevice()
-{
-    //Life cycle of this device in controlled by PnP manager outside of WDF,
-    //We detach WDF object here to avoid explicit deletion
-    m_Device = WDF_NO_HANDLE;
-}
-
 NTSTATUS CUsbDkRedirectorDevice::PassThroughPreProcessWithCompletion(_Inout_  PIRP Irp,
                                                                         PIO_COMPLETION_ROUTINE CompletionRoutine)
 {

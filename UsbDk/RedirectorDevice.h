@@ -10,7 +10,6 @@ class CUsbDkRedirectorDevice : public CWdfDevice, public CAllocatable<NonPagedPo
 public:
     CUsbDkRedirectorDevice()
     {}
-    ~CUsbDkRedirectorDevice();
 
     NTSTATUS Create(WDFDEVICE ParentDevice, const PDEVICE_OBJECT OrigPDO);
 

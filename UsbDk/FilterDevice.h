@@ -33,6 +33,8 @@ public:
         , m_InstanceID(InstanceID)
         , m_ParentDevice(ParentDevice)
         , m_PDO(PDO)
+        , m_RedirectorDevice(nullptr,
+                             [](CUsbDkRedirectorDevice *Dev){ Dev->Delete();})
     {}
 
     ~CUsbDkChildDevice()

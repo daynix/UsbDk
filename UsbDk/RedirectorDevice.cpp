@@ -17,17 +17,13 @@ public:
     CUsbDkRedirectorDeviceInit()
     {}
 
-    NTSTATUS Create(const WDFDEVICE ParentDevice,
-                    PFN_WDFDEVICE_WDM_IRP_PREPROCESS PNPPreProcess,
-                    PFN_WDF_DEVICE_SELF_MANAGED_IO_INIT SelfManagedIoInit);
+    NTSTATUS Create(const WDFDEVICE ParentDevice);
 
     CUsbDkRedirectorDeviceInit(const CUsbDkRedirectorDeviceInit&) = delete;
     CUsbDkRedirectorDeviceInit& operator= (const CUsbDkRedirectorDeviceInit&) = delete;
 };
 
-NTSTATUS CUsbDkRedirectorDeviceInit::Create(const WDFDEVICE ParentDevice,
-                                         PFN_WDFDEVICE_WDM_IRP_PREPROCESS PNPPreProcess,
-                                         PFN_WDF_DEVICE_SELF_MANAGED_IO_INIT SelfManagedIoInit)
+NTSTATUS CUsbDkRedirectorDeviceInit::Create(const WDFDEVICE ParentDevice)
 {
     PAGED_CODE();
 
@@ -91,9 +87,16 @@ NTSTATUS CUsbDkRedirectorDeviceInit::Create(const WDFDEVICE ParentDevice,
 
     SetExclusive();
     SetIoDirect();
-    SetPowerCallbacks(SelfManagedIoInit);
 
-    status = SetPreprocessCallback(PNPPreProcess, IRP_MJ_PNP);
+    auto SMIOInitCallback = [](_In_ WDFDEVICE Device)
+                            { return UsbDkRedirectorDeviceGetData(Device)->UsbDkRedirector->SelfManagedIoInit(); };
+
+    SetPowerCallbacks(SMIOInitCallback);
+
+    auto PNPCallback = [](_In_ WDFDEVICE Device, _Inout_ PIRP Irp)
+                       { return UsbDkRedirectorDeviceGetData(Device)->UsbDkRedirector->PNPPreProcess(Irp); };
+
+    status = SetPreprocessCallback(PNPCallback, IRP_MJ_PNP);
     if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! Setting pre-process callback for IRP_MJ_PNP failed");
@@ -173,11 +176,7 @@ NTSTATUS CUsbDkRedirectorDevice::Create(WDFDEVICE ParentDevice, const PDEVICE_OB
 {
     CUsbDkRedirectorDeviceInit devInit;
 
-    auto status = devInit.Create(ParentDevice,
-                                 [](_In_ WDFDEVICE Device, _Inout_  PIRP Irp)
-                                 { return UsbDkRedirectorDeviceGetData(Device)->UsbDkRedirector->PNPPreProcess(Irp); },
-                                 [](_In_ WDFDEVICE Device)
-                                 { return UsbDkRedirectorDeviceGetData(Device)->UsbDkRedirector->SelfManagedIoInit(); });
+    auto status = devInit.Create(ParentDevice);
     if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! Failed to create device init for redirector");

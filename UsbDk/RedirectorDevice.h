@@ -34,4 +34,6 @@ private:
     NTSTATUS SelfManagedIoInit();
 
     PDEVICE_OBJECT m_RequestTarget = nullptr;
+
+    friend class CUsbDkRedirectorDeviceInit;
 };

@@ -108,6 +108,9 @@ public:
     ULONG GetChildrenCount()
     { return m_ChildrenDevices.GetCount(); }
 
+    WDFDRIVER GetDriverHandle() const
+    { return m_Driver; }
+
 private:
     static void ContextCleanup(_In_ WDFOBJECT DeviceObject);
 
@@ -137,6 +140,8 @@ private:
 
     PIRP m_QDRIrp = nullptr;
     CUsbDkControlDevice *m_ControlDevice = nullptr;
+
+    WDFDRIVER m_Driver = WDF_NO_HANDLE;
 
     CWdmList<CUsbDkChildDevice, CLockedAccess, CCountingObject> m_ChildrenDevices;
 

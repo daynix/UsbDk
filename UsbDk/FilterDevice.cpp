@@ -274,6 +274,8 @@ NTSTATUS CUsbDkFilterDevice::Create(PWDFDEVICE_INIT DevInit, WDFDRIVER Driver)
 {
     PAGED_CODE();
 
+    m_Driver = Driver;
+
     auto status = CreateFilterDevice(DevInit);
     if (!NT_SUCCESS(status))
     {

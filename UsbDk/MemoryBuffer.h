@@ -13,6 +13,9 @@ public:
     virtual PVOID Ptr() const { return m_Ptr; }
     virtual SIZE_T Size() const { return m_Size; }
 
+    virtual ~CMemoryBuffer()
+    {}
+
 protected:
     CMemoryBuffer()
     {}
@@ -28,7 +31,7 @@ public:
         : m_MemObj(MemObj)
     { m_Ptr = WdfMemoryGetBuffer(MemObj, &m_Size); }
 
-    ~CWdfMemoryBuffer()
+    virtual ~CWdfMemoryBuffer()
     { WdfObjectDelete(m_MemObj); }
 
     CWdfMemoryBuffer(const CWdfMemoryBuffer&) = delete;
@@ -53,7 +56,7 @@ public:
         m_Size = Size;
     }
 
-    ~CWdmMemoryBuffer()
+    virtual ~CWdmMemoryBuffer()
     { ExFreePool(m_Ptr); }
 
     CWdmMemoryBuffer(const CWdmMemoryBuffer&) = delete;

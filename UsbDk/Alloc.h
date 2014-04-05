@@ -40,14 +40,14 @@ public:
     ~CObjHolder()
     { delete m_Obj; }
 
-    operator bool() const { return m_Obj != NULL; }
+    operator bool() const { return m_Obj != nullptr; }
     operator T *() const { return m_Obj; }
     T *operator ->() const { return m_Obj; }
 
     T *detach()
     {
         auto ptr = m_Obj;
-        m_Obj = NULL;
+        m_Obj = nullptr;
         return ptr;
     }
 

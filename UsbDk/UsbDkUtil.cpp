@@ -1,5 +1,7 @@
 #include "Alloc.h"
 #include "UsbDkUtil.h"
+#include "Trace.h"
+#include "UsbDkUtil.tmh"
 
 NTSTATUS CWdmEvent::Wait(bool WithTimeout, LONGLONG Timeout, bool Alertable)
 {
@@ -53,4 +55,21 @@ bool CStringComparator::operator== (const UNICODE_STRING& Str)
     }
 
     return RtlEqualMemory(m_String.Buffer, Str.Buffer, Str.Length);
+}
+
+PVOID DuplicateStaticBuffer(const void *Buffer, SIZE_T Length, POOL_TYPE PoolType)
+{
+    ASSERT(Buffer != nullptr);
+    ASSERT(Length > 0);
+
+    auto Duplicate = ExAllocatePoolWithTag(PoolType, Length, 'BDHR');
+    if (Duplicate != nullptr)
+    {
+        RtlCopyMemory(Duplicate, Buffer, Length);
+    }
+    else
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_UTILS, "%!FUNC! Failed to allocate buffer");
+    }
+    return Duplicate;
 }

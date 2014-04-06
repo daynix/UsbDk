@@ -354,3 +354,5 @@ private:
     CString(const CString&) = delete;
     CString& operator= (const CString&) = delete;
 };
+
+PVOID DuplicateStaticBuffer(const void *Buffer, SIZE_T Length, POOL_TYPE PoolType = PagedPool);

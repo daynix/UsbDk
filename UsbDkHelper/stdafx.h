@@ -12,6 +12,7 @@
 #include <windows.h>
 #include <cfgmgr32.h>
 
+#include <memory>
 #include <ios>
 #include <vector>
 #include <winscard.h>

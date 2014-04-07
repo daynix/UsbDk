@@ -28,8 +28,9 @@ extern "C" {
     DLL BOOL             UninstallDriver(void);
     DLL BOOL             GetDevicesList(PUSB_DK_DEVICE_ID *DevicesArray, ULONG *NumberDevices);
     DLL void             ReleaseDeviceList(PUSB_DK_DEVICE_ID DevicesArray);
-    DLL BOOL             AddRedirect(PUSB_DK_DEVICE_ID DeviceID);
-    DLL BOOL             RemoveRedirect(PUSB_DK_DEVICE_ID DeviceID);
+
+    DLL HANDLE           StartRedirect(PUSB_DK_DEVICE_ID DeviceID);
+    DLL BOOL             StopRedirect(HANDLE DeviceHandle);
 #ifdef __cplusplus
 }
 #endif

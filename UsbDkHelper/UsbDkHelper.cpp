@@ -4,7 +4,15 @@
 #include "UsbDkHelper.h"
 #include "Installer.h"
 #include "DriverAccess.h"
+#include "RedirectorAccess.h"
 
+//-------------------------------------------------------------------------------------------
+
+typedef struct tag_REDIRECTED_DEVICE_HANDLE
+{
+    USB_DK_DEVICE_ID DeviceID;
+    unique_ptr<UsbDkRedirectorAccess> RedirectorAccess;
+} REDIRECTED_DEVICE_HANDLE, PREDIRECTED_DEVICE_HANDLE;
 //-------------------------------------------------------------------------------------------
 
 void printExceptionString(const char *errorStr)
@@ -13,7 +21,6 @@ void printExceptionString(const char *errorStr)
     OutputDebugString(tString.c_str());
     tcout << tString;
 }
-
 //------------------------------------------------------------------------------------------
 InstallResult InstallDriver(void)
 {
@@ -76,13 +83,49 @@ void ReleaseDeviceList(PUSB_DK_DEVICE_ID DevicesArray)
 }
 //-------------------------------------------------------------------------------------------
 
-template <typename TFunc>
-static BOOL DoDriverBoolOp(TFunc Func)
+HANDLE StartRedirect(PUSB_DK_DEVICE_ID DeviceID)
+{
+    bool bRedirectAdded = false;
+    try
+    {
+        UsbDkDriverAccess driverAccess;
+        driverAccess.AddRedirect(*DeviceID);
+        bRedirectAdded = true;
+        unique_ptr<REDIRECTED_DEVICE_HANDLE> deviceHandle(new REDIRECTED_DEVICE_HANDLE);
+        deviceHandle->DeviceID = *DeviceID;
+        deviceHandle->RedirectorAccess.reset(new UsbDkRedirectorAccess);
+        return reinterpret_cast<HANDLE>(deviceHandle.release());
+    }
+    catch (const exception &e)
+    {
+        printExceptionString(e.what());
+    }
+
+    if (bRedirectAdded)
+    {
+        try
+        {
+            UsbDkDriverAccess driverAccess;
+            driverAccess.RemoveRedirect(*DeviceID);
+        }
+        catch (const exception &e)
+        {
+            printExceptionString(e.what());
+        }
+    }
+
+    return nullptr;
+}
+//-------------------------------------------------------------------------------------------
+
+BOOL StopRedirect(HANDLE DeviceHandle)
 {
     try
     {
-        UsbDkDriverAccess driver;
-        Func(driver);
+        UsbDkDriverAccess driverAccess;
+        unique_ptr<REDIRECTED_DEVICE_HANDLE> deviceHandle(reinterpret_cast<REDIRECTED_DEVICE_HANDLE*>(DeviceHandle));
+        deviceHandle->RedirectorAccess.reset();
+        driverAccess.RemoveRedirect(deviceHandle->DeviceID);
         return TRUE;
     }
     catch (const exception &e)
@@ -90,17 +133,5 @@ static BOOL DoDriverBoolOp(TFunc Func)
         printExceptionString(e.what());
         return FALSE;
     }
-}
-//-------------------------------------------------------------------------------------------
-
-BOOL AddRedirect(PUSB_DK_DEVICE_ID DeviceID)
-{
-    return DoDriverBoolOp([&DeviceID](UsbDkDriverAccess &drv){ drv.AddRedirect(*DeviceID); });
-}
-//-------------------------------------------------------------------------------------------
-
-BOOL RemoveRedirect(PUSB_DK_DEVICE_ID DeviceID)
-{
-    return DoDriverBoolOp([&DeviceID](UsbDkDriverAccess &drv){ drv.RemoveRedirect(*DeviceID); });
 }
 //-------------------------------------------------------------------------------------------

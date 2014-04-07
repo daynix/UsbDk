@@ -1,6 +1,8 @@
 #pragma once
 
 #include "UsbDkData.h"
+#include "DriverFile.h"
+#include "UsbDkNames.h"
 
 //-----------------------------------------------------------------------------------
 #define DRIVER_ACCESS_EXCEPTION_STRING TEXT("Driver operation error. ")
@@ -15,11 +17,12 @@ public:
     UsbDkDriverAccessException(tstring errMsg, DWORD dwErrorCode) : UsbDkW32ErrorException(tstring(DRIVER_ACCESS_EXCEPTION_STRING) + errMsg, dwErrorCode){}
 };
 //-----------------------------------------------------------------------------------
-class UsbDkDriverAccess
+class UsbDkDriverAccess : public UsbDkDriverFile
 {
 public:
-    UsbDkDriverAccess();
-    virtual ~UsbDkDriverAccess();
+    UsbDkDriverAccess()
+        : UsbDkDriverFile(USBDK_USERMODE_NAME)
+    {}
 
     void GetDevicesList(PUSB_DK_DEVICE_ID &DevicesArray, ULONG &NumberDevice);
     static void ReleaseDeviceList(PUSB_DK_DEVICE_ID DevicesArray);
@@ -29,6 +32,5 @@ public:
 
 private:
     void SendIoctlWithDeviceId(DWORD ControlCode, USB_DK_DEVICE_ID &Id);
-    HANDLE m_hDriver;
 };
 //-----------------------------------------------------------------------------------

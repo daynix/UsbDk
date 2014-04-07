@@ -4,29 +4,6 @@
 
 //------------------------------------------------------------------------------------------------
 
-UsbDkDriverAccess::UsbDkDriverAccess()
-{
-    m_hDriver = CreateFile(USBDK_USERMODE_NAME,
-                           GENERIC_READ | GENERIC_WRITE,
-                           0,
-                           NULL,
-                           CREATE_ALWAYS,
-                           FILE_ATTRIBUTE_NORMAL,
-                           NULL);
-
-    if (m_hDriver == INVALID_HANDLE_VALUE)
-    {
-        throw UsbDkDriverAccessException(TEXT("Failed to open device symlink"));
-    }
-}
-//------------------------------------------------------------------------------------------------
-
-UsbDkDriverAccess::~UsbDkDriverAccess()
-{
-    CloseHandle(m_hDriver);
-}
-//------------------------------------------------------------------------------------------------
-
 void UsbDkDriverAccess::GetDevicesList(PUSB_DK_DEVICE_ID &DevicesArray, ULONG &NumberDevice)
 {
     DevicesArray = nullptr;
@@ -109,3 +86,4 @@ void UsbDkDriverAccess::SendIoctlWithDeviceId(DWORD ControlCode,
         throw UsbDkDriverAccessException(TEXT("Ioctl failed"));
     }
 }
+//------------------------------------------------------------------------------------------------

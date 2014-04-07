@@ -51,6 +51,9 @@
     <ClCompile Include="DriverFile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="RedirectorAccess.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="UsbDkHelper.h">
@@ -87,6 +90,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DriverFile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RedirectorAccess.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

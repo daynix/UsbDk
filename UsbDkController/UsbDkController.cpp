@@ -16,7 +16,6 @@ void ShowUsage()
     tcout << TEXT("UsbDkController -i  - install UsbDk driver") << endl;
     tcout << TEXT("UsbDkController -u  - uninstall UsbDk driver") << endl;
     tcout << TEXT("UsbDkController -n  - enumerate USB devices") << endl;
-    tcout << TEXT("UsbDkController -r ID SN - Reset USB device by ID and serial number") << endl;
     tcout << TEXT("UsbDkController -a ID SN - Redirect USB device by ID and serial number") << endl;
     tcout << TEXT("UsbDkController -s ID SN - Stop redirection of USB device by ID and serial number") << endl;
     tcout << endl;
@@ -80,7 +79,7 @@ int __cdecl _tmain(int argc, _TCHAR* argv[])
                 tcout << TEXT("Enumeration failed") << endl;
             }
         }
-        else if ((_tcsicmp(L"-r", argv[1]) == 0) || (_tcsicmp(L"-a", argv[1]) == 0) || (_tcsicmp(L"-s", argv[1]) == 0))
+        else if ((_tcsicmp(L"-a", argv[1]) == 0) || (_tcsicmp(L"-s", argv[1]) == 0))
         {
             if (argc < 4)
             {
@@ -114,18 +113,6 @@ int __cdecl _tmain(int argc, _TCHAR* argv[])
                 else
                 {
                     tcout << TEXT("Restore of USB device failed") << endl;
-                }
-            }
-            else
-            {
-                tcout << TEXT("Reset USB device ") << deviceID.DeviceID << TEXT(", ") << deviceID.InstanceID << endl;
-                if (ResetDevice(&deviceID))
-                {
-                    tcout << TEXT("USB device was reset successfully") << endl;
-                }
-                else
-                {
-                    tcout << TEXT("Reset of USB device failed") << endl;
                 }
             }
         }

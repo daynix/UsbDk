@@ -28,7 +28,6 @@ private:
 
     static void CountDevices(CWdfRequest &Request, WDFQUEUE Queue);
     static void EnumerateDevices(CWdfRequest &Request, WDFQUEUE Queue);
-    static void ResetDevice(CWdfRequest &Request, WDFQUEUE Queue);
     static void AddRedirect(CWdfRequest &Request, WDFQUEUE Queue);
     static void RemoveRedirect(CWdfRequest &Request, WDFQUEUE Queue);
 
@@ -105,6 +104,7 @@ private:
     bool UsbDeviceExists(const USB_DK_DEVICE_ID &ID);
 
     static void ContextCleanup(_In_ WDFOBJECT DeviceObject);
+    NTSTATUS AddDeviceToSet(const USB_DK_DEVICE_ID &DeviceId);
 };
 
 typedef struct _USBDK_CONTROL_DEVICE_EXTENSION {

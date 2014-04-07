@@ -68,12 +68,6 @@ void CUsbDkControlDeviceQueue::DeviceControl(WDFQUEUE Queue,
             EnumerateDevices(WdfRequest, Queue);
             break;
         }
-        case IOCTL_USBDK_RESET_DEVICE:
-        {
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "Called IOCTL_USBDK_RESET_DEVICE\n");
-            ResetDevice(WdfRequest, Queue);
-            break;
-        }
         case IOCTL_USBDK_ADD_REDIRECT:
         {
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "Called IOCTL_USBDK_ADD_REDIRECT\n");
@@ -160,12 +154,6 @@ void CUsbDkControlDeviceQueue::DoUSBDeviceOp(CWdfRequest &Request, WDFQUEUE Queu
     }
 
     Request.SetStatus(status);
-}
-//------------------------------------------------------------------------------------------------------------
-
-void CUsbDkControlDeviceQueue::ResetDevice(CWdfRequest &Request, WDFQUEUE Queue)
-{
-    DoUSBDeviceOp(Request, Queue, &CUsbDkControlDevice::ResetUsbDevice);
 }
 //------------------------------------------------------------------------------------------------------------
 
@@ -363,50 +351,91 @@ bool CUsbDkControlDevice::Allocate()
 
 NTSTATUS CUsbDkControlDevice::AddRedirect(const USB_DK_DEVICE_ID &DeviceId)
 {
+    auto addRes = AddDeviceToSet(DeviceId);
+
+    if (!NT_SUCCESS(addRes))
+    {
+        return addRes;
+    }
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "%!FUNC! Success. New redirections list:");
+    m_Redirections.Dump();
+
+    auto resetRes = ResetUsbDevice(DeviceId);
+
+    if (!NT_SUCCESS(resetRes))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! Reset after start redirection failed! Stop redirection.");
+        auto res = m_Redirections.Delete(&DeviceId);
+        if (!res)
+        {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! Delete device from redirected set failed.");
+        }
+    }
+    return resetRes;
+}
+//-------------------------------------------------------------------------------------------------------------
+
+NTSTATUS CUsbDkControlDevice::AddDeviceToSet(const USB_DK_DEVICE_ID &DeviceId)
+{
     CObjHolder<CUsbDkRedirection> newRedir(new CUsbDkRedirection());
 
     if (!newRedir)
     {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! failed. Cannot allocate redirection.");
         return STATUS_INSUFFICIENT_RESOURCES;
     }
 
     auto status = newRedir->Create(DeviceId);
     if (!NT_SUCCESS(status))
     {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! failed. Cannot create redirection.");
         return status;
     }
 
     if (!UsbDeviceExists(DeviceId))
     {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! failed. Cannot redirect unknown device.");
         return STATUS_OBJECT_NAME_NOT_FOUND;
     }
 
     if (!m_Redirections.Add(newRedir))
     {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! failed. Device already redirected.");
         return STATUS_OBJECT_NAME_COLLISION;
     }
 
     newRedir.detach();
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "%!FUNC! Success. New redirections list:");
-    m_Redirections.Dump();
-
     return STATUS_SUCCESS;
 }
+//-------------------------------------------------------------------------------------------------------------
 
 NTSTATUS CUsbDkControlDevice::RemoveRedirect(const USB_DK_DEVICE_ID &DeviceId)
 {
-    auto res = m_Redirections.Delete(&DeviceId);
-
-    if (res)
+    if (m_Redirections.Delete(&DeviceId))
     {
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "%!FUNC! Success. New redirections list:");
         m_Redirections.Dump();
-        return STATUS_SUCCESS;
+
+        auto res = ResetUsbDevice(DeviceId);
+
+        if (!NT_SUCCESS(res))
+        {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! Reset after stop redirection failed! Return redirection.");
+            auto addRes = AddDeviceToSet(DeviceId);
+            if (!NT_SUCCESS(addRes))
+            {
+                TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! Return redirection failed.");
+            }
+        }
+        return res;
     }
 
+    TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! failed.");
     return STATUS_OBJECT_NAME_NOT_FOUND;
 }
+//-------------------------------------------------------------------------------------------------------------
 
 NTSTATUS CUsbDkRedirection::Create(const USB_DK_DEVICE_ID &Id)
 {

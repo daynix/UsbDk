@@ -81,21 +81,21 @@ void UsbDkDriverAccess::ReleaseDeviceList(PUSB_DK_DEVICE_ID DevicesArray)
 }
 //------------------------------------------------------------------------------------------------
 
-void UsbDkDriverAccess::ResetDevice(USB_DK_DEVICE_ID &DeviceID)
-{
-    SendIoctlWithDeviceId(IOCTL_USBDK_RESET_DEVICE, DeviceID);
-}
-//------------------------------------------------------------------------------------------------
-
 void UsbDkDriverAccess::AddRedirect(USB_DK_DEVICE_ID &DeviceID)
 {
     SendIoctlWithDeviceId(IOCTL_USBDK_ADD_REDIRECT, DeviceID);
+
+    // Temporary, will be replace by WAIT after ADD & RESET in driver
+    Sleep(3000); // 3 seconds wait after reset
 }
 //------------------------------------------------------------------------------------------------
 
 void UsbDkDriverAccess::RemoveRedirect(USB_DK_DEVICE_ID &DeviceID)
 {
     SendIoctlWithDeviceId(IOCTL_USBDK_REMOVE_REDIRECT, DeviceID);
+
+    // Temporary, will be replace by WAIT after REMOVE & RESET in driver
+    Sleep(3000); // 3 seconds wait after reset
 }
 //------------------------------------------------------------------------------------------------
 

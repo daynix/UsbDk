@@ -24,7 +24,6 @@ public:
     void GetDevicesList(PUSB_DK_DEVICE_ID &DevicesArray, ULONG &NumberDevice);
     static void ReleaseDeviceList(PUSB_DK_DEVICE_ID DevicesArray);
 
-    void ResetDevice(USB_DK_DEVICE_ID &DeviceID);
     void AddRedirect(USB_DK_DEVICE_ID &DeviceID);
     void RemoveRedirect(USB_DK_DEVICE_ID &DeviceID);
 

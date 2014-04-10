@@ -42,6 +42,8 @@ NTSTATUS CIrp::Create(PDEVICE_OBJECT TargetDevice)
         return STATUS_INSUFFICIENT_RESOURCES;
     }
 
+    m_Irp->IoStatus.Status = STATUS_NOT_SUPPORTED;
+
     ObReferenceObject(TargetDevice);
     m_TargetDevice = TargetDevice;
     return STATUS_SUCCESS;

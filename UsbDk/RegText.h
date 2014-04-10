@@ -25,6 +25,7 @@ public:
     bool empty() const { return (m_Data->Size() == 0); }
 
     bool Match(PCWSTR String) const;
+    bool MatchPrefix(PCWSTR String) const;
     void Dump() const;
 
     CRegText(CMemoryBuffer* Data)

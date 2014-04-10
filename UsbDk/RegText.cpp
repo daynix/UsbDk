@@ -29,6 +29,18 @@ bool CRegText::Match(PCWSTR String) const
     return false;
 }
 
+bool CRegText::MatchPrefix(PCWSTR String) const
+{
+    for (auto idData : *this)
+    {
+        if (!wcsncmp(idData, String, wcslen(String)))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 void CRegText::Dump() const
 {
     for (auto idData : *this)

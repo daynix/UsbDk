@@ -3,10 +3,9 @@
 #include "ntddk.h"
 #include "wdf.h"
 #include "WdfDevice.h"
-#include "WdfWorkitem.h"
 #include "Alloc.h"
-#include "UsbDkUtil.h"
 #include "RegText.h"
+#include "Irp.h"
 #include "RedirectorDevice.h"
 
 class CUsbDkControlDevice;
@@ -33,12 +32,7 @@ public:
         , m_InstanceID(InstanceID)
         , m_ParentDevice(ParentDevice)
         , m_PDO(PDO)
-        , m_RedirectorDevice(nullptr,
-                             [](CUsbDkRedirectorDevice *){})
     {}
-
-    ~CUsbDkChildDevice()
-    { ObDereferenceObject(m_PDO); }
 
     PCWCHAR DeviceID() const { return *m_DeviceID->begin(); }
     PCWCHAR InstanceID() const { return *m_InstanceID->begin(); }
@@ -50,10 +44,7 @@ public:
     bool Match(PDEVICE_OBJECT PDO) const
     { return m_PDO == PDO; }
 
-    PDEVICE_OBJECT PNPMgrPDO() const;
-
     bool MakeRedirected();
-    void MakeNonRedirected();
 
     void Dump();
 
@@ -66,13 +57,11 @@ private:
     CObjHolder<CRegText> m_DeviceID;
     CObjHolder<CRegText> m_InstanceID;
     PDEVICE_OBJECT m_PDO;
-    CObjHolder<CUsbDkRedirectorDevice> m_RedirectorDevice;
     const CUsbDkFilterDevice &m_ParentDevice;
-    bool m_RedirectionSpecified = false;
 
     LIST_ENTRY m_ListEntry;
 
-    bool CreateRedirectorDevice(const PDEVICE_OBJECT origPDO);
+    bool CreateRedirectorDevice();
 
     CUsbDkChildDevice(const CUsbDkChildDevice&) = delete;
     CUsbDkChildDevice& operator= (const CUsbDkChildDevice&) = delete;
@@ -80,24 +69,39 @@ private:
 
 class CDeviceRelations;
 
+class CUsbDkHubFilterStrategy : public CUsbDkFilterStrategy
+{
+public:
+    virtual NTSTATUS Create(CUsbDkFilterDevice *Owner) override;
+    virtual void Delete() override;
+    virtual NTSTATUS MakeAvailable() override
+    { return STATUS_SUCCESS; }
+    virtual NTSTATUS PNPPreProcess(PIRP Irp) override;
+
+private:
+    CUsbDkControlDevice *m_ControlDevice = nullptr;
+    void DropRemovedDevices(const CDeviceRelations &Relations);
+    void AddNewDevices(const CDeviceRelations &Relations);
+    void RegisterNewChild(PDEVICE_OBJECT PDO);
+    void ApplyRedirectionPolicy(CUsbDkChildDevice &Device);
+
+    bool IsChildRegistered(PDEVICE_OBJECT PDO)
+    { return !Children().ForEachIf([PDO](CUsbDkChildDevice *Child){ return Child->Match(PDO); }, ConstFalse); }
+};
+
 class CUsbDkFilterDevice : public CWdfDevice, public CAllocatable<NonPagedPool, 'DFHR'>
 {
 public:
     CUsbDkFilterDevice()
     {}
-
-    ~CUsbDkFilterDevice();
+    ~CUsbDkFilterDevice()
+    { m_Strategy->Delete(); }
 
     NTSTATUS Create(PWDFDEVICE_INIT DevInit, WDFDRIVER Driver);
-    NTSTATUS CreateFilterDevice(PWDFDEVICE_INIT DevInit);
-
-    template <typename TFunctor>
-    void EnumerateChildren(TFunctor Functor)
-    { m_ChildrenDevices.ForEach(Functor); }
 
     template <typename TPredicate, typename TFunctor>
     bool EnumerateChildrenIf(TPredicate Predicate, TFunctor Functor)
-    { return m_ChildrenDevices.ForEachIf(Predicate, Functor); }
+    { return m_Strategy->Children().ForEachIf(Predicate, Functor); }
 
     PLIST_ENTRY GetListEntry()
     { return &m_ListEntry; }
@@ -105,38 +109,37 @@ public:
     { return static_cast<CUsbDkFilterDevice*>(CONTAINING_RECORD(entry, CUsbDkFilterDevice, m_ListEntry)); }
 
     ULONG GetChildrenCount()
-    { return m_ChildrenDevices.GetCount(); }
+    { return m_Strategy->Children().GetCount(); }
 
     WDFDRIVER GetDriverHandle() const
     { return m_Driver; }
 
+    PDRIVER_OBJECT GetDriverObject() const
+    { return WdfDriverWdmGetDriverObject(m_Driver); }
+
 private:
+    NTSTATUS CreateFilterDevice(PWDFDEVICE_INIT DevInit);
     static void ContextCleanup(_In_ WDFOBJECT DeviceObject);
-
-    static NTSTATUS QDRPreProcessWrap(_In_ WDFDEVICE Device, _Inout_  PIRP Irp)
-    { return UsbDkFilterGetContext(Device)->UsbDkFilter->QDRPreProcess(Irp); }
-    NTSTATUS QDRPreProcess(PIRP Irp);
-
-    void CUsbDkFilterDevice::QDRPostProcess(PIRP Irp);
-
-    bool ShouldAttach();
-
-    void DropRemovedDevices(const CDeviceRelations &Relations);
-    void AddNewDevices(const CDeviceRelations &Relations);
-    bool IsChildRegistered(PDEVICE_OBJECT PDO)
-    { return !m_ChildrenDevices.ForEachIf([PDO](CUsbDkChildDevice *Child){ return Child->Match(PDO); }, ConstFalse); }
-    void RegisterNewChild(PDEVICE_OBJECT PDO);
-    void ApplyRedirectionPolicy(CUsbDkChildDevice &Device);
-    void FillRelationsArray(CDeviceRelations &Relations);
-
-    CUsbDkControlDevice *m_ControlDevice = nullptr;
 
     WDFDRIVER m_Driver = WDF_NO_HANDLE;
 
-    CWdmList<CUsbDkChildDevice, CLockedAccess, CCountingObject> m_ChildrenDevices;
-
     LIST_ENTRY m_ListEntry;
+
+    class CStrategist
+    {
+    public:
+        bool SelectStrategy(PDEVICE_OBJECT Device);
+        void SetNullStrategy() { m_Strategy = &m_NullStrategy; }
+        CUsbDkFilterStrategy *operator ->() const { return m_Strategy; }
+    private:
+        CUsbDkFilterStrategy *m_Strategy = nullptr;
+        CUsbDkNullFilterStrategy m_NullStrategy;
+        CUsbDkHubFilterStrategy m_HubStrategy;
+        CUsbDkDevFilterStrategy m_DevStrategy;
+    } m_Strategy;
 
     CUsbDkFilterDevice(const CUsbDkFilterDevice&) = delete;
     CUsbDkFilterDevice& operator= (const CUsbDkFilterDevice&) = delete;
+
+    friend class CUsbDkFilterDeviceInit;
 };

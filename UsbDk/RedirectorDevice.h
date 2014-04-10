@@ -1,38 +1,74 @@
 #pragma once
 
 #include "ntddk.h"
-#include "wdf.h"
-#include "WdfDevice.h"
 #include "Alloc.h"
+#include "UsbDkUtil.h"
 
-class CUsbDkRedirectorDevice : public CWdfControlDevice, public CAllocatable<NonPagedPool, 'PRHR'>
+class CUsbDkFilterDevice;
+class CUsbDkChildDevice;
+
+class CUsbDkFilterStrategy
 {
 public:
-    CUsbDkRedirectorDevice()
-    {}
-
-    NTSTATUS Create(WDFDRIVER Driver, const PDEVICE_OBJECT OrigPDO);
-
-    CUsbDkRedirectorDevice(const CUsbDkRedirectorDevice&) = delete;
-    CUsbDkRedirectorDevice& operator= (const CUsbDkRedirectorDevice&) = delete;
-
-private:
-    static void ContextCleanup(_In_ WDFOBJECT DeviceObject);
-
-    NTSTATUS PNPPreProcess(_Inout_  PIRP Irp);
-    NTSTATUS QueryIdPreProcess(_Inout_  PIRP Irp);
-
-    NTSTATUS PassThroughPreProcess(_Inout_  PIRP Irp)
+    virtual NTSTATUS Create(CUsbDkFilterDevice *Owner)
     {
-        IoSkipCurrentIrpStackLocation(Irp);
-        return IoCallDriver(m_RequestTarget, Irp);
+        m_Owner = Owner;
+        return STATUS_SUCCESS;
+    }
+    virtual void Delete()
+    {}
+    virtual NTSTATUS PNPPreProcess(PIRP Irp);
+
+    virtual NTSTATUS MakeAvailable() = 0;
+
+    typedef CWdmList<CUsbDkChildDevice, CLockedAccess, CCountingObject> TChildrenList;
+
+    virtual TChildrenList& Children()
+    { return m_Children; }
+
+protected:
+    CUsbDkFilterDevice *m_Owner = nullptr;
+
+    template<typename PostProcessFuncT>
+    NTSTATUS PostProcessOnSuccess(PIRP Irp, PostProcessFuncT PostProcessFunc)
+    {
+        IoCopyCurrentIrpStackLocationToNext(Irp);
+
+        auto status = CIrp::ForwardAndWait(Irp, [this, Irp]()
+                                           { return WdfDeviceWdmDispatchPreprocessedIrp(m_Owner->WdfObject(), Irp); });
+
+        if (NT_SUCCESS(status))
+        {
+            PostProcessFunc(Irp);
+        }
+
+        IoCompleteRequest(Irp, IO_NO_INCREMENT);
+        return status;
     }
 
-    NTSTATUS PassThroughPreProcessWithCompletion(_Inout_  PIRP Irp, PIO_COMPLETION_ROUTINE CompletionRoutine);
+private:
+    TChildrenList m_Children;
+};
 
-    NTSTATUS QueryCapabilitiesPostProcess(_Inout_  PIRP Irp);
+class CUsbDkNullFilterStrategy : public CUsbDkFilterStrategy
+{
+public:
+    virtual NTSTATUS MakeAvailable() override
+    { return STATUS_SUCCESS; }
+};
 
-    PDEVICE_OBJECT m_RequestTarget = nullptr;
+class CUsbDkDevFilterStrategy : public CUsbDkFilterStrategy
+{
+public:
+    virtual NTSTATUS Create(CUsbDkFilterDevice *Owner) override
+    { return CUsbDkFilterStrategy::Create(Owner); }
 
-    friend class CUsbDkRedirectorDeviceInit;
+    virtual void Delete() override
+    {}
+
+    virtual NTSTATUS MakeAvailable() override;
+    virtual NTSTATUS PNPPreProcess(PIRP Irp) override;
+
+private:
+    static void PatchDeviceID(PIRP Irp);
 };

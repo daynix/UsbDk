@@ -3,9 +3,7 @@
 #include "FilterDevice.tmh"
 #include "DeviceAccess.h"
 #include "ControlDevice.h"
-#include "RedirectorDevice.h"
 #include "UsbDkNames.h"
-#include "Irp.h"
 
 void CUsbDkChildDevice::Dump()
 {
@@ -20,43 +18,52 @@ public:
     CUsbDkFilterDeviceInit(PWDFDEVICE_INIT DeviceInit)
     { Attach(DeviceInit); }
 
-    NTSTATUS Configure(PFN_WDFDEVICE_WDM_IRP_PREPROCESS QDRPreProcessCallback);
+    NTSTATUS Configure();
 
     CUsbDkFilterDeviceInit(const CUsbDkFilterDeviceInit&) = delete;
     CUsbDkFilterDeviceInit& operator= (const CUsbDkFilterDeviceInit&) = delete;
 };
 
-NTSTATUS CUsbDkFilterDeviceInit::Configure(PFN_WDFDEVICE_WDM_IRP_PREPROCESS QDRPreProcessCallback)
+NTSTATUS CUsbDkFilterDeviceInit::Configure()
 {
     PAGED_CODE();
 
     SetFilter();
-    return SetPreprocessCallback(QDRPreProcessCallback, IRP_MJ_PNP, IRP_MN_QUERY_DEVICE_RELATIONS);
+    SetPowerCallbacks([](_In_ WDFDEVICE Device)
+                      { return UsbDkFilterGetContext(Device)->UsbDkFilter->m_Strategy->MakeAvailable(); });
+
+    auto status = SetPreprocessCallback([](_In_ WDFDEVICE Device, _Inout_  PIRP Irp)
+                                        { return UsbDkFilterGetContext(Device)->UsbDkFilter->m_Strategy->PNPPreProcess(Irp); },
+                                        IRP_MJ_PNP);
+
+    return status;
 }
 
-NTSTATUS CUsbDkFilterDevice::QDRPreProcess(PIRP Irp)
+NTSTATUS CUsbDkHubFilterStrategy::Create(CUsbDkFilterDevice *Owner)
 {
-    PIO_STACK_LOCATION irpStack = IoGetCurrentIrpStackLocation(Irp);
-
-    if (BusRelations != irpStack->Parameters.QueryDeviceRelations.Type)
+    auto status = CUsbDkFilterStrategy::Create(Owner);
+    if (!NT_SUCCESS(status))
     {
-        IoSkipCurrentIrpStackLocation(Irp);
-        return WdfDeviceWdmDispatchPreprocessedIrp(m_Device, Irp);
-    }
-    else
-    {
-        IoCopyCurrentIrpStackLocationToNext(Irp);
-
-        auto status = CIrp::ForwardAndWait(Irp, [this, Irp]()
-                                                { return WdfDeviceWdmDispatchPreprocessedIrp(m_Device, Irp); });
-
-        if (NT_SUCCESS(status))
-        {
-            QDRPostProcess(Irp);
-        }
-
-        IoCompleteRequest(Irp, IO_NO_INCREMENT);
         return status;
+    }
+
+    m_ControlDevice = CUsbDkControlDevice::Reference(Owner->GetDriverHandle());
+    if (m_ControlDevice == nullptr)
+    {
+        CUsbDkFilterStrategy::Delete();
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+
+    m_ControlDevice->RegisterFilter(*Owner);
+    return STATUS_SUCCESS;
+}
+
+void CUsbDkHubFilterStrategy::Delete()
+{
+    if (m_ControlDevice != nullptr)
+    {
+        m_ControlDevice->UnregisterFilter(*m_Owner);
+        CUsbDkControlDevice::Release();
     }
 }
 
@@ -91,40 +98,49 @@ public:
     bool Contains(const CUsbDkChildDevice &Dev) const
     { return !ForEach([&Dev](PDEVICE_OBJECT Relation) { return !Dev.Match(Relation); }); }
 
-    void PushBack(PDEVICE_OBJECT Relation);
-
 private:
     PDEVICE_RELATIONS m_Relations;
-    ULONG m_PushPosition = 0;
 
     CDeviceRelations(const CDeviceRelations&) = delete;
     CDeviceRelations& operator= (const CDeviceRelations&) = delete;
 };
 
-void CDeviceRelations::PushBack(PDEVICE_OBJECT Relation)
+NTSTATUS CUsbDkHubFilterStrategy::PNPPreProcess(PIRP Irp)
 {
-    ASSERT(m_Relations != nullptr);
-    ASSERT(m_PushPosition < m_Relations->Count);
-    m_Relations->Objects[m_PushPosition++] = Relation;
+    auto irpStack = IoGetCurrentIrpStackLocation(Irp);
+
+    if ((irpStack->MinorFunction == IRP_MN_QUERY_DEVICE_RELATIONS) &&
+        (BusRelations == irpStack->Parameters.QueryDeviceRelations.Type))
+    {
+        return PostProcessOnSuccess(Irp,
+                                    [this](PIRP Irp)
+                                    {
+                                        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Entry");
+                                        CDeviceRelations Relations((PDEVICE_RELATIONS)Irp->IoStatus.Information);
+                                        DropRemovedDevices(Relations);
+                                        AddNewDevices(Relations);
+                                    });
+    }
+
+    return CUsbDkFilterStrategy::PNPPreProcess(Irp);
 }
 
-void CUsbDkFilterDevice::DropRemovedDevices(const CDeviceRelations &Relations)
+void CUsbDkHubFilterStrategy::DropRemovedDevices(const CDeviceRelations &Relations)
 {
     //Child device must be deleted on PASSIVE_LEVEL
     //So we put those to non-locked list and let its destructor do the job
-
     CWdmList<CUsbDkChildDevice, CRawAccess, CNonCountingObject> ToBeDeleted;
-    m_ChildrenDevices.ForEachDetachedIf([&Relations](CUsbDkChildDevice *Child) { return !Relations.Contains(*Child); },
-                                        [&ToBeDeleted](CUsbDkChildDevice *Child) -> bool { ToBeDeleted.PushBack(Child); return true; });
+    Children().ForEachDetachedIf([&Relations](CUsbDkChildDevice *Child) { return !Relations.Contains(*Child); },
+                                 [&ToBeDeleted](CUsbDkChildDevice *Child) -> bool { ToBeDeleted.PushBack(Child); return true; });
 }
 
-void CUsbDkFilterDevice::AddNewDevices(const CDeviceRelations &Relations)
+void CUsbDkHubFilterStrategy::AddNewDevices(const CDeviceRelations &Relations)
 {
     Relations.ForEachIf([this](PDEVICE_OBJECT PDO){ return !IsChildRegistered(PDO); },
                         [this](PDEVICE_OBJECT PDO){ RegisterNewChild(PDO); return true; });
 }
 
-void CUsbDkFilterDevice::RegisterNewChild(PDEVICE_OBJECT PDO)
+void CUsbDkHubFilterStrategy::RegisterNewChild(PDEVICE_OBJECT PDO)
 {
     CWdmDeviceAccess pdoAccess(PDO);
     CObjHolder<CRegText> DevID(pdoAccess.GetDeviceID());
@@ -143,7 +159,7 @@ void CUsbDkFilterDevice::RegisterNewChild(PDEVICE_OBJECT PDO)
         return;
     }
 
-    CUsbDkChildDevice *Device = new CUsbDkChildDevice(DevID, InstanceID, *this, PDO);
+    CUsbDkChildDevice *Device = new CUsbDkChildDevice(DevID, InstanceID, *m_Owner, PDO);
 
     if (Device == nullptr)
     {
@@ -156,10 +172,10 @@ void CUsbDkFilterDevice::RegisterNewChild(PDEVICE_OBJECT PDO)
 
     ApplyRedirectionPolicy(*Device);
 
-    m_ChildrenDevices.PushBack(Device);
+    Children().PushBack(Device);
 }
 
-void CUsbDkFilterDevice::ApplyRedirectionPolicy(CUsbDkChildDevice &Device)
+void CUsbDkHubFilterStrategy::ApplyRedirectionPolicy(CUsbDkChildDevice &Device)
 {
     if (m_ControlDevice->ShouldRedirect(Device))
     {
@@ -174,85 +190,24 @@ void CUsbDkFilterDevice::ApplyRedirectionPolicy(CUsbDkChildDevice &Device)
     }
     else
     {
-        Device.MakeNonRedirected();
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Adding new PDO 0x%p as non-redirected initially", Device.PDO());
     }
 }
 
 bool CUsbDkChildDevice::MakeRedirected()
 {
-    ASSERT(!m_RedirectionSpecified);
-
-    if (!CreateRedirectorDevice(m_PDO))
+    if (!CreateRedirectorDevice())
     {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Failed to create redirector for child");
-        MakeNonRedirected();
         return false;
     }
-
-    m_RedirectionSpecified = true;
     return true;
 }
 
-void CUsbDkChildDevice::MakeNonRedirected()
+bool CUsbDkChildDevice::CreateRedirectorDevice()
 {
-    ASSERT(!m_RedirectionSpecified);
-    ObReferenceObject(m_PDO);
-    m_RedirectionSpecified = true;
-}
-
-PDEVICE_OBJECT CUsbDkChildDevice::PNPMgrPDO() const
-{
-    return m_RedirectorDevice ? m_RedirectorDevice->WdmObject()
-                              : m_PDO;
-}
-
-bool CUsbDkChildDevice::CreateRedirectorDevice(const PDEVICE_OBJECT origPDO)
-{
-    m_RedirectorDevice = new CUsbDkRedirectorDevice;
-
-    if (!m_RedirectorDevice)
-    {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Failed to allocate redirector device");
-        return false;
-    }
-
-    if (!NT_SUCCESS(m_RedirectorDevice->Create(m_ParentDevice.GetDriverHandle(), origPDO)))
-    {
-        m_RedirectorDevice.detach();
-        return false;
-    }
-
-    return true;
-}
-
-void CUsbDkFilterDevice::FillRelationsArray(CDeviceRelations &Relations)
-{
-    m_ChildrenDevices.ForEach([this, &Relations](CUsbDkChildDevice *Child) -> bool
-                              {
-                                  Relations.PushBack(Child->PNPMgrPDO());
-                                  return true;
-                              });
-}
-
-void CUsbDkFilterDevice::QDRPostProcess(PIRP Irp)
-{
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Entry");
-
-    CDeviceRelations Relations((PDEVICE_RELATIONS)Irp->IoStatus.Information);
-
-    DropRemovedDevices(Relations);
-    AddNewDevices(Relations);
-    FillRelationsArray(Relations);
-}
-
-CUsbDkFilterDevice::~CUsbDkFilterDevice()
-{
-    if (m_ControlDevice != nullptr)
-    {
-        m_ControlDevice->UnregisterFilter(*this);
-        CUsbDkControlDevice::Release();
-    }
+    auto DriverObj = m_ParentDevice.GetDriverObject();
+    return NT_SUCCESS(DriverObj->DriverExtension->AddDevice(DriverObj, m_PDO));
 }
 
 NTSTATUS CUsbDkFilterDevice::Create(PWDFDEVICE_INIT DevInit, WDFDRIVER Driver)
@@ -267,14 +222,28 @@ NTSTATUS CUsbDkFilterDevice::Create(PWDFDEVICE_INIT DevInit, WDFDRIVER Driver)
         return status;
     }
 
-    m_ControlDevice = CUsbDkControlDevice::Reference(Driver);
-
-    if (m_ControlDevice == nullptr)
+    m_Strategy.SetNullStrategy();
+    status = m_Strategy->Create(this);
+    if (!NT_SUCCESS(status))
     {
-        return STATUS_INSUFFICIENT_RESOURCES;
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Failed to create null strategy");
+        return status;
     }
 
-    m_ControlDevice->RegisterFilter(*this);
+    if (!m_Strategy.SelectStrategy(WdmObject()))
+    {
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Not attached");
+        return STATUS_NOT_SUPPORTED;
+    }
+
+    status = m_Strategy->Create(this);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Failed to create strategy");
+        return status;
+    }
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Attached");
     return STATUS_SUCCESS;
 }
 
@@ -284,9 +253,10 @@ NTSTATUS CUsbDkFilterDevice::CreateFilterDevice(PWDFDEVICE_INIT DevInit)
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Entry");
 
-    auto status = DeviceInit.Configure(CUsbDkFilterDevice::QDRPreProcessWrap);
+    auto status = DeviceInit.Configure();
     if (!NT_SUCCESS(status))
     {
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Failed to create device init");
         return status;
     }
 
@@ -297,22 +267,14 @@ NTSTATUS CUsbDkFilterDevice::CreateFilterDevice(PWDFDEVICE_INIT DevInit)
     status = CWdfDevice::Create(DeviceInit, attr);
     if (!NT_SUCCESS(status))
     {
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Failed to create device");
         return status;
     }
 
     auto deviceContext = UsbDkFilterGetContext(m_Device);
     deviceContext->UsbDkFilter = this;
 
-    if (ShouldAttach())
-    {
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Attached");
-        return STATUS_SUCCESS;
-    }
-    else
-    {
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Not attached");
-        return STATUS_NOT_SUPPORTED;
-    }
+    return STATUS_SUCCESS;
 }
 
 void CUsbDkFilterDevice::ContextCleanup(_In_ WDFOBJECT DeviceObject)
@@ -325,18 +287,35 @@ void CUsbDkFilterDevice::ContextCleanup(_In_ WDFOBJECT DeviceObject)
     delete deviceContext->UsbDkFilter;
 }
 
-bool CUsbDkFilterDevice::ShouldAttach()
+bool CUsbDkFilterDevice::CStrategist::SelectStrategy(PDEVICE_OBJECT DevObj)
 {
     PAGED_CODE();
 
-    CWdfDeviceAccess devAccess(m_Device);
-    CObjHolder<CRegText> hwIDs(devAccess.GetHardwareIdProperty());
-    if (hwIDs)
+    CWdmDeviceAccess wdmAccess(DevObj);
+    CObjHolder<CRegText> ID = wdmAccess.GetDeviceID();
+
+    if (!ID)
     {
-        hwIDs->Dump();
-        return hwIDs->Match(L"USB\\ROOT_HUB") ||
-                hwIDs->Match(L"USB\\ROOT_HUB20");
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Failed to read device type");
+        return false;
     }
 
+    ID->Dump();
+
+    if ((ID->Match(L"USB\\ROOT_HUB") || ID->Match(L"USB\\ROOT_HUB20")))
+    {
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Assigning HUB strategy");
+        m_Strategy = &m_HubStrategy;
+        return true;
+    }
+
+    if (ID->MatchPrefix(L"USB\\"))
+    {
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Assigning redirected USB device strategy");
+        m_Strategy = &m_DevStrategy;
+        return true;
+    }
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Unsupported device type, no strategy assigned");
     return false;
 }

@@ -15,7 +15,7 @@ UsbDkDriverFile::UsbDkDriverFile(LPCTSTR lpFileName)
 
     if (m_hDriver == INVALID_HANDLE_VALUE)
     {
-        throw UsbDkDriverFileException(TEXT("Failed to open device symlink"));
+        throw UsbDkDriverFileException(tstring(TEXT("Failed to open device symlink ")) + lpFileName);
     }
 }
 //------------------------------------------------------------------------------------------------

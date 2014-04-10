@@ -99,6 +99,8 @@ NTSTATUS CIoControlIrp::SendSynchronously()
     if (res == STATUS_PENDING)
     {
         KeWaitForSingleObject(&m_Event, Executive, KernelMode, FALSE, nullptr);
+        return m_IoControlStatus.Status;
     }
-    return m_IoControlStatus.Status;
+
+    return res;
 }

@@ -1,6 +1,6 @@
-#include "RedirectorDevice.h"
+#include "RedirectorStrategy.h"
 #include "trace.h"
-#include "RedirectorDevice.tmh"
+#include "RedirectorStrategy.tmh"
 #include "FilterDevice.h"
 #include "UsbDkNames.h"
 

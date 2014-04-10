@@ -6,7 +6,7 @@
 #include "Alloc.h"
 #include "RegText.h"
 #include "Irp.h"
-#include "RedirectorDevice.h"
+#include "RedirectorStrategy.h"
 
 class CUsbDkControlDevice;
 class CUsbDkFilterDevice;

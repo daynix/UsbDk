@@ -67,7 +67,7 @@
     <ClInclude Include="UsbDkNames.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RedirectorDevice.h">
+    <ClInclude Include="RedirectorStrategy.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -102,7 +102,7 @@
     <ClCompile Include="UsbDkUtil.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RedirectorDevice.cpp">
+    <ClCompile Include="RedirectorStrategy.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

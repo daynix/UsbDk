@@ -3,12 +3,7 @@
 #include "RedirectorStrategy.tmh"
 #include "FilterDevice.h"
 #include "UsbDkNames.h"
-
-NTSTATUS CUsbDkFilterStrategy::PNPPreProcess(PIRP Irp)
-{
-    IoSkipCurrentIrpStackLocation(Irp);
-    return WdfDeviceWdmDispatchPreprocessedIrp(m_Owner->WdfObject(), Irp);
-}
+//--------------------------------------------------------------------------------------------------
 
 NTSTATUS CUsbDkRedirectorStrategy::MakeAvailable()
 {
@@ -22,6 +17,7 @@ NTSTATUS CUsbDkRedirectorStrategy::MakeAvailable()
 
     return status;
 }
+//--------------------------------------------------------------------------------------------------
 
 void CUsbDkRedirectorStrategy::PatchDeviceID(PIRP Irp)
 {
@@ -81,6 +77,7 @@ void CUsbDkRedirectorStrategy::PatchDeviceID(PIRP Irp)
         Irp->IoStatus.Information = reinterpret_cast<ULONG_PTR>(Result);
     }
 }
+//--------------------------------------------------------------------------------------------------
 
 NTSTATUS CUsbDkRedirectorStrategy::PNPPreProcess(PIRP Irp)
 {
@@ -105,3 +102,4 @@ NTSTATUS CUsbDkRedirectorStrategy::PNPPreProcess(PIRP Irp)
         return CUsbDkFilterStrategy::PNPPreProcess(Irp);
     }
 }
+//--------------------------------------------------------------------------------------------------

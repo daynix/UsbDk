@@ -89,8 +89,6 @@ UsbDkEvtDeviceAdd(
     _Inout_ PWDFDEVICE_INIT DeviceInit
     )
 {
-    UNREFERENCED_PARAMETER(Driver);
-
     PAGED_CODE();
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
@@ -98,6 +96,7 @@ UsbDkEvtDeviceAdd(
     auto FilterDevice = new CUsbDkFilterDevice();
     if (FilterDevice == nullptr)
     {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC! Failed to allocate filter device");
         return STATUS_INSUFFICIENT_RESOURCES;
     }
 

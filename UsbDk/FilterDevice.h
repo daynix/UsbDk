@@ -119,6 +119,7 @@ public:
 
 private:
     NTSTATUS InitializeFilterDevice(PWDFDEVICE_INIT DevInit);
+    NTSTATUS DefineStrategy();
     static void ContextCleanup(_In_ WDFOBJECT DeviceObject);
 
     WDFDRIVER m_Driver = WDF_NO_HANDLE;

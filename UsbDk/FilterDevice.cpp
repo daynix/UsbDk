@@ -222,8 +222,20 @@ NTSTATUS CUsbDkFilterDevice::Create(PWDFDEVICE_INIT DevInit, WDFDRIVER Driver)
         return status;
     }
 
+    status = DefineStrategy();
+    if (!NT_SUCCESS(status))
+    {
+        return status;
+    }
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Attached");
+    return STATUS_SUCCESS;
+}
+
+NTSTATUS CUsbDkFilterDevice::DefineStrategy()
+{
     m_Strategy.SetNullStrategy();
-    status = m_Strategy->Create(this);
+    auto status = m_Strategy->Create(this);
     if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Failed to create null strategy");
@@ -243,7 +255,6 @@ NTSTATUS CUsbDkFilterDevice::Create(PWDFDEVICE_INIT DevInit, WDFDRIVER Driver)
         return status;
     }
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Attached");
     return STATUS_SUCCESS;
 }
 

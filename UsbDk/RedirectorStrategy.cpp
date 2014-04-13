@@ -10,7 +10,7 @@ NTSTATUS CUsbDkFilterStrategy::PNPPreProcess(PIRP Irp)
     return WdfDeviceWdmDispatchPreprocessedIrp(m_Owner->WdfObject(), Irp);
 }
 
-NTSTATUS CUsbDkDevFilterStrategy::MakeAvailable()
+NTSTATUS CUsbDkRedirectorStrategy::MakeAvailable()
 {
     static DECLARE_CONST_UNICODE_STRING(ntDosDeviceName, USBDK_TEMP_REDIRECTOR_NAME);
 
@@ -23,7 +23,7 @@ NTSTATUS CUsbDkDevFilterStrategy::MakeAvailable()
     return status;
 }
 
-void CUsbDkDevFilterStrategy::PatchDeviceID(PIRP Irp)
+void CUsbDkRedirectorStrategy::PatchDeviceID(PIRP Irp)
 {
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Entry");
 
@@ -82,7 +82,7 @@ void CUsbDkDevFilterStrategy::PatchDeviceID(PIRP Irp)
     }
 }
 
-NTSTATUS CUsbDkDevFilterStrategy::PNPPreProcess(PIRP Irp)
+NTSTATUS CUsbDkRedirectorStrategy::PNPPreProcess(PIRP Irp)
 {
     PIO_STACK_LOCATION irpStack = IoGetCurrentIrpStackLocation(Irp);
     switch (irpStack->MinorFunction)

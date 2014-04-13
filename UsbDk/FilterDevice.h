@@ -136,7 +136,7 @@ private:
         CUsbDkFilterStrategy *m_Strategy = nullptr;
         CUsbDkNullFilterStrategy m_NullStrategy;
         CUsbDkHubFilterStrategy m_HubStrategy;
-        CUsbDkDevFilterStrategy m_DevStrategy;
+        CUsbDkRedirectorStrategy m_DevStrategy;
     } m_Strategy;
 
     CUsbDkFilterDevice(const CUsbDkFilterDevice&) = delete;

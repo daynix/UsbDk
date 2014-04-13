@@ -57,7 +57,7 @@ public:
     { return STATUS_SUCCESS; }
 };
 
-class CUsbDkDevFilterStrategy : public CUsbDkFilterStrategy
+class CUsbDkRedirectorStrategy : public CUsbDkFilterStrategy
 {
 public:
     virtual NTSTATUS Create(CUsbDkFilterDevice *Owner) override

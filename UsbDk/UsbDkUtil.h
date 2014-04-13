@@ -312,6 +312,10 @@ public:
     }
 
     operator PCUNICODE_STRING() const { return &m_String; };
+
+    NTSTATUS ToString(ULONG Val, ULONG Base)
+    { return RtlIntegerToUnicodeString(Val, Base, &m_String); }
+
 protected:
     CStringBase(const CStringBase&) = delete;
     CStringBase& operator= (const CStringBase&) = delete;
@@ -325,6 +329,14 @@ class CStringHolder : public CStringBase
 public:
     NTSTATUS Attach(NTSTRSAFE_PCWSTR String)
     { return RtlUnicodeStringInit(&m_String, String); }
+
+    NTSTATUS Attach(NTSTRSAFE_PCWSTR String, USHORT SizeInBytes)
+    {
+        m_String.Length = SizeInBytes;
+        m_String.MaximumLength = SizeInBytes;
+        m_String.Buffer = const_cast<PWCH>(String);
+        return RtlUnicodeStringValidate(&m_String);
+    }
 
     //This initialization may be done in-class without
     //constructor definition but MS compiler crashes with internal error
@@ -340,6 +352,9 @@ class CString : public CStringBase
 {
 public:
     NTSTATUS Create(NTSTRSAFE_PCWSTR String);
+    NTSTATUS Create(NTSTRSAFE_PCWSTR Prefix, ULONG Postfix);
+    NTSTATUS Append(PCUNICODE_STRING String);
+    NTSTATUS Append(ULONG Num, ULONG Base = 10);
     void Destroy();
 
     //This initialization may be done in-class without
@@ -351,6 +366,9 @@ public:
     { Destroy(); }
 
 private:
+
+    NTSTATUS Resize(USHORT NewLenBytes);
+
     CString(const CString&) = delete;
     CString& operator= (const CString&) = delete;
 };

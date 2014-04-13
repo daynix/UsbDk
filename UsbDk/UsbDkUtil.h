@@ -293,10 +293,10 @@ private:
     KEVENT m_Event;
 };
 
-class CStringComparator
+class CStringBase
 {
 public:
-    bool operator== (const CStringComparator &Other)
+    bool operator== (const CStringBase &Other)
     { return *this == Other.m_String; }
 
     bool operator== (const UNICODE_STRING& Str);
@@ -313,14 +313,14 @@ public:
 
     operator PCUNICODE_STRING() const { return &m_String; };
 protected:
-    CStringComparator(const CStringComparator&) = delete;
-    CStringComparator& operator= (const CStringComparator&) = delete;
-    CStringComparator() {};
-    ~CStringComparator() {};
+    CStringBase(const CStringBase&) = delete;
+    CStringBase& operator= (const CStringBase&) = delete;
+    CStringBase() {};
+    ~CStringBase() {};
 
     UNICODE_STRING m_String;
 };
-class CStringHolder : public CStringComparator
+class CStringHolder : public CStringBase
 {
 public:
     NTSTATUS Attach(NTSTRSAFE_PCWSTR String)
@@ -336,7 +336,7 @@ private:
     CStringHolder& operator= (const CStringHolder&) = delete;
 };
 
-class CString : public CStringComparator
+class CString : public CStringBase
 {
 public:
     NTSTATUS Create(NTSTRSAFE_PCWSTR String);

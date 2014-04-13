@@ -47,7 +47,7 @@ void CString::Destroy()
     }
 }
 
-bool CStringComparator::operator== (const UNICODE_STRING& Str)
+bool CStringBase::operator== (const UNICODE_STRING& Str)
 {
     if (m_String.Length != Str.Length)
     {

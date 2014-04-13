@@ -5,12 +5,6 @@
 class CUsbDkRedirectorStrategy : public CUsbDkFilterStrategy
 {
 public:
-    virtual NTSTATUS Create(CUsbDkFilterDevice *Owner) override
-    { return CUsbDkFilterStrategy::Create(Owner); }
-
-    virtual void Delete() override
-    {}
-
     virtual NTSTATUS MakeAvailable() override;
     virtual NTSTATUS PNPPreProcess(PIRP Irp) override;
 

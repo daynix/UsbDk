@@ -12,7 +12,7 @@ NTSTATUS CUsbDkRedirectorStrategy::MakeAvailable()
     auto status = m_Owner->CreateSymLink(ntDosDeviceName);
     if (!NT_SUCCESS(status))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Failed to create a symbolic link for redirector device (%!STATUS!)", status);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! Failed to create a symbolic link for redirector device (%!STATUS!)", status);
     }
 
     return status;
@@ -21,7 +21,7 @@ NTSTATUS CUsbDkRedirectorStrategy::MakeAvailable()
 
 void CUsbDkRedirectorStrategy::PatchDeviceID(PIRP Irp)
 {
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Entry");
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_REDIRECTOR, "%!FUNC! Entry");
 
     static const WCHAR RedirectorDeviceId[] = L"USB\\Vid_FEED&Pid_CAFE&Rev_0001";
     static const WCHAR RedirectorInstanceId[] = L"111222333";

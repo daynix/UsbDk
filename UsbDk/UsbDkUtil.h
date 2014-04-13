@@ -374,3 +374,22 @@ private:
 };
 
 PVOID DuplicateStaticBuffer(const void *Buffer, SIZE_T Length, POOL_TYPE PoolType = PagedPool);
+
+template<typename T>
+class CInstanceCounter
+{
+public:
+    CInstanceCounter()
+    {
+        static LONG volatile Counter = 0;
+        m_Number = InterlockedIncrement(&Counter);
+    }
+
+    operator ULONG() const { return static_cast<ULONG>(m_Number); };
+
+private:
+    LONG m_Number = 0;
+
+    CInstanceCounter(const CInstanceCounter&) = delete;
+    CInstanceCounter& operator= (const CInstanceCounter&) = delete;
+};

@@ -118,7 +118,7 @@ public:
     { return WdfDriverWdmGetDriverObject(m_Driver); }
 
 private:
-    NTSTATUS CreateFilterDevice(PWDFDEVICE_INIT DevInit);
+    NTSTATUS InitializeFilterDevice(PWDFDEVICE_INIT DevInit);
     static void ContextCleanup(_In_ WDFOBJECT DeviceObject);
 
     WDFDRIVER m_Driver = WDF_NO_HANDLE;

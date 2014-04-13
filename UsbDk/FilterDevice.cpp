@@ -216,7 +216,7 @@ NTSTATUS CUsbDkFilterDevice::Create(PWDFDEVICE_INIT DevInit, WDFDRIVER Driver)
 
     m_Driver = Driver;
 
-    auto status = CreateFilterDevice(DevInit);
+    auto status = InitializeFilterDevice(DevInit);
     if (!NT_SUCCESS(status))
     {
         return status;
@@ -247,7 +247,7 @@ NTSTATUS CUsbDkFilterDevice::Create(PWDFDEVICE_INIT DevInit, WDFDRIVER Driver)
     return STATUS_SUCCESS;
 }
 
-NTSTATUS CUsbDkFilterDevice::CreateFilterDevice(PWDFDEVICE_INIT DevInit)
+NTSTATUS CUsbDkFilterDevice::InitializeFilterDevice(PWDFDEVICE_INIT DevInit)
 {
     CUsbDkFilterDeviceInit DeviceInit(DevInit);
 

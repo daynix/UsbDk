@@ -19,3 +19,6 @@
 
 #define USBDK_TEMP_REDIRECTOR_NAME             TEXT("\\DosDevices\\UsbDkRedirectorTemp")
 #define USBDK_TEMP_REDIRECTOR_USERMODE_NAME    TEXT("\\\\.\\UsbDkRedirectorTemp")
+
+#define USBDK_HUB_FILTER_NAME_PREFIX             TEXT("\\DosDevices\\UsbDkHubFilter")
+#define USBDK_HUB_FILTER_USERMODE_NAME_PREFIX    TEXT("\\\\.\\UsbDkHubFilter")

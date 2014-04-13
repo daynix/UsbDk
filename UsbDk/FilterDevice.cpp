@@ -125,6 +125,11 @@ NTSTATUS CUsbDkHubFilterStrategy::PNPPreProcess(PIRP Irp)
     return CUsbDkFilterStrategy::PNPPreProcess(Irp);
 }
 
+NTSTATUS CUsbDkHubFilterStrategy::MakeAvailable()
+{
+    return m_Owner->CreatePerInstanceSymLink(USBDK_HUB_FILTER_NAME_PREFIX);
+}
+
 void CUsbDkHubFilterStrategy::DropRemovedDevices(const CDeviceRelations &Relations)
 {
     //Child device must be deleted on PASSIVE_LEVEL
@@ -286,6 +291,28 @@ NTSTATUS CUsbDkFilterDevice::InitializeFilterDevice(PWDFDEVICE_INIT DevInit)
     deviceContext->UsbDkFilter = this;
 
     return STATUS_SUCCESS;
+}
+
+NTSTATUS CUsbDkFilterDevice::CreatePerInstanceSymLink(PCWSTR Prefix)
+{
+    CString SymLinkName;
+
+    auto status = SymLinkName.Create(Prefix, GetInstanceNumber());
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Failed to allocate symbolic link name for filter device (%!STATUS!)", status);
+        return status;
+    }
+
+    status = CreateSymLink(*SymLinkName);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Failed to create a symbolic link for filter device (%!STATUS!)", status);
+        return status;
+    }
+
+    TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Filter is available via symlink %wZ", SymLinkName);
+    return status;
 }
 
 void CUsbDkFilterDevice::ContextCleanup(_In_ WDFOBJECT DeviceObject)

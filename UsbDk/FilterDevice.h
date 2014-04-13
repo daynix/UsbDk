@@ -74,8 +74,7 @@ class CUsbDkHubFilterStrategy : public CUsbDkFilterStrategy
 public:
     virtual NTSTATUS Create(CUsbDkFilterDevice *Owner) override;
     virtual void Delete() override;
-    virtual NTSTATUS MakeAvailable() override
-    { return STATUS_SUCCESS; }
+    virtual NTSTATUS MakeAvailable() override;
     virtual NTSTATUS PNPPreProcess(PIRP Irp) override;
 
 private:
@@ -117,6 +116,11 @@ public:
     PDRIVER_OBJECT GetDriverObject() const
     { return WdfDriverWdmGetDriverObject(m_Driver); }
 
+    ULONG GetInstanceNumber() const
+    { return m_InstanceNumber; }
+
+    NTSTATUS CreatePerInstanceSymLink(PCWSTR Prefix);
+
 private:
     NTSTATUS InitializeFilterDevice(PWDFDEVICE_INIT DevInit);
     NTSTATUS DefineStrategy();
@@ -141,6 +145,8 @@ private:
 
     CUsbDkFilterDevice(const CUsbDkFilterDevice&) = delete;
     CUsbDkFilterDevice& operator= (const CUsbDkFilterDevice&) = delete;
+
+    CInstanceCounter<CUsbDkFilterDevice> m_InstanceNumber;
 
     friend class CUsbDkFilterDeviceInit;
 };

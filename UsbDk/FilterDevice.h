@@ -26,10 +26,12 @@ class CUsbDkChildDevice : public CAllocatable<NonPagedPool, 'DCHR'>
 public:
     CUsbDkChildDevice(CRegText *DeviceID,
                       CRegText *InstanceID,
+                      ULONG Port,
                       const CUsbDkFilterDevice &ParentDevice,
                       PDEVICE_OBJECT PDO)
         : m_DeviceID(DeviceID)
         , m_InstanceID(InstanceID)
+        , m_Port(Port)
         , m_ParentDevice(ParentDevice)
         , m_PDO(PDO)
     {}
@@ -37,6 +39,8 @@ public:
     ULONG ParentID() const;
     PCWCHAR DeviceID() const { return *m_DeviceID->begin(); }
     PCWCHAR InstanceID() const { return *m_InstanceID->begin(); }
+    ULONG Port() const
+    { return m_Port; }
     PDEVICE_OBJECT PDO() const { return m_PDO; }
 
     bool Match(PCWCHAR deviceID, PCWCHAR instanceID) const
@@ -57,6 +61,7 @@ public:
 private:
     CObjHolder<CRegText> m_DeviceID;
     CObjHolder<CRegText> m_InstanceID;
+    ULONG m_Port;
     PDEVICE_OBJECT m_PDO;
     const CUsbDkFilterDevice &m_ParentDevice;
 

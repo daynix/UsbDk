@@ -148,6 +148,15 @@ void CUsbDkHubFilterStrategy::AddNewDevices(const CDeviceRelations &Relations)
 void CUsbDkHubFilterStrategy::RegisterNewChild(PDEVICE_OBJECT PDO)
 {
     CWdmDeviceAccess pdoAccess(PDO);
+
+    auto Port = pdoAccess.GetAddress();
+
+    if (Port == CWdmDeviceAccess::NO_ADDRESS)
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Cannot read device port number");
+        return;
+    }
+
     CObjHolder<CRegText> DevID(pdoAccess.GetDeviceID());
 
     if (!DevID || DevID->empty())
@@ -164,7 +173,7 @@ void CUsbDkHubFilterStrategy::RegisterNewChild(PDEVICE_OBJECT PDO)
         return;
     }
 
-    CUsbDkChildDevice *Device = new CUsbDkChildDevice(DevID, InstanceID, *m_Owner, PDO);
+    CUsbDkChildDevice *Device = new CUsbDkChildDevice(DevID, InstanceID, Port, *m_Owner, PDO);
 
     if (Device == nullptr)
     {

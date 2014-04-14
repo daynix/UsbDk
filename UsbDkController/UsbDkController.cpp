@@ -70,6 +70,7 @@ void Controller_EnumerateDevices()
         {
             tcout << to_tstring(deviceIndex) << TEXT(". ")
                   << TEXT("FilterID: ") << devicesArray[deviceIndex].FilterID << TEXT(", ")
+                  << TEXT("Port: ") << devicesArray[deviceIndex].Port << TEXT(", ")
                   << devicesArray[deviceIndex].ID.DeviceID << TEXT(" ")
                   << devicesArray[deviceIndex].ID.InstanceID
                   << endl;

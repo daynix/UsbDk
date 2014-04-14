@@ -20,4 +20,5 @@ typedef struct tag_USB_DK_DEVICE_INFO
 {
     USB_DK_DEVICE_ID ID;
     ULONG FilterID;
+    ULONG Port;
 } USB_DK_DEVICE_INFO, *PUSB_DK_DEVICE_INFO;

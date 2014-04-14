@@ -22,7 +22,8 @@ class UsbDkRedirectorAccess : public UsbDkDriverFile
 {
 public:
     UsbDkRedirectorAccess()
-        :UsbDkDriverFile(USBDK_TEMP_REDIRECTOR_USERMODE_NAME)
+        //TODO: Name with postfix needed
+        :UsbDkDriverFile(USBDK_REDIRECTOR_USERMODE_NAME_PREFIX)
     {}
 };
 //-----------------------------------------------------------------------------------

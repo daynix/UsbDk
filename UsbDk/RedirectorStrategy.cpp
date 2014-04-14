@@ -7,15 +7,7 @@
 
 NTSTATUS CUsbDkRedirectorStrategy::MakeAvailable()
 {
-    static DECLARE_CONST_UNICODE_STRING(ntDosDeviceName, USBDK_TEMP_REDIRECTOR_NAME);
-
-    auto status = m_Owner->CreateSymLink(ntDosDeviceName);
-    if (!NT_SUCCESS(status))
-    {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! Failed to create a symbolic link for redirector device (%!STATUS!)", status);
-    }
-
-    return status;
+    return m_Owner->CreatePerInstanceSymLink(USBDK_REDIRECTOR_NAME_PREFIX);
 }
 //--------------------------------------------------------------------------------------------------
 

@@ -17,8 +17,8 @@
 #define USBDK_DOSDEVICE_NAME    TEXT("\\DosDevices\\") USBDK_DRIVER_NAME
 #define USBDK_USERMODE_NAME     TEXT("\\\\.\\") USBDK_DRIVER_NAME
 
-#define USBDK_TEMP_REDIRECTOR_NAME             TEXT("\\DosDevices\\UsbDkRedirectorTemp")
-#define USBDK_TEMP_REDIRECTOR_USERMODE_NAME    TEXT("\\\\.\\UsbDkRedirectorTemp")
+#define USBDK_REDIRECTOR_NAME_PREFIX             TEXT("\\DosDevices\\UsbDkRedirector")
+#define USBDK_REDIRECTOR_USERMODE_NAME_PREFIX    TEXT("\\\\.\\UsbDkRedirector")
 
 #define USBDK_HUB_FILTER_NAME_PREFIX             TEXT("\\DosDevices\\UsbDkHubFilter")
 #define USBDK_HUB_FILTER_USERMODE_NAME_PREFIX    TEXT("\\\\.\\UsbDkHubFilter")

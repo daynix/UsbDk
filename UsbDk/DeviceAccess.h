@@ -14,12 +14,20 @@ public:
     CRegText *GetInstanceID() { return QueryBusIDWrapped<CRegSz>(BusQueryInstanceID); }
     CRegText *GetHardwareIDs() { return QueryBusIDWrapped<CRegMultiSz>(BusQueryHardwareIDs); }
 
+    enum : ULONG
+    {
+        NO_ADDRESS = (ULONG) -1
+    };
+
+    ULONG     GetAddress();
+
     virtual ~CDeviceAccess()
     {}
 
 protected:
     virtual CMemoryBuffer *GetDeviceProperty(DEVICE_REGISTRY_PROPERTY propertyId) = 0;
     virtual PWCHAR QueryBusID(BUS_QUERY_ID_TYPE idType) = 0;
+    virtual NTSTATUS QueryCapabilities(DEVICE_CAPABILITIES &Capabilities) = 0;
 
     CDeviceAccess()
     {}
@@ -48,6 +56,7 @@ public:
 private:
     virtual CMemoryBuffer *GetDeviceProperty(DEVICE_REGISTRY_PROPERTY propertyId) override;
     virtual PWCHAR QueryBusID(BUS_QUERY_ID_TYPE idType) override;
+    virtual NTSTATUS QueryCapabilities(DEVICE_CAPABILITIES &Capabilities) override;
 
     WDFDEVICE m_DevObj;
 };
@@ -71,6 +80,7 @@ protected:
 private:
     virtual CMemoryBuffer *GetDeviceProperty(DEVICE_REGISTRY_PROPERTY propertyId) override;
     virtual PWCHAR QueryBusID(BUS_QUERY_ID_TYPE idType) override;
+    virtual NTSTATUS QueryCapabilities(DEVICE_CAPABILITIES &Capabilities) override;
 
     static PWCHAR MakeNonPagedDuplicate(BUS_QUERY_ID_TYPE idType, PWCHAR idData);
     static SIZE_T GetIdBufferLength(BUS_QUERY_ID_TYPE idType, PWCHAR idData);

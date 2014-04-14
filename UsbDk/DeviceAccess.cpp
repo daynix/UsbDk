@@ -6,11 +6,30 @@
 
 #include "UsbIOCtl.h"
 
+ULONG CDeviceAccess::GetAddress()
+{
+    DEVICE_CAPABILITIES Capabilities;
+
+    if (!NT_SUCCESS(QueryCapabilities(Capabilities)))
+    {
+        return NO_ADDRESS;
+    }
+
+    return Capabilities.Address;
+}
+
 PWCHAR CWdfDeviceAccess::QueryBusID(BUS_QUERY_ID_TYPE idType)
 {
     UNREFERENCED_PARAMETER(idType);
     ASSERT(!"NOT IMPLEMENTED");
     return NULL;
+}
+
+NTSTATUS CWdfDeviceAccess::QueryCapabilities(DEVICE_CAPABILITIES &Capabilities)
+{
+    UNREFERENCED_PARAMETER(Capabilities);
+    ASSERT(!"NOT IMPLEMENTED");
+    return STATUS_NOT_IMPLEMENTED;
 }
 
 CMemoryBuffer *CWdfDeviceAccess::GetDeviceProperty(DEVICE_REGISTRY_PROPERTY propertyId)
@@ -66,6 +85,36 @@ PWCHAR CWdmDeviceAccess::QueryBusID(BUS_QUERY_ID_TYPE idType)
     idData = MakeNonPagedDuplicate(idType, idData);
 
     return idData;
+}
+
+NTSTATUS CWdmDeviceAccess::QueryCapabilities(DEVICE_CAPABILITIES &Capabilities)
+{
+    CIrp irp;
+
+    auto status = irp.Create(m_DevObj);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVACCESS, "%!FUNC! Error %!STATUS! during IRP creation", status);
+        return status;
+    }
+
+    Capabilities = {};
+    Capabilities.Size = sizeof(Capabilities);
+
+    irp.Configure([&Capabilities](PIO_STACK_LOCATION s)
+                  {
+                      s->MajorFunction = IRP_MJ_PNP;
+                      s->MinorFunction = IRP_MN_QUERY_CAPABILITIES;
+                      s->Parameters.DeviceCapabilities.Capabilities = &Capabilities;
+                  });
+
+    status = irp.SendSynchronously();
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVACCESS, "%!FUNC! Error %!STATUS! during capabilities query", status);
+    }
+
+    return status;
 }
 
 SIZE_T CWdmDeviceAccess::GetIdBufferLength(BUS_QUERY_ID_TYPE idType, PWCHAR idData)

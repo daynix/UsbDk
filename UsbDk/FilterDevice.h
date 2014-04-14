@@ -34,6 +34,7 @@ public:
         , m_PDO(PDO)
     {}
 
+    ULONG ParentID() const;
     PCWCHAR DeviceID() const { return *m_DeviceID->begin(); }
     PCWCHAR InstanceID() const { return *m_InstanceID->begin(); }
     PDEVICE_OBJECT PDO() const { return m_PDO; }

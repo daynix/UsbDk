@@ -199,6 +199,11 @@ void CUsbDkHubFilterStrategy::ApplyRedirectionPolicy(CUsbDkChildDevice &Device)
     }
 }
 
+ULONG CUsbDkChildDevice::ParentID() const
+{
+    return m_ParentDevice.GetInstanceNumber();
+}
+
 bool CUsbDkChildDevice::MakeRedirected()
 {
     if (!CreateRedirectorDevice())

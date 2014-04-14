@@ -198,6 +198,8 @@ bool CUsbDkControlDevice::EnumerateDevices(USB_DK_DEVICE_INFO *outBuff, size_t n
 
                                    wcsncpy(outBuff->ID.DeviceID, Child->DeviceID(), MAX_DEVICE_ID_LEN);
                                    wcsncpy(outBuff->ID.InstanceID, Child->InstanceID(), MAX_DEVICE_ID_LEN);
+                                   outBuff->FilterID = Child->ParentID();
+
                                    outBuff++;
                                    numberExistingDevices++;
                                    return true;

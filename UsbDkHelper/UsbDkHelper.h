@@ -26,8 +26,8 @@ extern "C" {
 #endif
     DLL InstallResult    InstallDriver(void);
     DLL BOOL             UninstallDriver(void);
-    DLL BOOL             GetDevicesList(PUSB_DK_DEVICE_ID *DevicesArray, ULONG *NumberDevices);
-    DLL void             ReleaseDeviceList(PUSB_DK_DEVICE_ID DevicesArray);
+    DLL BOOL             GetDevicesList(PUSB_DK_DEVICE_INFO *DevicesArray, ULONG *NumberDevices);
+    DLL void             ReleaseDeviceList(PUSB_DK_DEVICE_INFO DevicesArray);
 
     DLL HANDLE           StartRedirect(PUSB_DK_DEVICE_ID DeviceID);
     DLL BOOL             StopRedirect(HANDLE DeviceHandle);

@@ -8,6 +8,7 @@
 #include "FilterDevice.h"
 
 typedef struct tag_USB_DK_DEVICE_ID USB_DK_DEVICE_ID;
+typedef struct tag_USB_DK_DEVICE_INFO USB_DK_DEVICE_INFO;
 class CUsbDkFilterDevice;
 class CWdfRequest;
 
@@ -72,7 +73,7 @@ public:
     { m_FilterDevices.Remove(&FilterDevice); }
 
     ULONG CountDevices();
-    bool EnumerateDevices(USB_DK_DEVICE_ID *outBuff, size_t numberAllocatedDevices, size_t &numberExistingDevices);
+    bool EnumerateDevices(USB_DK_DEVICE_INFO *outBuff, size_t numberAllocatedDevices, size_t &numberExistingDevices);
     NTSTATUS ResetUsbDevice(const USB_DK_DEVICE_ID &DeviceId);
     NTSTATUS AddRedirect(const USB_DK_DEVICE_ID &DeviceId);
     NTSTATUS RemoveRedirect(const USB_DK_DEVICE_ID &DeviceId);

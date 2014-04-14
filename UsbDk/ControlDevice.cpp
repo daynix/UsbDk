@@ -110,7 +110,7 @@ void CUsbDkControlDeviceQueue::CountDevices(CWdfRequest &Request, WDFQUEUE Queue
 
 void CUsbDkControlDeviceQueue::EnumerateDevices(CWdfRequest &Request, WDFQUEUE Queue)
 {
-    USB_DK_DEVICE_ID *existingDevices;
+    USB_DK_DEVICE_INFO *existingDevices;
     size_t  numberExistingDevices = 0;
     size_t numberAllocatedDevices;
 
@@ -128,7 +128,7 @@ void CUsbDkControlDeviceQueue::EnumerateDevices(CWdfRequest &Request, WDFQUEUE Q
 
     if (res)
     {
-        Request.SetOutputDataLen(numberExistingDevices * sizeof(USB_DK_DEVICE_ID));
+        Request.SetOutputDataLen(numberExistingDevices * sizeof(USB_DK_DEVICE_INFO));
         Request.SetStatus(STATUS_SUCCESS);
     }
     else
@@ -183,7 +183,7 @@ ULONG CUsbDkControlDevice::CountDevices()
 }
 //------------------------------------------------------------------------------------------------------------
 
-bool CUsbDkControlDevice::EnumerateDevices(USB_DK_DEVICE_ID *outBuff, size_t numberAllocatedDevices, size_t &numberExistingDevices)
+bool CUsbDkControlDevice::EnumerateDevices(USB_DK_DEVICE_INFO *outBuff, size_t numberAllocatedDevices, size_t &numberExistingDevices)
 {
     numberExistingDevices = 0;
 
@@ -196,8 +196,8 @@ bool CUsbDkControlDevice::EnumerateDevices(USB_DK_DEVICE_ID *outBuff, size_t num
                                        return false;
                                    }
 
-                                   wcsncpy(outBuff->DeviceID, Child->DeviceID(), MAX_DEVICE_ID_LEN);
-                                   wcsncpy(outBuff->InstanceID, Child->InstanceID(), MAX_DEVICE_ID_LEN);
+                                   wcsncpy(outBuff->ID.DeviceID, Child->DeviceID(), MAX_DEVICE_ID_LEN);
+                                   wcsncpy(outBuff->ID.InstanceID, Child->InstanceID(), MAX_DEVICE_ID_LEN);
                                    outBuff++;
                                    numberExistingDevices++;
                                    return true;

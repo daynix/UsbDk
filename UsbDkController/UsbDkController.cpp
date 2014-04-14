@@ -59,7 +59,7 @@ void Controller_UninstallDriver()
 
 void Controller_EnumerateDevices()
 {
-    PUSB_DK_DEVICE_ID   devicesArray;
+    PUSB_DK_DEVICE_INFO devicesArray;
     ULONG               numberDevices;
     tcout << TEXT("Enumerate USB devices") << endl;
     if (GetDevicesList(&devicesArray, &numberDevices))
@@ -68,7 +68,10 @@ void Controller_EnumerateDevices()
 
         for (ULONG deviceIndex = 0; deviceIndex < numberDevices; ++deviceIndex)
         {
-            tcout << to_tstring(deviceIndex) + TEXT(". ") + devicesArray[deviceIndex].DeviceID + TEXT(" ") + devicesArray[deviceIndex].InstanceID << endl;
+            tcout << to_tstring(deviceIndex) << TEXT(". ")
+                  << devicesArray[deviceIndex].ID.DeviceID << TEXT(" ")
+                  << devicesArray[deviceIndex].ID.InstanceID
+                  << endl;
         }
 
         ReleaseDeviceList(devicesArray);

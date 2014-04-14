@@ -24,8 +24,8 @@ public:
         : UsbDkDriverFile(USBDK_USERMODE_NAME)
     {}
 
-    void GetDevicesList(PUSB_DK_DEVICE_ID &DevicesArray, ULONG &NumberDevice);
-    static void ReleaseDeviceList(PUSB_DK_DEVICE_ID DevicesArray);
+    void GetDevicesList(PUSB_DK_DEVICE_INFO &DevicesArray, ULONG &NumberDevice);
+    static void ReleaseDeviceList(PUSB_DK_DEVICE_INFO DevicesArray);
 
     void AddRedirect(USB_DK_DEVICE_ID &DeviceID);
     void RemoveRedirect(USB_DK_DEVICE_ID &DeviceID);

@@ -54,7 +54,7 @@ BOOL UninstallDriver(void)
 }
 //-------------------------------------------------------------------------------------------
 
-BOOL GetDevicesList(PUSB_DK_DEVICE_ID *DevicesArray, ULONG *NumberDevices)
+BOOL GetDevicesList(PUSB_DK_DEVICE_INFO *DevicesArray, ULONG *NumberDevices)
 {
     try
     {
@@ -70,7 +70,7 @@ BOOL GetDevicesList(PUSB_DK_DEVICE_ID *DevicesArray, ULONG *NumberDevices)
 }
 //-------------------------------------------------------------------------------------------
 
-void ReleaseDeviceList(PUSB_DK_DEVICE_ID DevicesArray)
+void ReleaseDeviceList(PUSB_DK_DEVICE_INFO DevicesArray)
 {
     try
     {

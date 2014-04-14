@@ -4,7 +4,7 @@
 
 //------------------------------------------------------------------------------------------------
 
-void UsbDkDriverAccess::GetDevicesList(PUSB_DK_DEVICE_ID &DevicesArray, ULONG &NumberDevice)
+void UsbDkDriverAccess::GetDevicesList(PUSB_DK_DEVICE_INFO &DevicesArray, ULONG &NumberDevice)
 {
     DevicesArray = nullptr;
     for (;;)
@@ -26,14 +26,14 @@ void UsbDkDriverAccess::GetDevicesList(PUSB_DK_DEVICE_ID &DevicesArray, ULONG &N
 
         // get list of devices
         delete DevicesArray;
-        DevicesArray = new USB_DK_DEVICE_ID[NumberDevice];
+        DevicesArray = new USB_DK_DEVICE_INFO[NumberDevice];
 
         if (!DeviceIoControl(m_hDriver,
             IOCTL_USBDK_ENUM_DEVICES,
             nullptr,
             0,
             DevicesArray,
-            NumberDevice * sizeof(USB_DK_DEVICE_ID),
+            NumberDevice * sizeof(USB_DK_DEVICE_INFO),
             &bytesReturned,
             nullptr))
         {
@@ -47,12 +47,12 @@ void UsbDkDriverAccess::GetDevicesList(PUSB_DK_DEVICE_ID &DevicesArray, ULONG &N
                 UsbDkDriverAccessException(TEXT("Enumeration failed in IOCTL_USBDK_ENUM_DEVICES."), err);
             }
         }
-        NumberDevice = bytesReturned / sizeof(USB_DK_DEVICE_ID);
+        NumberDevice = bytesReturned / sizeof(USB_DK_DEVICE_INFO);
         break;
     }
 }
 //------------------------------------------------------------------------------------------------
-void UsbDkDriverAccess::ReleaseDeviceList(PUSB_DK_DEVICE_ID DevicesArray)
+void UsbDkDriverAccess::ReleaseDeviceList(PUSB_DK_DEVICE_INFO DevicesArray)
 {
     delete[] DevicesArray;
 }

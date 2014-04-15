@@ -196,8 +196,8 @@ bool CUsbDkControlDevice::EnumerateDevices(USB_DK_DEVICE_INFO *outBuff, size_t n
                                        return false;
                                    }
 
-                                   wcsncpy(outBuff->ID.DeviceID, Child->DeviceID(), MAX_DEVICE_ID_LEN);
-                                   wcsncpy(outBuff->ID.InstanceID, Child->InstanceID(), MAX_DEVICE_ID_LEN);
+                                   UsbDkFillIDStruct(&outBuff->ID, Child->DeviceID(), Child->InstanceID());
+
                                    outBuff->FilterID = Child->ParentID();
                                    outBuff->Port = Child->Port();
 

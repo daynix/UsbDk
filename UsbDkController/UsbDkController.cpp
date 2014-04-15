@@ -88,8 +88,7 @@ void Controller_EnumerateDevices()
 void Controller_RedirectDevice(_TCHAR *DeviceID, _TCHAR *InstanceID)
 {
     USB_DK_DEVICE_ID   deviceID;
-    wcscpy_s(deviceID.DeviceID, MAX_DEVICE_ID_LEN, tstring2wstring(DeviceID));
-    wcscpy_s(deviceID.InstanceID, MAX_DEVICE_ID_LEN, tstring2wstring(InstanceID));
+    UsbDkFillIDStruct(&deviceID, tstring2wstring(DeviceID), tstring2wstring(InstanceID));
 
     tcout << TEXT("Redirect USB device ") << deviceID.DeviceID << TEXT(", ") << deviceID.InstanceID << endl;
 

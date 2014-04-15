@@ -16,6 +16,13 @@ typedef struct tag_USB_DK_DEVICE_ID
     WCHAR InstanceID[MAX_DEVICE_ID_LEN];
 } USB_DK_DEVICE_ID, *PUSB_DK_DEVICE_ID;
 
+static inline
+void UsbDkFillIDStruct(USB_DK_DEVICE_ID *ID, PCWCHAR DeviceID, PCWCHAR InstanceID)
+{
+    wcsncpy_s(ID->DeviceID, DeviceID, MAX_DEVICE_ID_LEN);
+    wcsncpy_s(ID->InstanceID, InstanceID, MAX_DEVICE_ID_LEN);
+}
+
 typedef struct tag_USB_DK_DEVICE_INFO
 {
     USB_DK_DEVICE_ID ID;

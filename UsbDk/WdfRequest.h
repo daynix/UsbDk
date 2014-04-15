@@ -15,15 +15,15 @@ public:
     }
 
     template <typename TObject>
-    NTSTATUS FetchInputObject(TObject &objectPtr)
+    NTSTATUS FetchInputObject(TObject &objectPtr, size_t *Length = nullptr)
     {
-        return WdfRequestRetrieveInputBuffer(m_Request, sizeof(*objectPtr), (PVOID *)&objectPtr, nullptr);
+        return WdfRequestRetrieveInputBuffer(m_Request, sizeof(*objectPtr), (PVOID *)&objectPtr, Length);
     }
 
     template <typename TObject>
-    NTSTATUS FetchOutputObject(TObject &objectPtr)
+    NTSTATUS FetchOutputObject(TObject &objectPtr, size_t *Length = nullptr)
     {
-        return WdfRequestRetrieveOutputBuffer(m_Request, sizeof(*objectPtr), (PVOID *)&objectPtr, nullptr);
+        return WdfRequestRetrieveOutputBuffer(m_Request, sizeof(*objectPtr), (PVOID *)&objectPtr, Length);
     }
 
     template <typename TObject>

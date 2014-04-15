@@ -31,6 +31,15 @@ public:
     void RemoveRedirect(USB_DK_DEVICE_ID &DeviceID);
 
 private:
-    void SendIoctlWithDeviceId(DWORD ControlCode, USB_DK_DEVICE_ID &Id);
+    template <typename TOutputObj = char>
+    void SendIoctlWithDeviceId(DWORD ControlCode, USB_DK_DEVICE_ID &Id, TOutputObj* Output = nullptr)
+    {
+        DWORD bytesReturned;
+        if (!DeviceIoControl(m_hDriver, ControlCode, &Id, sizeof(Id),
+                             Output, sizeof(*Output), &bytesReturned, nullptr))
+        {
+            throw UsbDkDriverAccessException(TEXT("Ioctl failed"));
+        }
+    }
 };
 //-----------------------------------------------------------------------------------

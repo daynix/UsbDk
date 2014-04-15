@@ -75,15 +75,3 @@ void UsbDkDriverAccess::RemoveRedirect(USB_DK_DEVICE_ID &DeviceID)
     Sleep(3000); // 3 seconds wait after reset
 }
 //------------------------------------------------------------------------------------------------
-
-void UsbDkDriverAccess::SendIoctlWithDeviceId(DWORD ControlCode,
-                                              USB_DK_DEVICE_ID &Id)
-{
-    DWORD   bytesReturned;
-    if (!DeviceIoControl(m_hDriver, ControlCode, &Id, sizeof(Id),
-                         nullptr, 0, &bytesReturned, nullptr))
-    {
-        throw UsbDkDriverAccessException(TEXT("Ioctl failed"));
-    }
-}
-//------------------------------------------------------------------------------------------------

@@ -138,6 +138,41 @@ void CUsbDkControlDeviceQueue::EnumerateDevices(CWdfRequest &Request, WDFQUEUE Q
 }
 //------------------------------------------------------------------------------------------------------------
 
+template <typename TOutputObj>
+static void CUsbDkControlDeviceQueue::DoUSBDeviceOp(CWdfRequest &Request,
+                                                    WDFQUEUE Queue,
+                                                    USBDevControlMethodWithOutput<TOutputObj> Method)
+{
+    TOutputObj *output;
+    size_t outputLength;
+
+    auto status = Request.FetchOutputObject(output, &outputLength);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! Failed to fetch output buffer. %!STATUS!", status);
+        Request.SetOutputDataLen(0);
+        Request.SetStatus(status);
+        return;
+    }
+
+    USB_DK_DEVICE_ID *deviceId;
+    status = Request.FetchInputObject(deviceId);
+    if (NT_SUCCESS(status))
+    {
+        auto devExt = UsbDkControlGetContext(WdfIoQueueGetDevice(Queue));
+        status = (devExt->UsbDkControl->*Method)(*deviceId, output, &outputLength);
+    }
+
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! Fail with code: %!STATUS!", status);
+    }
+
+    Request.SetOutputDataLen(outputLength);
+    Request.SetStatus(status);
+}
+//------------------------------------------------------------------------------------------------------------
+
 void CUsbDkControlDeviceQueue::DoUSBDeviceOp(CWdfRequest &Request, WDFQUEUE Queue, USBDevControlMethod Method)
 {
     USB_DK_DEVICE_ID *deviceId;

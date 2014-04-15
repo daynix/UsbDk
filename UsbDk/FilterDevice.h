@@ -84,7 +84,6 @@ public:
     virtual NTSTATUS PNPPreProcess(PIRP Irp) override;
 
 private:
-    CUsbDkControlDevice *m_ControlDevice = nullptr;
     void DropRemovedDevices(const CDeviceRelations &Relations);
     void AddNewDevices(const CDeviceRelations &Relations);
     void RegisterNewChild(PDEVICE_OBJECT PDO);

@@ -47,13 +47,6 @@ NTSTATUS CUsbDkHubFilterStrategy::Create(CUsbDkFilterDevice *Owner)
         return status;
     }
 
-    m_ControlDevice = CUsbDkControlDevice::Reference(Owner->GetDriverHandle());
-    if (m_ControlDevice == nullptr)
-    {
-        CUsbDkFilterStrategy::Delete();
-        return STATUS_INSUFFICIENT_RESOURCES;
-    }
-
     m_ControlDevice->RegisterFilter(*Owner);
     return STATUS_SUCCESS;
 }
@@ -63,7 +56,6 @@ void CUsbDkHubFilterStrategy::Delete()
     if (m_ControlDevice != nullptr)
     {
         m_ControlDevice->UnregisterFilter(*m_Owner);
-        CUsbDkControlDevice::Release();
     }
 }
 

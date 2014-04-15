@@ -6,17 +6,13 @@
 
 class CUsbDkFilterDevice;
 class CUsbDkChildDevice;
+class CUsbDkControlDevice;
 
 class CUsbDkFilterStrategy
 {
 public:
-    virtual NTSTATUS Create(CUsbDkFilterDevice *Owner)
-    {
-        m_Owner = Owner;
-        return STATUS_SUCCESS;
-    }
-    virtual void Delete()
-    {}
+    virtual NTSTATUS Create(CUsbDkFilterDevice *Owner);
+    virtual void Delete();
     virtual NTSTATUS PNPPreProcess(PIRP Irp);
 
     virtual NTSTATUS MakeAvailable() = 0;
@@ -28,6 +24,7 @@ public:
 
 protected:
     CUsbDkFilterDevice *m_Owner = nullptr;
+    CUsbDkControlDevice *m_ControlDevice = nullptr;
 
     template<typename PostProcessFuncT>
     NTSTATUS PostProcessOnSuccess(PIRP Irp, PostProcessFuncT PostProcessFunc)
@@ -54,6 +51,15 @@ private:
 class CUsbDkNullFilterStrategy : public CUsbDkFilterStrategy
 {
 public:
+    virtual NTSTATUS Create(CUsbDkFilterDevice *Owner)
+    {
+        m_Owner = Owner;
+        return STATUS_SUCCESS;
+    }
+
+    virtual void Delete()
+    {}
+
     virtual NTSTATUS MakeAvailable() override
     { return STATUS_SUCCESS; }
 };

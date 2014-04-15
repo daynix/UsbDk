@@ -3,11 +3,36 @@
 #include "RedirectorStrategy.tmh"
 #include "FilterDevice.h"
 #include "UsbDkNames.h"
+#include "ControlDevice.h"
 //--------------------------------------------------------------------------------------------------
 
 NTSTATUS CUsbDkRedirectorStrategy::MakeAvailable()
 {
-    return m_Owner->CreatePerInstanceSymLink(USBDK_REDIRECTOR_NAME_PREFIX);
+    auto status = m_Owner->CreatePerInstanceSymLink(USBDK_REDIRECTOR_NAME_PREFIX);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_REDIRECTOR, "%!FUNC! Cannot create symlink");
+        return status;
+    }
+
+    status = m_ControlDevice->NotifyRedirectorAttached(m_DeviceID, m_InstanceID, m_Owner->GetInstanceNumber());
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_REDIRECTOR, "%!FUNC! Failed to raise creation notification");
+    }
+
+    return status;
+}
+//--------------------------------------------------------------------------------------------------
+
+void CUsbDkRedirectorStrategy::Delete()
+{
+    if (m_ControlDevice)
+    {
+        m_ControlDevice->NotifyRedirectorDetached(m_DeviceID, m_InstanceID);
+    }
+
+    CUsbDkFilterStrategy::Delete();
 }
 //--------------------------------------------------------------------------------------------------
 

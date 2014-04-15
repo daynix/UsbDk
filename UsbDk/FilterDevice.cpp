@@ -327,31 +327,39 @@ bool CUsbDkFilterDevice::CStrategist::SelectStrategy(PDEVICE_OBJECT DevObj)
 {
     PAGED_CODE();
 
-    CWdmDeviceAccess wdmAccess(DevObj);
-    CObjHolder<CRegText> ID = wdmAccess.GetDeviceID();
-
-    if (!ID)
+    CObjHolder<CRegText> DevID;
+    if (!UsbDkGetWdmDeviceIdentity(DevObj, &DevID, nullptr))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Failed to read device type");
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Cannot query device ID");
         return false;
     }
 
-    ID->Dump();
+    DevID->Dump();
 
-    if ((ID->Match(L"USB\\ROOT_HUB") || ID->Match(L"USB\\ROOT_HUB20")))
+    if ((DevID->Match(L"USB\\ROOT_HUB") || DevID->Match(L"USB\\ROOT_HUB20")))
     {
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Assigning HUB strategy");
         m_Strategy = &m_HubStrategy;
         return true;
     }
 
-    if (ID->MatchPrefix(L"USB\\"))
+    if (!DevID->MatchPrefix(L"USB\\"))
     {
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Assigning redirected USB device strategy");
-        m_Strategy = &m_DevStrategy;
-        return true;
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Unsupported device type, no strategy assigned");
+        return false;
     }
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Unsupported device type, no strategy assigned");
-    return false;
+    CObjHolder<CRegText> InstanceID;
+    if (!UsbDkGetWdmDeviceIdentity(DevObj, nullptr, &InstanceID))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Cannot query instance ID");
+        return false;
+    }
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Assigning redirected USB device strategy");
+    m_DevStrategy.SetDeviceID(DevID.detach());
+    m_DevStrategy.SetInstanceID(InstanceID.detach());
+    m_Strategy = &m_DevStrategy;
+
+    return true;
 }

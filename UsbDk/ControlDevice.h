@@ -106,6 +106,9 @@ public:
     bool ShouldRedirect(const CUsbDkChildDevice &Dev)
     { return m_Redirections.Contains(&Dev); }
 
+    bool NotifyRedirectorAttached(CRegText *DeviceID, CRegText *InstanceID, ULONG RedrectorID);
+    bool NotifyRedirectorDetached(CRegText *DeviceID, CRegText *InstanceID);
+
 private:
     CObjHolder<CUsbDkControlDeviceQueue> m_DeviceQueue;
     static CRefCountingHolder<CUsbDkControlDevice> *m_UsbDkControlDevice;

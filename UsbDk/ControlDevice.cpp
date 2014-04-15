@@ -440,6 +440,24 @@ NTSTATUS CUsbDkControlDevice::RemoveRedirect(const USB_DK_DEVICE_ID &DeviceId)
 }
 //-------------------------------------------------------------------------------------------------------------
 
+bool CUsbDkControlDevice::NotifyRedirectorAttached(CRegText *DeviceID, CRegText *InstanceID, ULONG RedrectorID)
+{
+    USB_DK_DEVICE_ID ID;
+    UsbDkFillIDStruct(&ID, *DeviceID->begin(), *InstanceID->begin());
+
+    return m_Redirections.ModifyOne(&ID, [RedrectorID](CUsbDkRedirection *R){ R->NotifyRedirectorCreated(RedrectorID); });
+}
+//-------------------------------------------------------------------------------------------------------------
+
+bool CUsbDkControlDevice::NotifyRedirectorDetached(CRegText *DeviceID, CRegText *InstanceID)
+{
+    USB_DK_DEVICE_ID ID;
+    UsbDkFillIDStruct(&ID, *DeviceID->begin(), *InstanceID->begin());
+
+    return m_Redirections.ModifyOne(&ID, [](CUsbDkRedirection *R){ R->NotifyRedirectorDeleted(); });
+}
+//-------------------------------------------------------------------------------------------------------------
+
 NTSTATUS CUsbDkRedirection::Create(const USB_DK_DEVICE_ID &Id)
 {
     auto status = m_DeviceID.Create(Id.DeviceID);

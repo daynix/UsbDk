@@ -102,7 +102,7 @@ public:
     ULONG CountDevices();
     bool EnumerateDevices(USB_DK_DEVICE_INFO *outBuff, size_t numberAllocatedDevices, size_t &numberExistingDevices);
     NTSTATUS ResetUsbDevice(const USB_DK_DEVICE_ID &DeviceId);
-    NTSTATUS AddRedirect(const USB_DK_DEVICE_ID &DeviceId);
+    NTSTATUS AddRedirect(const USB_DK_DEVICE_ID &DeviceId, PULONG RedirectorID, size_t *OutputBuffLen);
     NTSTATUS RemoveRedirect(const USB_DK_DEVICE_ID &DeviceId);
 
     static bool Allocate();
@@ -135,7 +135,8 @@ private:
     bool UsbDeviceExists(const USB_DK_DEVICE_ID &ID);
 
     static void ContextCleanup(_In_ WDFOBJECT DeviceObject);
-    NTSTATUS AddDeviceToSet(const USB_DK_DEVICE_ID &DeviceId);
+    NTSTATUS AddDeviceToSet(const USB_DK_DEVICE_ID &DeviceId, CUsbDkRedirection **NewRedirection);
+    void AddRedirectRollBack(const USB_DK_DEVICE_ID &DeviceId, bool WithReset);
 };
 
 typedef struct _USBDK_CONTROL_DEVICE_EXTENSION {

@@ -83,17 +83,51 @@ void ReleaseDeviceList(PUSB_DK_DEVICE_INFO DevicesArray)
 }
 //-------------------------------------------------------------------------------------------
 
+static UsbDkRedirectorAccess* ConnectToRedirector(ULONG RedirectorID)
+{
+    // Although we got notification from driver regarding redirection creation
+    // system requires some (rather short) time to get the device ready for requests processing.
+    // In case of unfortunate timing we may try to open the redirector device symlink before
+    // it is ready, in this case we get ERROR_FILE_NOT_FOUND.
+    // Unfortunately it looks like there is no way to ensure device is ready but spin around
+    // and poll it for some time.
+
+    static const int NumRetries = 100;
+    static const int TimeoutMS = 50;
+
+    int RetryNumber = 0;
+
+    for (;;)
+    {
+        try
+        {
+            return new UsbDkRedirectorAccess(RedirectorID);
+        }
+        catch (const UsbDkDriverFileException& e)
+        {
+            if ((e.GetErrorCode() != ERROR_FILE_NOT_FOUND) || (++RetryNumber == NumRetries))
+            {
+                OutputDebugString(TEXT("Cannot connect to the redirector, gave up."));
+                throw;
+            }
+        }
+
+        OutputDebugString(TEXT("Cannot connect to the redirector, will wait and try again..."));
+        Sleep(TimeoutMS);
+    }
+}
+
 HANDLE StartRedirect(PUSB_DK_DEVICE_ID DeviceID)
 {
     bool bRedirectAdded = false;
     try
     {
         UsbDkDriverAccess driverAccess;
-        driverAccess.AddRedirect(*DeviceID);
+        auto RedirectorID = driverAccess.AddRedirect(*DeviceID);
         bRedirectAdded = true;
         unique_ptr<REDIRECTED_DEVICE_HANDLE> deviceHandle(new REDIRECTED_DEVICE_HANDLE);
         deviceHandle->DeviceID = *DeviceID;
-        deviceHandle->RedirectorAccess.reset(new UsbDkRedirectorAccess);
+        deviceHandle->RedirectorAccess.reset(ConnectToRedirector(RedirectorID));
         return reinterpret_cast<HANDLE>(deviceHandle.release());
     }
     catch (const exception &e)

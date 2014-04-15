@@ -194,7 +194,7 @@ void CUsbDkControlDeviceQueue::DoUSBDeviceOp(CWdfRequest &Request, WDFQUEUE Queu
 
 void CUsbDkControlDeviceQueue::AddRedirect(CWdfRequest &Request, WDFQUEUE Queue)
 {
-    DoUSBDeviceOp(Request, Queue, &CUsbDkControlDevice::AddRedirect);
+    DoUSBDeviceOp<ULONG>(Request, Queue, &CUsbDkControlDevice::AddRedirect);
 }
 //------------------------------------------------------------------------------------------------------------
 
@@ -387,10 +387,32 @@ bool CUsbDkControlDevice::Allocate()
     return true;
 }
 
-NTSTATUS CUsbDkControlDevice::AddRedirect(const USB_DK_DEVICE_ID &DeviceId)
+void CUsbDkControlDevice::AddRedirectRollBack(const USB_DK_DEVICE_ID &DeviceId, bool WithReset)
 {
-    auto addRes = AddDeviceToSet(DeviceId);
+    auto res = m_Redirections.Delete(&DeviceId);
+    if (!res)
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! Roll-back failed.");
+    }
 
+    if (!WithReset)
+    {
+        return;
+    }
+
+    auto resetRes = ResetUsbDevice(DeviceId);
+    if (!NT_SUCCESS(resetRes))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! Roll-back reset failed. %!STATUS!", resetRes);
+    }
+}
+
+NTSTATUS CUsbDkControlDevice::AddRedirect(const USB_DK_DEVICE_ID &DeviceId, PULONG RedirectorID, size_t *OutputBuffLen)
+{
+    *OutputBuffLen = sizeof(*RedirectorID);
+
+    CUsbDkRedirection *Redirection;
+    auto addRes = AddDeviceToSet(DeviceId, &Redirection);
     if (!NT_SUCCESS(addRes))
     {
         return addRes;
@@ -400,21 +422,34 @@ NTSTATUS CUsbDkControlDevice::AddRedirect(const USB_DK_DEVICE_ID &DeviceId)
     m_Redirections.Dump();
 
     auto resetRes = ResetUsbDevice(DeviceId);
-
     if (!NT_SUCCESS(resetRes))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! Reset after start redirection failed! Stop redirection.");
-        auto res = m_Redirections.Delete(&DeviceId);
-        if (!res)
-        {
-            TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! Delete device from redirected set failed.");
-        }
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! Reset after start redirection failed. %!STATUS!", resetRes);
+        AddRedirectRollBack(DeviceId, false);
+        return resetRes;
     }
-    return resetRes;
+
+    auto waitRes = Redirection->WaitForAttachment();
+    if ((waitRes == STATUS_TIMEOUT) || !NT_SUCCESS(waitRes))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! Wait for redirector attachment failed. %!STATUS!", waitRes);
+        AddRedirectRollBack(DeviceId, true);
+        return (waitRes == STATUS_TIMEOUT) ? STATUS_DEVICE_NOT_CONNECTED : waitRes;
+    }
+
+    *RedirectorID = Redirection->RedirectorID();
+    if (*RedirectorID == CUsbDkRedirection::NO_REDIRECTOR)
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! No redirector attached. %!STATUS!", waitRes);
+        AddRedirectRollBack(DeviceId, true);
+        return STATUS_DEVICE_NOT_CONNECTED;
+    }
+
+    return STATUS_SUCCESS;
 }
 //-------------------------------------------------------------------------------------------------------------
 
-NTSTATUS CUsbDkControlDevice::AddDeviceToSet(const USB_DK_DEVICE_ID &DeviceId)
+NTSTATUS CUsbDkControlDevice::AddDeviceToSet(const USB_DK_DEVICE_ID &DeviceId, CUsbDkRedirection **NewRedirection)
 {
     CObjHolder<CUsbDkRedirection> newRedir(new CUsbDkRedirection());
 
@@ -443,7 +478,7 @@ NTSTATUS CUsbDkControlDevice::AddDeviceToSet(const USB_DK_DEVICE_ID &DeviceId)
         return STATUS_OBJECT_NAME_COLLISION;
     }
 
-    newRedir.detach();
+    *NewRedirection = newRedir.detach();
 
     return STATUS_SUCCESS;
 }
@@ -461,7 +496,9 @@ NTSTATUS CUsbDkControlDevice::RemoveRedirect(const USB_DK_DEVICE_ID &DeviceId)
         if (!NT_SUCCESS(res))
         {
             TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! Reset after stop redirection failed! Return redirection.");
-            auto addRes = AddDeviceToSet(DeviceId);
+
+            CUsbDkRedirection *Redirection;
+            auto addRes = AddDeviceToSet(DeviceId, &Redirection);
             if (!NT_SUCCESS(addRes))
             {
                 TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! Return redirection failed.");

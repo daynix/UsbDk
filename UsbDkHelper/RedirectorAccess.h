@@ -21,9 +21,8 @@ public:
 class UsbDkRedirectorAccess : public UsbDkDriverFile
 {
 public:
-    UsbDkRedirectorAccess()
-        //TODO: Name with postfix needed
-        :UsbDkDriverFile(USBDK_REDIRECTOR_USERMODE_NAME_PREFIX)
+    UsbDkRedirectorAccess(ULONG RedirectorID)
+        :UsbDkDriverFile( (tstring(USBDK_REDIRECTOR_USERMODE_NAME_PREFIX) + to_tstring(RedirectorID)).c_str() )
     {}
 };
 //-----------------------------------------------------------------------------------

@@ -149,19 +149,11 @@ void CUsbDkHubFilterStrategy::RegisterNewChild(PDEVICE_OBJECT PDO)
         return;
     }
 
-    CObjHolder<CRegText> DevID(pdoAccess.GetDeviceID());
-
-    if (!DevID || DevID->empty())
+    CObjHolder<CRegText> DevID;
+    CObjHolder<CRegText> InstanceID;
+    if (!UsbDkGetWdmDeviceIdentity(PDO, &DevID, &InstanceID))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! No Device IDs read");
-        return;
-    }
-
-    CObjHolder<CRegText> InstanceID(pdoAccess.GetInstanceID());
-
-    if (!InstanceID || InstanceID->empty())
-    {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! No Instance ID read");
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Cannot query device identity");
         return;
     }
 

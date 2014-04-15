@@ -98,3 +98,7 @@ public:
     CWdmUsbDeviceAccess(const CWdmUsbDeviceAccess&) = delete;
     CWdmUsbDeviceAccess& operator= (const CWdmUsbDeviceAccess&) = delete;
 };
+
+bool UsbDkGetWdmDeviceIdentity(const PDEVICE_OBJECT PDO,
+                               CObjHolder<CRegText> *DeviceID,
+                               CObjHolder<CRegText> *InstanceID = nullptr);

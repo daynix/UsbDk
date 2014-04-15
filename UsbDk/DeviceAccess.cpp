@@ -211,3 +211,32 @@ NTSTATUS CWdmUsbDeviceAccess::Reset()
 
     return status;
 }
+
+bool UsbDkGetWdmDeviceIdentity(const PDEVICE_OBJECT PDO,
+                               CObjHolder<CRegText> *DeviceID,
+                               CObjHolder<CRegText> *InstanceID)
+{
+    CWdmDeviceAccess pdoAccess(PDO);
+
+    if (DeviceID != nullptr)
+    {
+        *DeviceID = pdoAccess.GetDeviceID();
+        if (!(*DeviceID) || (*DeviceID)->empty())
+        {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVACCESS, "%!FUNC! No Device IDs read");
+            return false;
+        }
+    }
+
+    if (InstanceID != nullptr)
+    {
+        *InstanceID = pdoAccess.GetInstanceID();
+        if (!(*InstanceID) || (*InstanceID)->empty())
+        {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVACCESS, "%!FUNC! No Instance ID read");
+            return false;
+        }
+    }
+
+    return true;
+}

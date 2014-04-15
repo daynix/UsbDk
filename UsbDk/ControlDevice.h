@@ -42,6 +42,11 @@ private:
 class CUsbDkRedirection : public CAllocatable<NonPagedPool, 'NRHR'>
 {
 public:
+    enum : ULONG
+    {
+        NO_REDIRECTOR = (ULONG) -1,
+    };
+
     NTSTATUS Create(const USB_DK_DEVICE_ID &Id);
 
     bool operator==(const USB_DK_DEVICE_ID &Id);
@@ -54,9 +59,22 @@ public:
     { return static_cast<CUsbDkRedirection*>(CONTAINING_RECORD(entry, CUsbDkRedirection, m_ListEntry)); }
 
     void Dump() const;
+
+    void NotifyRedirectorCreated(ULONG RedirectorID);
+    void NotifyRedirectorDeleted();
+
+    NTSTATUS WaitForAttachment()
+    { return m_RedirectionCreated.Wait(true, -SecondsTo100Nanoseconds(10)); }
+
+    ULONG RedirectorID()
+    { return m_RedirectorID; }
+
 private:
     CString m_DeviceID;
     CString m_InstanceID;
+
+    CWdmEvent m_RedirectionCreated;
+    ULONG m_RedirectorID = NO_REDIRECTOR;
 
     LIST_ENTRY m_ListEntry;
 };

@@ -458,6 +458,18 @@ void CUsbDkRedirection::Dump() const
                 m_DeviceID, m_InstanceID);
 }
 
+void CUsbDkRedirection::NotifyRedirectorCreated(ULONG RedirectorID)
+{
+    m_RedirectorID = RedirectorID;
+    m_RedirectionCreated.Set();
+}
+
+void CUsbDkRedirection::NotifyRedirectorDeleted()
+{
+    m_RedirectorID = NO_REDIRECTOR;
+    m_RedirectionCreated.Clear();
+}
+
 bool CUsbDkRedirection::operator==(const USB_DK_DEVICE_ID &Id)
 {
     return (m_DeviceID == Id.DeviceID) &&

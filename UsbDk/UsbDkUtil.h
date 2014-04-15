@@ -254,6 +254,15 @@ public:
         CLockedContext<TAccessStrategy> LockedContext(*this);
         return Contains_LockLess(Id);
     }
+
+    template <typename TEntryId, typename TModifier>
+    bool ModifyOne(TEntryId *Id, TModifier ModifierFunc)
+    {
+        CLockedContext<TAccessStrategy> LockedContext(*this);
+        return !m_Objects.ForEachIf([Id](TEntryType *ExistingEntry) { return *ExistingEntry == *Id; },
+                                    [&ModifierFunc](TEntryType *Entry) { ModifierFunc(Entry); return false; });
+    }
+
 private:
     template <typename TEntryId>
     bool Contains_LockLess(TEntryId *Id)

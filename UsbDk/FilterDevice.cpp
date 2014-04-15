@@ -341,6 +341,7 @@ bool CUsbDkFilterDevice::CStrategist::SelectStrategy(PDEVICE_OBJECT DevObj)
     if ((DevID->Match(L"USB\\ROOT_HUB") || DevID->Match(L"USB\\ROOT_HUB20")))
     {
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Assigning HUB strategy");
+        m_Strategy->Delete();
         m_Strategy = &m_HubStrategy;
         return true;
     }
@@ -361,6 +362,7 @@ bool CUsbDkFilterDevice::CStrategist::SelectStrategy(PDEVICE_OBJECT DevObj)
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Assigning redirected USB device strategy");
     m_DevStrategy.SetDeviceID(DevID.detach());
     m_DevStrategy.SetInstanceID(InstanceID.detach());
+    m_Strategy->Delete();
     m_Strategy = &m_DevStrategy;
 
     return true;

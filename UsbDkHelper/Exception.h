@@ -33,7 +33,7 @@ public:
     UsbDkNumErrorException(const tstring &Description, DWORD dwErrorCode);
     UsbDkNumErrorException(const UsbDkNumErrorException& Other);
 
-    DWORD GetErrorCode(void) { return m_dwErrorCode; }
+    DWORD GetErrorCode(void) const { return m_dwErrorCode; }
 
 protected:
     DWORD m_dwErrorCode;

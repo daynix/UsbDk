@@ -57,6 +57,8 @@ void CUsbDkHubFilterStrategy::Delete()
     {
         m_ControlDevice->UnregisterFilter(*m_Owner);
     }
+
+    CUsbDkFilterStrategy::Delete();
 }
 
 class CDeviceRelations

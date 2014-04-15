@@ -402,3 +402,9 @@ private:
     CInstanceCounter(const CInstanceCounter&) = delete;
     CInstanceCounter& operator= (const CInstanceCounter&) = delete;
 };
+
+static inline
+LONGLONG SecondsTo100Nanoseconds(LONGLONG Seconds)
+{
+    return Seconds * 10 * 1000 * 1000;
+}

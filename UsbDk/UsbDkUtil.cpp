@@ -117,6 +117,14 @@ bool CStringBase::operator== (const UNICODE_STRING& Str)
     return RtlEqualMemory(m_String.Buffer, Str.Buffer, Str.Length);
 }
 
+size_t CStringBase::ToWSTR(PWCHAR Buffer, size_t SizeBytes) const
+{
+    size_t BytesToCopy = min(SizeBytes - sizeof(Buffer[0]), m_String.Length);
+    RtlCopyMemory(Buffer, m_String.Buffer, BytesToCopy);
+    Buffer[BytesToCopy / sizeof(Buffer[0])] = L'\0';
+    return BytesToCopy + sizeof(Buffer[0]);
+}
+
 PVOID DuplicateStaticBuffer(const void *Buffer, SIZE_T Length, POOL_TYPE PoolType)
 {
     ASSERT(Buffer != nullptr);

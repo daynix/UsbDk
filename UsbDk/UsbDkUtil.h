@@ -325,6 +325,8 @@ public:
     NTSTATUS ToString(ULONG Val, ULONG Base)
     { return RtlIntegerToUnicodeString(Val, Base, &m_String); }
 
+    size_t ToWSTR(PWCHAR Buffer, size_t SizeBytes) const;
+
 protected:
     CStringBase(const CStringBase&) = delete;
     CStringBase& operator= (const CStringBase&) = delete;

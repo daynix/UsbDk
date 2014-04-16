@@ -21,6 +21,16 @@ public:
     UsbDkDriverFile(LPCTSTR lpFileName);
     virtual ~UsbDkDriverFile()
     { CloseHandle(m_hDriver); }
+
+    bool Ioctl(DWORD Code,
+               bool ShortBufferOk = false,
+               LPVOID InBuffer = nullptr,
+               DWORD InBufferSize = 0,
+               LPVOID OutBuffer = nullptr,
+               DWORD OutBufferSize = 0,
+               LPDWORD BytesReturned = nullptr,
+               LPOVERLAPPED Overlapped = nullptr);
+
 protected:
     HANDLE m_hDriver;
 };

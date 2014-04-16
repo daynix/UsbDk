@@ -73,6 +73,9 @@
     <ClInclude Include="FilterStrategy.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="UsbTarget.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Driver.cpp">
@@ -109,6 +112,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="FilterStrategy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UsbTarget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

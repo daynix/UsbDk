@@ -29,6 +29,7 @@
         WPP_DEFINE_BIT(TRACE_WDFDEVICE)                                \
         WPP_DEFINE_BIT(TRACE_REDIRECTOR)                               \
         WPP_DEFINE_BIT(TRACE_UTILS)                                    \
+        WPP_DEFINE_BIT(TRACE_USBTARGET)                                \
         )
 
 #define WPP_FLAG_LEVEL_LOGGER(flag, level)                                  \

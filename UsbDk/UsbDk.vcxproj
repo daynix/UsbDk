@@ -61,6 +61,7 @@
     <ClCompile Include="RedirectorStrategy.cpp" />
     <ClCompile Include="RegText.cpp" />
     <ClCompile Include="UsbDkUtil.cpp" />
+    <ClCompile Include="UsbTarget.cpp" />
     <ClCompile Include="WdfDevice.cpp" />
     <ClCompile Include="WdfWorkitem.cpp" />
   </ItemGroup>
@@ -80,6 +81,7 @@
     <ClInclude Include="UsbDkNames.h" />
     <ClInclude Include="UsbDkUtil.h" />
     <ClInclude Include="Trace.h" />
+    <ClInclude Include="UsbTarget.h" />
     <ClInclude Include="WdfDevice.h" />
     <ClInclude Include="WdfRequest.h" />
     <ClInclude Include="WdfWorkitem.h" />

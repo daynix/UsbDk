@@ -1,6 +1,7 @@
 #pragma once
 
 #include "FilterStrategy.h"
+#include "UsbTarget.h"
 
 class CRegText;
 
@@ -19,6 +20,7 @@ public:
 
 private:
     void PatchDeviceID(PIRP Irp);
+    CWdfUsbTarget m_Target;
 
     CObjHolder<CRegText> m_DeviceID;
     CObjHolder<CRegText> m_InstanceID;

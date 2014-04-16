@@ -40,10 +40,13 @@ void CUsbDkRedirectorStrategy::PatchDeviceID(PIRP Irp)
 {
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_REDIRECTOR, "%!FUNC! Entry");
 
+    //TODO: Put RedHat VID/PID when obtained from USB.org
     static const WCHAR RedirectorDeviceId[] = L"USB\\Vid_FEED&Pid_CAFE&Rev_0001";
-    static const WCHAR RedirectorInstanceId[] = L"111222333";
     static const WCHAR RedirectorHardwareIds[] = L"USB\\Vid_FEED&Pid_CAFE&Rev_0001\0USB\\Vid_FEED&Pid_CAFE\0";
     static const WCHAR RedirectorCompatibleIds[] = L"USB\\Class_FF&SubClass_FF&Prot_FF\0USB\\Class_FF&SubClass_FF\0USB\\Class_FF\0";
+
+    static const size_t MAX_DEC_NUMBER_LEN = 11;
+    WCHAR SzInstanceID[ARRAY_SIZE(USBDK_DRIVER_NAME) + MAX_DEC_NUMBER_LEN + 1];
 
     const WCHAR *Buffer;
     SIZE_T Size = 0;
@@ -58,9 +61,19 @@ void CUsbDkRedirectorStrategy::PatchDeviceID(PIRP Irp)
             break;
 
         case BusQueryInstanceID:
-            Buffer = &RedirectorInstanceId[0];
-            Size = sizeof(RedirectorInstanceId);
+        {
+            CString InstanceID;
+            auto status = InstanceID.Create(USBDK_DRIVER_NAME, m_Owner->GetInstanceNumber());
+            if (!NT_SUCCESS(status))
+            {
+                TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! Failed to create instance ID string %!STATUS!", status);
+                return;
+            }
+
+            Size = InstanceID.ToWSTR(SzInstanceID, sizeof(SzInstanceID));
+            Buffer = &SzInstanceID[0];
             break;
+        }
 
         case BusQueryHardwareIDs:
             Buffer = &RedirectorHardwareIds[0];
@@ -103,7 +116,7 @@ NTSTATUS CUsbDkRedirectorStrategy::PNPPreProcess(PIRP Irp)
     {
     case IRP_MN_QUERY_ID:
         return PostProcessOnSuccess(Irp,
-                                    [](PIRP Irp)
+                                    [this](PIRP Irp)
                                     {
                                         PatchDeviceID(Irp);
                                     });

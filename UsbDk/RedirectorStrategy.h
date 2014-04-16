@@ -18,7 +18,7 @@ public:
     { m_InstanceID = InstID; }
 
 private:
-    static void PatchDeviceID(PIRP Irp);
+    void PatchDeviceID(PIRP Irp);
 
     CObjHolder<CRegText> m_DeviceID;
     CObjHolder<CRegText> m_InstanceID;

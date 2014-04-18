@@ -4,6 +4,7 @@
 #include "Usb.h"
 #include "WdfUsb.h"
 #include "Usbdlib.h"
+#include "DeviceAccess.h"
 
 class CWdfUrb final
 {
@@ -49,10 +50,7 @@ NTSTATUS CWdfUrb::Create()
 template <typename TBuffer>
 void CWdfUrb::BuildDescriptorRequest(UCHAR Type, UCHAR Index, TBuffer &Buffer, ULONG BufferLength)
 {
-    UsbBuildGetDescriptorRequest(m_Urb, sizeof(struct _URB_CONTROL_DESCRIPTOR_REQUEST),
-                                 Type, Index, 0,
-                                 &Buffer, nullptr, BufferLength,
-                                 nullptr);
+    UsbDkBuildDescriptorRequest(*m_Urb, Type, Index, Buffer, BufferLength);
 }
 
 NTSTATUS CWdfUrb::SendSynchronously()

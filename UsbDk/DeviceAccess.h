@@ -2,6 +2,8 @@
 
 #include "ntddk.h"
 #include "wdf.h"
+#include "usb.h"
+#include "usbdlib.h"
 #include "Alloc.h"
 #include "RegText.h"
 #include "MemoryBuffer.h"
@@ -102,3 +104,12 @@ public:
 bool UsbDkGetWdmDeviceIdentity(const PDEVICE_OBJECT PDO,
                                CObjHolder<CRegText> *DeviceID,
                                CObjHolder<CRegText> *InstanceID = nullptr);
+
+template <typename TBuffer>
+void UsbDkBuildDescriptorRequest(URB &Urb, UCHAR Type, UCHAR Index, TBuffer &Buffer, ULONG BufferLength = sizeof(TBuffer))
+{
+    UsbBuildGetDescriptorRequest(&Urb, sizeof(struct _URB_CONTROL_DESCRIPTOR_REQUEST),
+                                 Type, Index, 0,
+                                 &Buffer, nullptr, BufferLength,
+                                 nullptr);
+}

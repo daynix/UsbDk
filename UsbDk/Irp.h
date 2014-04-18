@@ -4,7 +4,25 @@
 #include "Alloc.h"
 #include "UsbDkUtil.h"
 
-class CIrp : public CAllocatable<NonPagedPool, 'RIHR'>
+class CIrpBase : public CAllocatable<NonPagedPool, 'RIHR'>
+{
+public:
+    template<typename ConfiguratorT>
+    void Configure(ConfiguratorT Configurator)
+    { Configurator(IoGetNextIrpStackLocation(m_Irp)); }
+
+protected:
+    CIrpBase()
+    {}
+
+    CIrpBase(const CIrpBase&) = delete;
+    CIrpBase& operator= (const CIrpBase&) = delete;
+
+    PIRP m_Irp = nullptr;
+    PDEVICE_OBJECT m_TargetDevice = nullptr;
+};
+
+class CIrp : public CIrpBase
 {
 public:
     CIrp() {};
@@ -46,10 +64,6 @@ public:
     }
 
 
-    template<typename ConfiguratorT>
-    void Configure(ConfiguratorT Configurator)
-    { Configurator(IoGetNextIrpStackLocation(m_Irp)); }
-
     template<typename ReaderT>
     void ReadResult(ReaderT Reader)
     { Reader(m_Irp->IoStatus.Information); }
@@ -60,13 +74,10 @@ public:
 private:
     void DestroyIrp();
     void ReleaseTarget();
-
-    PIRP m_Irp = nullptr;
-    PDEVICE_OBJECT m_TargetDevice = nullptr;
 };
 //-------------------------------------------------------------------------------------------------
 
-class CIoControlIrp : public CAllocatable<NonPagedPool, 'CIHR'>
+class CIoControlIrp : public CIrpBase
 {
 public:
     CIoControlIrp() {}
@@ -86,8 +97,6 @@ public:
     CIoControlIrp& operator= (const CIoControlIrp&) = delete;
 
 private:
-    PIRP m_Irp = nullptr;
-    PDEVICE_OBJECT m_TargetDevice = nullptr;
     CWdmEvent m_Event;
     IO_STATUS_BLOCK m_IoControlStatus;
 };

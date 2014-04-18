@@ -68,11 +68,16 @@ void Controller_EnumerateDevices()
 
         for (ULONG deviceIndex = 0; deviceIndex < numberDevices; ++deviceIndex)
         {
+            auto &Dev = devicesArray[deviceIndex];
+
             tcout << to_tstring(deviceIndex) << TEXT(". ")
-                  << TEXT("FilterID: ") << devicesArray[deviceIndex].FilterID << TEXT(", ")
-                  << TEXT("Port: ") << devicesArray[deviceIndex].Port << TEXT(", ")
-                  << devicesArray[deviceIndex].ID.DeviceID << TEXT(" ")
-                  << devicesArray[deviceIndex].ID.InstanceID
+                  << TEXT("FilterID: ") << Dev.FilterID << TEXT(", ")
+                  << TEXT("Port: ") << Dev.Port << TEXT(", ")
+                  << TEXT("ID: ")
+                    << hex << setw(4) << setfill(L'0') << static_cast<int>(Dev.DeviceDescriptor.idVendor) << TEXT(":")
+                    << hex << setw(4) << setfill(L'0') << static_cast<int>(Dev.DeviceDescriptor.idProduct) << TEXT(", ")
+                  << Dev.ID.DeviceID << TEXT(" ")
+                  << Dev.ID.InstanceID
                   << endl;
         }
 

@@ -27,11 +27,13 @@ public:
     CUsbDkChildDevice(CRegText *DeviceID,
                       CRegText *InstanceID,
                       ULONG Port,
+                      USB_DEVICE_DESCRIPTOR &DevDescriptor,
                       const CUsbDkFilterDevice &ParentDevice,
                       PDEVICE_OBJECT PDO)
         : m_DeviceID(DeviceID)
         , m_InstanceID(InstanceID)
         , m_Port(Port)
+        , m_DevDescriptor(DevDescriptor)
         , m_ParentDevice(ParentDevice)
         , m_PDO(PDO)
     {}
@@ -41,6 +43,8 @@ public:
     PCWCHAR InstanceID() const { return *m_InstanceID->begin(); }
     ULONG Port() const
     { return m_Port; }
+    const USB_DEVICE_DESCRIPTOR &DeviceDescriptor() const
+    { return m_DevDescriptor; }
     PDEVICE_OBJECT PDO() const { return m_PDO; }
 
     bool Match(PCWCHAR deviceID, PCWCHAR instanceID) const
@@ -62,6 +66,7 @@ private:
     CObjHolder<CRegText> m_DeviceID;
     CObjHolder<CRegText> m_InstanceID;
     ULONG m_Port;
+    USB_DEVICE_DESCRIPTOR m_DevDescriptor;
     PDEVICE_OBJECT m_PDO;
     const CUsbDkFilterDevice &m_ParentDevice;
 

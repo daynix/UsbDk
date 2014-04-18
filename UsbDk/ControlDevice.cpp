@@ -235,6 +235,7 @@ bool CUsbDkControlDevice::EnumerateDevices(USB_DK_DEVICE_INFO *outBuff, size_t n
 
                                    outBuff->FilterID = Child->ParentID();
                                    outBuff->Port = Child->Port();
+                                   outBuff->DeviceDescriptor = Child->DeviceDescriptor();
 
                                    outBuff++;
                                    numberExistingDevices++;

@@ -141,13 +141,21 @@ void CUsbDkHubFilterStrategy::AddNewDevices(const CDeviceRelations &Relations)
 
 void CUsbDkHubFilterStrategy::RegisterNewChild(PDEVICE_OBJECT PDO)
 {
-    CWdmDeviceAccess pdoAccess(PDO);
+    CWdmUsbDeviceAccess pdoAccess(PDO);
 
     auto Port = pdoAccess.GetAddress();
 
     if (Port == CWdmDeviceAccess::NO_ADDRESS)
     {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Cannot read device port number");
+        return;
+    }
+
+    USB_DEVICE_DESCRIPTOR DevDescriptor;
+    auto status = pdoAccess.GetDeviceDescriptor(DevDescriptor);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Cannot query device descriptor");
         return;
     }
 
@@ -159,7 +167,8 @@ void CUsbDkHubFilterStrategy::RegisterNewChild(PDEVICE_OBJECT PDO)
         return;
     }
 
-    CUsbDkChildDevice *Device = new CUsbDkChildDevice(DevID, InstanceID, Port, *m_Owner, PDO);
+    CUsbDkChildDevice *Device = new CUsbDkChildDevice(DevID, InstanceID, Port, DevDescriptor,
+                                                      *m_Owner, PDO);
 
     if (Device == nullptr)
     {

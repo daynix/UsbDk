@@ -11,6 +11,7 @@
 #include <tchar.h>
 #include <windows.h>
 #include <cfgmgr32.h>
+#include <usbspec.h>
 
 #include <memory>
 #include <ios>

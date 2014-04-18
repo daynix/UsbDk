@@ -212,6 +212,32 @@ NTSTATUS CWdmUsbDeviceAccess::Reset()
     return status;
 }
 
+NTSTATUS CWdmUsbDeviceAccess::GetDeviceDescriptor(USB_DEVICE_DESCRIPTOR &Descriptor)
+{
+    URB Urb;
+    UsbDkBuildDescriptorRequest(Urb, USB_DEVICE_DESCRIPTOR_TYPE, 0, Descriptor);
+
+    CIoControlIrp Irp;
+    auto status = Irp.Create(m_DevObj, IOCTL_INTERNAL_USB_SUBMIT_URB);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVACCESS, "%!FUNC! Error %!STATUS! during IOCTL IRP creation", status);
+        return status;
+    }
+
+    Irp.Configure([&Urb] (PIO_STACK_LOCATION s)
+                  { s->Parameters.Others.Argument1 = &Urb; });
+
+    status = Irp.SendSynchronously();
+
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVACCESS, "%!FUNC! Send IOCTL IRP Error %!STATUS!", status);
+    }
+
+    return status;
+}
+
 bool UsbDkGetWdmDeviceIdentity(const PDEVICE_OBJECT PDO,
                                CObjHolder<CRegText> *DeviceID,
                                CObjHolder<CRegText> *InstanceID)

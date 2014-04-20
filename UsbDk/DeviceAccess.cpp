@@ -219,6 +219,30 @@ NTSTATUS CWdmUsbDeviceAccess::GetDeviceDescriptor(USB_DEVICE_DESCRIPTOR &Descrip
     return UsbDkSendUrbSynchronously(m_DevObj, Urb);
 }
 
+NTSTATUS CWdmUsbDeviceAccess::GetConfigurationDescriptor(UCHAR Index, USB_CONFIGURATION_DESCRIPTOR &Descriptor, size_t Length)
+{
+    RtlZeroMemory(&Descriptor, Length);
+
+    URB Urb;
+    UsbDkBuildDescriptorRequest(Urb, USB_CONFIGURATION_DESCRIPTOR_TYPE, Index, Descriptor, static_cast<ULONG>(Length));
+
+    auto status = UsbDkSendUrbSynchronously(m_DevObj, Urb);
+    if (Descriptor.wTotalLength == 0)
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVACCESS, "%!FUNC! Invalid configuration descriptor on unknown size received.");
+        return USBD_STATUS_INAVLID_CONFIGURATION_DESCRIPTOR;
+    }
+
+    if ((Descriptor.wTotalLength <= Length) && !NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVACCESS, "%!FUNC! Failed to retrieve the configuration descriptor.");
+        return status;
+    }
+
+    TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVACCESS, "%!FUNC! Total descriptor size %d, buffer length %llu", Descriptor.wTotalLength, Length);
+    return STATUS_SUCCESS;
+}
+
 bool UsbDkGetWdmDeviceIdentity(const PDEVICE_OBJECT PDO,
                                CObjHolder<CRegText> *DeviceID,
                                CObjHolder<CRegText> *InstanceID)

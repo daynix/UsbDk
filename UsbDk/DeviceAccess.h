@@ -97,6 +97,7 @@ public:
 
     NTSTATUS Reset();
     NTSTATUS GetDeviceDescriptor(USB_DEVICE_DESCRIPTOR &Descriptor);
+    NTSTATUS GetConfigurationDescriptor(UCHAR Index, USB_CONFIGURATION_DESCRIPTOR &Descriptor, size_t Length);
 
     CWdmUsbDeviceAccess(const CWdmUsbDeviceAccess&) = delete;
     CWdmUsbDeviceAccess& operator= (const CWdmUsbDeviceAccess&) = delete;

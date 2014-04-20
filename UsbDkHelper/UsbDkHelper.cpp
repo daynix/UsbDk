@@ -56,7 +56,7 @@ BOOL UninstallDriver(void)
 
 DLL BOOL GetConfigurationDescriptor(PUSB_DK_CONFIG_DESCRIPTOR_REQUEST Request,
                                     PUSB_CONFIGURATION_DESCRIPTOR *Descriptor,
-                                    ULONG *Length)
+                                    PULONG Length)
 {
     try
     {
@@ -85,7 +85,7 @@ DLL void ReleaseConfigurationDescriptor(PUSB_CONFIGURATION_DESCRIPTOR Descriptor
 }
 //-------------------------------------------------------------------------------------------
 
-BOOL GetDevicesList(PUSB_DK_DEVICE_INFO *DevicesArray, ULONG *NumberDevices)
+BOOL GetDevicesList(PUSB_DK_DEVICE_INFO *DevicesArray, PULONG NumberDevices)
 {
     try
     {

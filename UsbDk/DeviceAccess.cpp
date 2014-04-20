@@ -216,26 +216,7 @@ NTSTATUS CWdmUsbDeviceAccess::GetDeviceDescriptor(USB_DEVICE_DESCRIPTOR &Descrip
 {
     URB Urb;
     UsbDkBuildDescriptorRequest(Urb, USB_DEVICE_DESCRIPTOR_TYPE, 0, Descriptor);
-
-    CIoControlIrp Irp;
-    auto status = Irp.Create(m_DevObj, IOCTL_INTERNAL_USB_SUBMIT_URB);
-    if (!NT_SUCCESS(status))
-    {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVACCESS, "%!FUNC! Error %!STATUS! during IOCTL IRP creation", status);
-        return status;
-    }
-
-    Irp.Configure([&Urb] (PIO_STACK_LOCATION s)
-                  { s->Parameters.Others.Argument1 = &Urb; });
-
-    status = Irp.SendSynchronously();
-
-    if (!NT_SUCCESS(status))
-    {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVACCESS, "%!FUNC! Send IOCTL IRP Error %!STATUS!", status);
-    }
-
-    return status;
+    return UsbDkSendUrbSynchronously(m_DevObj, Urb);
 }
 
 bool UsbDkGetWdmDeviceIdentity(const PDEVICE_OBJECT PDO,
@@ -265,4 +246,27 @@ bool UsbDkGetWdmDeviceIdentity(const PDEVICE_OBJECT PDO,
     }
 
     return true;
+}
+
+NTSTATUS UsbDkSendUrbSynchronously(PDEVICE_OBJECT Target, URB &Urb)
+{
+    CIoControlIrp Irp;
+    auto status = Irp.Create(Target, IOCTL_INTERNAL_USB_SUBMIT_URB);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVACCESS, "%!FUNC! Error %!STATUS! during IOCTL IRP creation", status);
+        return status;
+    }
+
+    Irp.Configure([&Urb] (PIO_STACK_LOCATION s)
+                  { s->Parameters.Others.Argument1 = &Urb; });
+
+    status = Irp.SendSynchronously();
+
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVACCESS, "%!FUNC! Send URB IRP Error %!STATUS!", status);
+    }
+
+    return status;
 }

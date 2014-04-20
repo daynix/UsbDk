@@ -114,3 +114,5 @@ void UsbDkBuildDescriptorRequest(URB &Urb, UCHAR Type, UCHAR Index, TBuffer &Buf
                                  &Buffer, nullptr, BufferLength,
                                  nullptr);
 }
+
+NTSTATUS UsbDkSendUrbSynchronously(PDEVICE_OBJECT Target, URB &Urb);

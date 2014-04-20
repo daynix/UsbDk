@@ -54,6 +54,37 @@ BOOL UninstallDriver(void)
 }
 //-------------------------------------------------------------------------------------------
 
+DLL BOOL GetConfigurationDescriptor(PUSB_DK_CONFIG_DESCRIPTOR_REQUEST Request,
+                                    PUSB_CONFIGURATION_DESCRIPTOR *Descriptor,
+                                    ULONG *Length)
+{
+    try
+    {
+        UsbDkDriverAccess driver;
+        *Descriptor = driver.GetConfigurationDescriptor(*Request, *Length);
+        return TRUE;
+    }
+    catch (const exception &e)
+    {
+        printExceptionString(e.what());
+        return FALSE;
+    }
+}
+//-------------------------------------------------------------------------------------------
+
+DLL void ReleaseConfigurationDescriptor(PUSB_CONFIGURATION_DESCRIPTOR Descriptor)
+{
+    try
+    {
+        UsbDkDriverAccess::ReleaseConfigurationDescriptor(Descriptor);
+    }
+    catch (const exception &e)
+    {
+        printExceptionString(e.what());
+    }
+}
+//-------------------------------------------------------------------------------------------
+
 BOOL GetDevicesList(PUSB_DK_DEVICE_INFO *DevicesArray, ULONG *NumberDevices)
 {
     try

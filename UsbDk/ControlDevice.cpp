@@ -80,6 +80,12 @@ void CUsbDkControlDeviceQueue::DeviceControl(WDFQUEUE Queue,
             RemoveRedirect(WdfRequest, Queue);
             break;
         }
+        case IOCTL_USBDK_GET_CONFIG_DESCRIPTOR:
+        {
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "Called IOCTL_USBDK_GET_CONFIG_DESCRIPTOR\n");
+            GetConfigurationDescriptor(WdfRequest, Queue);
+            break;
+        }
         default:
         {
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "Wrong IoControlCode 0x%X\n", IoControlCode);
@@ -192,6 +198,12 @@ void CUsbDkControlDeviceQueue::DoUSBDeviceOp(CWdfRequest &Request, WDFQUEUE Queu
 }
 //------------------------------------------------------------------------------------------------------------
 
+void CUsbDkControlDeviceQueue::GetConfigurationDescriptor(CWdfRequest &Request, WDFQUEUE Queue)
+{
+    DoUSBDeviceOp<USB_DK_CONFIG_DESCRIPTOR_REQUEST, USB_CONFIGURATION_DESCRIPTOR>(Request, Queue, &CUsbDkControlDevice::GetConfigurationDescriptor);
+}
+//------------------------------------------------------------------------------------------------------------
+
 void CUsbDkControlDeviceQueue::AddRedirect(CWdfRequest &Request, WDFQUEUE Queue)
 {
     DoUSBDeviceOp<USB_DK_DEVICE_ID, ULONG>(Request, Queue, &CUsbDkControlDevice::AddRedirect);
@@ -285,6 +297,24 @@ NTSTATUS CUsbDkControlDevice::ResetUsbDevice(const USB_DK_DEVICE_ID &DeviceID)
 
     CWdmUsbDeviceAccess pdoAccess(PDO);
     auto status = pdoAccess.Reset();
+    ObDereferenceObject(PDO);
+
+    return status;
+}
+
+NTSTATUS CUsbDkControlDevice::GetUsbDeviceConfigurationDescriptor(const USB_DK_DEVICE_ID &DeviceID,
+                                                                  UCHAR DescriptorIndex,
+                                                                  USB_CONFIGURATION_DESCRIPTOR &Descriptor,
+                                                                  size_t Length)
+{
+    PDEVICE_OBJECT PDO = GetPDOByDeviceID(DeviceID);
+    if (PDO == nullptr)
+    {
+        return STATUS_NOT_FOUND;
+    }
+
+    CWdmUsbDeviceAccess pdoAccess(PDO);
+    auto status = pdoAccess.GetConfigurationDescriptor(DescriptorIndex, Descriptor, Length);
     ObDereferenceObject(PDO);
 
     return status;
@@ -416,6 +446,15 @@ void CUsbDkControlDevice::AddRedirectRollBack(const USB_DK_DEVICE_ID &DeviceId, 
     {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! Roll-back reset failed. %!STATUS!", resetRes);
     }
+}
+
+NTSTATUS CUsbDkControlDevice::GetConfigurationDescriptor(const USB_DK_CONFIG_DESCRIPTOR_REQUEST &Request,
+                                                         PUSB_CONFIGURATION_DESCRIPTOR Descriptor,
+                                                         size_t *OutputBuffLen)
+{
+    auto status = GetUsbDeviceConfigurationDescriptor(Request.ID, Request.Index, *Descriptor, *OutputBuffLen);
+    *OutputBuffLen = NT_SUCCESS(status) ? min(Descriptor->wTotalLength, *OutputBuffLen) : 0;
+    return status;
 }
 
 NTSTATUS CUsbDkControlDevice::AddRedirect(const USB_DK_DEVICE_ID &DeviceId, PULONG RedirectorID, size_t *OutputBuffLen)

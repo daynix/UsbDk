@@ -57,6 +57,30 @@ void Controller_UninstallDriver()
 }
 //-------------------------------------------------------------------------------
 
+static void Controller_DumpConfigurationDescriptors(USB_DK_DEVICE_INFO &Device)
+{
+    for (UCHAR i = 0; i < Device.DeviceDescriptor.bNumConfigurations; i++)
+    {
+        USB_DK_CONFIG_DESCRIPTOR_REQUEST Request;
+        Request.ID = Device.ID;
+        Request.Index = i;
+
+        PUSB_CONFIGURATION_DESCRIPTOR Descriptor;
+        ULONG Length;
+
+        if (!GetConfigurationDescriptor(&Request, &Descriptor, &Length))
+        {
+            tcout << TEXT("Failed to read configuration descriptor #") << (int) i << endl;
+        }
+        else
+        {
+            tcout << TEXT("Descriptor for configuration #") << (int) i << TEXT(": size ") << Length << endl;
+            ReleaseConfigurationDescriptor(Descriptor);
+        }
+    }
+}
+//-------------------------------------------------------------------------------
+
 void Controller_EnumerateDevices()
 {
     PUSB_DK_DEVICE_INFO devicesArray;
@@ -74,11 +98,16 @@ void Controller_EnumerateDevices()
                   << TEXT("FilterID: ") << Dev.FilterID << TEXT(", ")
                   << TEXT("Port: ") << Dev.Port << TEXT(", ")
                   << TEXT("ID: ")
-                    << hex << setw(4) << setfill(L'0') << static_cast<int>(Dev.DeviceDescriptor.idVendor) << TEXT(":")
-                    << hex << setw(4) << setfill(L'0') << static_cast<int>(Dev.DeviceDescriptor.idProduct) << TEXT(", ")
+                    << hex
+                    << setw(4) << setfill(L'0') << static_cast<int>(Dev.DeviceDescriptor.idVendor) << TEXT(":")
+                    << setw(4) << setfill(L'0') << static_cast<int>(Dev.DeviceDescriptor.idProduct) << TEXT(", ")
+                    << dec
+                  << TEXT("Configurations: ") << static_cast<int>(Dev.DeviceDescriptor.bNumConfigurations) << TEXT(" ")
                   << Dev.ID.DeviceID << TEXT(" ")
                   << Dev.ID.InstanceID
                   << endl;
+
+            Controller_DumpConfigurationDescriptors(Dev);
         }
 
         ReleaseDeviceList(devicesArray);

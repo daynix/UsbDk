@@ -9,6 +9,7 @@
 
 typedef struct tag_USB_DK_DEVICE_ID USB_DK_DEVICE_ID;
 typedef struct tag_USB_DK_DEVICE_INFO USB_DK_DEVICE_INFO;
+typedef struct tag_USB_DK_CONFIG_DESCRIPTOR_REQUEST USB_DK_CONFIG_DESCRIPTOR_REQUEST;
 class CUsbDkFilterDevice;
 class CWdfRequest;
 
@@ -29,6 +30,7 @@ private:
 
     static void CountDevices(CWdfRequest &Request, WDFQUEUE Queue);
     static void EnumerateDevices(CWdfRequest &Request, WDFQUEUE Queue);
+    static void GetConfigurationDescriptor(CWdfRequest &Request, WDFQUEUE Queue);
     static void AddRedirect(CWdfRequest &Request, WDFQUEUE Queue);
     static void RemoveRedirect(CWdfRequest &Request, WDFQUEUE Queue);
 
@@ -104,6 +106,9 @@ public:
     NTSTATUS ResetUsbDevice(const USB_DK_DEVICE_ID &DeviceId);
     NTSTATUS AddRedirect(const USB_DK_DEVICE_ID &DeviceId, PULONG RedirectorID, size_t *OutputBuffLen);
     NTSTATUS RemoveRedirect(const USB_DK_DEVICE_ID &DeviceId);
+    NTSTATUS GetConfigurationDescriptor(const USB_DK_CONFIG_DESCRIPTOR_REQUEST &Request,
+                                        PUSB_CONFIGURATION_DESCRIPTOR Descriptor,
+                                        size_t *OutputBuffLen);
 
     static bool Allocate();
     static void Deallocate()
@@ -138,6 +143,11 @@ private:
     static void ContextCleanup(_In_ WDFOBJECT DeviceObject);
     NTSTATUS AddDeviceToSet(const USB_DK_DEVICE_ID &DeviceId, CUsbDkRedirection **NewRedirection);
     void AddRedirectRollBack(const USB_DK_DEVICE_ID &DeviceId, bool WithReset);
+
+    NTSTATUS GetUsbDeviceConfigurationDescriptor(const USB_DK_DEVICE_ID &DeviceID,
+                                                 UCHAR DescriptorIndex,
+                                                 USB_CONFIGURATION_DESCRIPTOR &Descriptor,
+                                                 size_t Length);
 };
 
 typedef struct _USBDK_CONTROL_DEVICE_EXTENSION {

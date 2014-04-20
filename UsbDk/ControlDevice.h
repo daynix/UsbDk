@@ -131,6 +131,7 @@ private:
 
     template <typename TFunctor>
     bool EnumUsbDevicesByID(const USB_DK_DEVICE_ID &ID, TFunctor Functor);
+    PDEVICE_OBJECT GetPDOByDeviceID(const USB_DK_DEVICE_ID &DeviceID);
 
     bool UsbDeviceExists(const USB_DK_DEVICE_ID &ID);
 

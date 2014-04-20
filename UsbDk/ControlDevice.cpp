@@ -255,7 +255,7 @@ bool CUsbDkControlDevice::UsbDeviceExists(const USB_DK_DEVICE_ID &ID)
     return !EnumUsbDevicesByID(ID, ConstFalse);
 }
 
-NTSTATUS CUsbDkControlDevice::ResetUsbDevice(const USB_DK_DEVICE_ID &DeviceID)
+PDEVICE_OBJECT CUsbDkControlDevice::GetPDOByDeviceID(const USB_DK_DEVICE_ID &DeviceID)
 {
     PDEVICE_OBJECT PDO = nullptr;
 
@@ -270,6 +270,16 @@ NTSTATUS CUsbDkControlDevice::ResetUsbDevice(const USB_DK_DEVICE_ID &DeviceID)
     if (PDO == nullptr)
     {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! PDO was not found");
+    }
+
+    return PDO;
+}
+
+NTSTATUS CUsbDkControlDevice::ResetUsbDevice(const USB_DK_DEVICE_ID &DeviceID)
+{
+    PDEVICE_OBJECT PDO = GetPDOByDeviceID(DeviceID);
+    if (PDO == nullptr)
+    {
         return STATUS_NOT_FOUND;
     }
 

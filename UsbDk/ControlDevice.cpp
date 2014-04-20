@@ -138,10 +138,10 @@ void CUsbDkControlDeviceQueue::EnumerateDevices(CWdfRequest &Request, WDFQUEUE Q
 }
 //------------------------------------------------------------------------------------------------------------
 
-template <typename TOutputObj>
+template <typename TInputObj, typename TOutputObj>
 static void CUsbDkControlDeviceQueue::DoUSBDeviceOp(CWdfRequest &Request,
                                                     WDFQUEUE Queue,
-                                                    USBDevControlMethodWithOutput<TOutputObj> Method)
+                                                    USBDevControlMethodWithOutput<TInputObj, TOutputObj> Method)
 {
     TOutputObj *output;
     size_t outputLength;
@@ -155,12 +155,12 @@ static void CUsbDkControlDeviceQueue::DoUSBDeviceOp(CWdfRequest &Request,
         return;
     }
 
-    USB_DK_DEVICE_ID *deviceId;
-    status = Request.FetchInputObject(deviceId);
+    TInputObj *input;
+    status = Request.FetchInputObject(input);
     if (NT_SUCCESS(status))
     {
         auto devExt = UsbDkControlGetContext(WdfIoQueueGetDevice(Queue));
-        status = (devExt->UsbDkControl->*Method)(*deviceId, output, &outputLength);
+        status = (devExt->UsbDkControl->*Method)(*input, output, &outputLength);
     }
 
     if (!NT_SUCCESS(status))
@@ -194,7 +194,7 @@ void CUsbDkControlDeviceQueue::DoUSBDeviceOp(CWdfRequest &Request, WDFQUEUE Queu
 
 void CUsbDkControlDeviceQueue::AddRedirect(CWdfRequest &Request, WDFQUEUE Queue)
 {
-    DoUSBDeviceOp<ULONG>(Request, Queue, &CUsbDkControlDevice::AddRedirect);
+    DoUSBDeviceOp<USB_DK_DEVICE_ID, ULONG>(Request, Queue, &CUsbDkControlDevice::AddRedirect);
 }
 //------------------------------------------------------------------------------------------------------------
 

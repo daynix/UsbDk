@@ -35,14 +35,14 @@ private:
     typedef NTSTATUS(CUsbDkControlDevice::*USBDevControlMethod)(const USB_DK_DEVICE_ID&);
     static void DoUSBDeviceOp(CWdfRequest &Request, WDFQUEUE Queue, USBDevControlMethod Method);
 
-    template <typename TOutputObj>
-    using USBDevControlMethodWithOutput = NTSTATUS(CUsbDkControlDevice::*)(const USB_DK_DEVICE_ID& ID,
+    template <typename TInputObj, typename TOutputObj>
+    using USBDevControlMethodWithOutput = NTSTATUS(CUsbDkControlDevice::*)(const TInputObj& Input,
                                                                            TOutputObj *Output,
                                                                            size_t* OutputBufferLen);
-    template <typename TOutputObj>
+    template <typename TInputObj, typename TOutputObj>
     static void DoUSBDeviceOp(CWdfRequest &Request,
                               WDFQUEUE Queue,
-                              USBDevControlMethodWithOutput<TOutputObj> Method);
+                              USBDevControlMethodWithOutput<TInputObj, TOutputObj> Method);
 
     CUsbDkControlDeviceQueue(const CUsbDkControlDeviceQueue&) = delete;
     CUsbDkControlDeviceQueue& operator= (const CUsbDkControlDeviceQueue&) = delete;

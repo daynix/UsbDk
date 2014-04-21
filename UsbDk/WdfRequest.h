@@ -44,6 +44,9 @@ public:
         return status;
     }
 
+    NTSTATUS FetchSafeReadBuffer(WDFMEMORY *Buffer) const;
+    NTSTATUS FetchSafeWriteBuffer(WDFMEMORY *Buffer) const;
+
     void SetStatus(NTSTATUS status)
     { m_Status = status; }
 

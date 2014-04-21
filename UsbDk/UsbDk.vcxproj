@@ -63,6 +63,7 @@
     <ClCompile Include="UsbDkUtil.cpp" />
     <ClCompile Include="UsbTarget.cpp" />
     <ClCompile Include="WdfDevice.cpp" />
+    <ClCompile Include="WdfRequest.cpp" />
     <ClCompile Include="WdfWorkitem.cpp" />
   </ItemGroup>
   <ItemGroup>

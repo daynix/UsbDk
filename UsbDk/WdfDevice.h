@@ -49,6 +49,11 @@ public:
         return SetPreprocessCallback(Callback, MajorFunction, NULL, 0);
     }
 
+    void SetIoInCallerContextCallback(PFN_WDF_IO_IN_CALLER_CONTEXT Callback)
+    {
+        WdfDeviceInitSetIoInCallerContextCallback(m_DeviceInit, Callback);
+    }
+
     NTSTATUS SetName(const UNICODE_STRING &Name);
 
     CPreAllocatedDeviceInit(const CPreAllocatedDeviceInit&) = delete;

@@ -11,6 +11,7 @@ public:
     virtual NTSTATUS MakeAvailable() override;
     virtual void Delete() override;
     virtual NTSTATUS PNPPreProcess(PIRP Irp) override;
+    virtual void IoInCallerContext(WDFDEVICE Device, WDFREQUEST Request) override;
 
     void SetDeviceID(CRegText *DevID)
     { m_DeviceID = DevID; }

@@ -4,6 +4,7 @@
 #include "FilterDevice.h"
 #include "UsbDkNames.h"
 #include "ControlDevice.h"
+#include "WdfRequest.h"
 //--------------------------------------------------------------------------------------------------
 
 NTSTATUS CUsbDkRedirectorStrategy::MakeAvailable()
@@ -143,7 +144,50 @@ NTSTATUS CUsbDkRedirectorStrategy::PNPPreProcess(PIRP Irp)
 
 typedef struct tag_USBDK_REDIRECTOR_REQUEST_CONTEXT
 {
+    WDFMEMORY LockedBuffer;
 } USBDK_REDIRECTOR_REQUEST_CONTEXT, *PUSBDK_REDIRECTOR_REQUEST_CONTEXT;
+
+class CRedirectorRequest : public CWdfRequest
+{
+public:
+    CRedirectorRequest(WDFREQUEST Request)
+        : CWdfRequest(Request)
+    {}
+
+    PUSBDK_REDIRECTOR_REQUEST_CONTEXT Context()
+    { return reinterpret_cast<PUSBDK_REDIRECTOR_REQUEST_CONTEXT>(UsbDkFilterRequestGetContext(m_Request)); }
+};
+
+void CUsbDkRedirectorStrategy::IoInCallerContext(WDFDEVICE Device, WDFREQUEST Request)
+{
+    CRedirectorRequest WdfRequest(Request);
+    WDF_REQUEST_PARAMETERS Params;
+    WdfRequest.GetParameters(Params);
+
+    NTSTATUS status;
+
+    switch (Params.Type)
+    {
+    case WdfRequestTypeRead:
+        status = WdfRequest.FetchSafeReadBuffer(&WdfRequest.Context()->LockedBuffer);
+        break;
+    case WdfRequestTypeWrite:
+        status = WdfRequest.FetchSafeWriteBuffer(&WdfRequest.Context()->LockedBuffer);
+        break;
+    default:
+        status = STATUS_SUCCESS;
+    }
+
+    if (NT_SUCCESS(status))
+    {
+        CUsbDkFilterStrategy::IoInCallerContext(Device, Request);
+    }
+    else
+    {
+        WdfRequestComplete(Request, status);
+    }
+}
+//--------------------------------------------------------------------------------------------------
 
 size_t CUsbDkRedirectorStrategy::GetRequestContextSize()
 {

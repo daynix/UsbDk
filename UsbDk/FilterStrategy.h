@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ntddk.h"
+#include "wdf.h"
 #include "Alloc.h"
 #include "UsbDkUtil.h"
 
@@ -14,6 +15,7 @@ public:
     virtual NTSTATUS Create(CUsbDkFilterDevice *Owner);
     virtual void Delete();
     virtual NTSTATUS PNPPreProcess(PIRP Irp);
+    virtual void IoInCallerContext(WDFDEVICE Device, WDFREQUEST Request);
 
     virtual NTSTATUS MakeAvailable() = 0;
 

@@ -23,7 +23,7 @@ public:
     CUsbDkFilterDeviceInit(const CUsbDkFilterDeviceInit&) = delete;
     CUsbDkFilterDeviceInit& operator= (const CUsbDkFilterDeviceInit&) = delete;
 private:
-    static CUsbDkFilterDevice::CStrategist &Strategy(WDFDEVICE Device) const
+    static CUsbDkFilterDevice::CStrategist &Strategy(WDFDEVICE Device)
     { return UsbDkFilterGetContext(Device)->UsbDkFilter->m_Strategy; }
 };
 
@@ -34,6 +34,9 @@ NTSTATUS CUsbDkFilterDeviceInit::Configure()
     SetFilter();
     SetPowerCallbacks([](_In_ WDFDEVICE Device)
                       { return Strategy(Device)->MakeAvailable(); });
+
+    SetIoInCallerContextCallback([](_In_ WDFDEVICE Device, WDFREQUEST  Request)
+                                 { return Strategy(Device)->IoInCallerContext(Device, Request); });
 
     auto status = SetPreprocessCallback([](_In_ WDFDEVICE Device, _Inout_  PIRP Irp)
                                         { return Strategy(Device)->PNPPreProcess(Irp); },

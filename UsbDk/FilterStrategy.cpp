@@ -10,6 +10,15 @@ NTSTATUS CUsbDkFilterStrategy::PNPPreProcess(PIRP Irp)
     return WdfDeviceWdmDispatchPreprocessedIrp(m_Owner->WdfObject(), Irp);
 }
 
+void CUsbDkFilterStrategy::IoInCallerContext(WDFDEVICE Device, WDFREQUEST Request)
+{
+    auto status = WdfDeviceEnqueueRequest(Device, Request);
+    if (!NT_SUCCESS(status))
+    {
+        WdfRequestComplete(Request, status);
+    }
+}
+
 NTSTATUS CUsbDkFilterStrategy::Create(CUsbDkFilterDevice *Owner)
 {
     m_Owner = Owner;

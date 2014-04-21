@@ -18,6 +18,8 @@ public:
     void SetInstanceID(CRegText *InstID)
     { m_InstanceID = InstID; }
 
+    static size_t GetRequestContextSize();
+
 private:
     void PatchDeviceID(PIRP Irp);
     CWdfUsbTarget m_Target;

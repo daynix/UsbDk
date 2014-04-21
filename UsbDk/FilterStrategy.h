@@ -24,6 +24,8 @@ public:
     virtual TChildrenList& Children()
     { return m_Children; }
 
+    static size_t GetRequestContextSize()
+    { return 0; }
 protected:
     CUsbDkFilterDevice *m_Owner = nullptr;
     CUsbDkControlDevice *m_ControlDevice = nullptr;
@@ -66,3 +68,8 @@ public:
     { return STATUS_SUCCESS; }
 };
 //-----------------------------------------------------------------------------------------
+
+typedef struct _USBDK_FILTER_REQUEST_CONTEXT {
+} USBDK_FILTER_REQUEST_CONTEXT, *PUSBDK_FILTER_REQUEST_CONTEXT;
+
+WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(USBDK_FILTER_REQUEST_CONTEXT, UsbDkFilterRequestGetContext);

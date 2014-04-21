@@ -140,3 +140,13 @@ NTSTATUS CUsbDkRedirectorStrategy::PNPPreProcess(PIRP Irp)
     }
 }
 //--------------------------------------------------------------------------------------------------
+
+typedef struct tag_USBDK_REDIRECTOR_REQUEST_CONTEXT
+{
+} USBDK_REDIRECTOR_REQUEST_CONTEXT, *PUSBDK_REDIRECTOR_REQUEST_CONTEXT;
+
+size_t CUsbDkRedirectorStrategy::GetRequestContextSize()
+{
+    return sizeof(USBDK_REDIRECTOR_REQUEST_CONTEXT);
+}
+//--------------------------------------------------------------------------------------------------

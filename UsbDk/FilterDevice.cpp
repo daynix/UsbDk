@@ -31,6 +31,11 @@ NTSTATUS CUsbDkFilterDeviceInit::Configure()
 {
     PAGED_CODE();
 
+    WDF_OBJECT_ATTRIBUTES requestAttributes;
+    WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&requestAttributes, USBDK_FILTER_REQUEST_CONTEXT);
+    requestAttributes.ContextSizeOverride = CUsbDkFilterDevice::CStrategist::GetRequestContextSize();
+
+    SetRequestAttributes(requestAttributes);
     SetFilter();
     SetPowerCallbacks([](_In_ WDFDEVICE Device)
                       { return Strategy(Device)->MakeAvailable(); });
@@ -381,4 +386,11 @@ bool CUsbDkFilterDevice::CStrategist::SelectStrategy(PDEVICE_OBJECT DevObj)
     m_Strategy = &m_DevStrategy;
 
     return true;
+}
+
+size_t CUsbDkFilterDevice::CStrategist::GetRequestContextSize()
+{
+    return max(CUsbDkNullFilterStrategy::GetRequestContextSize(),
+               max(CUsbDkHubFilterStrategy::GetRequestContextSize(),
+                   CUsbDkRedirectorStrategy::GetRequestContextSize()));
 }

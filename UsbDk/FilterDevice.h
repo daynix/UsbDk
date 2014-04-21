@@ -146,6 +146,7 @@ private:
         bool SelectStrategy(PDEVICE_OBJECT Device);
         void SetNullStrategy() { m_Strategy = &m_NullStrategy; }
         CUsbDkFilterStrategy *operator ->() const { return m_Strategy; }
+        static size_t GetRequestContextSize();
     private:
         CUsbDkFilterStrategy *m_Strategy = nullptr;
         CUsbDkNullFilterStrategy m_NullStrategy;

@@ -160,4 +160,5 @@ private:
     CInstanceCounter<CUsbDkFilterDevice> m_InstanceNumber;
 
     friend class CUsbDkFilterDeviceInit;
+    friend class CUsbDkRedirectorQueue;
 };

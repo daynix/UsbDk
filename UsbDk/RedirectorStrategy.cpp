@@ -33,6 +33,31 @@ NTSTATUS CUsbDkRedirectorStrategy::MakeAvailable()
 }
 //--------------------------------------------------------------------------------------------------
 
+NTSTATUS CUsbDkRedirectorStrategy::Create(CUsbDkFilterDevice *Owner)
+{
+    auto status = CUsbDkFilterStrategy::Create(Owner);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! Base class creation failed");
+        return status;
+    }
+
+    m_IncomingQueue = new CUsbDkRedirectorQueue(*m_Owner);
+    if (!m_IncomingQueue)
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! Queue allocation failed");
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+
+    status = m_IncomingQueue->Create();
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! Queue creation failed");
+    }
+    return status;
+}
+//--------------------------------------------------------------------------------------------------
+
 void CUsbDkRedirectorStrategy::Delete()
 {
     if (m_ControlDevice)
@@ -194,3 +219,36 @@ size_t CUsbDkRedirectorStrategy::GetRequestContextSize()
     return sizeof(USBDK_REDIRECTOR_REQUEST_CONTEXT);
 }
 //--------------------------------------------------------------------------------------------------
+
+void CUsbDkRedirectorQueue::WritePipe(WDFQUEUE Queue, WDFREQUEST Request, size_t Length)
+{
+    UNREFERENCED_PARAMETER(Queue);
+    UNREFERENCED_PARAMETER(Request);
+    UNREFERENCED_PARAMETER(Length);
+
+    WdfRequestComplete(Request, STATUS_NOT_IMPLEMENTED);
+}
+//--------------------------------------------------------------------------------------------------
+
+void CUsbDkRedirectorQueue::ReadPipe(WDFQUEUE Queue, WDFREQUEST Request, size_t Length)
+{
+    UNREFERENCED_PARAMETER(Queue);
+    UNREFERENCED_PARAMETER(Request);
+    UNREFERENCED_PARAMETER(Length);
+
+    WdfRequestComplete(Request, STATUS_NOT_IMPLEMENTED);
+}
+//--------------------------------------------------------------------------------------------------
+
+void CUsbDkRedirectorQueue::IoDeviceControl(WDFQUEUE Queue, WDFREQUEST Request,
+                                            size_t OutputBufferLength, size_t InputBufferLength,
+                                            ULONG IoControlCode)
+{
+    UNREFERENCED_PARAMETER(Queue);
+    UNREFERENCED_PARAMETER(Request);
+    UNREFERENCED_PARAMETER(OutputBufferLength);
+    UNREFERENCED_PARAMETER(InputBufferLength);
+    UNREFERENCED_PARAMETER(IoControlCode);
+
+    WdfRequestComplete(Request, STATUS_NOT_IMPLEMENTED);
+}

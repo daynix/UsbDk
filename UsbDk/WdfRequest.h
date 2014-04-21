@@ -52,8 +52,17 @@ public:
 
     void SetOutputDataLen(size_t lenBytes)
     { m_Information = lenBytes; }
-private:
+
+    void GetParameters(WDF_REQUEST_PARAMETERS &Params)
+    {
+        WDF_REQUEST_PARAMETERS_INIT(&Params);
+        WdfRequestGetParameters(m_Request, &Params);
+    }
+
+protected:
     WDFREQUEST m_Request;
+
+private:
     NTSTATUS m_Status = STATUS_UNSUCCESSFUL;
     ULONG_PTR m_Information = 0;
 

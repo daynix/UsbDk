@@ -8,6 +8,7 @@
 class CUsbDkFilterDevice;
 class CUsbDkChildDevice;
 class CUsbDkControlDevice;
+class CWdfRequest;
 
 class CUsbDkFilterStrategy
 {
@@ -16,6 +17,12 @@ public:
     virtual void Delete();
     virtual NTSTATUS PNPPreProcess(PIRP Irp);
     virtual void IoInCallerContext(WDFDEVICE Device, WDFREQUEST Request);
+
+    virtual void IoDeviceControl(CWdfRequest& Request,
+                                 size_t OutputBufferLength, size_t InputBufferLength,
+                                 ULONG IoControlCode);
+    virtual void WritePipe(CWdfRequest& Request, size_t Length);
+    virtual void ReadPipe(CWdfRequest& Request, size_t Length);
 
     virtual NTSTATUS MakeAvailable() = 0;
 
@@ -48,6 +55,7 @@ protected:
     }
 
 private:
+    void ForwardRequest(CWdfRequest &Request);
     TChildrenList m_Children;
 };
 //-----------------------------------------------------------------------------------------

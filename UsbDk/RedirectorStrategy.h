@@ -40,6 +40,11 @@ public:
     virtual NTSTATUS PNPPreProcess(PIRP Irp) override;
     virtual void IoInCallerContext(WDFDEVICE Device, WDFREQUEST Request) override;
 
+    virtual void IoDeviceControl(CWdfRequest& Request,
+                                 size_t OutputBufferLength,
+                                 size_t InputBufferLength,
+                                 ULONG IoControlCode) override;
+
     void SetDeviceID(CRegText *DevID)
     { m_DeviceID = DevID; }
 

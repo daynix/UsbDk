@@ -5,6 +5,9 @@
 #include "UsbDkNames.h"
 #include "ControlDevice.h"
 #include "WdfRequest.h"
+
+#define MAX_DEVICE_ID_LEN (200)
+#include "Public.h"
 //--------------------------------------------------------------------------------------------------
 
 NTSTATUS CUsbDkRedirectorStrategy::MakeAvailable()
@@ -214,6 +217,28 @@ void CUsbDkRedirectorStrategy::IoInCallerContext(WDFDEVICE Device, WDFREQUEST Re
 }
 //--------------------------------------------------------------------------------------------------
 
+void CUsbDkRedirectorStrategy::IoDeviceControl(CWdfRequest& Request,
+                                               size_t OutputBufferLength, size_t InputBufferLength,
+                                               ULONG IoControlCode)
+{
+    switch (IoControlCode)
+    {
+        default:
+        {
+            CUsbDkFilterStrategy::IoDeviceControl(Request, OutputBufferLength, InputBufferLength, IoControlCode);
+            return;
+        }
+        case IOCTL_USBDK_DEVICE_SELECT_CONFIGURATION:
+        {
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_REDIRECTOR, "Called IOCTL_USBDK_DEVICE_SET_CONFIGURATION\n");
+            //TODO: Handle me
+            CUsbDkFilterStrategy::IoDeviceControl(Request, OutputBufferLength, InputBufferLength, IoControlCode);
+            return;
+        }
+    }
+}
+//--------------------------------------------------------------------------------------------------
+
 size_t CUsbDkRedirectorStrategy::GetRequestContextSize()
 {
     return sizeof(USBDK_REDIRECTOR_REQUEST_CONTEXT);
@@ -244,11 +269,8 @@ void CUsbDkRedirectorQueue::IoDeviceControl(WDFQUEUE Queue, WDFREQUEST Request,
                                             size_t OutputBufferLength, size_t InputBufferLength,
                                             ULONG IoControlCode)
 {
-    UNREFERENCED_PARAMETER(Queue);
-    UNREFERENCED_PARAMETER(Request);
-    UNREFERENCED_PARAMETER(OutputBufferLength);
-    UNREFERENCED_PARAMETER(InputBufferLength);
-    UNREFERENCED_PARAMETER(IoControlCode);
+    CWdfRequest WdfRequest(Request);
 
-    WdfRequestComplete(Request, STATUS_NOT_IMPLEMENTED);
+    auto devExt = UsbDkFilterGetContext(WdfIoQueueGetDevice(Queue));
+    devExt->UsbDkFilter->m_Strategy->IoDeviceControl(WdfRequest, OutputBufferLength, InputBufferLength, IoControlCode);
 }

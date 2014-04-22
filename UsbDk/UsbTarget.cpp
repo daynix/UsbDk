@@ -1,8 +1,6 @@
 #include "UsbTarget.h"
 #include "Trace.h"
 #include "UsbTarget.tmh"
-#include "Usb.h"
-#include "WdfUsb.h"
 #include "Usbdlib.h"
 #include "DeviceAccess.h"
 
@@ -65,6 +63,97 @@ NTSTATUS CWdfUrb::SendSynchronously()
     return status;
 }
 
+class CWdfUsbPipe : public CAllocatable<NonPagedPool, 'PUHR'>
+{
+public:
+    CWdfUsbPipe()
+    {}
+
+    void Create(WDFUSBINTERFACE Interface, UCHAR PipeIndex);
+
+private:
+    WDFUSBINTERFACE m_Interface;
+    WDFUSBPIPE m_Pipe;
+    WDF_USB_PIPE_INFORMATION m_Info;
+
+    CWdfUsbPipe(const CWdfUsbPipe&) = delete;
+    CWdfUsbPipe& operator= (const CWdfUsbPipe&) = delete;
+};
+
+class CWdfUsbInterface : public CAllocatable<NonPagedPool, 'IUHR'>
+{
+public:
+    CWdfUsbInterface()
+        : m_Pipes(nullptr, CObjHolder<CWdfUsbPipe>::ArrayHolderDelete)
+    {}
+
+    NTSTATUS Create(WDFUSBDEVICE Device, UCHAR InterfaceIdx);
+    NTSTATUS SetAltSetting(UCHAR AltSettingIdx);
+
+private:
+    WDFUSBDEVICE m_UsbDevice;
+    WDFUSBINTERFACE m_Interface;
+
+    CObjHolder<CWdfUsbPipe> m_Pipes;
+    BYTE m_NumPipes = 0;
+
+    CWdfUsbInterface(const CWdfUsbInterface&) = delete;
+    CWdfUsbInterface& operator= (const CWdfUsbInterface&) = delete;
+};
+
+NTSTATUS CWdfUsbInterface::SetAltSetting(UCHAR AltSettingIdx)
+{
+    WDF_USB_INTERFACE_SELECT_SETTING_PARAMS params;
+    WDF_USB_INTERFACE_SELECT_SETTING_PARAMS_INIT_SETTING(&params, AltSettingIdx);
+
+    auto status = WdfUsbInterfaceSelectSetting(m_Interface, WDF_NO_OBJECT_ATTRIBUTES, &params);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed: %!STATUS!", status);
+        return status;
+    }
+
+    m_NumPipes = WdfUsbInterfaceGetNumConfiguredPipes(m_Interface);
+    if (m_NumPipes == 0)
+    {
+        return STATUS_SUCCESS;
+    }
+
+    m_Pipes.destroy();
+    m_Pipes = new CWdfUsbPipe[m_NumPipes];
+    if (!m_Pipes)
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed to allocate pipes array");
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+
+    for (UCHAR i = 0; i < m_NumPipes; i++)
+    {
+        m_Pipes[i].Create(m_Interface, i);
+    }
+
+    return STATUS_SUCCESS;
+}
+
+NTSTATUS CWdfUsbInterface::Create(WDFUSBDEVICE Device, UCHAR InterfaceIdx)
+{
+    m_UsbDevice = Device;
+    m_Interface = WdfUsbTargetDeviceGetInterface(Device, InterfaceIdx);
+    ASSERT(m_Interface != nullptr);
+
+    return SetAltSetting(0);
+}
+
+void CWdfUsbPipe::Create(WDFUSBINTERFACE Interface, UCHAR PipeIndex)
+{
+    m_Interface = Interface;
+
+    WDF_USB_PIPE_INFORMATION_INIT(&m_Info);
+
+    m_Pipe = WdfUsbInterfaceGetConfiguredPipe(m_Interface, PipeIndex, &m_Info);
+    ASSERT(m_Pipe != nullptr);
+}
+
 NTSTATUS CWdfUsbTarget::Create(WDFDEVICE Device)
 {
     m_Device = Device;
@@ -79,9 +168,48 @@ NTSTATUS CWdfUsbTarget::Create(WDFDEVICE Device)
     if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Cannot create USB target, %!STATUS!", status);
+        return status;
     }
-    return status;
+
+    WDF_USB_DEVICE_SELECT_CONFIG_PARAMS Params;
+    WDF_USB_DEVICE_SELECT_CONFIG_PARAMS_INIT_MULTIPLE_INTERFACES(&Params, 0, nullptr);
+    status = WdfUsbTargetDeviceSelectConfig(m_UsbDevice, WDF_NO_OBJECT_ATTRIBUTES, &Params);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Cannot apply device configuration, %!STATUS!", status);
+        return status;
+    }
+
+    m_NumInterfaces = WdfUsbTargetDeviceGetNumInterfaces(m_UsbDevice);
+    if (m_NumInterfaces == 0)
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed: Number of interfaces is zero.");
+        return STATUS_INVALID_DEVICE_STATE;
+    }
+
+    m_Interfaces = new CWdfUsbInterface[m_NumInterfaces];
+    if (!m_Interfaces)
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed to allocate interfaces array");
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+
+    for (UCHAR i = 0; i < m_NumInterfaces; i++)
+    {
+        status = m_Interfaces[i].Create(m_UsbDevice, i);
+        if (!NT_SUCCESS(status))
+        {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Cannot create interface %d, %!STATUS!", i, status);
+            return status;
+        }
+    }
+
+    return STATUS_SUCCESS;
 }
+
+CWdfUsbTarget::CWdfUsbTarget()
+    : m_Interfaces(nullptr, CObjHolder<CWdfUsbInterface>::ArrayHolderDelete)
+{}
 
 CWdfUsbTarget::~CWdfUsbTarget()
 {
@@ -143,4 +271,15 @@ NTSTATUS CWdfUsbTarget::ConfigurationDescriptor(UCHAR Index, PUSB_CONFIGURATION_
         }
     }
     return status;
+}
+
+NTSTATUS CWdfUsbTarget::SetInterfaceAltSetting(UCHAR InterfaceIdx, UCHAR AltSettingIdx)
+{
+    if (InterfaceIdx >= m_NumInterfaces)
+    {
+        return STATUS_INVALID_PARAMETER_1;
+    }
+
+    //TODO: Stop read/write queue before interface reconfiguration
+    return m_Interfaces[InterfaceIdx].SetAltSetting(AltSettingIdx);
 }

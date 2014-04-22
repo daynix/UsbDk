@@ -1,6 +1,26 @@
 #include <ntddk.h>
 #include "WdfRequest.h"
 
+NTSTATUS CWdfRequest::SendAndForget(WDFIOTARGET Target)
+{
+    WDF_REQUEST_SEND_OPTIONS options;
+    WDF_REQUEST_SEND_OPTIONS_INIT(&options, WDF_REQUEST_SEND_OPTION_SEND_AND_FORGET);
+
+    NTSTATUS status = STATUS_SUCCESS;
+
+    if (WdfRequestSend(m_Request, Target, &options))
+    {
+        Forget();
+    }
+    else
+    {
+        status = WdfRequestGetStatus(m_Request);
+        SetStatus(status);
+    }
+
+    return status;
+}
+
 NTSTATUS CWdfRequest::FetchSafeReadBuffer(WDFMEMORY *Buffer) const
 {
     PVOID Ptr;

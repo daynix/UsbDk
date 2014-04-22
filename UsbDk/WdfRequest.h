@@ -10,8 +10,11 @@ public:
     {}
     ~CWdfRequest()
     {
-        WdfRequestSetInformation(m_Request, m_Information);
-        WdfRequestComplete(m_Request, m_Status);
+        if (m_Request != WDF_NO_HANDLE)
+        {
+            WdfRequestSetInformation(m_Request, m_Information);
+            WdfRequestComplete(m_Request, m_Status);
+        }
     }
 
     template <typename TObject>
@@ -59,10 +62,15 @@ public:
         WdfRequestGetParameters(m_Request, &Params);
     }
 
+    NTSTATUS SendAndForget(WDFIOTARGET Target);
+
 protected:
     WDFREQUEST m_Request;
 
 private:
+    void Forget()
+    { m_Request = WDF_NO_HANDLE; }
+
     NTSTATUS m_Status = STATUS_UNSUCCESSFUL;
     ULONG_PTR m_Information = 0;
 

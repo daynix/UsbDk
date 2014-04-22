@@ -95,6 +95,8 @@ public:
 
     WDFDEVICE WdfObject() const { return m_Device; }
     PDEVICE_OBJECT WdmObject() const { return WdfDeviceWdmGetDeviceObject(m_Device); };
+    WDFIOTARGET IOTarget() const
+    { return WdfDeviceGetIoTarget(m_Device); }
 
     void Delete() { WdfObjectDelete(m_Device); }
 protected:

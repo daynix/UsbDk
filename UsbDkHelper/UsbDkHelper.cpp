@@ -179,7 +179,7 @@ HANDLE StartRedirect(PUSB_DK_DEVICE_ID DeviceID)
         }
     }
 
-    return nullptr;
+    return INVALID_HANDLE_VALUE;
 }
 //-------------------------------------------------------------------------------------------
 

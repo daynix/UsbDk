@@ -77,3 +77,81 @@ private:
     CWdfRequest(const CWdfRequest&) = delete;
     CWdfRequest& operator= (const CWdfRequest&) = delete;
 };
+
+template <typename TInputObj, typename TOutputObj, typename THandler>
+static void UsbDkHandleRequestWithInputOutput(CWdfRequest &Request,
+                                              THandler Handler)
+{
+    TOutputObj *output;
+    size_t outputLength;
+
+    auto status = Request.FetchOutputObject(output, &outputLength);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! Failed to fetch output buffer. %!STATUS!", status);
+        Request.SetOutputDataLen(0);
+        Request.SetStatus(status);
+        return;
+    }
+
+    TInputObj *input;
+    size_t inputLength;
+
+    status = Request.FetchInputObject(input, &inputLength);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! Failed to fetch input buffer. %!STATUS!", status);
+        Request.SetOutputDataLen(0);
+        Request.SetStatus(status);
+        return;
+    }
+
+    status = Handler(input, inputLength, output, outputLength);
+
+    Request.SetOutputDataLen(outputLength);
+    Request.SetStatus(status);
+}
+
+template <typename TInputObj, typename THandler>
+static void UsbDkHandleRequestWithInput(CWdfRequest &Request,
+                                        THandler Handler)
+{
+    TInputObj *input;
+    size_t inputLength;
+
+    auto status = Request.FetchInputObject(input, &inputLength);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! Failed to fetch input buffer. %!STATUS!", status);
+        Request.SetOutputDataLen(0);
+        Request.SetStatus(status);
+        return;
+    }
+
+    status = Handler(input, inputLength);
+
+    Request.SetOutputDataLen(0);
+    Request.SetStatus(status);
+}
+
+template <typename TInputObj, typename THandler>
+static void UsbDkHandleRequestWithOutput(CWdfRequest &Request,
+                                         THandler Handler)
+{
+    TOutputObj *output;
+    size_t outputLength;
+
+    auto status = Request.FetchOutputObject(output, &outputLength);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! Failed to fetch output buffer. %!STATUS!", status);
+        Request.SetOutputDataLen(0);
+        Request.SetStatus(status);
+        return;
+    }
+
+    status = Handler(output, outputLength);
+
+    Request.SetOutputDataLen(outputLength);
+    Request.SetStatus(status);
+}

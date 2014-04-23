@@ -33,6 +33,9 @@ public:
 
     static size_t GetRequestContextSize()
     { return 0; }
+
+    CUsbDkControlDevice* GetControlDevice()
+    { return m_ControlDevice; }
 protected:
     CUsbDkFilterDevice *m_Owner = nullptr;
     CUsbDkControlDevice *m_ControlDevice = nullptr;

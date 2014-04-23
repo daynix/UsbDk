@@ -30,6 +30,18 @@ public:
     }
 
     template <typename TObject>
+    NTSTATUS FetchInputMemory(WDFMEMORY *Memory)
+    {
+        return WdfRequestRetrieveInputMemory(m_Request, Memory);
+    }
+
+    template <typename TObject>
+    NTSTATUS FetchOutputMemory(WDFMEMORY *Memory)
+    {
+        return WdfRequestRetrieveOutputMemory(m_Request, Memory);
+    }
+
+    template <typename TObject>
     NTSTATUS FetchInputArray(TObject &arrayPtr, size_t &numElements)
     {
         size_t DataLen;
@@ -151,6 +163,37 @@ static void UsbDkHandleRequestWithOutput(CWdfRequest &Request,
     }
 
     status = Handler(output, outputLength);
+
+    Request.SetOutputDataLen(outputLength);
+    Request.SetStatus(status);
+}
+
+template <typename THandler>
+static void UsbDkHandleRequestWithIOMemory(CWdfRequest &Request,
+                                           THandler Handler)
+{
+    WDFMEMORY output;
+
+    auto status = Request.FetchOutputMemory(&output);
+    if (!NT_SUCCESS(status))
+    {
+        Request.SetOutputDataLen(0);
+        Request.SetStatus(status);
+        return;
+    }
+
+    WDFMEMORY input;
+
+    status = Request.FetchInputMemory(&input);
+    if (!NT_SUCCESS(status))
+    {
+        Request.SetOutputDataLen(0);
+        Request.SetStatus(status);
+        return;
+    }
+
+    size_t outputLength;
+    status = Handler(input, output, outputLength);
 
     Request.SetOutputDataLen(outputLength);
     Request.SetStatus(status);

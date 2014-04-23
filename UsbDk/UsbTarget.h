@@ -20,6 +20,9 @@ public:
     NTSTATUS ConfigurationDescriptor(UCHAR Index, PUSB_CONFIGURATION_DESCRIPTOR Descriptor, PULONG TotalLength);
     NTSTATUS SetInterfaceAltSetting(UCHAR InterfaceIdx, UCHAR AltSettingIdx);
 
+    operator WDFUSBDEVICE () const
+    { return m_UsbDevice; }
+
 private:
     WDFDEVICE m_Device = WDF_NO_HANDLE;
     WDFUSBDEVICE m_UsbDevice = WDF_NO_HANDLE;

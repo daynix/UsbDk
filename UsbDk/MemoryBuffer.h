@@ -69,7 +69,7 @@ public:
     }
 
     virtual ~CWdmMemoryBuffer()
-    { ExFreePool(m_Ptr); }
+    { if(m_Ptr != nullptr) { ExFreePool(m_Ptr); } }
 
     CWdmMemoryBuffer(const CWdmMemoryBuffer&) = delete;
     CWdmMemoryBuffer& operator= (const CWdmMemoryBuffer&) = delete;

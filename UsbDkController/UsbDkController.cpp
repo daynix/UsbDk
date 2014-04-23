@@ -127,7 +127,7 @@ void Controller_RedirectDevice(_TCHAR *DeviceID, _TCHAR *InstanceID)
     tcout << TEXT("Redirect USB device ") << deviceID.DeviceID << TEXT(", ") << deviceID.InstanceID << endl;
 
     HANDLE redirectedDevice = StartRedirect(&deviceID);
-    if (nullptr == redirectedDevice)
+    if (INVALID_HANDLE_VALUE == redirectedDevice)
     {
         tcout << TEXT("Redirect of USB device failed") << endl;
         return;

@@ -101,7 +101,6 @@ static void UsbDkHandleRequestWithInputOutput(CWdfRequest &Request,
     auto status = Request.FetchOutputObject(output, &outputLength);
     if (!NT_SUCCESS(status))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! Failed to fetch output buffer. %!STATUS!", status);
         Request.SetOutputDataLen(0);
         Request.SetStatus(status);
         return;
@@ -113,7 +112,6 @@ static void UsbDkHandleRequestWithInputOutput(CWdfRequest &Request,
     status = Request.FetchInputObject(input, &inputLength);
     if (!NT_SUCCESS(status))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! Failed to fetch input buffer. %!STATUS!", status);
         Request.SetOutputDataLen(0);
         Request.SetStatus(status);
         return;
@@ -135,7 +133,6 @@ static void UsbDkHandleRequestWithInput(CWdfRequest &Request,
     auto status = Request.FetchInputObject(input, &inputLength);
     if (!NT_SUCCESS(status))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! Failed to fetch input buffer. %!STATUS!", status);
         Request.SetOutputDataLen(0);
         Request.SetStatus(status);
         return;
@@ -157,7 +154,6 @@ static void UsbDkHandleRequestWithOutput(CWdfRequest &Request,
     auto status = Request.FetchOutputObject(output, &outputLength);
     if (!NT_SUCCESS(status))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! Failed to fetch output buffer. %!STATUS!", status);
         Request.SetOutputDataLen(0);
         Request.SetStatus(status);
         return;

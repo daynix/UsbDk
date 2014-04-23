@@ -123,7 +123,6 @@ NTSTATUS CUsbDkHubFilterStrategy::PNPPreProcess(PIRP Irp)
         return PostProcessOnSuccess(Irp,
                                     [this](PIRP Irp)
                                     {
-                                        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Entry");
                                         CDeviceRelations Relations((PDEVICE_RELATIONS)Irp->IoStatus.Information);
                                         DropRemovedDevices(Relations);
                                         AddNewDevices(Relations);

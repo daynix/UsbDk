@@ -42,7 +42,7 @@ public:
     CRegSz(PWCHAR Data)
         : CRegText(CMemoryBuffer::GetMemoryBuffer(static_cast<PVOID>(Data), GetBufferLength(Data)))
     {}
-    static SIZE_T GetBufferLength(PWCHAR Data) { return (wcslen(Data) + 1) * sizeof(WCHAR); }
+    static SIZE_T GetBufferLength(PWCHAR Data) { return (Data != nullptr) ? (wcslen(Data) + 1) * sizeof(WCHAR) : 0; }
 };
 
 class CRegMultiSz : public CRegText

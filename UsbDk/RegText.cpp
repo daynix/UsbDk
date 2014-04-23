@@ -5,14 +5,18 @@
 SIZE_T CRegMultiSz::GetBufferLength(PWCHAR Data)
 {
     SIZE_T Size = 0;
-    SIZE_T stringLen;
 
-    do
+    if (Data != nullptr)
     {
-        stringLen = wcslen(Data);
-        Data += stringLen + 1;
-        Size += (stringLen + 1) * sizeof(WCHAR);
-    } while (stringLen != 0);
+        SIZE_T stringLen;
+
+        do
+        {
+            stringLen = wcslen(Data);
+            Data += stringLen + 1;
+            Size += (stringLen + 1) * sizeof(WCHAR);
+        } while (stringLen != 0);
+    }
 
     return Size;
 }

@@ -73,6 +73,8 @@ public:
 
     void NotifyRedirectorCreated(ULONG RedirectorID);
     void NotifyRedirectorDeleted();
+    bool IsRedirected() const
+    { return m_RedirectorID != NO_REDIRECTOR; }
 
     NTSTATUS WaitForAttachment()
     { return m_RedirectionCreated.Wait(true, -SecondsTo100Nanoseconds(10)); }
@@ -117,8 +119,14 @@ public:
     static void Release()
     { m_UsbDkControlDevice->Release(); }
 
-    bool ShouldRedirect(const CUsbDkChildDevice &Dev)
-    { return m_Redirections.Contains(&Dev); }
+    template <typename TDevID>
+    bool ShouldRedirect(const TDevID &Dev) const
+    {
+        bool DontRedirect = true;
+        const_cast<RedirectionsSet*>(&m_Redirections)->ModifyOne(&Dev, [&DontRedirect](CUsbDkRedirection *Entry)
+                                                                       { DontRedirect = Entry->IsRedirected(); });
+        return !DontRedirect;
+    }
 
     bool NotifyRedirectorAttached(CRegText *DeviceID, CRegText *InstanceID, ULONG RedrectorID);
     bool NotifyRedirectorDetached(CRegText *DeviceID, CRegText *InstanceID);
@@ -128,7 +136,9 @@ private:
     static CRefCountingHolder<CUsbDkControlDevice> *m_UsbDkControlDevice;
 
     CWdmList<CUsbDkFilterDevice, CLockedAccess, CNonCountingObject> m_FilterDevices;
-    CWdmSet<CUsbDkRedirection, CLockedAccess, CNonCountingObject> m_Redirections;
+
+    typedef CWdmSet<CUsbDkRedirection, CLockedAccess, CNonCountingObject> RedirectionsSet;
+    RedirectionsSet m_Redirections;
 
     template <typename TPredicate, typename TFunctor>
     bool UsbDevicesForEachIf(TPredicate Predicate, TFunctor Functor)

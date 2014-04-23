@@ -5,6 +5,9 @@
 #include "ControlDevice.h"
 #include "UsbDkNames.h"
 
+#define MAX_DEVICE_ID_LEN (200)
+#include "Public.h"
+
 void CUsbDkChildDevice::Dump()
 {
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Child device 0x%p:", m_PDO);
@@ -366,16 +369,19 @@ bool CUsbDkFilterDevice::CStrategist::SelectStrategy(PDEVICE_OBJECT DevObj)
         return true;
     }
 
-    if (!DevID->MatchPrefix(L"USB\\"))
-    {
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Unsupported device type, no strategy assigned");
-        return false;
-    }
-
     CObjHolder<CRegText> InstanceID;
     if (!UsbDkGetWdmDeviceIdentity(DevObj, nullptr, &InstanceID))
     {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Cannot query instance ID");
+        return false;
+    }
+
+    USB_DK_DEVICE_ID ID;
+    UsbDkFillIDStruct(&ID, *DevID->begin(), *InstanceID->begin());
+
+    if (!m_Strategy->GetControlDevice()->ShouldRedirect(ID))
+    {
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Unsupported or already redirected device, no strategy assigned");
         return false;
     }
 

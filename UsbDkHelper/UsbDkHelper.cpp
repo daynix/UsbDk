@@ -12,7 +12,7 @@ typedef struct tag_REDIRECTED_DEVICE_HANDLE
 {
     USB_DK_DEVICE_ID DeviceID;
     unique_ptr<UsbDkRedirectorAccess> RedirectorAccess;
-} REDIRECTED_DEVICE_HANDLE, PREDIRECTED_DEVICE_HANDLE;
+} REDIRECTED_DEVICE_HANDLE, *PREDIRECTED_DEVICE_HANDLE;
 //-------------------------------------------------------------------------------------------
 
 void printExceptionString(const char *errorStr)
@@ -188,7 +188,7 @@ BOOL StopRedirect(HANDLE DeviceHandle)
     try
     {
         UsbDkDriverAccess driverAccess;
-        unique_ptr<REDIRECTED_DEVICE_HANDLE> deviceHandle(reinterpret_cast<REDIRECTED_DEVICE_HANDLE*>(DeviceHandle));
+        unique_ptr<REDIRECTED_DEVICE_HANDLE> deviceHandle(reinterpret_cast<PREDIRECTED_DEVICE_HANDLE>(DeviceHandle));
         deviceHandle->RedirectorAccess.reset();
         driverAccess.RemoveRedirect(deviceHandle->DeviceID);
         return TRUE;

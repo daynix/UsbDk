@@ -610,19 +610,19 @@ void CUsbDkRedirection::NotifyRedirectorDeleted()
     m_RedirectionCreated.Clear();
 }
 
-bool CUsbDkRedirection::operator==(const USB_DK_DEVICE_ID &Id)
+bool CUsbDkRedirection::operator==(const USB_DK_DEVICE_ID &Id) const
 {
     return (m_DeviceID == Id.DeviceID) &&
            (m_InstanceID == Id.InstanceID);
 }
 
-bool CUsbDkRedirection::operator==(const CUsbDkChildDevice &Dev)
+bool CUsbDkRedirection::operator==(const CUsbDkChildDevice &Dev) const
 {
     return (m_DeviceID == Dev.DeviceID()) &&
            (m_InstanceID == Dev.InstanceID());
 }
 
-bool CUsbDkRedirection::operator==(const CUsbDkRedirection &Other)
+bool CUsbDkRedirection::operator==(const CUsbDkRedirection &Other) const
 {
     return (m_DeviceID == Other.m_DeviceID) &&
            (m_InstanceID == Other.m_InstanceID);

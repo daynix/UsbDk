@@ -60,9 +60,9 @@ public:
 
     NTSTATUS Create(const USB_DK_DEVICE_ID &Id);
 
-    bool operator==(const USB_DK_DEVICE_ID &Id);
-    bool operator==(const CUsbDkChildDevice &Dev);
-    bool operator==(const CUsbDkRedirection &Other);
+    bool operator==(const USB_DK_DEVICE_ID &Id) const;
+    bool operator==(const CUsbDkChildDevice &Dev) const;
+    bool operator==(const CUsbDkRedirection &Other) const;
 
     PLIST_ENTRY GetListEntry()
     { return &m_ListEntry; }

@@ -107,7 +107,7 @@ void CString::Destroy()
     }
 }
 
-bool CStringBase::operator== (const UNICODE_STRING& Str)
+bool CStringBase::operator== (const UNICODE_STRING& Str) const
 {
     if (m_String.Length != Str.Length)
     {

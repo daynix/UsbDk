@@ -305,12 +305,12 @@ private:
 class CStringBase
 {
 public:
-    bool operator== (const CStringBase &Other)
+    bool operator== (const CStringBase &Other) const
     { return *this == Other.m_String; }
 
-    bool operator== (const UNICODE_STRING& Str);
+    bool operator== (const UNICODE_STRING& Str) const;
 
-    bool operator== (PCWSTR Other)
+    bool operator== (PCWSTR Other) const
     {
         UNICODE_STRING str;
         if (NT_SUCCESS(RtlUnicodeStringInit(&str, Other)))

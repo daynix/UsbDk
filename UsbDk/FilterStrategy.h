@@ -66,15 +66,6 @@ private:
 class CUsbDkNullFilterStrategy : public CUsbDkFilterStrategy
 {
 public:
-    virtual NTSTATUS Create(CUsbDkFilterDevice *Owner)
-    {
-        m_Owner = Owner;
-        return STATUS_SUCCESS;
-    }
-
-    virtual void Delete()
-    {}
-
     virtual NTSTATUS MakeAvailable() override
     { return STATUS_SUCCESS; }
 };

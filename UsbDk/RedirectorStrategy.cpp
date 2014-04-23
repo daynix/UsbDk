@@ -210,10 +210,29 @@ void CUsbDkRedirectorStrategy::IoInCallerContext(WDFDEVICE Device, WDFREQUEST Re
     {
         CUsbDkFilterStrategy::IoInCallerContext(Device, Request);
     }
+}
+//--------------------------------------------------------------------------------------------------
+
+NTSTATUS CUsbDkRedirectorStrategy::DoControlTransfer(PWDF_USB_CONTROL_SETUP_PACKET Input, size_t InputLength,
+                                                     PWDF_USB_CONTROL_SETUP_PACKET Output, size_t& OutputLength)
+{
+    WDF_MEMORY_DESCRIPTOR Memory;
+    WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(&Memory, &Input[1], static_cast<ULONG>(InputLength - sizeof(*Input)));
+    ULONG BytesTransferred;
+
+    auto status = WdfUsbTargetDeviceSendControlTransferSynchronously(m_Target, nullptr, nullptr,
+                                                                     Input, &Memory, &BytesTransferred);
+    if (NT_SUCCESS(status) && (Input->Packet.bm.Request.Dir == BMREQUEST_DEVICE_TO_HOST))
+    {
+        RtlMoveMemory(&Output[1], &Input[1], min(BytesTransferred, OutputLength - sizeof(*Output)));
+        OutputLength = BytesTransferred + sizeof(*Output);
+    }
     else
     {
-        WdfRequestComplete(Request, status);
+        OutputLength = 0;
     }
+
+    return status;
 }
 //--------------------------------------------------------------------------------------------------
 
@@ -228,11 +247,14 @@ void CUsbDkRedirectorStrategy::IoDeviceControl(CWdfRequest& Request,
             CUsbDkFilterStrategy::IoDeviceControl(Request, OutputBufferLength, InputBufferLength, IoControlCode);
             return;
         }
-        case IOCTL_USBDK_DEVICE_SELECT_CONFIGURATION:
+        case IOCTL_USBDK_DEVICE_CONTROL_TRANSFER:
         {
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_REDIRECTOR, "Called IOCTL_USBDK_DEVICE_SET_CONFIGURATION\n");
-            //TODO: Handle me
-            CUsbDkFilterStrategy::IoDeviceControl(Request, OutputBufferLength, InputBufferLength, IoControlCode);
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_REDIRECTOR, "Called IOCTL_USBDK_DEVICE_CONTROL_TRANSFER\n");
+
+            UsbDkHandleRequestWithInputOutput<WDF_USB_CONTROL_SETUP_PACKET, WDF_USB_CONTROL_SETUP_PACKET>(Request,
+                [this](PWDF_USB_CONTROL_SETUP_PACKET Input, size_t InputLength, PWDF_USB_CONTROL_SETUP_PACKET Output, size_t &OutputLength)
+                { return DoControlTransfer(Input, InputLength, Output, OutputLength); });
+
             return;
         }
     }

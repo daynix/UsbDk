@@ -200,3 +200,19 @@ BOOL StopRedirect(HANDLE DeviceHandle)
     }
 }
 //-------------------------------------------------------------------------------------------
+
+BOOL ControlTransfer(HANDLE DeviceHandle, PVOID Buffer, PULONG Length)
+{
+    try
+    {
+        auto deviceHandle = reinterpret_cast<PREDIRECTED_DEVICE_HANDLE>(DeviceHandle);
+        deviceHandle->RedirectorAccess->DoControlTransfer(Buffer, *Length);
+        return TRUE;
+    }
+    catch (const exception &e)
+    {
+        printExceptionString(e.what());
+        return FALSE;
+    }
+}
+//-------------------------------------------------------------------------------------------

@@ -35,6 +35,8 @@ extern "C" {
 
     DLL HANDLE           StartRedirect(PUSB_DK_DEVICE_ID DeviceID);
     DLL BOOL             StopRedirect(HANDLE DeviceHandle);
+
+    DLL BOOL             ControlTransfer(HANDLE DeviceHandle, PVOID Buffer, PULONG Length);
 #ifdef __cplusplus
 }
 #endif

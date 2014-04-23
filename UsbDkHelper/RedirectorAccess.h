@@ -24,5 +24,7 @@ public:
     UsbDkRedirectorAccess(ULONG RedirectorID)
         :UsbDkDriverFile( (tstring(USBDK_REDIRECTOR_USERMODE_NAME_PREFIX) + to_tstring(RedirectorID)).c_str() )
     {}
+
+    void DoControlTransfer(PVOID Buffer, ULONG &Length);
 };
 //-----------------------------------------------------------------------------------

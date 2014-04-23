@@ -82,9 +82,7 @@ PWCHAR CWdmDeviceAccess::QueryBusID(BUS_QUERY_ID_TYPE idType)
     irp.ReadResult([&idData](ULONG_PTR information)
                    { idData = reinterpret_cast<PWCHAR>(information); });
 
-    idData = MakeNonPagedDuplicate(idType, idData);
-
-    return idData;
+    return (idData != nullptr) ? MakeNonPagedDuplicate(idType, idData) : nullptr;
 }
 
 NTSTATUS CWdmDeviceAccess::QueryCapabilities(DEVICE_CAPABILITIES &Capabilities)

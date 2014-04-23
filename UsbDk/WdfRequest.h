@@ -76,12 +76,13 @@ public:
 
     NTSTATUS SendAndForget(WDFIOTARGET Target);
 
+    void Detach()
+    { m_Request = WDF_NO_HANDLE; }
+
 protected:
     WDFREQUEST m_Request;
 
 private:
-    void Forget()
-    { m_Request = WDF_NO_HANDLE; }
 
     NTSTATUS m_Status = STATUS_UNSUCCESSFUL;
     ULONG_PTR m_Information = 0;

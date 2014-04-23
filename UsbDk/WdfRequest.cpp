@@ -10,7 +10,7 @@ NTSTATUS CWdfRequest::SendAndForget(WDFIOTARGET Target)
 
     if (WdfRequestSend(m_Request, Target, &options))
     {
-        Forget();
+        Detach();
     }
     else
     {

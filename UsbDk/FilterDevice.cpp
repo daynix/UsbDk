@@ -351,6 +351,7 @@ bool CUsbDkFilterDevice::CStrategist::SelectStrategy(PDEVICE_OBJECT DevObj)
 {
     PAGED_CODE();
 
+    // 1. Get device ID
     CObjHolder<CRegText> DevID;
     if (!UsbDkGetWdmDeviceIdentity(DevObj, &DevID, nullptr))
     {
@@ -360,6 +361,7 @@ bool CUsbDkFilterDevice::CStrategist::SelectStrategy(PDEVICE_OBJECT DevObj)
 
     DevID->Dump();
 
+    // 2. Root hubs -> Hub strategy
     if ((DevID->Match(L"USB\\ROOT_HUB") || DevID->Match(L"USB\\ROOT_HUB20")))
     {
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Assigning HUB strategy");
@@ -368,6 +370,23 @@ bool CUsbDkFilterDevice::CStrategist::SelectStrategy(PDEVICE_OBJECT DevObj)
         return true;
     }
 
+    // 3. Not a USB device -> do not filter
+    if (!DevID->MatchPrefix(L"USB\\"))
+    {
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Not a usb device, no strategy assigned");
+        return false;
+    }
+
+    // 4. Device class is HUB -> Hub strategy
+    if (UsbDkWdmUsbDeviceIsHub(DevObj))
+    {
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Device class in HUB, assigning hub strategy");
+        m_Strategy->Delete();
+        m_Strategy = &m_HubStrategy;
+        return true;
+    }
+
+    // 5. Get instance ID
     CObjHolder<CRegText> InstanceID;
     if (!UsbDkGetWdmDeviceIdentity(DevObj, nullptr, &InstanceID))
     {
@@ -375,15 +394,17 @@ bool CUsbDkFilterDevice::CStrategist::SelectStrategy(PDEVICE_OBJECT DevObj)
         return false;
     }
 
+    // 6. Configuration doesn't tell to redirect or device already redirected -> no strategy
     USB_DK_DEVICE_ID ID;
     UsbDkFillIDStruct(&ID, *DevID->begin(), *InstanceID->begin());
 
     if (!m_Strategy->GetControlDevice()->ShouldRedirect(ID))
     {
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Unsupported or already redirected device, no strategy assigned");
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Do not redirect or already redirected device, no strategy assigned");
         return false;
     }
 
+    // 7. Redirector strategy
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Assigning redirected USB device strategy");
     m_DevStrategy.SetDeviceID(DevID.detach());
     m_DevStrategy.SetInstanceID(InstanceID.detach());

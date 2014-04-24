@@ -107,6 +107,8 @@ bool UsbDkGetWdmDeviceIdentity(const PDEVICE_OBJECT PDO,
                                CObjHolder<CRegText> *DeviceID,
                                CObjHolder<CRegText> *InstanceID = nullptr);
 
+bool UsbDkWdmUsbDeviceIsHub(PDEVICE_OBJECT PDO);
+
 template <typename TBuffer>
 void UsbDkBuildDescriptorRequest(URB &Urb, UCHAR Type, UCHAR Index, TBuffer &Buffer, ULONG BufferLength = sizeof(TBuffer))
 {

@@ -163,9 +163,17 @@ CMemoryBuffer *CWdmDeviceAccess::GetDeviceProperty(DEVICE_REGISTRY_PROPERTY prop
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVACCESS,
                 "%!FUNC! Property %!devprop! size for device 0x%p is %lu bytes", propertyId, m_DevObj, bytesNeeded);
 
-            CObjHolder<CMemoryBuffer> buffer(new CWdmMemoryBuffer(bytesNeeded, NonPagedPool));
+            CObjHolder<CWdmMemoryBuffer> buffer(new CWdmMemoryBuffer());
             if (buffer)
             {
+                status = buffer->Create(bytesNeeded, NonPagedPool);
+                if (!NT_SUCCESS(status))
+                {
+                    TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVACCESS,
+                        "%!FUNC! Error %!STATUS! during memory buffer creation", status);
+                    return nullptr;
+                }
+
                 status = IoGetDeviceProperty(m_DevObj, propertyId, static_cast<ULONG>(buffer->Size()), buffer->Ptr(), &bytesNeeded);
                 if (NT_SUCCESS(status))
                 {

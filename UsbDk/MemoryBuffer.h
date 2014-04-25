@@ -50,10 +50,22 @@ public:
         m_Size = Size;
     }
 
-    CWdmMemoryBuffer(SIZE_T Size, POOL_TYPE PoolType)
+    CWdmMemoryBuffer()
     {
-        m_Ptr = ExAllocatePoolWithTag(PoolType, m_Size, 'BRHR');
+        m_Ptr = nullptr;
+        m_Size = 0;
+    }
+
+    NTSTATUS Create(SIZE_T Size, POOL_TYPE PoolType)
+    {
+        m_Ptr = ExAllocatePoolWithTag(PoolType, m_Size, 'BMHR');
+        if (m_Ptr == nullptr)
+        {
+            return STATUS_INSUFFICIENT_RESOURCES;
+        }
+
         m_Size = Size;
+        return STATUS_SUCCESS;
     }
 
     virtual ~CWdmMemoryBuffer()

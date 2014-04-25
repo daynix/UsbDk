@@ -41,11 +41,7 @@ public:
     {}
 
     ~CObjHolder()
-    { if (*this)
-      {
-        m_DeleteFunc(m_Obj);
-      }
-    }
+    { destroy(); }
 
     operator bool() const { return m_Obj != nullptr; }
     operator T *() const { return m_Obj; }
@@ -58,8 +54,19 @@ public:
         return ptr;
     }
 
+    void destroy()
+    {
+        if (*this)
+        {
+            m_DeleteFunc(m_Obj);
+        }
+    }
+
     void operator= (T *ptr)
     { m_Obj = ptr; }
+
+    static void ArrayHolderDelete(T *Obj)
+    { delete[] Obj; }
 
     CObjHolder(const CObjHolder&) = delete;
     CObjHolder& operator= (const CObjHolder&) = delete;

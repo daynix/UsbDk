@@ -8,6 +8,7 @@
 #include "Alloc.h"
 
 class CWdfUsbInterface;
+class CWdfUsbPipe;
 
 class CWdfUsbTarget
 {
@@ -23,7 +24,12 @@ public:
     operator WDFUSBDEVICE () const
     { return m_UsbDevice; }
 
+    void WritePipe(WDFREQUEST Request, ULONG64 EndpointAddress, WDFMEMORY Buffer);
+    void ReadPipe(WDFREQUEST Request, ULONG64 EndpointAddress, WDFMEMORY Buffer);
+
 private:
+    CWdfUsbPipe *FindPipeByEndpointAddress(ULONG64 EndpointAddress);
+
     WDFDEVICE m_Device = WDF_NO_HANDLE;
     WDFUSBDEVICE m_UsbDevice = WDF_NO_HANDLE;
 

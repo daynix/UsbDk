@@ -3,6 +3,7 @@
 #include "UsbTarget.tmh"
 #include "Usbdlib.h"
 #include "DeviceAccess.h"
+#include "WdfRequest.h"
 
 class CWdfUrb final
 {
@@ -70,6 +71,10 @@ public:
     {}
 
     void Create(WDFUSBINTERFACE Interface, UCHAR PipeIndex);
+    void Read(CWdfRequest &Request, WDFMEMORY Buffer);
+    void Write(CWdfRequest &Request, WDFMEMORY Buffer);
+    UCHAR EndpointAddress() const
+    { return m_Info.EndpointAddress; }
 
 private:
     WDFUSBINTERFACE m_Interface;
@@ -89,6 +94,8 @@ public:
 
     NTSTATUS Create(WDFUSBDEVICE Device, UCHAR InterfaceIdx);
     NTSTATUS SetAltSetting(UCHAR AltSettingIdx);
+
+    CWdfUsbPipe *FindPipeByEndpointAddress(ULONG64 EndpointAddress);
 
 private:
     WDFUSBDEVICE m_UsbDevice;
@@ -135,6 +142,19 @@ NTSTATUS CWdfUsbInterface::SetAltSetting(UCHAR AltSettingIdx)
     return STATUS_SUCCESS;
 }
 
+CWdfUsbPipe *CWdfUsbInterface::FindPipeByEndpointAddress(ULONG64 EndpointAddress)
+{
+    for (UCHAR i = 0; i < m_NumPipes; i++)
+    {
+        if (m_Pipes[i].EndpointAddress() == EndpointAddress)
+        {
+            return &m_Pipes[i];
+        }
+    }
+
+    return nullptr;
+}
+
 NTSTATUS CWdfUsbInterface::Create(WDFUSBDEVICE Device, UCHAR InterfaceIdx)
 {
     m_UsbDevice = Device;
@@ -152,6 +172,76 @@ void CWdfUsbPipe::Create(WDFUSBINTERFACE Interface, UCHAR PipeIndex)
 
     m_Pipe = WdfUsbInterfaceGetConfiguredPipe(m_Interface, PipeIndex, &m_Info);
     ASSERT(m_Pipe != nullptr);
+}
+
+void CWdfUsbPipe::Read(CWdfRequest &Request, WDFMEMORY Buffer)
+{
+    auto status = WdfUsbTargetPipeFormatRequestForRead(m_Pipe, Request, Buffer, nullptr);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! WdfUsbTargetPipeFormatRequestForRead failed: %!STATUS!", status);
+        Request.SetStatus(status);
+    }
+    else
+    {
+        status = Request.SendWithCompletion(WdfUsbTargetPipeGetIoTarget(m_Pipe),
+            [](WDFREQUEST Request, WDFIOTARGET, PWDF_REQUEST_COMPLETION_PARAMS Params, WDFCONTEXT)
+            {
+                auto status = Params->IoStatus.Status;
+                auto usbCompletionParams = Params->Parameters.Usb.Completion;
+                auto bytesWritten = usbCompletionParams->Parameters.PipeRead.Length;
+
+                if (!NT_SUCCESS(status))
+                {
+                    TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Read failed: %!STATUS! UsbdStatus 0x%x\n",
+                                status, usbCompletionParams->UsbdStatus);
+                }
+
+                CWdfRequest WdfRequest(Request);
+                WdfRequest.SetStatus(status);
+                WdfRequest.SetBytesRead(bytesWritten);
+            });
+
+        if (!NT_SUCCESS(status))
+        {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! send failed: %!STATUS!", status);
+        }
+    }
+}
+
+void CWdfUsbPipe::Write(CWdfRequest &Request, WDFMEMORY Buffer)
+{
+    auto status = WdfUsbTargetPipeFormatRequestForWrite(m_Pipe, Request, Buffer, nullptr);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! WdfUsbTargetPipeFormatRequestForWrite failed: %!STATUS!", status);
+        Request.SetStatus(status);
+    }
+    else
+    {
+        status = Request.SendWithCompletion(WdfUsbTargetPipeGetIoTarget(m_Pipe),
+            [](WDFREQUEST Request, WDFIOTARGET, PWDF_REQUEST_COMPLETION_PARAMS Params, WDFCONTEXT)
+            {
+                auto status = Params->IoStatus.Status;
+                auto usbCompletionParams = Params->Parameters.Usb.Completion;
+                auto bytesWritten = usbCompletionParams->Parameters.PipeWrite.Length;
+
+                if (!NT_SUCCESS(status))
+                {
+                    TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Write failed: %!STATUS! UsbdStatus 0x%x\n",
+                                status, usbCompletionParams->UsbdStatus);
+                }
+
+                CWdfRequest WdfRequest(Request);
+                WdfRequest.SetStatus(status);
+                WdfRequest.SetBytesWritten(bytesWritten);
+            });
+
+        if (!NT_SUCCESS(status))
+        {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! send failed: %!STATUS!", status);
+        }
+    }
 }
 
 NTSTATUS CWdfUsbTarget::Create(WDFDEVICE Device)
@@ -282,4 +372,52 @@ NTSTATUS CWdfUsbTarget::SetInterfaceAltSetting(UCHAR InterfaceIdx, UCHAR AltSett
 
     //TODO: Stop read/write queue before interface reconfiguration
     return m_Interfaces[InterfaceIdx].SetAltSetting(AltSettingIdx);
+}
+
+CWdfUsbPipe *CWdfUsbTarget::FindPipeByEndpointAddress(ULONG64 EndpointAddress)
+{
+    CWdfUsbPipe *Pipe = nullptr;
+
+    for (UCHAR i = 0; i < m_NumInterfaces; i++)
+    {
+        Pipe = m_Interfaces[i].FindPipeByEndpointAddress(EndpointAddress);
+        if (Pipe != nullptr)
+        {
+            break;
+        }
+    }
+
+    return Pipe;
+}
+
+void CWdfUsbTarget::WritePipe(WDFREQUEST Request, ULONG64 EndpointAddress, WDFMEMORY Buffer)
+{
+    CWdfRequest WdfRequest(Request);
+
+    CWdfUsbPipe *Pipe = FindPipeByEndpointAddress(EndpointAddress);
+    if (Pipe != nullptr)
+    {
+        Pipe->Write(WdfRequest, Buffer);
+    }
+    else
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed: Pipe not found");
+        WdfRequest.SetStatus(STATUS_NOT_FOUND);
+    }
+}
+
+void CWdfUsbTarget::ReadPipe(WDFREQUEST Request, ULONG64 EndpointAddress, WDFMEMORY Buffer)
+{
+    CWdfRequest WdfRequest(Request);
+
+    CWdfUsbPipe *Pipe = FindPipeByEndpointAddress(EndpointAddress);
+    if (Pipe != nullptr)
+    {
+        Pipe->Read(WdfRequest, Buffer);
+    }
+    else
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed: Pipe not found");
+        WdfRequest.SetStatus(STATUS_NOT_FOUND);
+    }
 }

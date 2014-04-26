@@ -50,3 +50,23 @@ bool UsbDkDriverFile::Ioctl(DWORD Code,
 
     return true;
 }
+
+void UsbDkDriverFile::Read(LPVOID Buffer,
+                           DWORD BufferSize,
+                           LPDWORD BytesRead)
+{
+    if (!ReadFile(m_hDriver, Buffer, BufferSize, BytesRead, nullptr))
+    {
+        throw UsbDkDriverFileException(TEXT("IOCTL failed"));
+    }
+}
+
+void UsbDkDriverFile::Write(LPVOID Buffer,
+                            DWORD BufferSize,
+                            LPDWORD BytesWritten)
+{
+    if (!WriteFile(m_hDriver, Buffer, BufferSize, BytesWritten, nullptr))
+    {
+        throw UsbDkDriverFileException(TEXT("IOCTL failed"));
+    }
+}

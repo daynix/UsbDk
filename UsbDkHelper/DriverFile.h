@@ -31,6 +31,14 @@ public:
                LPDWORD BytesReturned = nullptr,
                LPOVERLAPPED Overlapped = nullptr);
 
+    void Read(LPVOID Buffer,
+              DWORD BufferSize,
+              LPDWORD BytesRead);
+
+    void Write(LPVOID Buffer,
+               DWORD BufferSize,
+               LPDWORD BytesWritten);
+
 protected:
     HANDLE m_hDriver;
 };

@@ -411,32 +411,13 @@ size_t CUsbDkRedirectorStrategy::GetRequestContextSize()
 }
 //--------------------------------------------------------------------------------------------------
 
-void CUsbDkRedirectorQueue::WritePipe(WDFQUEUE Queue, WDFREQUEST Request, size_t Length)
+void CUsbDkRedirectorQueue::SetCallbacks(WDF_IO_QUEUE_CONFIG &QueueConfig)
 {
-    UNREFERENCED_PARAMETER(Queue);
-    UNREFERENCED_PARAMETER(Request);
-    UNREFERENCED_PARAMETER(Length);
-
-    WdfRequestComplete(Request, STATUS_NOT_IMPLEMENTED);
+    QueueConfig.EvtIoDeviceControl = [](WDFQUEUE Q, WDFREQUEST R, size_t OL, size_t IL, ULONG CTL)
+                                     { UsbDkFilterGetContext(WdfIoQueueGetDevice(Q))->UsbDkFilter->m_Strategy->IoDeviceControl(R, OL, IL, CTL); };;
+    QueueConfig.EvtIoWrite = [](WDFQUEUE Q, WDFREQUEST R, size_t L)
+                             { UsbDkFilterGetContext(WdfIoQueueGetDevice(Q))->UsbDkFilter->m_Strategy->WritePipe(R, L); };
+    QueueConfig.EvtIoRead = [](WDFQUEUE Q, WDFREQUEST R, size_t L)
+                            { UsbDkFilterGetContext(WdfIoQueueGetDevice(Q))->UsbDkFilter->m_Strategy->ReadPipe(R, L); };
 }
 //--------------------------------------------------------------------------------------------------
-
-void CUsbDkRedirectorQueue::ReadPipe(WDFQUEUE Queue, WDFREQUEST Request, size_t Length)
-{
-    UNREFERENCED_PARAMETER(Queue);
-    UNREFERENCED_PARAMETER(Request);
-    UNREFERENCED_PARAMETER(Length);
-
-    WdfRequestComplete(Request, STATUS_NOT_IMPLEMENTED);
-}
-//--------------------------------------------------------------------------------------------------
-
-void CUsbDkRedirectorQueue::IoDeviceControl(WDFQUEUE Queue, WDFREQUEST Request,
-                                            size_t OutputBufferLength, size_t InputBufferLength,
-                                            ULONG IoControlCode)
-{
-    CWdfRequest WdfRequest(Request);
-
-    auto devExt = UsbDkFilterGetContext(WdfIoQueueGetDevice(Queue));
-    devExt->UsbDkFilter->m_Strategy->IoDeviceControl(WdfRequest, OutputBufferLength, InputBufferLength, IoControlCode);
-}

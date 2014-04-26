@@ -14,18 +14,7 @@ public:
     {}
 
 private:
-    virtual void SetCallbacks(WDF_IO_QUEUE_CONFIG &QueueConfig) override
-    {
-        QueueConfig.EvtIoDeviceControl = IoDeviceControl;
-        QueueConfig.EvtIoWrite = WritePipe;
-        QueueConfig.EvtIoRead = ReadPipe;
-    }
-    static void WritePipe(WDFQUEUE Queue, WDFREQUEST Request, size_t Length);
-    static void ReadPipe(WDFQUEUE Queue, WDFREQUEST Request, size_t Length);
-    static void IoDeviceControl(WDFQUEUE Queue, WDFREQUEST Request,
-                                size_t OutputBufferLength, size_t InputBufferLength,
-                                ULONG IoControlCode);
-
+    virtual void SetCallbacks(WDF_IO_QUEUE_CONFIG &QueueConfig) override;
     CUsbDkRedirectorQueue(const CUsbDkRedirectorQueue&) = delete;
     CUsbDkRedirectorQueue& operator= (const CUsbDkRedirectorQueue&) = delete;
 };

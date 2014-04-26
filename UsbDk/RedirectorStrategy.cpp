@@ -208,8 +208,7 @@ void CUsbDkRedirectorStrategy::IoInCallerContext(WDFDEVICE Device, WDFREQUEST Re
 
     if (NT_SUCCESS(status))
     {
-        WdfRequest.Detach();
-        CUsbDkFilterStrategy::IoInCallerContext(Device, Request);
+        CUsbDkFilterStrategy::IoInCallerContext(Device, WdfRequest.Detach());
     }
 }
 //--------------------------------------------------------------------------------------------------

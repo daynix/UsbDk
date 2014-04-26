@@ -173,6 +173,7 @@ NTSTATUS CUsbDkRedirectorStrategy::PNPPreProcess(PIRP Irp)
 typedef struct tag_USBDK_REDIRECTOR_REQUEST_CONTEXT
 {
     WDFMEMORY LockedBuffer;
+    ULONG64 EndpointAddress;
 } USBDK_REDIRECTOR_REQUEST_CONTEXT, *PUSBDK_REDIRECTOR_REQUEST_CONTEXT;
 
 class CRedirectorRequest : public CWdfRequest
@@ -184,7 +185,99 @@ public:
 
     PUSBDK_REDIRECTOR_REQUEST_CONTEXT Context()
     { return reinterpret_cast<PUSBDK_REDIRECTOR_REQUEST_CONTEXT>(UsbDkFilterRequestGetContext(m_Request)); }
+
+    NTSTATUS FetchWriteRequest(USB_DK_TRANSFER_REQUEST &request) const
+    {
+        return FetchTransferRequest(request, [this](PVOID &buf, size_t &len)
+                                             { return FetchUnsafeInputBuffer(buf, len); });
+    }
+
+    NTSTATUS FetchReadRequest(USB_DK_TRANSFER_REQUEST &request) const
+    {
+        return FetchTransferRequest(request, [this](PVOID &buf, size_t &len)
+                                             { return FetchUnsafeOutputBuffer(buf, len); });
+    }
+
+private:
+
+    template<typename TWdfRequestBufferRetriever>
+    static NTSTATUS FetchTransferRequest(USB_DK_TRANSFER_REQUEST &request,
+                                         TWdfRequestBufferRetriever RetrieverFunc);
+
+    static NTSTATUS ReadTransferRequestSafe(PVOID requestBuffer, USB_DK_TRANSFER_REQUEST &Request);
 };
+
+template<typename TWdfRequestBufferRetriever>
+static NTSTATUS CRedirectorRequest::FetchTransferRequest(USB_DK_TRANSFER_REQUEST &Request,
+                                                         TWdfRequestBufferRetriever RetrieverFunc)
+{
+    PVOID buf;
+    size_t len;
+
+    auto status = RetrieverFunc(buf, len);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! FetchUnsafeReadBuffer failed, %!STATUS!", status);
+        return status;
+    }
+
+    if (len != sizeof(USB_DK_TRANSFER_REQUEST))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! Wrong request buffer size (%llu, expected %llu)",
+                    len, sizeof(USB_DK_TRANSFER_REQUEST));
+        return STATUS_INVALID_BUFFER_SIZE;
+    }
+
+    status = ReadTransferRequestSafe(buf, Request);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! ReadTransferRequestSafe failed, %!STATUS!", status);
+    }
+
+    return status;
+}
+//--------------------------------------------------------------------------------------------------
+
+NTSTATUS CRedirectorRequest::ReadTransferRequestSafe(PVOID requestBuffer, USB_DK_TRANSFER_REQUEST &Request)
+{
+    __try
+    {
+        ProbeForRead(requestBuffer, sizeof(Request), 1);
+        Request = *(PUSB_DK_TRANSFER_REQUEST)requestBuffer;
+        return STATUS_SUCCESS;
+    }
+    __except (EXCEPTION_EXECUTE_HANDLER)
+    {
+        return STATUS_ACCESS_VIOLATION;
+    }
+}
+//--------------------------------------------------------------------------------------------------
+
+template <typename TRetrieverFunc, typename TLockerFunc>
+NTSTATUS CUsbDkRedirectorStrategy::IoInCallerContextRW(CRedirectorRequest &WdfRequest,
+                                                       TRetrieverFunc RetrieverFunc,
+                                                       TLockerFunc LockerFunc)
+{
+    USB_DK_TRANSFER_REQUEST TransferRequest;
+
+    auto status = RetrieverFunc(WdfRequest, TransferRequest);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! failed to read transfer request, %!STATUS!", status);
+        return status;
+    }
+
+    PUSBDK_REDIRECTOR_REQUEST_CONTEXT context = WdfRequest.Context();
+    context->EndpointAddress = TransferRequest.endpointAddress;
+
+    status = LockerFunc(WdfRequest, TransferRequest, context->LockedBuffer);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! LockUserBufferForRead failed");
+    }
+    return status;
+}
+//--------------------------------------------------------------------------------------------------
 
 void CUsbDkRedirectorStrategy::IoInCallerContext(WDFDEVICE Device, WDFREQUEST Request)
 {
@@ -197,10 +290,24 @@ void CUsbDkRedirectorStrategy::IoInCallerContext(WDFDEVICE Device, WDFREQUEST Re
     switch (Params.Type)
     {
     case WdfRequestTypeRead:
-        status = WdfRequest.FetchSafeReadBuffer(&WdfRequest.Context()->LockedBuffer);
+        status = IoInCallerContextRW(WdfRequest,
+                                     [](const CRedirectorRequest &WdfRequest, USB_DK_TRANSFER_REQUEST &Transfer)
+                                     { return WdfRequest.FetchReadRequest(Transfer); },
+                                     [](const CRedirectorRequest &WdfRequest, const USB_DK_TRANSFER_REQUEST &Transfer, WDFMEMORY &LockedMemory)
+#pragma warning(push)
+#pragma warning(disable:4244) //Unsafe conversions on 32 bit
+                                     { return WdfRequest.LockUserBufferForWrite(Transfer.buffer, Transfer.bufferLength, LockedMemory); });
+#pragma warning(pop)
         break;
     case WdfRequestTypeWrite:
-        status = WdfRequest.FetchSafeWriteBuffer(&WdfRequest.Context()->LockedBuffer);
+        status = IoInCallerContextRW(WdfRequest,
+                                     [](const CRedirectorRequest &WdfRequest, USB_DK_TRANSFER_REQUEST &Transfer)
+                                     { return WdfRequest.FetchWriteRequest(Transfer); },
+                                     [](const CRedirectorRequest &WdfRequest, const USB_DK_TRANSFER_REQUEST &Transfer, WDFMEMORY &LockedMemory)
+#pragma warning(push)
+#pragma warning(disable:4244) //Unsafe conversions on 32 bit
+                                     { return WdfRequest.LockUserBufferForRead(Transfer.buffer, Transfer.bufferLength, LockedMemory); });
+#pragma warning(pop)
         break;
     default:
         status = STATUS_SUCCESS;
@@ -258,6 +365,42 @@ void CUsbDkRedirectorStrategy::IoDeviceControl(WDFREQUEST Request,
 
             return;
         }
+    }
+}
+//--------------------------------------------------------------------------------------------------
+
+void CUsbDkRedirectorStrategy::WritePipe(WDFREQUEST Request, size_t Length)
+{
+    UNREFERENCED_PARAMETER(Length);
+
+    CRedirectorRequest WdfRequest(Request);
+    PUSBDK_REDIRECTOR_REQUEST_CONTEXT Context = WdfRequest.Context();
+
+    if (Context->LockedBuffer != WDF_NO_HANDLE)
+    {
+        m_Target.WritePipe(WdfRequest.Detach(), Context->EndpointAddress, Context->LockedBuffer);
+    }
+    else
+    {
+        WdfRequest.SetStatus(STATUS_INVALID_PARAMETER);
+    }
+}
+//--------------------------------------------------------------------------------------------------
+
+void CUsbDkRedirectorStrategy::ReadPipe(WDFREQUEST Request, size_t Length)
+{
+    UNREFERENCED_PARAMETER(Length);
+
+    CRedirectorRequest WdfRequest(Request);
+    PUSBDK_REDIRECTOR_REQUEST_CONTEXT Context = WdfRequest.Context();
+
+    if (Context->LockedBuffer != WDF_NO_HANDLE)
+    {
+        m_Target.ReadPipe(WdfRequest.Detach(), Context->EndpointAddress, Context->LockedBuffer);
+    }
+    else
+    {
+        WdfRequest.SetStatus(STATUS_INVALID_PARAMETER);
     }
 }
 //--------------------------------------------------------------------------------------------------

@@ -96,6 +96,9 @@ public:
     void Detach()
     { m_Request = WDF_NO_HANDLE; }
 
+    operator WDFREQUEST() const
+    { return m_Request; }
+
 protected:
     WDFREQUEST m_Request;
 

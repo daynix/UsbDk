@@ -12,8 +12,7 @@ public:
     {
         if (m_Request != WDF_NO_HANDLE)
         {
-            WdfRequestSetInformation(m_Request, m_Information);
-            WdfRequestComplete(m_Request, m_Status);
+            WdfRequestCompleteWithInformation(m_Request, m_Status, m_Information);
         }
     }
 

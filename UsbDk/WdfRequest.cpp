@@ -21,6 +21,24 @@ NTSTATUS CWdfRequest::SendAndForget(WDFIOTARGET Target)
     return status;
 }
 
+NTSTATUS CWdfRequest::SendWithCompletion(WDFIOTARGET Target, PFN_WDF_REQUEST_COMPLETION_ROUTINE CompletionFunc)
+{
+    auto status = STATUS_SUCCESS;
+
+    WdfRequestSetCompletionRoutine(m_Request, CompletionFunc, nullptr);
+    if (WdfRequestSend(m_Request, Target, WDF_NO_SEND_OPTIONS))
+    {
+        Detach();
+    }
+    else
+    {
+        status = WdfRequestGetStatus(m_Request);
+        SetStatus(status);
+    }
+
+    return status;
+}
+
 NTSTATUS CWdfRequest::FetchSafeReadBuffer(WDFMEMORY *Buffer) const
 {
     PVOID Ptr;

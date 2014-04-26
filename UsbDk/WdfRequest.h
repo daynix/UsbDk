@@ -92,6 +92,7 @@ public:
     }
 
     NTSTATUS SendAndForget(WDFIOTARGET Target);
+    NTSTATUS SendWithCompletion(WDFIOTARGET Target, PFN_WDF_REQUEST_COMPLETION_ROUTINE CompletionFunc);
 
     void Detach()
     { m_Request = WDF_NO_HANDLE; }

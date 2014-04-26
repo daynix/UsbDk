@@ -79,6 +79,12 @@ public:
     void SetOutputDataLen(size_t lenBytes)
     { m_Information = lenBytes; }
 
+    void SetBytesWritten(size_t numBytes)
+    { m_Information = numBytes; }
+
+    void SetBytesRead(size_t numBytes)
+    { m_Information = numBytes; }
+
     void GetParameters(WDF_REQUEST_PARAMETERS &Params)
     {
         WDF_REQUEST_PARAMETERS_INIT(&Params);

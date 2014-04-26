@@ -37,6 +37,9 @@ extern "C" {
     DLL BOOL             StopRedirect(HANDLE DeviceHandle);
 
     DLL BOOL             ControlTransfer(HANDLE DeviceHandle, PVOID Buffer, PULONG Length);
+
+    DLL BOOL             WritePipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Request, PULONG BytesWritten);
+    DLL BOOL             ReadPipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Request, PULONG BytesRead);
 #ifdef __cplusplus
 }
 #endif

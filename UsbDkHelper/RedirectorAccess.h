@@ -26,5 +26,10 @@ public:
     {}
 
     void DoControlTransfer(PVOID Buffer, ULONG &Length);
+
+    void ReadPipe(USB_DK_TRANSFER_REQUEST &Request, ULONG &BytesRead)
+    { Read(&Request, sizeof(Request), &BytesRead); }
+    void WritePipe(USB_DK_TRANSFER_REQUEST &Request, ULONG &BytesWritten)
+    { Write(&Request, sizeof(Request), &BytesWritten); }
 };
 //-----------------------------------------------------------------------------------

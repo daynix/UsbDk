@@ -11,16 +11,18 @@ NTSTATUS CUsbDkFilterStrategy::PNPPreProcess(PIRP Irp)
     return WdfDeviceWdmDispatchPreprocessedIrp(m_Owner->WdfObject(), Irp);
 }
 
-void CUsbDkFilterStrategy::ForwardRequest(CWdfRequest &Request)
+void CUsbDkFilterStrategy::ForwardRequest(WDFREQUEST Request)
 {
-    auto status = Request.SendAndForget(m_Owner->IOTarget());
+    CWdfRequest WdfRequest(Request);
+
+    auto status = WdfRequest.SendAndForget(m_Owner->IOTarget());
     if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERSTRATEGY, "%!FUNC! failed %!STATUS!", status);
     }
 }
 
-void CUsbDkFilterStrategy::IoDeviceControl(CWdfRequest& Request,
+void CUsbDkFilterStrategy::IoDeviceControl(WDFREQUEST Request,
                                            size_t OutputBufferLength, size_t InputBufferLength,
                                            ULONG IoControlCode)
 {
@@ -30,13 +32,13 @@ void CUsbDkFilterStrategy::IoDeviceControl(CWdfRequest& Request,
     ForwardRequest(Request);
 }
 
-void CUsbDkFilterStrategy::WritePipe(CWdfRequest& Request, size_t Length)
+void CUsbDkFilterStrategy::WritePipe(WDFREQUEST Request, size_t Length)
 {
     UNREFERENCED_PARAMETER(Length);
     ForwardRequest(Request);
 }
 
-void CUsbDkFilterStrategy::ReadPipe(CWdfRequest& Request, size_t Length)
+void CUsbDkFilterStrategy::ReadPipe(WDFREQUEST Request, size_t Length)
 {
     UNREFERENCED_PARAMETER(Length);
     ForwardRequest(Request);

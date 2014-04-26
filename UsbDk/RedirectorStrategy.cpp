@@ -236,7 +236,7 @@ NTSTATUS CUsbDkRedirectorStrategy::DoControlTransfer(PWDF_USB_CONTROL_SETUP_PACK
 }
 //--------------------------------------------------------------------------------------------------
 
-void CUsbDkRedirectorStrategy::IoDeviceControl(CWdfRequest& Request,
+void CUsbDkRedirectorStrategy::IoDeviceControl(WDFREQUEST Request,
                                                size_t OutputBufferLength, size_t InputBufferLength,
                                                ULONG IoControlCode)
 {
@@ -249,9 +249,10 @@ void CUsbDkRedirectorStrategy::IoDeviceControl(CWdfRequest& Request,
         }
         case IOCTL_USBDK_DEVICE_CONTROL_TRANSFER:
         {
+            CWdfRequest WdfRequest(Request);
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_REDIRECTOR, "Called IOCTL_USBDK_DEVICE_CONTROL_TRANSFER\n");
 
-            UsbDkHandleRequestWithInputOutput<WDF_USB_CONTROL_SETUP_PACKET, WDF_USB_CONTROL_SETUP_PACKET>(Request,
+            UsbDkHandleRequestWithInputOutput<WDF_USB_CONTROL_SETUP_PACKET, WDF_USB_CONTROL_SETUP_PACKET>(WdfRequest,
                 [this](PWDF_USB_CONTROL_SETUP_PACKET Input, size_t InputLength, PWDF_USB_CONTROL_SETUP_PACKET Output, size_t &OutputLength)
                 { return DoControlTransfer(Input, InputLength, Output, OutputLength); });
 

@@ -18,11 +18,11 @@ public:
     virtual NTSTATUS PNPPreProcess(PIRP Irp);
     virtual void IoInCallerContext(WDFDEVICE Device, WDFREQUEST Request);
 
-    virtual void IoDeviceControl(CWdfRequest& Request,
+    virtual void IoDeviceControl(WDFREQUEST Request,
                                  size_t OutputBufferLength, size_t InputBufferLength,
                                  ULONG IoControlCode);
-    virtual void WritePipe(CWdfRequest& Request, size_t Length);
-    virtual void ReadPipe(CWdfRequest& Request, size_t Length);
+    virtual void WritePipe(WDFREQUEST Request, size_t Length);
+    virtual void ReadPipe(WDFREQUEST Request, size_t Length);
 
     virtual NTSTATUS MakeAvailable() = 0;
 
@@ -58,7 +58,7 @@ protected:
     }
 
 private:
-    void ForwardRequest(CWdfRequest &Request);
+    void ForwardRequest(WDFREQUEST Request);
     TChildrenList m_Children;
 };
 //-----------------------------------------------------------------------------------------

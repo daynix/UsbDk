@@ -221,7 +221,7 @@ BOOL WritePipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Request, PULONG Byt
 {
     try
     {
-        unique_ptr<REDIRECTED_DEVICE_HANDLE> deviceHandle(reinterpret_cast<PREDIRECTED_DEVICE_HANDLE>(DeviceHandle));
+        auto deviceHandle = reinterpret_cast<PREDIRECTED_DEVICE_HANDLE>(DeviceHandle);
         deviceHandle->RedirectorAccess->WritePipe(*Request, *BytesWritten);
         return TRUE;
     }
@@ -237,7 +237,7 @@ BOOL ReadPipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Request, PULONG Byte
 {
     try
     {
-        unique_ptr<REDIRECTED_DEVICE_HANDLE> deviceHandle(reinterpret_cast<PREDIRECTED_DEVICE_HANDLE>(DeviceHandle));
+        auto deviceHandle= reinterpret_cast<PREDIRECTED_DEVICE_HANDLE>(DeviceHandle);
         deviceHandle->RedirectorAccess->ReadPipe(*Request, *BytesRead);
         return TRUE;
     }

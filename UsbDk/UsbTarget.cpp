@@ -71,8 +71,8 @@ public:
     {}
 
     void Create(WDFUSBINTERFACE Interface, UCHAR PipeIndex);
-    void Read(CWdfRequest &Request, WDFMEMORY Buffer);
-    void Write(CWdfRequest &Request, WDFMEMORY Buffer);
+    void ReadAsync(CWdfRequest &Request, WDFMEMORY Buffer, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion);
+    void WriteAsync(CWdfRequest &Request, WDFMEMORY Buffer, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion);
     UCHAR EndpointAddress() const
     { return m_Info.EndpointAddress; }
 
@@ -175,7 +175,7 @@ void CWdfUsbPipe::Create(WDFUSBINTERFACE Interface, UCHAR PipeIndex)
     WdfUsbTargetPipeSetNoMaximumPacketSizeCheck(m_Pipe);
 }
 
-void CWdfUsbPipe::Read(CWdfRequest &Request, WDFMEMORY Buffer)
+void CWdfUsbPipe::ReadAsync(CWdfRequest &Request, WDFMEMORY Buffer, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion)
 {
     auto status = WdfUsbTargetPipeFormatRequestForRead(m_Pipe, Request, Buffer, nullptr);
     if (!NT_SUCCESS(status))
@@ -185,24 +185,7 @@ void CWdfUsbPipe::Read(CWdfRequest &Request, WDFMEMORY Buffer)
     }
     else
     {
-        status = Request.SendWithCompletion(WdfUsbTargetPipeGetIoTarget(m_Pipe),
-            [](WDFREQUEST Request, WDFIOTARGET, PWDF_REQUEST_COMPLETION_PARAMS Params, WDFCONTEXT)
-            {
-                auto status = Params->IoStatus.Status;
-                auto usbCompletionParams = Params->Parameters.Usb.Completion;
-                auto bytesWritten = usbCompletionParams->Parameters.PipeRead.Length;
-
-                if (!NT_SUCCESS(status))
-                {
-                    TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Read failed: %!STATUS! UsbdStatus 0x%x\n",
-                                status, usbCompletionParams->UsbdStatus);
-                }
-
-                CWdfRequest WdfRequest(Request);
-                WdfRequest.SetStatus(status);
-                WdfRequest.SetBytesRead(bytesWritten);
-            });
-
+        status = Request.SendWithCompletion(WdfUsbTargetPipeGetIoTarget(m_Pipe), Completion);
         if (!NT_SUCCESS(status))
         {
             TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! send failed: %!STATUS!", status);
@@ -210,7 +193,7 @@ void CWdfUsbPipe::Read(CWdfRequest &Request, WDFMEMORY Buffer)
     }
 }
 
-void CWdfUsbPipe::Write(CWdfRequest &Request, WDFMEMORY Buffer)
+void CWdfUsbPipe::WriteAsync(CWdfRequest &Request, WDFMEMORY Buffer, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion)
 {
     auto status = WdfUsbTargetPipeFormatRequestForWrite(m_Pipe, Request, Buffer, nullptr);
     if (!NT_SUCCESS(status))
@@ -220,24 +203,7 @@ void CWdfUsbPipe::Write(CWdfRequest &Request, WDFMEMORY Buffer)
     }
     else
     {
-        status = Request.SendWithCompletion(WdfUsbTargetPipeGetIoTarget(m_Pipe),
-            [](WDFREQUEST Request, WDFIOTARGET, PWDF_REQUEST_COMPLETION_PARAMS Params, WDFCONTEXT)
-            {
-                auto status = Params->IoStatus.Status;
-                auto usbCompletionParams = Params->Parameters.Usb.Completion;
-                auto bytesWritten = usbCompletionParams->Parameters.PipeWrite.Length;
-
-                if (!NT_SUCCESS(status))
-                {
-                    TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Write failed: %!STATUS! UsbdStatus 0x%x\n",
-                                status, usbCompletionParams->UsbdStatus);
-                }
-
-                CWdfRequest WdfRequest(Request);
-                WdfRequest.SetStatus(status);
-                WdfRequest.SetBytesWritten(bytesWritten);
-            });
-
+        status = Request.SendWithCompletion(WdfUsbTargetPipeGetIoTarget(m_Pipe), Completion);
         if (!NT_SUCCESS(status))
         {
             TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! send failed: %!STATUS!", status);
@@ -391,14 +357,14 @@ CWdfUsbPipe *CWdfUsbTarget::FindPipeByEndpointAddress(ULONG64 EndpointAddress)
     return Pipe;
 }
 
-void CWdfUsbTarget::WritePipe(WDFREQUEST Request, ULONG64 EndpointAddress, WDFMEMORY Buffer)
+void CWdfUsbTarget::WritePipeAsync(WDFREQUEST Request, ULONG64 EndpointAddress, WDFMEMORY Buffer, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion)
 {
     CWdfRequest WdfRequest(Request);
 
     CWdfUsbPipe *Pipe = FindPipeByEndpointAddress(EndpointAddress);
     if (Pipe != nullptr)
     {
-        Pipe->Write(WdfRequest, Buffer);
+        Pipe->WriteAsync(WdfRequest, Buffer, Completion);
     }
     else
     {
@@ -407,14 +373,14 @@ void CWdfUsbTarget::WritePipe(WDFREQUEST Request, ULONG64 EndpointAddress, WDFME
     }
 }
 
-void CWdfUsbTarget::ReadPipe(WDFREQUEST Request, ULONG64 EndpointAddress, WDFMEMORY Buffer)
+void CWdfUsbTarget::ReadPipeAsync(WDFREQUEST Request, ULONG64 EndpointAddress, WDFMEMORY Buffer, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion)
 {
     CWdfRequest WdfRequest(Request);
 
     CWdfUsbPipe *Pipe = FindPipeByEndpointAddress(EndpointAddress);
     if (Pipe != nullptr)
     {
-        Pipe->Read(WdfRequest, Buffer);
+        Pipe->ReadAsync(WdfRequest, Buffer, Completion);
     }
     else
     {

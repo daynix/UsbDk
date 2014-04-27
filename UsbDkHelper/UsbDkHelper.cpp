@@ -217,12 +217,12 @@ BOOL ControlTransfer(HANDLE DeviceHandle, PVOID Buffer, PULONG Length)
 }
 //-------------------------------------------------------------------------------------------
 
-BOOL WritePipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Request, PULONG BytesWritten)
+BOOL WritePipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Request)
 {
     try
     {
         auto deviceHandle = reinterpret_cast<PREDIRECTED_DEVICE_HANDLE>(DeviceHandle);
-        deviceHandle->RedirectorAccess->WritePipe(*Request, *BytesWritten);
+        deviceHandle->RedirectorAccess->WritePipe(*Request);
         return TRUE;
     }
     catch (const exception &e)
@@ -233,12 +233,12 @@ BOOL WritePipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Request, PULONG Byt
 }
 //-------------------------------------------------------------------------------------------
 
-BOOL ReadPipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Request, PULONG BytesRead)
+BOOL ReadPipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Request)
 {
     try
     {
         auto deviceHandle= reinterpret_cast<PREDIRECTED_DEVICE_HANDLE>(DeviceHandle);
-        deviceHandle->RedirectorAccess->ReadPipe(*Request, *BytesRead);
+        deviceHandle->RedirectorAccess->ReadPipe(*Request);
         return TRUE;
     }
     catch (const exception &e)

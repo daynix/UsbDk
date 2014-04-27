@@ -24,8 +24,8 @@ public:
     operator WDFUSBDEVICE () const
     { return m_UsbDevice; }
 
-    void WritePipe(WDFREQUEST Request, ULONG64 EndpointAddress, WDFMEMORY Buffer);
-    void ReadPipe(WDFREQUEST Request, ULONG64 EndpointAddress, WDFMEMORY Buffer);
+    void WritePipeAsync(WDFREQUEST Request, ULONG64 EndpointAddress, WDFMEMORY Buffer, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion);
+    void ReadPipeAsync(WDFREQUEST Request, ULONG64 EndpointAddress, WDFMEMORY Buffer, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion);
 
 private:
     CWdfUsbPipe *FindPipeByEndpointAddress(ULONG64 EndpointAddress);

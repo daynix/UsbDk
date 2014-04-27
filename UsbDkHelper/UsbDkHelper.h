@@ -38,8 +38,8 @@ extern "C" {
 
     DLL BOOL             ControlTransfer(HANDLE DeviceHandle, PVOID Buffer, PULONG Length);
 
-    DLL BOOL             WritePipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Request, PULONG BytesWritten);
-    DLL BOOL             ReadPipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Request, PULONG BytesRead);
+    DLL BOOL             WritePipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Request);
+    DLL BOOL             ReadPipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Request);
 #ifdef __cplusplus
 }
 #endif

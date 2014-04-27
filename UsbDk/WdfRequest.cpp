@@ -39,7 +39,7 @@ NTSTATUS CWdfRequest::SendWithCompletion(WDFIOTARGET Target, PFN_WDF_REQUEST_COM
     return status;
 }
 
-NTSTATUS CWdfRequest::FetchSafeReadBuffer(WDFMEMORY *Buffer) const
+NTSTATUS CWdfRequest::FetchSafeInputBuffer(WDFMEMORY &Buffer) const
 {
     PVOID Ptr;
     size_t Length;
@@ -47,13 +47,13 @@ NTSTATUS CWdfRequest::FetchSafeReadBuffer(WDFMEMORY *Buffer) const
     auto status = WdfRequestRetrieveUnsafeUserInputBuffer(m_Request, 0, &Ptr, &Length);
     if (NT_SUCCESS(status))
     {
-        status = WdfRequestProbeAndLockUserBufferForRead(m_Request, Ptr, Length, Buffer);
+        status = WdfRequestProbeAndLockUserBufferForRead(m_Request, Ptr, Length, &Buffer);
     }
 
     return status;
 }
 
-NTSTATUS CWdfRequest::FetchSafeWriteBuffer(WDFMEMORY *Buffer) const
+NTSTATUS CWdfRequest::FetchSafeOutputBuffer(WDFMEMORY &Buffer) const
 {
     PVOID Ptr;
     size_t Length;
@@ -61,7 +61,7 @@ NTSTATUS CWdfRequest::FetchSafeWriteBuffer(WDFMEMORY *Buffer) const
     auto status = WdfRequestRetrieveUnsafeUserOutputBuffer(m_Request, 0, &Ptr, &Length);
     if (NT_SUCCESS(status))
     {
-        status = WdfRequestProbeAndLockUserBufferForWrite(m_Request, Ptr, Length, Buffer);
+        status = WdfRequestProbeAndLockUserBufferForWrite(m_Request, Ptr, Length, &Buffer);
     }
 
     return status;

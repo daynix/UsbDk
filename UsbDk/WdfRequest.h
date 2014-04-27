@@ -28,13 +28,11 @@ public:
         return WdfRequestRetrieveOutputBuffer(m_Request, sizeof(*objectPtr), (PVOID *)&objectPtr, Length);
     }
 
-    template <typename TObject>
     NTSTATUS FetchInputMemory(WDFMEMORY *Memory)
     {
         return WdfRequestRetrieveInputMemory(m_Request, Memory);
     }
 
-    template <typename TObject>
     NTSTATUS FetchOutputMemory(WDFMEMORY *Memory)
     {
         return WdfRequestRetrieveOutputMemory(m_Request, Memory);
@@ -58,8 +56,8 @@ public:
         return status;
     }
 
-    NTSTATUS FetchSafeReadBuffer(WDFMEMORY *Buffer) const;
-    NTSTATUS FetchSafeWriteBuffer(WDFMEMORY *Buffer) const;
+    NTSTATUS FetchSafeInputBuffer(WDFMEMORY &Buffer) const;
+    NTSTATUS FetchSafeOutputBuffer(WDFMEMORY &Buffer) const;
 
     NTSTATUS FetchUnsafeInputBuffer(PVOID &Ptr, size_t &Length) const
     { return WdfRequestRetrieveUnsafeUserInputBuffer(m_Request, 0, &Ptr, &Length); }

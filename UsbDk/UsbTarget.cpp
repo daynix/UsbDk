@@ -172,6 +172,7 @@ void CWdfUsbPipe::Create(WDFUSBINTERFACE Interface, UCHAR PipeIndex)
 
     m_Pipe = WdfUsbInterfaceGetConfiguredPipe(m_Interface, PipeIndex, &m_Info);
     ASSERT(m_Pipe != nullptr);
+    WdfUsbTargetPipeSetNoMaximumPacketSizeCheck(m_Pipe);
 }
 
 void CWdfUsbPipe::Read(CWdfRequest &Request, WDFMEMORY Buffer)

@@ -52,43 +52,36 @@ void CUsbDkControlDeviceQueue::DeviceControl(WDFQUEUE Queue,
 
     CWdfRequest WdfRequest(Request);
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "%!FUNC! Request arrived");
-
     switch (IoControlCode)
     {
         case IOCTL_USBDK_COUNT_DEVICES:
         {
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "Called IOCTL_USBDK_COUNT_DEVICES\n");
             CountDevices(WdfRequest, Queue);
             break;
         }
         case IOCTL_USBDK_ENUM_DEVICES:
         {
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "Called IOCTL_USBDK_ENUM_DEVICES\n");
             EnumerateDevices(WdfRequest, Queue);
             break;
         }
         case IOCTL_USBDK_ADD_REDIRECT:
         {
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "Called IOCTL_USBDK_ADD_REDIRECT\n");
             AddRedirect(WdfRequest, Queue);
             break;
         }
         case IOCTL_USBDK_REMOVE_REDIRECT:
         {
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "Called IOCTL_USBDK_REMOVE_REDIRECT\n");
             RemoveRedirect(WdfRequest, Queue);
             break;
         }
         case IOCTL_USBDK_GET_CONFIG_DESCRIPTOR:
         {
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "Called IOCTL_USBDK_GET_CONFIG_DESCRIPTOR\n");
             GetConfigurationDescriptor(WdfRequest, Queue);
             break;
         }
         default:
         {
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "Wrong IoControlCode 0x%X\n", IoControlCode);
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "Wrong IoControlCode 0x%X\n", IoControlCode);
             WdfRequest.SetStatus(STATUS_INVALID_DEVICE_REQUEST);
             break;
         }
@@ -104,8 +97,6 @@ void CUsbDkControlDeviceQueue::CountDevices(CWdfRequest &Request, WDFQUEUE Queue
     {
         auto devExt = UsbDkControlGetContext(WdfIoQueueGetDevice(Queue));
         *numberDevices = devExt->UsbDkControl->CountDevices();
-
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "%!FUNC! CountDevices returned %d", *numberDevices);
 
         Request.SetOutputDataLen(sizeof(*numberDevices));
     }
@@ -129,8 +120,6 @@ void CUsbDkControlDeviceQueue::EnumerateDevices(CWdfRequest &Request, WDFQUEUE Q
 
     auto devExt = UsbDkControlGetContext(WdfIoQueueGetDevice(Queue));
     auto res = devExt->UsbDkControl->EnumerateDevices(existingDevices, numberAllocatedDevices, numberExistingDevices);
-
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "%!FUNC! EnumerateDevices returned %llu devices", numberExistingDevices);
 
     if (res)
     {

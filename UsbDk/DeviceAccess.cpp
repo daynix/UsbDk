@@ -245,7 +245,6 @@ NTSTATUS CWdmUsbDeviceAccess::GetConfigurationDescriptor(UCHAR Index, USB_CONFIG
         return status;
     }
 
-    TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVACCESS, "%!FUNC! Total descriptor size %d, buffer length %llu", Descriptor.wTotalLength, Length);
     return STATUS_SUCCESS;
 }
 

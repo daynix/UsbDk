@@ -74,8 +74,6 @@ void CUsbDkRedirectorStrategy::Delete()
 
 void CUsbDkRedirectorStrategy::PatchDeviceID(PIRP Irp)
 {
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_REDIRECTOR, "%!FUNC! Entry");
-
     //TODO: Put RedHat VID/PID when obtained from USB.org
     static const WCHAR RedirectorDeviceId[] = L"USB\\Vid_FEED&Pid_CAFE&Rev_0001";
     static const WCHAR RedirectorHardwareIds[] = L"USB\\Vid_FEED&Pid_CAFE&Rev_0001\0USB\\Vid_FEED&Pid_CAFE\0";
@@ -273,7 +271,7 @@ NTSTATUS CUsbDkRedirectorStrategy::IoInCallerContextRW(CRedirectorRequest &WdfRe
     status = LockerFunc(WdfRequest, TransferRequest, context->LockedBuffer);
     if (!NT_SUCCESS(status))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! LockUserBufferForRead failed");
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! Failed to lock user buffer, %!STATUS!", status);
     }
     return status;
 }
@@ -357,8 +355,6 @@ void CUsbDkRedirectorStrategy::IoDeviceControl(WDFREQUEST Request,
         case IOCTL_USBDK_DEVICE_CONTROL_TRANSFER:
         {
             CWdfRequest WdfRequest(Request);
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_REDIRECTOR, "Called IOCTL_USBDK_DEVICE_CONTROL_TRANSFER\n");
-
             UsbDkHandleRequestWithInputOutput<WDF_USB_CONTROL_SETUP_PACKET, WDF_USB_CONTROL_SETUP_PACKET>(WdfRequest,
                 [this](PWDF_USB_CONTROL_SETUP_PACKET Input, size_t InputLength, PWDF_USB_CONTROL_SETUP_PACKET Output, size_t &OutputLength)
                 { return DoControlTransfer(Input, InputLength, Output, OutputLength); });

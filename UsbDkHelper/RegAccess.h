@@ -30,60 +30,60 @@ public:
     BOOL  ReadValueName(LPTSTR lpsValueName,
                         DWORD  dwNumberOfElements,
                         DWORD  dwIndex=0,
-                        LPCTSTR lpzSubKey=NULL);
+                        LPCTSTR lpzSubKey=nullptr);
     BOOL  ReadKeyName(LPTSTR  lpsKeyName,
                       DWORD   dwNumberOfElements,
                       DWORD   dwIndex,
-                      LPCTSTR lpzSubKey = NULL);
+                      LPCTSTR lpzSubKey = nullptr);
 
     BOOL GetValueInfo(LPCTSTR lpzValueName,
                       DWORD*  lpDataType,
                       DWORD*  lpDataSize,
-                      LPCTSTR lpzSubKey = NULL);
+                      LPCTSTR lpzSubKey = nullptr);
     BOOL GetKeyInfo(LPDWORD lpdwNofSubKeys,
                     LPDWORD lpdwMaxSubKeyLen,
                     LPDWORD lpdwNofValues,
                     LPDWORD lpdwMaxValueNameLen,
                     LPDWORD lpdwMaxValueLen,
-                    LPCTSTR lpzSubKey = NULL);
+                    LPCTSTR lpzSubKey = nullptr);
 
     DWORD ReadDWord(LPCTSTR lpzValueName,
                     DWORD   dwDefault = 0,
-                    LPCTSTR lpzSubKey = NULL);
+                    LPCTSTR lpzSubKey = nullptr);
     BOOL  ReadDWord(LPCTSTR lpzValueName,
                     LPDWORD lpdwValue,
-                    LPCTSTR lpzSubKey = NULL);
+                    LPCTSTR lpzSubKey = nullptr);
     DWORD ReadString(LPCTSTR lpzValueName,
                      LPTSTR  lpzData,
                      DWORD   dwNumberOfElements,
-                     LPCTSTR lpzSubKey=NULL);
+                     LPCTSTR lpzSubKey=nullptr);
     LONG ReadMultiString(LPCTSTR lpzValueName,
                           LPTSTR  lpzData,
                           DWORD   dwNumberOfElements,
                           DWORD   &dwRes,
-                          LPCTSTR lpzSubKey = NULL);
+                          LPCTSTR lpzSubKey = nullptr);
     DWORD ReadBinary(LPCTSTR lpzValueName,
                      LPBYTE  lpzData,
                      DWORD   dwSize,
-                     LPCTSTR lpzSubKey=NULL);
+                     LPCTSTR lpzSubKey=nullptr);
     BOOL  WriteValue(LPCTSTR lpzValueName,
                      DWORD  dwValue,
-                     LPCTSTR lpzSubKey = NULL);
+                     LPCTSTR lpzSubKey = nullptr);
     BOOL  WriteString(LPCTSTR lpzValueName,
                       LPCTSTR lpzValue,
-                      LPCTSTR lpzSubKey=NULL);
+                      LPCTSTR lpzSubKey=nullptr);
     BOOL  WriteMultiString(LPCTSTR lpzValueName,
                            LPCTSTR lpzValue,
                            DWORD dwBuffSize,
-                           LPCTSTR lpzSubKey = NULL);
+                           LPCTSTR lpzSubKey = nullptr);
     BOOL  WriteBinary(LPCTSTR lpzValueName,
                       LPCBYTE lpData,
                       DWORD   dwDataSize,
-                      LPCTSTR lpzSubKey = NULL);
+                      LPCTSTR lpzSubKey = nullptr);
     BOOL  DeleteKey(LPCTSTR lpzKeyName,
-                    LPCTSTR lpzSubKey = NULL);
+                    LPCTSTR lpzSubKey = nullptr);
     BOOL  DeleteValue(LPCTSTR lpzValueName,
-                      LPCTSTR lpzSubKey = NULL);
+                      LPCTSTR lpzSubKey = nullptr);
 
     BOOL  AddKey(LPCTSTR lpzKeyName);
 

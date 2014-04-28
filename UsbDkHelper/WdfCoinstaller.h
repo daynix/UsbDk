@@ -40,7 +40,7 @@ private:
     CallbackType getCoinstallerFunction(char *functionName)
     {
         auto ptfFunction = (CallbackType)GetProcAddress(m_wdfCoinstallerLibrary, functionName);
-        if (ptfFunction == NULL)
+        if (ptfFunction == nullptr)
         {
             throw UsbDkWdfCoinstallerFailedException(L"WdfCoinstaller throw the exception. GetProcAddress failed!");
         }

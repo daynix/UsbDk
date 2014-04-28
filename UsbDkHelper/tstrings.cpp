@@ -8,7 +8,7 @@ string __wstring2string(const wstring& str)
    char* buf = new (std::nothrow) char[buf_length];
    size_t nCount;
 
-   if(NULL == buf)
+   if(nullptr == buf)
    {
        return string();
    }
@@ -29,7 +29,7 @@ wstring __string2wstring(const string& str)
     wchar_t* buf = new (std::nothrow) wchar_t[buf_length];
     size_t nCount;
 
-    if(NULL == buf)
+    if(nullptr == buf)
     {
         return wstring();
     }

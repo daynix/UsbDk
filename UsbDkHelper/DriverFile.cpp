@@ -8,10 +8,10 @@ UsbDkDriverFile::UsbDkDriverFile(LPCTSTR lpFileName)
     m_hDriver = CreateFile(lpFileName,
                            GENERIC_READ | GENERIC_WRITE,
                            0,
-                           NULL,
+                           nullptr,
                            OPEN_EXISTING,
                            FILE_ATTRIBUTE_NORMAL,
-                           NULL);
+                           nullptr);
 
     if (m_hDriver == INVALID_HANDLE_VALUE)
     {

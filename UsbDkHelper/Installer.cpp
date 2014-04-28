@@ -123,7 +123,7 @@ void UsbDkInstaller::addUsbDkToRegistry()
 
     // check for value size
     DWORD valLen = 0;
-    auto errCode = m_regAccess.ReadMultiString(upperFilterString, NULL, 0, valLen, upperFiltersKeyStr);
+    auto errCode = m_regAccess.ReadMultiString(upperFilterString, nullptr, 0, valLen, upperFiltersKeyStr);
 
     if (errCode != ERROR_FILE_NOT_FOUND && errCode != ERROR_SUCCESS)
     {
@@ -170,7 +170,7 @@ void UsbDkInstaller::removeUsbDkFromRegistry()
 
     // check for value size
     DWORD valLen = 0;
-    auto errCode = m_regAccess.ReadMultiString(upperFilterString, NULL, 0, valLen, upperFiltersKeyStr);
+    auto errCode = m_regAccess.ReadMultiString(upperFilterString, nullptr, 0, valLen, upperFiltersKeyStr);
 
     if (errCode != ERROR_FILE_NOT_FOUND && errCode != ERROR_SUCCESS)
     {

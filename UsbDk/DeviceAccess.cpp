@@ -22,7 +22,7 @@ PWCHAR CWdfDeviceAccess::QueryBusID(BUS_QUERY_ID_TYPE idType)
 {
     UNREFERENCED_PARAMETER(idType);
     ASSERT(!"NOT IMPLEMENTED");
-    return NULL;
+    return nullptr;
 }
 
 NTSTATUS CWdfDeviceAccess::QueryCapabilities(DEVICE_CAPABILITIES &Capabilities)
@@ -48,7 +48,7 @@ CMemoryBuffer *CWdfDeviceAccess::GetDeviceProperty(DEVICE_REGISTRY_PROPERTY prop
         return CMemoryBuffer::GetMemoryBuffer(devProperty);
     }
 
-    return NULL;
+    return nullptr;
 }
 
 PWCHAR CWdmDeviceAccess::QueryBusID(BUS_QUERY_ID_TYPE idType)
@@ -60,7 +60,7 @@ PWCHAR CWdmDeviceAccess::QueryBusID(BUS_QUERY_ID_TYPE idType)
     if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVACCESS, "%!FUNC! Error %!STATUS! during IRP creation", status);
-        return NULL;
+        return nullptr;
     }
 
     irp.Configure([idType] (PIO_STACK_LOCATION s)
@@ -75,7 +75,7 @@ PWCHAR CWdmDeviceAccess::QueryBusID(BUS_QUERY_ID_TYPE idType)
     if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVACCESS, "%!FUNC! Error %!STATUS! during %!devid! query", status, idType);
-        return NULL;
+        return nullptr;
     }
 
     PWCHAR idData;
@@ -151,8 +151,8 @@ CMemoryBuffer *CWdmDeviceAccess::GetDeviceProperty(DEVICE_REGISTRY_PROPERTY prop
 
     PAGED_CODE();
 
-    ULONG bytesNeeded = NULL;
-    auto status = IoGetDeviceProperty(m_DevObj, propertyId, 0, NULL, &bytesNeeded);
+    ULONG bytesNeeded = 0;
+    auto status = IoGetDeviceProperty(m_DevObj, propertyId, 0, nullptr, &bytesNeeded);
 
     if (!NT_SUCCESS(status))
     {
@@ -191,10 +191,10 @@ CMemoryBuffer *CWdmDeviceAccess::GetDeviceProperty(DEVICE_REGISTRY_PROPERTY prop
     {
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVACCESS,
             "%!FUNC! Empty property read for device 0x%p, %!devprop!", m_DevObj, propertyId);
-        return CMemoryBuffer::GetMemoryBuffer(NULL, 0);
+        return CMemoryBuffer::GetMemoryBuffer(nullptr, 0);
     }
 
-    return NULL;
+    return nullptr;
 }
 
 NTSTATUS CWdmUsbDeviceAccess::Reset()

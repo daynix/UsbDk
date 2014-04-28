@@ -131,12 +131,12 @@ tstring UsbDkW32ErrorException::GetErrorString(DWORD dwErrorCode)
                                     FORMAT_MESSAGE_FROM_SYSTEM |
                                     FORMAT_MESSAGE_IGNORE_INSERTS|
                                     FORMAT_MESSAGE_MAX_WIDTH_MASK,
-                                    NULL,
+                                    nullptr,
                                     dwErrorCode,
                                     MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US),
                                     (LPTSTR) &lpMsgBuf,
                                     0,
-                                    NULL);
+                                    nullptr);
     if(msgLen == 0)
     {
         tstringstream strm;

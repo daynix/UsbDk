@@ -49,7 +49,7 @@ public:
 
     NTSTATUS SetPreprocessCallback(PFN_WDFDEVICE_WDM_IRP_PREPROCESS Callback, UCHAR MajorFunction)
     {
-        return SetPreprocessCallback(Callback, MajorFunction, NULL, 0);
+        return SetPreprocessCallback(Callback, MajorFunction, nullptr, 0);
     }
 
     void SetIoInCallerContextCallback(PFN_WDF_IO_IN_CALLER_CONTEXT Callback)

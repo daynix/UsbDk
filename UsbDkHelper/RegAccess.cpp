@@ -10,12 +10,12 @@
 //////////////////////////////////////////////////////////////////////
 
 UsbDkRegAccess::UsbDkRegAccess()
-    : m_lpsRegPath(NULL), m_hkPrimaryHKey(0)
+    : m_lpsRegPath(nullptr), m_hkPrimaryHKey(0)
 {
 }
 
 UsbDkRegAccess::UsbDkRegAccess(HKEY hNewPrKey, LPCTSTR lpzNewRegPath)
-    : m_lpsRegPath(NULL), m_hkPrimaryHKey(0)
+    : m_lpsRegPath(nullptr), m_hkPrimaryHKey(0)
 {
     SetPrimaryKey(hNewPrKey);
     if (SetRegPath(lpzNewRegPath) == FALSE)
@@ -40,12 +40,12 @@ BOOL UsbDkRegAccess::SetRegPath(LPCTSTR lpzNewRegPath)
 
     if (!lpzNewRegPath)
     {
-        m_lpsRegPath = NULL;
+        m_lpsRegPath = nullptr;
         return TRUE;
     }
 
     m_lpsRegPath = _tcsdup(lpzNewRegPath);
-    return (m_lpsRegPath != NULL)?TRUE:FALSE;
+    return (m_lpsRegPath != nullptr)?TRUE:FALSE;
 }
 
 HKEY UsbDkRegAccess::GetPrimaryKey(VOID)
@@ -86,7 +86,7 @@ BOOL UsbDkRegAccess::ReadDWord(LPCTSTR lpzValueName,
     DWORD dwValue = 0,
           dwSize = sizeof(dwValue),
           dwType = REG_DWORD;
-    HKEY hkReadKeyHandle = NULL;
+    HKEY hkReadKeyHandle = nullptr;
     TCHAR tcaFullRegPath[DEFAULT_REG_ENTRY_DATA_LEN];
 
     FormatFullRegPath(tcaFullRegPath, TBUF_SIZEOF(tcaFullRegPath), lpzSubKey);
@@ -99,7 +99,7 @@ BOOL UsbDkRegAccess::ReadDWord(LPCTSTR lpzValueName,
     {
         if (RegQueryValueEx(hkReadKeyHandle,
                             lpzValueName,
-                            NULL,
+                            nullptr,
                             &dwType,
                             (LPBYTE)&dwValue,
                             &dwSize) == ERROR_SUCCESS)
@@ -124,7 +124,7 @@ DWORD UsbDkRegAccess::ReadString(LPCTSTR lpzValueName,
 {
     DWORD dwRes = 0;
     DWORD dwType = REG_SZ;
-    HKEY hkReadKeyHandle = NULL;
+    HKEY hkReadKeyHandle = nullptr;
     TCHAR tcaFullRegPath[DEFAULT_REG_ENTRY_DATA_LEN];
     DWORD dwBuffSize = dwNumberOfElements * sizeof(lpzData[0]);
 
@@ -140,7 +140,7 @@ DWORD UsbDkRegAccess::ReadString(LPCTSTR lpzValueName,
     {
         if (RegQueryValueEx(hkReadKeyHandle,
                             lpzValueName,
-                            NULL,
+                            nullptr,
                             &dwType,
                             (LPBYTE)lpzData,
                             &dwBuffSize) == ERROR_SUCCESS)
@@ -161,7 +161,7 @@ LONG UsbDkRegAccess::ReadMultiString(LPCTSTR lpzValueName,
 {
     dwRes = 0;
     DWORD dwType = REG_MULTI_SZ;
-    HKEY hkReadKeyHandle = NULL;
+    HKEY hkReadKeyHandle = nullptr;
     TCHAR tcaFullRegPath[DEFAULT_REG_ENTRY_DATA_LEN];
     DWORD dwBuffSize = dwNumberOfElements * sizeof(lpzData[0]);
 
@@ -176,7 +176,7 @@ LONG UsbDkRegAccess::ReadMultiString(LPCTSTR lpzValueName,
 
     if (errorCode == ERROR_SUCCESS)
     {
-        errorCode = RegQueryValueEx(hkReadKeyHandle, lpzValueName, NULL, &dwType, (LPBYTE)lpzData, &dwBuffSize);
+        errorCode = RegQueryValueEx(hkReadKeyHandle, lpzValueName, nullptr, &dwType, (LPBYTE)lpzData, &dwBuffSize);
 
         if (errorCode == ERROR_SUCCESS)
         {
@@ -197,7 +197,7 @@ DWORD UsbDkRegAccess::ReadBinary(LPCTSTR lpzValueName,
 {
     DWORD dwRes = 0;
     DWORD dwType = REG_BINARY;
-    HKEY hkReadKeyHandle = NULL;
+    HKEY hkReadKeyHandle = nullptr;
     TCHAR tcaFullRegPath[DEFAULT_REG_ENTRY_DATA_LEN];
 
     memset(lpzData, 0, dwSize);
@@ -212,7 +212,7 @@ DWORD UsbDkRegAccess::ReadBinary(LPCTSTR lpzValueName,
     {
         if (RegQueryValueEx(hkReadKeyHandle,
                             lpzValueName,
-                            NULL,
+                            nullptr,
                             &dwType,
                             lpzData,
                             &dwSize) == ERROR_SUCCESS)
@@ -233,7 +233,7 @@ BOOL UsbDkRegAccess::ReadValueName(LPTSTR  lpsValueName,
     BYTE baData[DEFAULT_REG_ENTRY_DATA_LEN];
     DWORD dwDataSize = DEFAULT_REG_ENTRY_DATA_LEN,
           dwType = REG_BINARY;
-    HKEY hkReadKeyHandle = NULL;
+    HKEY hkReadKeyHandle = nullptr;
     TCHAR tcaFullRegPath[DEFAULT_REG_ENTRY_DATA_LEN];
 
     FormatFullRegPath(tcaFullRegPath, TBUF_SIZEOF(tcaFullRegPath), lpzSubKey);
@@ -249,7 +249,7 @@ BOOL UsbDkRegAccess::ReadValueName(LPTSTR  lpsValueName,
                          dwIndex,
                          lpsValueName,
                          &dwBuffSize,
-                         NULL,
+                         nullptr,
                          &dwType,
                          baData,
                          &dwDataSize) == ERROR_SUCCESS)
@@ -266,7 +266,7 @@ BOOL UsbDkRegAccess::ReadKeyName(LPTSTR  lpsKeyName,
                                LPCTSTR lpzSubKey)
 {
     BOOL bResult = FALSE;
-    HKEY hkReadKeyHandle = NULL;
+    HKEY hkReadKeyHandle = nullptr;
     FILETIME stTimeFile;
     TCHAR tcaFullRegPath[DEFAULT_REG_ENTRY_DATA_LEN];
 
@@ -283,9 +283,9 @@ BOOL UsbDkRegAccess::ReadKeyName(LPTSTR  lpsKeyName,
                          dwIndex,
                          lpsKeyName,
                          &dwBuffSize,
-                         NULL,
-                         NULL,
-                         NULL,
+                         nullptr,
+                         nullptr,
+                         nullptr,
                          &stTimeFile) == ERROR_SUCCESS)
             bResult = TRUE;
         RegCloseKey(hkReadKeyHandle);
@@ -299,7 +299,7 @@ BOOL UsbDkRegAccess::WriteValue(LPCTSTR lpzValueName,
                               LPCTSTR lpzSubKey)
 {
     BOOL bResult = FALSE;
-    HKEY hkWriteKeyHandle = NULL;
+    HKEY hkWriteKeyHandle = nullptr;
     TCHAR tcaFullRegPath[DEFAULT_REG_ENTRY_DATA_LEN];
     DWORD dwDisposition;
 
@@ -311,7 +311,7 @@ BOOL UsbDkRegAccess::WriteValue(LPCTSTR lpzValueName,
                        TEXT(""),
                        REG_OPTION_NON_VOLATILE,
                        KEY_WRITE,
-                       NULL,
+                       nullptr,
                        &hkWriteKeyHandle,
                        &dwDisposition) == ERROR_SUCCESS)
     {
@@ -333,7 +333,7 @@ BOOL UsbDkRegAccess::WriteString(LPCTSTR lpzValueName,
                                LPCTSTR lpzSubKey)
 {
     BOOL bResult = FALSE;
-    HKEY hkWriteKeyHandle = NULL;
+    HKEY hkWriteKeyHandle = nullptr;
     TCHAR tcaFullRegPath[DEFAULT_REG_ENTRY_DATA_LEN];
     DWORD dwDisposition;
 
@@ -345,7 +345,7 @@ BOOL UsbDkRegAccess::WriteString(LPCTSTR lpzValueName,
                        TEXT(""),
                        REG_OPTION_NON_VOLATILE,
                        KEY_WRITE,
-                       NULL,
+                       nullptr,
                        &hkWriteKeyHandle,
                        &dwDisposition) == ERROR_SUCCESS)
     {
@@ -370,7 +370,7 @@ BOOL UsbDkRegAccess::WriteMultiString(LPCTSTR lpzValueName,
                                       LPCTSTR lpzSubKey)
 {
     BOOL bResult = FALSE;
-    HKEY hkWriteKeyHandle = NULL;
+    HKEY hkWriteKeyHandle = nullptr;
     TCHAR tcaFullRegPath[DEFAULT_REG_ENTRY_DATA_LEN];
     DWORD dwDisposition;
 
@@ -382,7 +382,7 @@ BOOL UsbDkRegAccess::WriteMultiString(LPCTSTR lpzValueName,
         TEXT(""),
         REG_OPTION_NON_VOLATILE,
         KEY_WRITE,
-        NULL,
+        nullptr,
         &hkWriteKeyHandle,
         &dwDisposition) == ERROR_SUCCESS)
     {
@@ -408,7 +408,7 @@ BOOL UsbDkRegAccess::WriteBinary(LPCTSTR lpzValueName,
                                LPCTSTR lpzSubKey)
 {
     BOOL bResult = FALSE;
-    HKEY hkWriteKeyHandle = NULL;
+    HKEY hkWriteKeyHandle = nullptr;
     TCHAR tcaFullRegPath[DEFAULT_REG_ENTRY_DATA_LEN];
     DWORD dwDisposition;
 
@@ -420,7 +420,7 @@ BOOL UsbDkRegAccess::WriteBinary(LPCTSTR lpzValueName,
                        TEXT(""),
                        REG_OPTION_NON_VOLATILE,
                        KEY_WRITE,
-                       NULL,
+                       nullptr,
                        &hkWriteKeyHandle,
                        &dwDisposition) == ERROR_SUCCESS)
     {
@@ -440,7 +440,7 @@ BOOL UsbDkRegAccess::WriteBinary(LPCTSTR lpzValueName,
 BOOL UsbDkRegAccess::AddKey(LPCTSTR lpzKeyName)
 {
     BOOL bResult = FALSE;
-    HKEY hkWriteKeyHandle = NULL;
+    HKEY hkWriteKeyHandle = nullptr;
     TCHAR tcaFullRegPath[DEFAULT_REG_ENTRY_DATA_LEN];
     DWORD dwDisposition;
 
@@ -452,7 +452,7 @@ BOOL UsbDkRegAccess::AddKey(LPCTSTR lpzKeyName)
                        TEXT(""),
                        REG_OPTION_NON_VOLATILE,
                        KEY_WRITE,
-                       NULL,
+                       nullptr,
                        &hkWriteKeyHandle,
                        &dwDisposition) == ERROR_SUCCESS)
     {
@@ -465,7 +465,7 @@ BOOL UsbDkRegAccess::AddKey(LPCTSTR lpzKeyName)
 BOOL UsbDkRegAccess::DeleteKey(LPCTSTR lpzKeyName, LPCTSTR lpzSubKey)
 {
     BOOL bResult = FALSE;
-    HKEY hkDeleteKeyHandle = NULL;
+    HKEY hkDeleteKeyHandle = nullptr;
     TCHAR tcaFullRegPath[DEFAULT_REG_ENTRY_DATA_LEN];
 
     FormatFullRegPath(tcaFullRegPath, TBUF_SIZEOF(tcaFullRegPath), lpzSubKey);
@@ -489,7 +489,7 @@ BOOL UsbDkRegAccess::DeleteKey(LPCTSTR lpzKeyName, LPCTSTR lpzSubKey)
 BOOL UsbDkRegAccess::DeleteValue(LPCTSTR lpzValueName, LPCTSTR lpzSubKey)
 {
     BOOL bResult = FALSE;
-    HKEY hkDeleteKeyHandle = NULL;
+    HKEY hkDeleteKeyHandle = nullptr;
     TCHAR tcaFullRegPath[DEFAULT_REG_ENTRY_DATA_LEN];
 
     FormatFullRegPath(tcaFullRegPath, TBUF_SIZEOF(tcaFullRegPath), lpzSubKey);
@@ -515,7 +515,7 @@ BOOL UsbDkRegAccess::GetValueInfo(LPCTSTR lpzValueName,
                           LPCTSTR lpzSubKey)
 {
     BOOL bRet = FALSE;
-    HKEY hkReadKeyHandle = NULL;
+    HKEY hkReadKeyHandle = nullptr;
     TCHAR tcaFullRegPath[DEFAULT_REG_ENTRY_DATA_LEN];
 
     FormatFullRegPath(tcaFullRegPath, TBUF_SIZEOF(tcaFullRegPath), lpzSubKey);
@@ -528,9 +528,9 @@ BOOL UsbDkRegAccess::GetValueInfo(LPCTSTR lpzValueName,
     {
         if (RegQueryValueEx(hkReadKeyHandle,
                             lpzValueName,
-                            NULL,
+                            nullptr,
                             lpDataType,
-                            NULL,
+                            nullptr,
                             lpDataSize) == ERROR_SUCCESS)
             bRet = TRUE;
 
@@ -548,7 +548,7 @@ BOOL UsbDkRegAccess::GetKeyInfo(LPDWORD lpdwNofSubKeys,
                               LPCTSTR lpzSubKey)
 {
     BOOL bRet = FALSE;
-    HKEY hkReadKeyHandle = NULL;
+    HKEY hkReadKeyHandle = nullptr;
     TCHAR tcaFullRegPath[DEFAULT_REG_ENTRY_DATA_LEN];
 
     FormatFullRegPath(tcaFullRegPath, TBUF_SIZEOF(tcaFullRegPath), lpzSubKey);
@@ -560,17 +560,17 @@ BOOL UsbDkRegAccess::GetKeyInfo(LPDWORD lpdwNofSubKeys,
                      &hkReadKeyHandle) == ERROR_SUCCESS)
     {
         if (RegQueryInfoKey(hkReadKeyHandle,
-                            NULL,
-                            NULL,
-                            NULL,
+                            nullptr,
+                            nullptr,
+                            nullptr,
                             lpdwNofSubKeys,
                             lpdwMaxSubKeyLen,
-                            NULL,
+                            nullptr,
                             lpdwNofValues,
                             lpdwMaxValueNameLen,
                             lpdwMaxValueLen,
-                            NULL,
-                            NULL) == ERROR_SUCCESS)
+                            nullptr,
+                            nullptr) == ERROR_SUCCESS)
             bRet = TRUE;
 
         RegCloseKey(hkReadKeyHandle);

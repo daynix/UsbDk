@@ -5,7 +5,7 @@
 
 InstallResult DeviceMgr::ResetDeviceByClass(const GUID &ClassGuid)
 {
-    auto hDevInfo = SetupDiGetClassDevsEx(&ClassGuid, NULL, NULL, DIGCF_DEVICEINTERFACE | DIGCF_PRESENT, NULL, NULL, NULL);
+    auto hDevInfo = SetupDiGetClassDevsEx(&ClassGuid, nullptr, nullptr, DIGCF_DEVICEINTERFACE | DIGCF_PRESENT, nullptr, nullptr, nullptr);
     if (hDevInfo == INVALID_HANDLE_VALUE)
     {
         throw UsbDkDeviceMgrException(TEXT("SetupDiGetClassDevsEx() failed!!"));

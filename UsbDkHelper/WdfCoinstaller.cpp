@@ -36,7 +36,7 @@ void WdfCoinstaller::loadWdfCoinstaller()
 
     m_wdfCoinstallerLibrary = LoadLibrary(coinstallerFullPath.str().c_str());
 
-    if (NULL == m_wdfCoinstallerLibrary)
+    if (nullptr == m_wdfCoinstallerLibrary)
     {
         throw UsbDkWdfCoinstallerFailedException(tstring(TEXT("LoadLibrary(")) + currDir + TEXT(") failed"));
     }
@@ -114,7 +114,7 @@ void WdfCoinstaller::freeWdfCoinstallerLibrary()
     if (m_wdfCoinstallerLibrary)
     {
         FreeLibrary(m_wdfCoinstallerLibrary);
-        m_wdfCoinstallerLibrary = NULL;
+        m_wdfCoinstallerLibrary = nullptr;
     }
 }
 //--------------------------------------------------------------------------------

@@ -3,8 +3,6 @@
 #include "DeviceAccess.h"
 #include "WdfRequest.h"
 #include "ControlDevice.tmh"
-
-#define MAX_DEVICE_ID_LEN (200)
 #include "Public.h"
 
 class CUsbDkControlDeviceInit : public CDeviceInit

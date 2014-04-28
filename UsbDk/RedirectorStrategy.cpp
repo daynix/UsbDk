@@ -5,8 +5,6 @@
 #include "UsbDkNames.h"
 #include "ControlDevice.h"
 #include "WdfRequest.h"
-
-#define MAX_DEVICE_ID_LEN (200)
 #include "Public.h"
 //--------------------------------------------------------------------------------------------------
 

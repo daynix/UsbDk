@@ -10,6 +10,10 @@
 
 #pragma once
 
+#if !defined(MAX_DEVICE_ID_LEN)
+#define MAX_DEVICE_ID_LEN (200)
+#endif
+
 #include "UsbDkData.h"
 #include "UsbDkNames.h"
 

@@ -4,8 +4,6 @@
 #include "DeviceAccess.h"
 #include "ControlDevice.h"
 #include "UsbDkNames.h"
-
-#define MAX_DEVICE_ID_LEN (200)
 #include "Public.h"
 
 void CUsbDkChildDevice::Dump()

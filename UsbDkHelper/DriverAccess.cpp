@@ -4,26 +4,34 @@
 
 //------------------------------------------------------------------------------------------------
 
-void UsbDkDriverAccess::GetDevicesList(PUSB_DK_DEVICE_INFO &DevicesArray, ULONG &NumberDevice)
+void UsbDkDriverAccess::GetDevicesList(PUSB_DK_DEVICE_INFO &DevicesArray, ULONG &DeviceNumber)
 {
     DevicesArray = nullptr;
     DWORD   bytesReturned;
+
+    unique_ptr<USB_DK_DEVICE_INFO[]> Result;
 
     do
     {
         // get number of devices
         Ioctl(IOCTL_USBDK_COUNT_DEVICES, false, nullptr, 0,
-              &NumberDevice, sizeof(NumberDevice));
+              &DeviceNumber, sizeof(DeviceNumber));
+
+        if (DeviceNumber == 0)
+        {
+            DevicesArray = nullptr;
+            return;
+        }
 
         // allocate storage for device list
-        delete DevicesArray;
-        DevicesArray = new USB_DK_DEVICE_INFO[NumberDevice];
+        Result.reset(new USB_DK_DEVICE_INFO[DeviceNumber]);
 
     } while (!Ioctl(IOCTL_USBDK_ENUM_DEVICES, true, nullptr, 0,
-                    DevicesArray, NumberDevice * sizeof(USB_DK_DEVICE_INFO),
+                    Result.get(), DeviceNumber * sizeof(USB_DK_DEVICE_INFO),
                     &bytesReturned));
 
-    NumberDevice = bytesReturned / sizeof(USB_DK_DEVICE_INFO);
+    DeviceNumber = bytesReturned / sizeof(USB_DK_DEVICE_INFO);
+    DevicesArray = Result.release();
 }
 //------------------------------------------------------------------------------------------------
 

@@ -50,3 +50,10 @@ typedef struct tag_USB_DK_TRANSFER_REQUEST
 
     USB_DK_TRANSFER_RESULT Result;
 } USB_DK_TRANSFER_REQUEST, *PUSB_DK_TRANSFER_REQUEST;
+
+typedef enum
+{
+    TransferFailure = 0,
+    TransferSuccess,
+    TransferSuccessAsync
+} TransferResult;

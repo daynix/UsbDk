@@ -77,7 +77,7 @@ public:
     { return m_RedirectorID != NO_REDIRECTOR; }
 
     NTSTATUS WaitForAttachment()
-    { return m_RedirectionCreated.Wait(true, -SecondsTo100Nanoseconds(10)); }
+    { return m_RedirectionCreated.Wait(true, -SecondsTo100Nanoseconds(120)); }
 
     ULONG RedirectorID()
     { return m_RedirectorID; }

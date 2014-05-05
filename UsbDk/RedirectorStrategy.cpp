@@ -340,8 +340,7 @@ NTSTATUS CUsbDkRedirectorStrategy::DoControlTransfer(PWDF_USB_CONTROL_SETUP_PACK
     WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(&Memory, &Input[1], static_cast<ULONG>(InputLength - sizeof(*Input)));
     ULONG BytesTransferred;
 
-    auto status = WdfUsbTargetDeviceSendControlTransferSynchronously(m_Target, nullptr, nullptr,
-                                                                     Input, &Memory, &BytesTransferred);
+    auto status = m_Target.ControlTransferSync(*Input, Memory, BytesTransferred);
     if (NT_SUCCESS(status) && (Input->Packet.bm.Request.Dir == BMREQUEST_DEVICE_TO_HOST))
     {
         RtlMoveMemory(&Output[1], &Input[1], min(BytesTransferred, OutputLength - sizeof(*Output)));

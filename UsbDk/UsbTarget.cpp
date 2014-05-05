@@ -388,3 +388,19 @@ void CWdfUsbTarget::ReadPipeAsync(WDFREQUEST Request, ULONG64 EndpointAddress, W
         WdfRequest.SetStatus(STATUS_NOT_FOUND);
     }
 }
+
+NTSTATUS CWdfUsbTarget::ControlTransferSync(WDF_USB_CONTROL_SETUP_PACKET &SetupPacket, WDF_MEMORY_DESCRIPTOR &Data, ULONG &BytesTransferred)
+{
+    auto status = WdfUsbTargetDeviceSendControlTransferSynchronously(m_UsbDevice,
+                                                                     nullptr,
+                                                                     nullptr,
+                                                                     &SetupPacket,
+                                                                     &Data,
+                                                                     &BytesTransferred);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Control transfer failed, %!STATUS!", status);
+    }
+
+    return status;
+}

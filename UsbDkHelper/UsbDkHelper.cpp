@@ -248,3 +248,10 @@ BOOL ReadPipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Request)
     }
 }
 //-------------------------------------------------------------------------------------------
+
+HANDLE GetRedirectorSystemHandle(HANDLE DeviceHandle)
+{
+    auto deviceHandle = reinterpret_cast<PREDIRECTED_DEVICE_HANDLE>(DeviceHandle);
+    return deviceHandle->RedirectorAccess->GetSystemHandle();
+}
+//-------------------------------------------------------------------------------------------

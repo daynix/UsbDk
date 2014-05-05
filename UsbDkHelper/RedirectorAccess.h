@@ -38,5 +38,8 @@ public:
         DWORD BytesWritten;
         Write(&Request, sizeof(Request), &BytesWritten);
     }
+
+    HANDLE GetSystemHandle() const
+    { return m_hDriver; }
 };
 //-----------------------------------------------------------------------------------

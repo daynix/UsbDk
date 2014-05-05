@@ -22,21 +22,21 @@ class UsbDkRedirectorAccess : public UsbDkDriverFile
 {
 public:
     UsbDkRedirectorAccess(ULONG RedirectorID)
-        :UsbDkDriverFile( (tstring(USBDK_REDIRECTOR_USERMODE_NAME_PREFIX) + to_tstring(RedirectorID)).c_str() )
+        :UsbDkDriverFile( (tstring(USBDK_REDIRECTOR_USERMODE_NAME_PREFIX) + to_tstring(RedirectorID)).c_str(), true )
     {}
 
-    void DoControlTransfer(PVOID Buffer, ULONG &Length);
+    TransferResult DoControlTransfer(PVOID Buffer, ULONG &Length, LPOVERLAPPED Overlapped);
 
-    void ReadPipe(USB_DK_TRANSFER_REQUEST &Request)
+    TransferResult ReadPipe(USB_DK_TRANSFER_REQUEST &Request, LPOVERLAPPED Overlapped)
     {
         DWORD BytesRead;
-        Read(&Request, sizeof(Request), &BytesRead);
+        return Read(&Request, sizeof(Request), &BytesRead, Overlapped);
     }
 
-    void WritePipe(USB_DK_TRANSFER_REQUEST &Request)
+    TransferResult WritePipe(USB_DK_TRANSFER_REQUEST &Request, LPOVERLAPPED Overlapped)
     {
         DWORD BytesWritten;
-        Write(&Request, sizeof(Request), &BytesWritten);
+        return Write(&Request, sizeof(Request), &BytesWritten, Overlapped);
     }
 
     HANDLE GetSystemHandle() const

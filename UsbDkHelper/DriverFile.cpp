@@ -3,14 +3,16 @@
 
 //------------------------------------------------------------------------------------------------
 
-UsbDkDriverFile::UsbDkDriverFile(LPCTSTR lpFileName)
+UsbDkDriverFile::UsbDkDriverFile(LPCTSTR lpFileName, bool bOverlapped)
 {
+    m_bOverlapped = bOverlapped;
+
     m_hDriver = CreateFile(lpFileName,
                            GENERIC_READ | GENERIC_WRITE,
                            0,
                            nullptr,
                            OPEN_EXISTING,
-                           FILE_ATTRIBUTE_NORMAL,
+                           FILE_ATTRIBUTE_NORMAL | (bOverlapped ? FILE_FLAG_OVERLAPPED : 0),
                            nullptr);
 
     if (m_hDriver == INVALID_HANDLE_VALUE)
@@ -20,7 +22,7 @@ UsbDkDriverFile::UsbDkDriverFile(LPCTSTR lpFileName)
 }
 //------------------------------------------------------------------------------------------------
 
-bool UsbDkDriverFile::Ioctl(DWORD Code,
+TransferResult UsbDkDriverFile::Ioctl(DWORD Code,
                             bool ShortBufferOk,
                             LPVOID InBuffer,
                             DWORD InBufferSize,
@@ -36,37 +38,52 @@ bool UsbDkDriverFile::Ioctl(DWORD Code,
                          OutBuffer, OutBufferSize,
                          InternalBytesReturnedPtr, Overlapped))
     {
-        if (ShortBufferOk)
+        auto err = GetLastError();
+        if (m_bOverlapped && (err == ERROR_IO_PENDING))
         {
-            DWORD err = GetLastError();
-            if (err == ERROR_MORE_DATA)
-            {
-                return false;
-            }
+            // If driver was open without FILE_FLAG_OVERLAPPED, DeviceIoControl can't return ERROR_IO_PENDING,
+            // so the caller of Ioctl can check return result as boolean
+            return TransferSuccessAsync;
+        }
+        if (ShortBufferOk && (err == ERROR_MORE_DATA))
+        {
+            return TransferFailure;
         }
 
-        throw UsbDkDriverFileException(TEXT("IOCTL failed"));
+        throw UsbDkDriverFileException(TEXT("DeviceIoControl failed"));
     }
 
-    return true;
+    return TransferSuccess;
 }
 
-void UsbDkDriverFile::Read(LPVOID Buffer,
+TransferResult UsbDkDriverFile::Read(LPVOID Buffer,
                            DWORD BufferSize,
-                           LPDWORD BytesRead)
+                           LPDWORD BytesRead,
+                           LPOVERLAPPED Overlapped)
 {
-    if (!ReadFile(m_hDriver, Buffer, BufferSize, BytesRead, nullptr))
+    if (!ReadFile(m_hDriver, Buffer, BufferSize, BytesRead, Overlapped))
     {
-        throw UsbDkDriverFileException(TEXT("IOCTL failed"));
+        if (m_bOverlapped && (GetLastError() == ERROR_IO_PENDING))
+        {
+            return TransferSuccessAsync;
+        }
+        throw UsbDkDriverFileException(TEXT("ReadFile failed"));
     }
+    return TransferSuccess;
 }
 
-void UsbDkDriverFile::Write(LPVOID Buffer,
+TransferResult UsbDkDriverFile::Write(LPVOID Buffer,
                             DWORD BufferSize,
-                            LPDWORD BytesWritten)
+                            LPDWORD BytesWritten,
+                            LPOVERLAPPED Overlapped)
 {
-    if (!WriteFile(m_hDriver, Buffer, BufferSize, BytesWritten, nullptr))
+    if (!WriteFile(m_hDriver, Buffer, BufferSize, BytesWritten, Overlapped))
     {
-        throw UsbDkDriverFileException(TEXT("IOCTL failed"));
+        if (m_bOverlapped && (GetLastError() == ERROR_IO_PENDING))
+        {
+            return TransferSuccessAsync;
+        }
+        throw UsbDkDriverFileException(TEXT("WriteFile failed"));
     }
+    return TransferSuccess;
 }

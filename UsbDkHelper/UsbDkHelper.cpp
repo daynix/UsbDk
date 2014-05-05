@@ -201,50 +201,47 @@ BOOL StopRedirect(HANDLE DeviceHandle)
 }
 //-------------------------------------------------------------------------------------------
 
-BOOL ControlTransfer(HANDLE DeviceHandle, PVOID Buffer, PULONG Length)
+TransferResult ControlTransfer(HANDLE DeviceHandle, PVOID Buffer, PULONG Length, LPOVERLAPPED Overlapped)
 {
     try
     {
         auto deviceHandle = reinterpret_cast<PREDIRECTED_DEVICE_HANDLE>(DeviceHandle);
-        deviceHandle->RedirectorAccess->DoControlTransfer(Buffer, *Length);
-        return TRUE;
+        return deviceHandle->RedirectorAccess->DoControlTransfer(Buffer, *Length, Overlapped);
     }
     catch (const exception &e)
     {
         printExceptionString(e.what());
-        return FALSE;
+        return TransferFailure;
     }
 }
 //-------------------------------------------------------------------------------------------
 
-BOOL WritePipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Request)
+TransferResult WritePipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Request, LPOVERLAPPED Overlapped)
 {
     try
     {
         auto deviceHandle = reinterpret_cast<PREDIRECTED_DEVICE_HANDLE>(DeviceHandle);
-        deviceHandle->RedirectorAccess->WritePipe(*Request);
-        return TRUE;
+        return deviceHandle->RedirectorAccess->WritePipe(*Request, Overlapped);
     }
     catch (const exception &e)
     {
         printExceptionString(e.what());
-        return FALSE;
+        return TransferFailure;
     }
 }
 //-------------------------------------------------------------------------------------------
 
-BOOL ReadPipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Request)
+TransferResult ReadPipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Request, LPOVERLAPPED Overlapped)
 {
     try
     {
         auto deviceHandle= reinterpret_cast<PREDIRECTED_DEVICE_HANDLE>(DeviceHandle);
-        deviceHandle->RedirectorAccess->ReadPipe(*Request);
-        return TRUE;
+        return deviceHandle->RedirectorAccess->ReadPipe(*Request, Overlapped);
     }
     catch (const exception &e)
     {
         printExceptionString(e.what());
-        return FALSE;
+        return TransferFailure;
     }
 }
 //-------------------------------------------------------------------------------------------

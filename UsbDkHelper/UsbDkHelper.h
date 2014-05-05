@@ -36,10 +36,10 @@ extern "C" {
     DLL HANDLE           StartRedirect(PUSB_DK_DEVICE_ID DeviceID);
     DLL BOOL             StopRedirect(HANDLE DeviceHandle);
 
-    DLL BOOL             ControlTransfer(HANDLE DeviceHandle, PVOID Buffer, PULONG Length);
+    DLL TransferResult   ControlTransfer(HANDLE DeviceHandle, PVOID Buffer, PULONG Length, LPOVERLAPPED Overlapped);
 
-    DLL BOOL             WritePipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Request);
-    DLL BOOL             ReadPipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Request);
+    DLL TransferResult   WritePipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Request, LPOVERLAPPED Overlapped);
+    DLL TransferResult   ReadPipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Request, LPOVERLAPPED Overlapped);
 
     DLL HANDLE           GetRedirectorSystemHandle(HANDLE DeviceHandle);
 #ifdef __cplusplus

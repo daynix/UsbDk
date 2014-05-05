@@ -18,11 +18,11 @@ public:
 class UsbDkDriverFile
 {
 public:
-    UsbDkDriverFile(LPCTSTR lpFileName);
+    UsbDkDriverFile(LPCTSTR lpFileName, bool bOverlapped = false);
     virtual ~UsbDkDriverFile()
     { CloseHandle(m_hDriver); }
 
-    bool Ioctl(DWORD Code,
+    TransferResult Ioctl(DWORD Code,
                bool ShortBufferOk = false,
                LPVOID InBuffer = nullptr,
                DWORD InBufferSize = 0,
@@ -31,15 +31,20 @@ public:
                LPDWORD BytesReturned = nullptr,
                LPOVERLAPPED Overlapped = nullptr);
 
-    void Read(LPVOID Buffer,
+    TransferResult Read(LPVOID Buffer,
               DWORD BufferSize,
-              LPDWORD BytesRead);
+              LPDWORD BytesRead,
+              LPOVERLAPPED Overlapped = nullptr);
 
-    void Write(LPVOID Buffer,
+    TransferResult Write(LPVOID Buffer,
                DWORD BufferSize,
-               LPDWORD BytesWritten);
+               LPDWORD BytesWritten,
+               LPOVERLAPPED Overlapped = nullptr);
 
 protected:
     HANDLE m_hDriver;
+
+private:
+    bool m_bOverlapped;
 };
 //-----------------------------------------------------------------------------------

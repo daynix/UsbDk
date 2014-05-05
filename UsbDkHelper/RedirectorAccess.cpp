@@ -2,8 +2,8 @@
 #include "RedirectorAccess.h"
 #include "Public.h"
 
-void UsbDkRedirectorAccess::DoControlTransfer(PVOID Buffer, ULONG &Length)
+TransferResult UsbDkRedirectorAccess::DoControlTransfer(PVOID Buffer, ULONG &Length, LPOVERLAPPED Overlapped)
 {
-    Ioctl(IOCTL_USBDK_DEVICE_CONTROL_TRANSFER, false, Buffer, Length, Buffer, Length, &Length);
+    return Ioctl(IOCTL_USBDK_DEVICE_CONTROL_TRANSFER, false, Buffer, Length, Buffer, Length, &Length, Overlapped);
 }
 //------------------------------------------------------------------------------------------------

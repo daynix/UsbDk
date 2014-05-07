@@ -14,19 +14,39 @@ public:
     UsbDkServiceManagerFailedException(tstring errMsg, DWORD dwErrorCode) : UsbDkW32ErrorException(tstring(SERVICE_MANAGER_EXCEPTION_STRING) + errMsg, dwErrorCode){}
 };
 //-----------------------------------------------------------------------------------
+
+class SCMHandleHolder
+{
+public:
+    SCMHandleHolder(SC_HANDLE Handle)
+        : m_Handle(Handle)
+    {}
+
+    ~SCMHandleHolder()
+    {
+        if (m_Handle != nullptr)
+        {
+            CloseServiceHandle(m_Handle);
+        }
+    }
+
+    operator bool() const { return m_Handle != nullptr; }
+    operator SC_HANDLE() const { return m_Handle; }
+private:
+    SC_HANDLE m_Handle;
+};
+
 class ServiceManager
 {
 public:
-
     ServiceManager();
-    virtual ~ServiceManager();
 
     void    CreateServiceObject(const tstring &ServiceName, const tstring &ServicePath);
     void    DeleteServiceObject(const tstring &ServiceName);
 
-protected:
 private:
+    static void WaitForServiceStop(const SCMHandleHolder &schService);
 
-    SC_HANDLE m_schSCManager;
+    SCMHandleHolder m_schSCManager;
 };
 //-----------------------------------------------------------------------------------

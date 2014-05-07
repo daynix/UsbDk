@@ -4,9 +4,8 @@
 //--------------------------------------------------------------------------------
 
 ServiceManager::ServiceManager()
+    :m_schSCManager(OpenSCManager(nullptr, nullptr, SC_MANAGER_ALL_ACCESS))
 {
-    m_schSCManager = OpenSCManager(nullptr, nullptr, SC_MANAGER_ALL_ACCESS);
-
     if (!m_schSCManager)
     {
         throw UsbDkServiceManagerFailedException(TEXT("OpenSCManager failed"));
@@ -14,36 +13,25 @@ ServiceManager::ServiceManager()
 }
 //--------------------------------------------------------------------------------
 
-ServiceManager::~ServiceManager()
-{
-    assert(nullptr != m_schSCManager);
-
-    CloseServiceHandle(m_schSCManager);
-}
-//--------------------------------------------------------------------------------
-
 void ServiceManager::CreateServiceObject(const tstring &ServiceName, const tstring &ServicePath)
 {
-    assert(nullptr != m_schSCManager);
+    assert(m_schSCManager);
 
-    auto schService = CreateService(m_schSCManager, ServiceName.c_str(), ServiceName.c_str(), SERVICE_ALL_ACCESS, SERVICE_KERNEL_DRIVER,
-                                SERVICE_DEMAND_START, SERVICE_ERROR_NORMAL, ServicePath.c_str(), nullptr, nullptr,    nullptr, nullptr,    nullptr);
-
-    if (nullptr == schService)
+    SCMHandleHolder schService(CreateService(m_schSCManager, ServiceName.c_str(), ServiceName.c_str(), SERVICE_ALL_ACCESS, SERVICE_KERNEL_DRIVER,
+                                             SERVICE_DEMAND_START, SERVICE_ERROR_NORMAL, ServicePath.c_str(), nullptr, nullptr, nullptr, nullptr, nullptr));
+    if (!schService)
     {
         throw UsbDkServiceManagerFailedException(TEXT("CreateService failed"));
     }
-
-    CloseServiceHandle(schService);
 }
 //--------------------------------------------------------------------------------
 
 void ServiceManager::DeleteServiceObject(const tstring &ServiceName)
 {
-    assert(nullptr != m_schSCManager);
+    assert(m_schSCManager);
 
-    auto schService = OpenService(m_schSCManager, ServiceName.c_str(), SERVICE_ALL_ACCESS);
-    if (nullptr == schService)
+    SCMHandleHolder schService(OpenService(m_schSCManager, ServiceName.c_str(), SERVICE_ALL_ACCESS));
+    if (!schService)
     {
         auto  err = GetLastError();
         if (err != ERROR_SERVICE_DOES_NOT_EXIST)
@@ -53,13 +41,31 @@ void ServiceManager::DeleteServiceObject(const tstring &ServiceName)
         return;
     }
 
+    WaitForServiceStop(schService);
     if (!DeleteService(schService))
     {
-        auto  err = GetLastError();
-        CloseServiceHandle(schService);
-        throw UsbDkServiceManagerFailedException(TEXT("DeleteService failed"), err);
+        throw UsbDkServiceManagerFailedException(TEXT("DeleteService failed"));
     }
+}
+//--------------------------------------------------------------------------------
 
-    CloseServiceHandle(schService);
+void ServiceManager::WaitForServiceStop(const SCMHandleHolder &schService)
+{
+    static const DWORD SERVICE_STOP_WAIT_QUANTUM = 50;
+    static const DWORD SERVICE_STOP_ITERATIONS = 20000 / 50; //Total timeout is 20 seconds
+
+    SERVICE_STATUS_PROCESS ssp;
+    DWORD iterationNumber = 0;
+
+    do
+    {
+        Sleep(SERVICE_STOP_WAIT_QUANTUM);
+
+        DWORD bytesNeeded;
+        if (!QueryServiceStatusEx(schService, SC_STATUS_PROCESS_INFO, (LPBYTE)&ssp, sizeof(SERVICE_STATUS_PROCESS), &bytesNeeded))
+        {
+            throw UsbDkServiceManagerFailedException(TEXT("QueryServiceStatusEx failed"));
+        }
+    } while ((ssp.dwCurrentState != SERVICE_STOPPED) && (iterationNumber++ < SERVICE_STOP_ITERATIONS));
 }
 //--------------------------------------------------------------------------------

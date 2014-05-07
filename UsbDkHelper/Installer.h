@@ -26,7 +26,7 @@ public:
 
     UsbDkInstaller();
 
-    bool Install();
+    bool Install(bool &NeedRollBack);
     void Uninstall();
 
 protected:

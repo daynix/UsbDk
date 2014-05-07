@@ -24,9 +24,11 @@ UsbDkInstaller::UsbDkInstaller()
 }
 //--------------------------------------------------------------------------------
 
-bool UsbDkInstaller::Install()
+bool UsbDkInstaller::Install(bool &NeedRollBack)
 {
+    NeedRollBack = false;
     auto driverLocation = CopyDriver();
+    NeedRollBack = true;
     auto infFilePath = buildInfFilePath();
     if (m_wdfCoinstaller.PreDeviceInstallEx(infFilePath))
     {
@@ -70,7 +72,7 @@ tstring UsbDkInstaller::CopyDriver()
 
     auto driverDestLocation = buildDriverPath(USBDK_DRIVER_FILE_NAME);
 
-    if (!CopyFile(driverOrigLocationStr.c_str(), driverDestLocation.c_str(), FALSE))
+    if (!CopyFile(driverOrigLocationStr.c_str(), driverDestLocation.c_str(), TRUE))
     {
         throw UsbDkInstallerFailedException(tstring(TEXT("CopyFile from ")) + driverOrigLocationStr + TEXT(" to ") + driverDestLocation + TEXT(" failed."));
     }

@@ -24,15 +24,20 @@ void printExceptionString(const char *errorStr)
 //------------------------------------------------------------------------------------------
 InstallResult InstallDriver(void)
 {
+    bool NeedRollBack;
     try
     {
         UsbDkInstaller installer;
-        return installer.Install() ? InstallSuccess : InstallFailureNeedReboot;
+        return installer.Install(NeedRollBack) ? InstallSuccess : InstallFailureNeedReboot;
     }
     catch (const exception &e)
     {
         printExceptionString(e.what());
-        UninstallDriver();
+        if (NeedRollBack)
+        {
+            UninstallDriver();
+        }
+
         return InstallFailure;
     }
 }

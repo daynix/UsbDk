@@ -86,6 +86,19 @@ protected:
     ULONG GetCount() { return 0; }
 };
 
+#define DECLARE_CWDMLIST_ENTRY(type)                                                    \
+    private:                                                                            \
+        PLIST_ENTRY GetListEntry()                                                      \
+        { return &m_ListEntry; }                                                        \
+                                                                                        \
+        static type *GetByListEntry(PLIST_ENTRY entry)                                  \
+        { return static_cast<type*>(CONTAINING_RECORD(entry, type, m_ListEntry)); }     \
+                                                                                        \
+        template<typename type, typename AnyAccess, typename AnyStrategy>               \
+        friend class CWdmList;                                                          \
+                                                                                        \
+        LIST_ENTRY m_ListEntry
+
 template <typename TEntryType, typename TAccessStrategy, typename TCountingStrategy>
 class CWdmList : private TAccessStrategy, public TCountingStrategy
 {

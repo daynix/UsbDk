@@ -64,11 +64,6 @@ public:
     bool operator==(const CUsbDkChildDevice &Dev) const;
     bool operator==(const CUsbDkRedirection &Other) const;
 
-    PLIST_ENTRY GetListEntry()
-    { return &m_ListEntry; }
-    static CUsbDkRedirection *GetByListEntry(PLIST_ENTRY entry)
-    { return static_cast<CUsbDkRedirection*>(CONTAINING_RECORD(entry, CUsbDkRedirection, m_ListEntry)); }
-
     void Dump() const;
 
     void NotifyRedirectorCreated(ULONG RedirectorID);
@@ -89,7 +84,7 @@ private:
     CWdmEvent m_RedirectionCreated;
     ULONG m_RedirectorID = NO_REDIRECTOR;
 
-    LIST_ENTRY m_ListEntry;
+    DECLARE_CWDMLIST_ENTRY(CUsbDkRedirection);
 };
 
 class CUsbDkControlDevice : private CWdfControlDevice, public CAllocatable<NonPagedPool, 'DCHR'>

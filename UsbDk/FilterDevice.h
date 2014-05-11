@@ -57,11 +57,6 @@ public:
 
     void Dump();
 
-    PLIST_ENTRY GetListEntry()
-    { return &m_ListEntry; }
-    static CUsbDkChildDevice *GetByListEntry(PLIST_ENTRY entry)
-    { return static_cast<CUsbDkChildDevice*>(CONTAINING_RECORD(entry, CUsbDkChildDevice, m_ListEntry)); }
-
 private:
     CObjHolder<CRegText> m_DeviceID;
     CObjHolder<CRegText> m_InstanceID;
@@ -70,12 +65,12 @@ private:
     PDEVICE_OBJECT m_PDO;
     const CUsbDkFilterDevice &m_ParentDevice;
 
-    LIST_ENTRY m_ListEntry;
-
     bool CreateRedirectorDevice();
 
     CUsbDkChildDevice(const CUsbDkChildDevice&) = delete;
     CUsbDkChildDevice& operator= (const CUsbDkChildDevice&) = delete;
+
+    DECLARE_CWDMLIST_ENTRY(CUsbDkChildDevice);
 };
 
 class CDeviceRelations;
@@ -112,11 +107,6 @@ public:
     bool EnumerateChildrenIf(TPredicate Predicate, TFunctor Functor)
     { return m_Strategy->Children().ForEachIf(Predicate, Functor); }
 
-    PLIST_ENTRY GetListEntry()
-    { return &m_ListEntry; }
-    static CUsbDkFilterDevice *GetByListEntry(PLIST_ENTRY entry)
-    { return static_cast<CUsbDkFilterDevice*>(CONTAINING_RECORD(entry, CUsbDkFilterDevice, m_ListEntry)); }
-
     ULONG GetChildrenCount()
     { return m_Strategy->Children().GetCount(); }
 
@@ -137,8 +127,6 @@ private:
     static void ContextCleanup(_In_ WDFOBJECT DeviceObject);
 
     WDFDRIVER m_Driver = WDF_NO_HANDLE;
-
-    LIST_ENTRY m_ListEntry;
 
     class CStrategist
     {
@@ -161,4 +149,6 @@ private:
 
     friend class CUsbDkFilterDeviceInit;
     friend class CUsbDkRedirectorQueue;
+
+    DECLARE_CWDMLIST_ENTRY(CUsbDkFilterDevice);
 };

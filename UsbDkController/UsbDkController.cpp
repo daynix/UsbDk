@@ -44,7 +44,7 @@ void ShowUsage()
 void Controller_InstallDriver()
 {
     tcout << TEXT("Installing UsbDk driver") << endl;
-    auto res = InstallDriver();
+    auto res = UsbDk_InstallDriver();
     switch (res)
     {
     case InstallSuccess:
@@ -66,7 +66,7 @@ void Controller_InstallDriver()
 void Controller_UninstallDriver()
 {
     tcout << TEXT("Uninstalling UsbDk driver") << endl;
-    if (UninstallDriver())
+    if (UsbDk_UninstallDriver())
     {
         tcout << TEXT("UsbDk driver uninstall succeeded") << endl;
     }
@@ -88,14 +88,14 @@ static void Controller_DumpConfigurationDescriptors(USB_DK_DEVICE_INFO &Device)
         PUSB_CONFIGURATION_DESCRIPTOR Descriptor;
         ULONG Length;
 
-        if (!GetConfigurationDescriptor(&Request, &Descriptor, &Length))
+        if (!UsbDk_GetConfigurationDescriptor(&Request, &Descriptor, &Length))
         {
             tcout << TEXT("Failed to read configuration descriptor #") << (int) i << endl;
         }
         else
         {
             tcout << TEXT("Descriptor for configuration #") << (int) i << TEXT(": size ") << Length << endl;
-            ReleaseConfigurationDescriptor(Descriptor);
+            UsbDk_ReleaseConfigurationDescriptor(Descriptor);
         }
     }
 }
@@ -106,7 +106,7 @@ void Controller_EnumerateDevices()
     PUSB_DK_DEVICE_INFO devicesArray;
     ULONG               numberDevices;
     tcout << TEXT("Enumerate USB devices") << endl;
-    if (GetDevicesList(&devicesArray, &numberDevices))
+    if (UsbDk_GetDevicesList(&devicesArray, &numberDevices))
     {
         tcout << TEXT("Found ") << to_tstring(numberDevices) << TEXT(" USB devices:") << endl;
 
@@ -130,7 +130,7 @@ void Controller_EnumerateDevices()
             Controller_DumpConfigurationDescriptors(Dev);
         }
 
-        ReleaseDevicesList(devicesArray);
+        UsbDk_ReleaseDevicesList(devicesArray);
     }
     else
     {
@@ -146,7 +146,7 @@ void Controller_RedirectDevice(_TCHAR *DeviceID, _TCHAR *InstanceID)
 
     tcout << TEXT("Redirect USB device ") << deviceID.DeviceID << TEXT(", ") << deviceID.InstanceID << endl;
 
-    HANDLE redirectedDevice = StartRedirect(&deviceID);
+    HANDLE redirectedDevice = UsbDk_StartRedirect(&deviceID);
     if (INVALID_HANDLE_VALUE == redirectedDevice)
     {
         tcout << TEXT("Redirect of USB device failed") << endl;
@@ -158,7 +158,7 @@ void Controller_RedirectDevice(_TCHAR *DeviceID, _TCHAR *InstanceID)
 
     // STOP redirect
     tcout << TEXT("Restore USB device ") << redirectedDevice << endl;
-    if (TRUE == StopRedirect(redirectedDevice))
+    if (TRUE == UsbDk_StopRedirect(redirectedDevice))
     {
         tcout << TEXT("USB device redirection was stopped successfully.") << endl;
     }

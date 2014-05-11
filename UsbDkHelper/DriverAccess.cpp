@@ -64,7 +64,7 @@ void UsbDkDriverAccess::ReleaseConfigurationDescriptor(PUSB_CONFIGURATION_DESCRI
 }
 //------------------------------------------------------------------------------------------------
 
-void UsbDkDriverAccess::ReleaseDeviceList(PUSB_DK_DEVICE_INFO DevicesArray)
+void UsbDkDriverAccess::ReleaseDevicesList(PUSB_DK_DEVICE_INFO DevicesArray)
 {
     delete[] DevicesArray;
 }

@@ -49,7 +49,7 @@ public:
 
     void GetDevicesList(PUSB_DK_DEVICE_INFO &DevicesArray, ULONG &NumberDevice);
     PUSB_CONFIGURATION_DESCRIPTOR GetConfigurationDescriptor(USB_DK_CONFIG_DESCRIPTOR_REQUEST &Request, ULONG &Length);
-    static void ReleaseDeviceList(PUSB_DK_DEVICE_INFO DevicesArray);
+    static void ReleaseDevicesList(PUSB_DK_DEVICE_INFO DevicesArray);
     static void ReleaseConfigurationDescriptor(PUSB_CONFIGURATION_DESCRIPTOR Descriptor);
 
     ULONG AddRedirect(USB_DK_DEVICE_ID &DeviceID);

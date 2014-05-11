@@ -130,7 +130,7 @@ void Controller_EnumerateDevices()
             Controller_DumpConfigurationDescriptors(Dev);
         }
 
-        ReleaseDeviceList(devicesArray);
+        ReleaseDevicesList(devicesArray);
     }
     else
     {

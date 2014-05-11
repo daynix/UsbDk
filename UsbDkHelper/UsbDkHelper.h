@@ -41,7 +41,7 @@ extern "C" {
     DLL InstallResult    InstallDriver(void);
     DLL BOOL             UninstallDriver(void);
     DLL BOOL             GetDevicesList(PUSB_DK_DEVICE_INFO *DevicesArray, PULONG NumberDevices);
-    DLL void             ReleaseDeviceList(PUSB_DK_DEVICE_INFO DevicesArray);
+    DLL void             ReleaseDevicesList(PUSB_DK_DEVICE_INFO DevicesArray);
     DLL BOOL             GetConfigurationDescriptor(PUSB_DK_CONFIG_DESCRIPTOR_REQUEST Request,
                                                     PUSB_CONFIGURATION_DESCRIPTOR *Descriptor,
                                                     PULONG Length);

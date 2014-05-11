@@ -120,11 +120,11 @@ BOOL GetDevicesList(PUSB_DK_DEVICE_INFO *DevicesArray, PULONG NumberDevices)
 }
 //-------------------------------------------------------------------------------------------
 
-void ReleaseDeviceList(PUSB_DK_DEVICE_INFO DevicesArray)
+void ReleaseDevicesList(PUSB_DK_DEVICE_INFO DevicesArray)
 {
     try
     {
-        UsbDkDriverAccess::ReleaseDeviceList(DevicesArray);
+        UsbDkDriverAccess::ReleaseDevicesList(DevicesArray);
     }
     catch (const exception &e)
     {

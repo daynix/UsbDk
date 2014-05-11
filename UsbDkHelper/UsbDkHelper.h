@@ -38,24 +38,24 @@ typedef enum
 #ifdef __cplusplus
 extern "C" {
 #endif
-    DLL InstallResult    InstallDriver(void);
-    DLL BOOL             UninstallDriver(void);
-    DLL BOOL             GetDevicesList(PUSB_DK_DEVICE_INFO *DevicesArray, PULONG NumberDevices);
-    DLL void             ReleaseDevicesList(PUSB_DK_DEVICE_INFO DevicesArray);
-    DLL BOOL             GetConfigurationDescriptor(PUSB_DK_CONFIG_DESCRIPTOR_REQUEST Request,
+    DLL InstallResult    UsbDk_InstallDriver(void);
+    DLL BOOL             UsbDk_UninstallDriver(void);
+    DLL BOOL             UsbDk_GetDevicesList(PUSB_DK_DEVICE_INFO *DevicesArray, PULONG NumberDevices);
+    DLL void             UsbDk_ReleaseDevicesList(PUSB_DK_DEVICE_INFO DevicesArray);
+    DLL BOOL             UsbDk_GetConfigurationDescriptor(PUSB_DK_CONFIG_DESCRIPTOR_REQUEST Request,
                                                     PUSB_CONFIGURATION_DESCRIPTOR *Descriptor,
                                                     PULONG Length);
-    DLL void             ReleaseConfigurationDescriptor(PUSB_CONFIGURATION_DESCRIPTOR Descriptor);
+    DLL void             UsbDk_ReleaseConfigurationDescriptor(PUSB_CONFIGURATION_DESCRIPTOR Descriptor);
 
-    DLL HANDLE           StartRedirect(PUSB_DK_DEVICE_ID DeviceID);
-    DLL BOOL             StopRedirect(HANDLE DeviceHandle);
+    DLL HANDLE           UsbDk_StartRedirect(PUSB_DK_DEVICE_ID DeviceID);
+    DLL BOOL             UsbDk_StopRedirect(HANDLE DeviceHandle);
 
-    DLL TransferResult   ControlTransfer(HANDLE DeviceHandle, PVOID Buffer, PULONG Length, LPOVERLAPPED Overlapped);
+    DLL TransferResult   UsbDk_ControlTransfer(HANDLE DeviceHandle, PVOID Buffer, PULONG Length, LPOVERLAPPED Overlapped);
 
-    DLL TransferResult   WritePipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Request, LPOVERLAPPED Overlapped);
-    DLL TransferResult   ReadPipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Request, LPOVERLAPPED Overlapped);
+    DLL TransferResult   UsbDk_WritePipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Request, LPOVERLAPPED Overlapped);
+    DLL TransferResult   UsbDk_ReadPipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Request, LPOVERLAPPED Overlapped);
 
-    DLL HANDLE           GetRedirectorSystemHandle(HANDLE DeviceHandle);
+    DLL HANDLE           UsbDk_GetRedirectorSystemHandle(HANDLE DeviceHandle);
 #ifdef __cplusplus
 }
 #endif

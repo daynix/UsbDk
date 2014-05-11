@@ -36,7 +36,7 @@ void printExceptionString(const char *errorStr)
     tcout << tString;
 }
 //------------------------------------------------------------------------------------------
-InstallResult InstallDriver(void)
+InstallResult UsbDk_InstallDriver(void)
 {
     bool NeedRollBack = false;
     try
@@ -49,7 +49,7 @@ InstallResult InstallDriver(void)
         printExceptionString(e.what());
         if (NeedRollBack)
         {
-            UninstallDriver();
+            UsbDk_UninstallDriver();
         }
 
         return InstallFailure;
@@ -57,7 +57,7 @@ InstallResult InstallDriver(void)
 }
 //-------------------------------------------------------------------------------------------
 
-BOOL UninstallDriver(void)
+BOOL UsbDk_UninstallDriver(void)
 {
     try
     {
@@ -73,7 +73,7 @@ BOOL UninstallDriver(void)
 }
 //-------------------------------------------------------------------------------------------
 
-DLL BOOL GetConfigurationDescriptor(PUSB_DK_CONFIG_DESCRIPTOR_REQUEST Request,
+DLL BOOL UsbDk_GetConfigurationDescriptor(PUSB_DK_CONFIG_DESCRIPTOR_REQUEST Request,
                                     PUSB_CONFIGURATION_DESCRIPTOR *Descriptor,
                                     PULONG Length)
 {
@@ -91,7 +91,7 @@ DLL BOOL GetConfigurationDescriptor(PUSB_DK_CONFIG_DESCRIPTOR_REQUEST Request,
 }
 //-------------------------------------------------------------------------------------------
 
-DLL void ReleaseConfigurationDescriptor(PUSB_CONFIGURATION_DESCRIPTOR Descriptor)
+DLL void UsbDk_ReleaseConfigurationDescriptor(PUSB_CONFIGURATION_DESCRIPTOR Descriptor)
 {
     try
     {
@@ -104,7 +104,7 @@ DLL void ReleaseConfigurationDescriptor(PUSB_CONFIGURATION_DESCRIPTOR Descriptor
 }
 //-------------------------------------------------------------------------------------------
 
-BOOL GetDevicesList(PUSB_DK_DEVICE_INFO *DevicesArray, PULONG NumberDevices)
+BOOL UsbDk_GetDevicesList(PUSB_DK_DEVICE_INFO *DevicesArray, PULONG NumberDevices)
 {
     try
     {
@@ -120,7 +120,7 @@ BOOL GetDevicesList(PUSB_DK_DEVICE_INFO *DevicesArray, PULONG NumberDevices)
 }
 //-------------------------------------------------------------------------------------------
 
-void ReleaseDevicesList(PUSB_DK_DEVICE_INFO DevicesArray)
+void UsbDk_ReleaseDevicesList(PUSB_DK_DEVICE_INFO DevicesArray)
 {
     try
     {
@@ -167,7 +167,7 @@ static UsbDkRedirectorAccess* ConnectToRedirector(ULONG RedirectorID)
     }
 }
 
-HANDLE StartRedirect(PUSB_DK_DEVICE_ID DeviceID)
+HANDLE UsbDk_StartRedirect(PUSB_DK_DEVICE_ID DeviceID)
 {
     bool bRedirectAdded = false;
     try
@@ -202,7 +202,7 @@ HANDLE StartRedirect(PUSB_DK_DEVICE_ID DeviceID)
 }
 //-------------------------------------------------------------------------------------------
 
-BOOL StopRedirect(HANDLE DeviceHandle)
+BOOL UsbDk_StopRedirect(HANDLE DeviceHandle)
 {
     try
     {
@@ -220,7 +220,7 @@ BOOL StopRedirect(HANDLE DeviceHandle)
 }
 //-------------------------------------------------------------------------------------------
 
-TransferResult ControlTransfer(HANDLE DeviceHandle, PVOID Buffer, PULONG Length, LPOVERLAPPED Overlapped)
+TransferResult UsbDk_ControlTransfer(HANDLE DeviceHandle, PVOID Buffer, PULONG Length, LPOVERLAPPED Overlapped)
 {
     try
     {
@@ -235,7 +235,7 @@ TransferResult ControlTransfer(HANDLE DeviceHandle, PVOID Buffer, PULONG Length,
 }
 //-------------------------------------------------------------------------------------------
 
-TransferResult WritePipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Request, LPOVERLAPPED Overlapped)
+TransferResult UsbDk_WritePipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Request, LPOVERLAPPED Overlapped)
 {
     try
     {
@@ -250,7 +250,7 @@ TransferResult WritePipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Request, 
 }
 //-------------------------------------------------------------------------------------------
 
-TransferResult ReadPipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Request, LPOVERLAPPED Overlapped)
+TransferResult UsbDk_ReadPipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Request, LPOVERLAPPED Overlapped)
 {
     try
     {
@@ -265,7 +265,7 @@ TransferResult ReadPipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Request, L
 }
 //-------------------------------------------------------------------------------------------
 
-HANDLE GetRedirectorSystemHandle(HANDLE DeviceHandle)
+HANDLE UsbDk_GetRedirectorSystemHandle(HANDLE DeviceHandle)
 {
     auto deviceHandle = reinterpret_cast<PREDIRECTED_DEVICE_HANDLE>(DeviceHandle);
     return deviceHandle->RedirectorAccess->GetSystemHandle();

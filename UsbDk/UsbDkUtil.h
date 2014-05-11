@@ -201,7 +201,6 @@ private:
     }
 
     LIST_ENTRY m_List;
-    ULONG m_NumEntries = 0;
 };
 
 static inline bool ConstTrue(...) { return true; }

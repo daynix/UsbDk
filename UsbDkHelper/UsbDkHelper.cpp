@@ -24,7 +24,7 @@ void printExceptionString(const char *errorStr)
 //------------------------------------------------------------------------------------------
 InstallResult InstallDriver(void)
 {
-    bool NeedRollBack;
+    bool NeedRollBack = false;
     try
     {
         UsbDkInstaller installer;

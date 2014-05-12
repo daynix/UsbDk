@@ -1,16 +1,27 @@
-    Red Hat USB Redirector Client (UsbDk) Design and Architecture
+    USB Development Kit (UsbDk) Design and Architecture
     =============================================================
 
-Red Hat USB redirector client software consists of following modules:
+USB Development Kit is a set of software modules meant to provide
+user mode applications with direct and exclusive access to USB devices
+by detaching those from Windows PNP manager and device drivers and
+providing user mode with API for USB-specific operations on the device.
 
-  1. UsbDk.sys - Red Hat USB filter driver for redirected USB
-     device interception and exclusive access acquisition.
+Original intention of the kit is USB device redirection support for
+spice remote desktop application however it may be used for any other
+purpose directly or via libusb (there is a libusb backend for UsbDk).
+
+USB Development Kit software consists of following modules:
+
+  1. UsbDk.sys - USB bus filter driver for acquisition of exclusive
+      access to USB devices.
   2. UsbDkHelper.dll - Helper DLL to install, uninstall and configure
-     USB filter driver.
-  3. UsbDkController.exe - Simple command line application for UsbDk.dll
+     the driver and forward USB requests to USB devices.
+  3. UsbDkController.exe - Simple command line application for system
      API usage demonstration and verification.
 
-USB redirector client software is used by virt-viewer for USB devices
+Using USB Development Kit for USB devices redirection (exclusive access aquisition)
+
+USB Development Kit software is used by virt-viewer for USB devices
 discovery and access as required for redirection purposes.
 
 Overall system architecture
@@ -21,7 +32,7 @@ Overall system architecture
          |        virt-viewer        |  +---------------------+
          |                           |            ^ |
          +------------+--------------+            | |
-         |  libusbx   |  libusbredir |            | |
+         |  libusb    |  libusbredir |            | |
          +------------+--------------+            | |
                      ^ |                          | |
                      |----------------------------+ |
@@ -29,7 +40,7 @@ Overall system architecture
  Notifications like: | | High-level API like:
    Device inserted   | |   InstallDriver/UninstallDriver
    Device removed    | |   RedirectDevice
-                     | |   SendUrb, ReceiveUrb
+                     | |   WritePipe, ReadPipe
                      | |
                      | V
              +-----------------+
@@ -41,14 +52,14 @@ Overall system architecture
                       |            |                Kernel Mode
       Control channel |            |
                       |            | Data channel for redirected
-                      V            | device Tx/Rx URB transfers
+                      V            | device Tx/Rx transfers
        Control device o            |
                       |            |
 +-----------+   +-----------+      V
-|PNP Manager|<->| UsbDk.sys |------o RedHat generic USB device
+|PNP Manager|<->| UsbDk.sys |------o Generic USB device
 +-----------+   +-----------+      ^
                       ^            |
-                      |            | Tx/Rx URB passthrough
+                      |            | Tx/Rx passthrough
      Filter and patch |            | done by UsbDk.sys
      device discovery |            |
      messages         |            |
@@ -79,23 +90,22 @@ PNP manager (IRP_MJ_PNP/IRP_MN_QUERY_DEVICE_RELATIONS).
 
 Upon enumeration request completion by USB hub driver UsbDk.sys scans
 array of child devices returned and in case there are devices to be
-redirected (according to current configuration) it creates special
-"Generic Red Hat USB device" PDO and places it into the array returned
-instead of entry being redirected.
+redirected (according to current configuration) it attaches as filter
+to those devices as well.
 
-As a result PNP manager doesn't see USB device being redirected, it sees
-vendor specific USB device with RedHat IDs instead.
+As a result all PNP manager requests pass via UsbDk.sys callbacks and the
+latter patches device ID properties as needed to make PNP manager recognize
+the device as a generic USB device.
 
-This vendor specific USB device created in special way (raw PDO) so that
-system assigns the driver who created it (UsbDk.sys) to be the device driver
-as well.
+Besides that UsbDk.sys marks underlying device object as raw PDO so the system
+assigns the driver who created it (UsbDk.sys) to be the device driver as well.
 
 At this stage any request to this vendor specific device will be forwarded
 to UsbDk.sys which in turn will patch and pass requests to/from original device
 created by USB hub as needed.
 
 
-Kernel Mode architecture after reset
+Device stack after UsbDk.sys installation
 ------------------------------------
 
                 +-----------+
@@ -121,7 +131,7 @@ Kernel Mode architecture after reset
             +-------------------+
 
 
-Time flow after reset USB Host Controller (or reboot of machine)
+QUERY_DEVICE_RELATIONS request flow
 ----------------------------------------------------------------
 
 PNP Manager                     UsbDk driver                    USB Root Hub
@@ -133,21 +143,21 @@ PNP Manager                     UsbDk driver                    USB Root Hub
     |                               |------------------------------>|
     |                               |     array of child devices    |
     |                               |<------------------------------|
-    |                           store array                         |
-    |                           of devices                          |
+    |                         attach filters                        |
+    |                    and save the device list                   |
     |                               |                               |
     |       array of devices        |                               |
     |<------------------------------|                               |
 
 
-Time flow of configuration UsbDk driver
+Device access acquisition flow
 --------------------------------------
 
 UsbDkHelper.dll                 UsbDk.sys                       Specific PDO
-                                                            (Mouse for example)
+                                                         (Mouse, Keyboard, Storage)
     |                               |                               |
     |                               |                               |
-    |     LetDevices                |                               |
+    |     GetDeviceList             |                               |
     |------------------------------>|                               |
     |                               |                               |
     |   Array of devices            |                               |
@@ -173,7 +183,7 @@ UsbDkHelper.dll                 UsbDk.sys                       Specific PDO
     |                               |------------------------------>|
 
 
-Time flow of enumeration after reset specific device
+QUERY_DEVICE_RELATIONS flow with redirected device
 ----------------------------------------------------
 
 PNP Manager                     UsbDk driver                    USB Root Hub
@@ -185,17 +195,17 @@ PNP Manager                     UsbDk driver                    USB Root Hub
     |                               |------------------------------>|
     |                               |     array of child devices    |
     |                               |<------------------------------|
-    |                           create generic                      |
-    |                           UsbDk device PDO                    |
+    |                         attach as filter                      |
+    |                    to the PDO being redirected                |
     |                               |                               |
-    |       array of devices        |                               |
-    |       where spcific device    |                               |
-    |     is replaced by UsbDk PDO  |                               |
+    |                               |                               |
+    |                               |                               |
+    |     array of child devices    |                               |
     |<------------------------------|                               |
 
 
 
-Architecture after initialisation
+Device stack after redirection initiation
 ------------------------
 
              +-----------------+
@@ -209,16 +219,16 @@ Architecture after initialisation
                       |
                       |
              +---------------+
-             | FDO, raw PDO  |
-             | UsbDk.sys WDF |
+             |   Filter DO   |
+             |   UsbDk.sys   |
              +---------------+
                       ^
                       |
                       V
-          +---------------------+
-          | Specific device PDO |
-          | (Mouse for example) |
-          +---------------------+
+         +-----------------------+
+         |  Specific device PDO  |
+         | (Mouse, Storage etc.) |
+         +-----------------------+
                       ^
                       |
                       V

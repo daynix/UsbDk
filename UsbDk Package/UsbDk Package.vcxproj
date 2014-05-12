@@ -525,6 +525,78 @@
       <PackageRelativeDirectory>
       </PackageRelativeDirectory>
     </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" Condition="'$(Configuration)|$(Platform)'=='Win7 Release|Win32'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDk\UsbDkData.h" Condition="'$(Configuration)|$(Platform)'=='Win7 Release|Win32'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" Condition="'$(Configuration)|$(Platform)'=='Win7 Release|x64'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDk\UsbDkData.h" Condition="'$(Configuration)|$(Platform)'=='Win7 Release|x64'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|Win32'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDk\UsbDkData.h" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|Win32'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDk\UsbDkData.h" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" Condition="'$(Configuration)|$(Platform)'=='Win8 Release|Win32'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDk\UsbDkData.h" Condition="'$(Configuration)|$(Platform)'=='Win8 Release|Win32'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" Condition="'$(Configuration)|$(Platform)'=='Win8 Release|x64'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDk\UsbDkData.h" Condition="'$(Configuration)|$(Platform)'=='Win8 Release|x64'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" Condition="'$(Configuration)|$(Platform)'=='Win8 Debug|Win32'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDk\UsbDkData.h" Condition="'$(Configuration)|$(Platform)'=='Win8 Debug|Win32'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" Condition="'$(Configuration)|$(Platform)'=='Win8 Debug|x64'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDk\UsbDkData.h" Condition="'$(Configuration)|$(Platform)'=='Win8 Debug|x64'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" Condition="'$(Configuration)|$(Platform)'=='Win8.1 Release|Win32'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDk\UsbDkData.h" Condition="'$(Configuration)|$(Platform)'=='Win8.1 Release|Win32'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" Condition="'$(Configuration)|$(Platform)'=='Win8.1 Release|x64'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDk\UsbDkData.h" Condition="'$(Configuration)|$(Platform)'=='Win8.1 Release|x64'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug|Win32'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDk\UsbDkData.h" Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug|Win32'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug|x64'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDk\UsbDkData.h" Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug|x64'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
     <FilesToPackage Include="@(Inf->'%(CopyOutput)')" Condition="'@(Inf)'!=''" />
   </ItemGroup>
   <ItemGroup>

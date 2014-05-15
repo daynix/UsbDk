@@ -71,8 +71,7 @@ public:
     static size_t GetRequestContextSize();
 
 private:
-    NTSTATUS DoControlTransfer(PWDF_USB_CONTROL_SETUP_PACKET Input, size_t InputLength,
-                               PWDF_USB_CONTROL_SETUP_PACKET Output, size_t &OutputLength);
+    NTSTATUS DoControlTransfer(CWdfRequest &WdfRequest, WDFMEMORY Input, WDFMEMORY Output, size_t &OutputLength);
 
     template <typename TRetrieverFunc, typename TLockerFunc>
     static NTSTATUS IoInCallerContextRW(CRedirectorRequest &WdfRequest,

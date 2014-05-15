@@ -412,17 +412,26 @@ void CWdfUsbTarget::ReadPipeAsync(WDFREQUEST Request, ULONG64 EndpointAddress, W
     }
 }
 
-NTSTATUS CWdfUsbTarget::ControlTransferSync(WDF_USB_CONTROL_SETUP_PACKET &SetupPacket, WDF_MEMORY_DESCRIPTOR &Data, ULONG &BytesTransferred)
+NTSTATUS CWdfUsbTarget::ControlTransferAsync(CWdfRequest &WdfRequest, PWDF_USB_CONTROL_SETUP_PACKET SetupPacket, WDFMEMORY Data,
+                                         PWDFMEMORY_OFFSET TransferOffset, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion)
 {
-    auto status = WdfUsbTargetDeviceSendControlTransferSynchronously(m_UsbDevice,
-                                                                     nullptr,
-                                                                     nullptr,
-                                                                     &SetupPacket,
-                                                                     &Data,
-                                                                     &BytesTransferred);
+    auto status = WdfUsbTargetDeviceFormatRequestForControlTransfer(m_UsbDevice, WdfRequest, SetupPacket, Data, TransferOffset);
+
     if (!NT_SUCCESS(status))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Control transfer failed, %!STATUS!", status);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! WdfUsbTargetDeviceFormatRequestForControlTransfer failed: %!STATUS!", status);
+    }
+    else
+    {
+        status = WdfRequest.SendWithCompletion(WdfUsbTargetDeviceGetIoTarget(m_UsbDevice), Completion);
+        if (!NT_SUCCESS(status))
+        {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! send failed: %!STATUS!", status);
+        }
+        else
+        {
+            WdfRequest.Detach();
+        }
     }
 
     return status;

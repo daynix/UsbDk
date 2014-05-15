@@ -32,6 +32,7 @@
 
 class CWdfUsbInterface;
 class CWdfUsbPipe;
+class CWdfRequest;
 
 class CWdfUsbTarget
 {
@@ -46,7 +47,8 @@ public:
 
     void WritePipeAsync(WDFREQUEST Request, ULONG64 EndpointAddress, WDFMEMORY Buffer, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion);
     void ReadPipeAsync(WDFREQUEST Request, ULONG64 EndpointAddress, WDFMEMORY Buffer, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion);
-    NTSTATUS ControlTransferSync(WDF_USB_CONTROL_SETUP_PACKET &SetupPacket, WDF_MEMORY_DESCRIPTOR &Data, ULONG &BytesTransferred);
+    NTSTATUS ControlTransferAsync(CWdfRequest &WdfRequest, PWDF_USB_CONTROL_SETUP_PACKET SetupPacket, WDFMEMORY Data,
+                                  PWDFMEMORY_OFFSET TransferOffset, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion);
 
 private:
     CWdfUsbPipe *FindPipeByEndpointAddress(ULONG64 EndpointAddress);

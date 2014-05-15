@@ -356,24 +356,50 @@ void CUsbDkRedirectorStrategy::IoInCallerContext(WDFDEVICE Device, WDFREQUEST Re
 }
 //--------------------------------------------------------------------------------------------------
 
-NTSTATUS CUsbDkRedirectorStrategy::DoControlTransfer(PWDF_USB_CONTROL_SETUP_PACKET Input, size_t InputLength,
-                                                     PWDF_USB_CONTROL_SETUP_PACKET Output, size_t& OutputLength)
+NTSTATUS CUsbDkRedirectorStrategy::DoControlTransfer(CWdfRequest &WdfRequest, WDFMEMORY Input, WDFMEMORY Output, size_t &OutputLength)
 {
-    WDF_MEMORY_DESCRIPTOR Memory;
-    WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(&Memory, &Input[1], static_cast<ULONG>(InputLength - sizeof(*Input)));
-    ULONG BytesTransferred;
+    UNREFERENCED_PARAMETER(Output);
 
-    auto status = m_Target.ControlTransferSync(*Input, Memory, BytesTransferred);
-    if (NT_SUCCESS(status) && (Input->Packet.bm.Request.Dir == BMREQUEST_DEVICE_TO_HOST))
+    CPreAllocatedWdfMemoryBuffer InputMemoryBuffer(Input);
+    CPreAllocatedWdfMemoryBuffer OutputMemoryBuffer(Output);
+
+    WDFMEMORY IOMemory;
+    WDFMEMORY_OFFSET TransferOffset;
+    TransferOffset.BufferOffset = sizeof(WDF_USB_CONTROL_SETUP_PACKET);
+
+    auto SetupPacket = static_cast<PWDF_USB_CONTROL_SETUP_PACKET>(InputMemoryBuffer.Ptr());
+    if (SetupPacket->Packet.bm.Request.Dir == BMREQUEST_HOST_TO_DEVICE)
     {
-        RtlMoveMemory(&Output[1], &Input[1], min(BytesTransferred, OutputLength - sizeof(*Output)));
-        OutputLength = BytesTransferred + sizeof(*Output);
+        TransferOffset.BufferLength = static_cast<ULONG>(InputMemoryBuffer.Size() - sizeof(WDF_USB_CONTROL_SETUP_PACKET));
+        IOMemory = Input;
     }
-    else
+    else // InputSetupPacked->Packet.bm.Request.Dir == BMREQUEST_DEVICE_TO_HOST
     {
-        OutputLength = 0;
+        TransferOffset.BufferLength = static_cast<ULONG>(OutputMemoryBuffer.Size() - sizeof(WDF_USB_CONTROL_SETUP_PACKET));
+        IOMemory = Output;
     }
 
+    auto status = m_Target.ControlTransferAsync(WdfRequest, SetupPacket, IOMemory, &TransferOffset,
+                                  [](WDFREQUEST Request, WDFIOTARGET Target, PWDF_REQUEST_COMPLETION_PARAMS Params, WDFCONTEXT Context)
+                                  {
+                                         UNREFERENCED_PARAMETER(Target);
+                                         UNREFERENCED_PARAMETER(Context);
+                                         CWdfRequest WdfRequest(Request);
+
+                                         auto status = Params->IoStatus.Status;
+                                         auto usbCompletionParams = Params->Parameters.Usb.Completion;
+
+                                         if (!NT_SUCCESS(status))
+                                         {
+                                             TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! Control transfer failed: %!STATUS! UsbdStatus 0x%x\n",
+                                                 status, usbCompletionParams->UsbdStatus);
+                                         }
+
+                                         WdfRequest.SetStatus(status);
+                                         WdfRequest.SetOutputDataLen(usbCompletionParams->Parameters.DeviceControlTransfer.Length + sizeof(WDF_USB_CONTROL_SETUP_PACKET));
+                                  });
+
+    OutputLength = 0;
     return status;
 }
 //--------------------------------------------------------------------------------------------------
@@ -392,10 +418,10 @@ void CUsbDkRedirectorStrategy::IoDeviceControl(WDFREQUEST Request,
         case IOCTL_USBDK_DEVICE_CONTROL_TRANSFER:
         {
             CWdfRequest WdfRequest(Request);
-            UsbDkHandleRequestWithInputOutput<WDF_USB_CONTROL_SETUP_PACKET, WDF_USB_CONTROL_SETUP_PACKET>(WdfRequest,
-                [this](PWDF_USB_CONTROL_SETUP_PACKET Input, size_t InputLength, PWDF_USB_CONTROL_SETUP_PACKET Output, size_t &OutputLength)
-                { return DoControlTransfer(Input, InputLength, Output, OutputLength); });
 
+            UsbDkHandleRequestWithIOMemory(WdfRequest,
+                                           [this, &WdfRequest](WDFMEMORY Input, WDFMEMORY Output, size_t &OutputLength)
+                                        { return DoControlTransfer(WdfRequest, Input, Output, OutputLength); });
             return;
         }
     }

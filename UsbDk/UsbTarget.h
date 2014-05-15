@@ -49,6 +49,7 @@ public:
     void ReadPipeAsync(WDFREQUEST Request, ULONG64 EndpointAddress, WDFMEMORY Buffer, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion);
     NTSTATUS ControlTransferAsync(CWdfRequest &WdfRequest, PWDF_USB_CONTROL_SETUP_PACKET SetupPacket, WDFMEMORY Data,
                                   PWDFMEMORY_OFFSET TransferOffset, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion);
+    NTSTATUS AbortPipe(WDFREQUEST Request, ULONG64 EndpointAddress);
 
 private:
     CWdfUsbPipe *FindPipeByEndpointAddress(ULONG64 EndpointAddress);

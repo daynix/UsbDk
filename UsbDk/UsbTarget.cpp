@@ -96,6 +96,7 @@ public:
     void Create(WDFUSBINTERFACE Interface, UCHAR PipeIndex);
     void ReadAsync(CWdfRequest &Request, WDFMEMORY Buffer, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion);
     void WriteAsync(CWdfRequest &Request, WDFMEMORY Buffer, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion);
+    NTSTATUS Abort(WDFREQUEST Request);
     UCHAR EndpointAddress() const
     { return m_Info.EndpointAddress; }
 
@@ -232,6 +233,18 @@ void CWdfUsbPipe::WriteAsync(CWdfRequest &Request, WDFMEMORY Buffer, PFN_WDF_REQ
             TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! send failed: %!STATUS!", status);
         }
     }
+}
+
+NTSTATUS CWdfUsbPipe::Abort(WDFREQUEST Request)
+{
+    auto status = WdfUsbTargetPipeAbortSynchronously(m_Pipe, Request, nullptr);
+
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! WdfUsbTargetPipeAbortSynchronously failed: %!STATUS!", status);
+    }
+
+    return status;
 }
 
 NTSTATUS CWdfUsbTarget::Create(WDFDEVICE Device)
@@ -409,6 +422,20 @@ void CWdfUsbTarget::ReadPipeAsync(WDFREQUEST Request, ULONG64 EndpointAddress, W
     {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed: Pipe not found");
         WdfRequest.SetStatus(STATUS_NOT_FOUND);
+    }
+}
+
+NTSTATUS CWdfUsbTarget::AbortPipe(WDFREQUEST Request, ULONG64 EndpointAddress)
+{
+    auto Pipe = FindPipeByEndpointAddress(EndpointAddress);
+    if (Pipe != nullptr)
+    {
+        return Pipe->Abort(Request);
+    }
+    else
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed: Pipe not found");
+        return STATUS_NOT_FOUND;
     }
 }
 

@@ -424,6 +424,14 @@ void CUsbDkRedirectorStrategy::IoDeviceControl(WDFREQUEST Request,
                                         { return DoControlTransfer(WdfRequest, Input, Output, OutputLength); });
             return;
         }
+        case IOCTL_USBDK_DEVICE_ABORT_PIPE:
+        {
+            CWdfRequest WdfRequest(Request);
+            UsbDkHandleRequestWithInput<ULONG64>(WdfRequest,
+                                            [this, Request](ULONG64 *endpointAddress, size_t)
+                                            {return m_Target.AbortPipe(Request, *endpointAddress); });
+            return;
+        }
     }
 }
 //--------------------------------------------------------------------------------------------------

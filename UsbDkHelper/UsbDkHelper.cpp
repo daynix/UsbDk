@@ -274,6 +274,22 @@ TransferResult UsbDk_ReadPipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Requ
 }
 //-------------------------------------------------------------------------------------------
 
+BOOL UsbDk_AbortPipe(HANDLE DeviceHandle, ULONG64 PipeAddress)
+{
+    try
+    {
+        auto deviceHandle = reinterpret_cast<PREDIRECTED_DEVICE_HANDLE>(DeviceHandle);
+        deviceHandle->RedirectorAccess->AbortPipe(PipeAddress);
+        return TRUE;
+    }
+    catch (const exception &e)
+    {
+        printExceptionString(e.what());
+        return FALSE;
+    }
+}
+//-------------------------------------------------------------------------------------------
+
 HANDLE UsbDk_GetRedirectorSystemHandle(HANDLE DeviceHandle)
 {
     auto deviceHandle = reinterpret_cast<PREDIRECTED_DEVICE_HANDLE>(DeviceHandle);

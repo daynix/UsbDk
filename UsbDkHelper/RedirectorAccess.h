@@ -62,7 +62,18 @@ public:
         return Write(&Request, sizeof(Request), &BytesWritten, Overlapped);
     }
 
+    void AbortPipe(ULONG64 PipeAddress);
+
     HANDLE GetSystemHandle() const
     { return m_hDriver; }
+
+private:
+    bool IoctlSync(DWORD Code,
+                   bool ShortBufferOk = false,
+                   LPVOID InBuffer = nullptr,
+                   DWORD InBufferSize = 0,
+                   LPVOID OutBuffer = nullptr,
+                   DWORD OutBufferSize = 0,
+                   LPDWORD BytesReturned = nullptr);
 };
 //-----------------------------------------------------------------------------------

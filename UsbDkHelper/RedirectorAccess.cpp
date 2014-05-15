@@ -30,3 +30,44 @@ TransferResult UsbDkRedirectorAccess::DoControlTransfer(PVOID Buffer, ULONG &Len
     return Ioctl(IOCTL_USBDK_DEVICE_CONTROL_TRANSFER, false, Buffer, Length, Buffer, Length, &Length, Overlapped);
 }
 //------------------------------------------------------------------------------------------------
+
+void UsbDkRedirectorAccess::AbortPipe(ULONG64 PipeAddress)
+{
+    IoctlSync(IOCTL_USBDK_DEVICE_ABORT_PIPE, false, &PipeAddress, sizeof(PipeAddress));
+}
+//------------------------------------------------------------------------------------------------
+
+bool UsbDkRedirectorAccess::IoctlSync(DWORD Code,
+                                      bool ShortBufferOk,
+                                      LPVOID InBuffer,
+                                      DWORD InBufferSize,
+                                      LPVOID OutBuffer,
+                                      DWORD OutBufferSize,
+                                      LPDWORD BytesReturned)
+{
+    OVERLAPPED Overlapped;
+    Overlapped.hEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+    if (Overlapped.hEvent == nullptr)
+    {
+        throw UsbDkDriverFileException(TEXT("CreateEvent failed"));
+    }
+
+    auto res = Ioctl(Code, ShortBufferOk, InBuffer, InBufferSize, OutBuffer, OutBufferSize, BytesReturned, &Overlapped);
+
+    switch (res)
+    {
+    case TransferSuccessAsync:
+        DWORD NumberOfBytesTransferred;
+        if (!GetOverlappedResult(m_hDriver, &Overlapped, &NumberOfBytesTransferred, TRUE))
+        {
+            throw UsbDkDriverFileException(TEXT("GetOverlappedResult failed"));
+        }
+        return true;
+    case TransferSuccess:
+        return true;
+    case TransferFailure:
+        return false;
+    }
+
+    return false;
+}

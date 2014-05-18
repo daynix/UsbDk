@@ -25,7 +25,6 @@
 
 #include "Exception.h"
 #include "WdfCoinstaller.h"
-#include "ServiceManager.h"
 #include "UsbDkHelper.h"
 #include "RegAccess.h"
 

@@ -23,7 +23,6 @@
 
 #pragma once
 
-
 //-----------------------------------------------------------------------------------
 #define SERVICE_MANAGER_EXCEPTION_STRING TEXT("ServiceManager throw the exception. ")
 
@@ -38,27 +37,6 @@ public:
 };
 //-----------------------------------------------------------------------------------
 
-class SCMHandleHolder
-{
-public:
-    SCMHandleHolder(SC_HANDLE Handle)
-        : m_Handle(Handle)
-    {}
-
-    ~SCMHandleHolder()
-    {
-        if (m_Handle != nullptr)
-        {
-            CloseServiceHandle(m_Handle);
-        }
-    }
-
-    operator bool() const { return m_Handle != nullptr; }
-    operator SC_HANDLE() const { return m_Handle; }
-private:
-    SC_HANDLE m_Handle;
-};
-
 class ServiceManager
 {
 public:
@@ -68,6 +46,8 @@ public:
     void    DeleteServiceObject(const tstring &ServiceName);
 
 private:
+    typedef UsbDkHandleHolder<SC_HANDLE> SCMHandleHolder;
+
     static void WaitForServiceStop(const SCMHandleHolder &schService);
 
     SCMHandleHolder m_schSCManager;

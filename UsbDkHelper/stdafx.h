@@ -43,5 +43,7 @@
 
 #include "tstrings.h"
 #include "Exception.h"
+#include "Utils.h"
+#include "ServiceManager.h"
 
 using namespace std;

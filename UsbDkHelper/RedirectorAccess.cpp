@@ -45,13 +45,14 @@ bool UsbDkRedirectorAccess::IoctlSync(DWORD Code,
                                       DWORD OutBufferSize,
                                       LPDWORD BytesReturned)
 {
-    OVERLAPPED Overlapped;
-    Overlapped.hEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
-    if (Overlapped.hEvent == nullptr)
+    UsbDkHandleHolder<HANDLE> Event(CreateEvent(nullptr, FALSE, FALSE, nullptr));
+    if (!Event)
     {
         throw UsbDkDriverFileException(TEXT("CreateEvent failed"));
     }
 
+    OVERLAPPED Overlapped;
+    Overlapped.hEvent = Event;
     auto res = Ioctl(Code, ShortBufferOk, InBuffer, InBufferSize, OutBuffer, OutBufferSize, BytesReturned, &Overlapped);
 
     switch (res)

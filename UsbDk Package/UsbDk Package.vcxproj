@@ -325,8 +325,7 @@
       <Command>copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk Package"</Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>
-      </Command>
+      <Command>del "$(OutDir)UsbDk Package\UsbDk.inf"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|Win32'">
@@ -334,8 +333,7 @@
       <Command>copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk Package"</Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>
-      </Command>
+      <Command>del "$(OutDir)UsbDk Package\UsbDk.inf"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win7 Release|Win32'">
@@ -343,8 +341,7 @@
       <Command>copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk Package"</Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>
-      </Command>
+      <Command>del "$(OutDir)UsbDk Package\UsbDk.inf"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug|Win32'">
@@ -352,8 +349,7 @@
       <Command>copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk Package"</Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>
-      </Command>
+      <Command>del "$(OutDir)UsbDk Package\UsbDk.inf"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win8 Release|Win32'">
@@ -361,8 +357,7 @@
       <Command>copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk Package"</Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>
-      </Command>
+      <Command>del "$(OutDir)UsbDk Package\UsbDk.inf"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win8.1 Release|Win32'">
@@ -370,8 +365,7 @@
       <Command>copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk Package"</Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>
-      </Command>
+      <Command>del "$(OutDir)UsbDk Package\UsbDk.inf"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win8 Debug|x64'">
@@ -379,8 +373,7 @@
       <Command>copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk Package"</Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>
-      </Command>
+      <Command>del "$(OutDir)UsbDk Package\UsbDk.inf"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
@@ -388,8 +381,7 @@
       <Command>copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk Package"</Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>
-      </Command>
+      <Command>del "$(OutDir)UsbDk Package\UsbDk.inf"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win7 Release|x64'">
@@ -397,8 +389,7 @@
       <Command>copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk Package"</Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>
-      </Command>
+      <Command>del "$(OutDir)UsbDk Package\UsbDk.inf"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug|x64'">
@@ -406,8 +397,7 @@
       <Command>copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk Package"</Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>
-      </Command>
+      <Command>del "$(OutDir)UsbDk Package\UsbDk.inf"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win8 Release|x64'">
@@ -415,8 +405,7 @@
       <Command>copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk Package"</Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>
-      </Command>
+      <Command>del "$(OutDir)UsbDk Package\UsbDk.inf"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win8.1 Release|x64'">
@@ -424,8 +413,7 @@
       <Command>copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk Package"</Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>
-      </Command>
+      <Command>del "$(OutDir)UsbDk Package\UsbDk.inf"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

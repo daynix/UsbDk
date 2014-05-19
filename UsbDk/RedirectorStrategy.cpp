@@ -84,11 +84,6 @@ NTSTATUS CUsbDkRedirectorStrategy::Create(CUsbDkFilterDevice *Owner)
 
 void CUsbDkRedirectorStrategy::Delete()
 {
-    if (m_ControlDevice)
-    {
-        m_ControlDevice->NotifyRedirectorDetached(m_DeviceID, m_InstanceID);
-    }
-
     CUsbDkFilterStrategy::Delete();
 }
 //--------------------------------------------------------------------------------------------------

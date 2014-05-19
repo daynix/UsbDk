@@ -299,7 +299,7 @@ public:
         m_Objects.ForEachDetachedIf([Id](TEntryType *ExistingEntry) { return *ExistingEntry == *Id; },
                                     [this, &Removed](TEntryType *ExistingEntry)
                                     {
-                                            delete ExistingEntry;
+                                            ExistingEntry->Release();
                                             CounterDecrement();
                                             Removed = true;
                                             return false;

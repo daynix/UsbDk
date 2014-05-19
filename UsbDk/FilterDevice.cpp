@@ -417,6 +417,8 @@ bool CUsbDkFilterDevice::CStrategist::SelectStrategy(PDEVICE_OBJECT DevObj)
     if (!m_Strategy->GetControlDevice()->ShouldRedirect(ID))
     {
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Do not redirect or already redirected device, no strategy assigned");
+        m_Strategy->GetControlDevice()->NotifyRedirectionRemoved(ID);
+
         return false;
     }
 

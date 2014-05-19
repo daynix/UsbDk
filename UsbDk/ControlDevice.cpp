@@ -546,24 +546,30 @@ NTSTATUS CUsbDkControlDevice::AddDeviceToSet(const USB_DK_DEVICE_ID &DeviceId, C
 
 NTSTATUS CUsbDkControlDevice::RemoveRedirect(const USB_DK_DEVICE_ID &DeviceId)
 {
-    if (m_Redirections.Delete(&DeviceId))
+    if (NotifyRedirectorRemovalStarted(DeviceId))
     {
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "%!FUNC! Success. New redirections list:");
         m_Redirections.Dump();
 
         auto res = ResetUsbDevice(DeviceId);
-
         if (!NT_SUCCESS(res))
         {
             TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! Reset after stop redirection failed! Return redirection.");
-
-            CUsbDkRedirection *Redirection;
-            auto addRes = AddDeviceToSet(DeviceId, &Redirection);
-            if (!NT_SUCCESS(addRes))
-            {
-                TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! Return redirection failed.");
-            }
+            return res;
         }
+
+        if (! WaitForDetachment(DeviceId))
+        {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! Wait for redirector detachment failed.");
+            return STATUS_DEVICE_NOT_CONNECTED;
+        }
+
+         if (!m_Redirections.Delete(&DeviceId))
+         {
+             TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! Delete device from set failed.");
+             return STATUS_OBJECT_NAME_NOT_FOUND;
+         }
+
         return res;
     }
 
@@ -581,12 +587,27 @@ bool CUsbDkControlDevice::NotifyRedirectorAttached(CRegText *DeviceID, CRegText 
 }
 //-------------------------------------------------------------------------------------------------------------
 
-bool CUsbDkControlDevice::NotifyRedirectorDetached(CRegText *DeviceID, CRegText *InstanceID)
+bool CUsbDkControlDevice::NotifyRedirectorRemovalStarted(const USB_DK_DEVICE_ID &ID)
 {
-    USB_DK_DEVICE_ID ID;
-    UsbDkFillIDStruct(&ID, *DeviceID->begin(), *InstanceID->begin());
+    return m_Redirections.ModifyOne(&ID, [](CUsbDkRedirection *R){ R->NotifyRedirectionRemovalStarted(); });
+}
+//-------------------------------------------------------------------------------------------------------------
 
-    return m_Redirections.ModifyOne(&ID, [](CUsbDkRedirection *R){ R->NotifyRedirectorDeleted(); });
+bool CUsbDkControlDevice::WaitForDetachment(const USB_DK_DEVICE_ID &ID)
+{
+    CUsbDkRedirection *Redirection;
+    auto res = m_Redirections.ModifyOne(&ID, [&Redirection](CUsbDkRedirection *R)
+                                            { R->AddRef();
+                                              Redirection = R;});
+    if (!res)
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_WDFDEVICE, "%!FUNC! object was not found.");
+        return res;
+    }
+    res = Redirection->WaitForDetachment();
+    Redirection->Release();
+
+    return res;
 }
 //-------------------------------------------------------------------------------------------------------------
 
@@ -614,10 +635,23 @@ void CUsbDkRedirection::NotifyRedirectorCreated(ULONG RedirectorID)
     m_RedirectionCreated.Set();
 }
 
-void CUsbDkRedirection::NotifyRedirectorDeleted()
+void CUsbDkRedirection::NotifyRedirectionRemovalStarted()
 {
+    m_RemovalInProgress = true;
     m_RedirectorID = NO_REDIRECTOR;
     m_RedirectionCreated.Clear();
+}
+
+bool CUsbDkRedirection::WaitForDetachment()
+{
+    auto waitRes = m_RedirectionRemoved.Wait(true, -SecondsTo100Nanoseconds(120));
+    if ((waitRes == STATUS_TIMEOUT) || !NT_SUCCESS(waitRes))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_WDFDEVICE, "%!FUNC! Wait of RedirectionRemoved event failed. %!STATUS!", waitRes);
+        return false;
+    }
+
+    return true;
 }
 
 bool CUsbDkRedirection::operator==(const USB_DK_DEVICE_ID &Id) const

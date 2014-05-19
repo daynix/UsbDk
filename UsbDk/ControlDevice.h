@@ -73,7 +73,7 @@ private:
     CUsbDkControlDeviceQueue& operator= (const CUsbDkControlDeviceQueue&) = delete;
 };
 
-class CUsbDkRedirection : public CAllocatable<NonPagedPool, 'NRHR'>
+class CUsbDkRedirection : public CAllocatable<NonPagedPool, 'NRHR'>, public CWdmRefCountingObject
 {
 public:
     enum : ULONG
@@ -90,22 +90,37 @@ public:
     void Dump() const;
 
     void NotifyRedirectorCreated(ULONG RedirectorID);
-    void NotifyRedirectorDeleted();
+    void NotifyRedirectionRemoved()
+    { m_RedirectionRemoved.Set(); }
+    void NotifyRedirectionRemovalStarted();
+
     bool IsRedirected() const
     { return m_RedirectorID != NO_REDIRECTOR; }
+
+    bool IsPreparedForRemove() const
+    { return m_RemovalInProgress; }
 
     NTSTATUS WaitForAttachment()
     { return m_RedirectionCreated.Wait(true, -SecondsTo100Nanoseconds(120)); }
 
+    bool WaitForDetachment();
+
     ULONG RedirectorID()
     { return m_RedirectorID; }
+
+protected:
+    virtual void OnLastReferenceGone()
+    { delete this; }
 
 private:
     CString m_DeviceID;
     CString m_InstanceID;
 
     CWdmEvent m_RedirectionCreated;
+    CWdmEvent m_RedirectionRemoved;
     ULONG m_RedirectorID = NO_REDIRECTOR;
+
+    bool m_RemovalInProgress = false;
 
     DECLARE_CWDMLIST_ENTRY(CUsbDkRedirection);
 };
@@ -142,12 +157,20 @@ public:
     {
         bool DontRedirect = true;
         const_cast<RedirectionsSet*>(&m_Redirections)->ModifyOne(&Dev, [&DontRedirect](CUsbDkRedirection *Entry)
-                                                                       { DontRedirect = Entry->IsRedirected(); });
+                                            { DontRedirect = Entry->IsRedirected() || Entry->IsPreparedForRemove(); });
         return !DontRedirect;
     }
 
+    template <typename TDevID>
+    void NotifyRedirectionRemoved(const TDevID &Dev) const
+    {
+        const_cast<RedirectionsSet*>(&m_Redirections)->ModifyOne(&Dev, [](CUsbDkRedirection *Entry)
+                                                                       { Entry->NotifyRedirectionRemoved();} );
+   }
+
     bool NotifyRedirectorAttached(CRegText *DeviceID, CRegText *InstanceID, ULONG RedrectorID);
-    bool NotifyRedirectorDetached(CRegText *DeviceID, CRegText *InstanceID);
+    bool NotifyRedirectorRemovalStarted(const USB_DK_DEVICE_ID &ID);
+    bool WaitForDetachment(const USB_DK_DEVICE_ID &ID);
 
 private:
     CObjHolder<CUsbDkControlDeviceQueue> m_DeviceQueue;

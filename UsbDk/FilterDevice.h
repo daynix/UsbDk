@@ -103,7 +103,8 @@ class CUsbDkHubFilterStrategy : public CUsbDkFilterStrategy
 public:
     virtual NTSTATUS Create(CUsbDkFilterDevice *Owner) override;
     virtual void Delete() override;
-    virtual NTSTATUS MakeAvailable() override;
+    virtual NTSTATUS MakeAvailable() override
+    { return STATUS_SUCCESS; }
     virtual NTSTATUS PNPPreProcess(PIRP Irp) override;
 
 private:

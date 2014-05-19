@@ -153,11 +153,6 @@ NTSTATUS CUsbDkHubFilterStrategy::PNPPreProcess(PIRP Irp)
     return CUsbDkFilterStrategy::PNPPreProcess(Irp);
 }
 
-NTSTATUS CUsbDkHubFilterStrategy::MakeAvailable()
-{
-    return m_Owner->CreatePerInstanceSymLink(USBDK_HUB_FILTER_NAME_PREFIX);
-}
-
 void CUsbDkHubFilterStrategy::DropRemovedDevices(const CDeviceRelations &Relations)
 {
     //Child device must be deleted on PASSIVE_LEVEL

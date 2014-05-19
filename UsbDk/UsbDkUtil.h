@@ -74,6 +74,37 @@ private:
     LONG m_Counter = 0;
 };
 
+class CWdmRefCountingObject
+{
+public:
+    CWdmRefCountingObject()
+    {
+        AddRef();
+    }
+
+    void AddRef()
+    {
+        m_RefCounter.AddRef();
+    }
+
+    void Release()
+    {
+        if (m_RefCounter.Release() == 0)
+        {
+            OnLastReferenceGone();
+        }
+    }
+
+protected:
+    virtual void OnLastReferenceGone() = 0;
+
+private:
+    CWdmRefCounter m_RefCounter;
+
+    CWdmRefCountingObject(const CWdmRefCountingObject&) = delete;
+    CWdmRefCountingObject& operator= (const CWdmRefCountingObject&) = delete;
+};
+
 class CLockedAccess
 {
 public:

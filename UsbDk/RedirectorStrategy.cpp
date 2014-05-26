@@ -478,6 +478,14 @@ void CUsbDkRedirectorStrategy::IoDeviceControl(WDFREQUEST Request,
             m_IncomingRWQueue->Start();
             return;
         }
+        case IOCTL_USBDK_DEVICE_RESET_DEVICE:
+        {
+            CWdfRequest WdfRequest(Request);
+            auto status = m_Target.ResetDevice(Request);
+            WdfRequest.SetStatus(status);
+            WdfRequest.SetOutputDataLen(0);
+            return;
+        }
     }
 }
 //--------------------------------------------------------------------------------------------------

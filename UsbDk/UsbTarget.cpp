@@ -97,6 +97,7 @@ public:
     void ReadAsync(CWdfRequest &Request, WDFMEMORY Buffer, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion);
     void WriteAsync(CWdfRequest &Request, WDFMEMORY Buffer, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion);
     NTSTATUS Abort(WDFREQUEST Request);
+    NTSTATUS Reset(WDFREQUEST Request);
     UCHAR EndpointAddress() const
     { return m_Info.EndpointAddress; }
 
@@ -120,6 +121,7 @@ public:
     NTSTATUS SetAltSetting(ULONG64 AltSettingIdx);
 
     CWdfUsbPipe *FindPipeByEndpointAddress(ULONG64 EndpointAddress);
+    NTSTATUS Reset(WDFREQUEST Request);
 
 private:
     WDFUSBDEVICE m_UsbDevice;
@@ -179,6 +181,27 @@ CWdfUsbPipe *CWdfUsbInterface::FindPipeByEndpointAddress(ULONG64 EndpointAddress
     }
 
     return nullptr;
+}
+
+NTSTATUS CWdfUsbInterface::Reset(WDFREQUEST Request)
+{
+    NTSTATUS status = STATUS_SUCCESS;
+    for (UCHAR i = 0; i < m_NumPipes; i++)
+    {
+        auto abortStatus = m_Pipes[i].Abort(Request);
+        if (!NT_SUCCESS(abortStatus))
+        {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC!: Abort of pipe %d failed", i);
+            status = abortStatus;
+        }
+        auto resetStatus = m_Pipes[i].Reset(Request);
+        if (!NT_SUCCESS(resetStatus))
+        {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC!: Reset of pipe %d failed", i);
+            status = resetStatus;
+        }
+    }
+    return status;
 }
 
 NTSTATUS CWdfUsbInterface::Create(WDFUSBDEVICE Device, UCHAR InterfaceIdx)
@@ -244,6 +267,18 @@ NTSTATUS CWdfUsbPipe::Abort(WDFREQUEST Request)
     if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! WdfUsbTargetPipeAbortSynchronously failed: %!STATUS!", status);
+    }
+
+    return status;
+}
+
+NTSTATUS CWdfUsbPipe::Reset(WDFREQUEST Request)
+{
+    auto status = WdfUsbTargetPipeResetSynchronously(m_Pipe, Request, nullptr);
+
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! WdfUsbTargetPipeResetSynchronously failed: %!STATUS!", status);
     }
 
     return status;
@@ -439,6 +474,23 @@ NTSTATUS CWdfUsbTarget::AbortPipe(WDFREQUEST Request, ULONG64 EndpointAddress)
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed: Pipe not found");
         return STATUS_NOT_FOUND;
     }
+}
+
+NTSTATUS CWdfUsbTarget::ResetDevice(WDFREQUEST Request)
+{
+    NTSTATUS status = STATUS_SUCCESS;
+
+    for (UCHAR i = 0; i < m_NumInterfaces; i++)
+    {
+        auto currentStatus = m_Interfaces[i].Reset(Request);
+        if (!NT_SUCCESS(currentStatus))
+        {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC!: Reset of interface %d failed", i);
+            status = currentStatus;
+        }
+    }
+
+    return status;
 }
 
 NTSTATUS CWdfUsbTarget::ControlTransferAsync(CWdfRequest &WdfRequest, PWDF_USB_CONTROL_SETUP_PACKET SetupPacket, WDFMEMORY Data,

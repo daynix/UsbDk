@@ -147,6 +147,11 @@ public:
     {}
 
     virtual NTSTATUS Create();
+    void StopSync()
+    {WdfIoQueueStopSynchronously(m_Queue);}
+    void Start()
+    {WdfIoQueueStart(m_Queue);}
+
 protected:
     virtual void InitConfig(WDF_IO_QUEUE_CONFIG &QueueConfig) = 0;
     virtual void SetCallbacks(WDF_IO_QUEUE_CONFIG &QueueConfig) = 0;

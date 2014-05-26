@@ -229,21 +229,6 @@ BOOL UsbDk_StopRedirect(HANDLE DeviceHandle)
 }
 //-------------------------------------------------------------------------------------------
 
-TransferResult UsbDk_ControlTransfer(HANDLE DeviceHandle, PVOID Buffer, PULONG Length, LPOVERLAPPED Overlapped)
-{
-    try
-    {
-        auto deviceHandle = reinterpret_cast<PREDIRECTED_DEVICE_HANDLE>(DeviceHandle);
-        return deviceHandle->RedirectorAccess->DoControlTransfer(Buffer, *Length, Overlapped);
-    }
-    catch (const exception &e)
-    {
-        printExceptionString(e.what());
-        return TransferFailure;
-    }
-}
-//-------------------------------------------------------------------------------------------
-
 TransferResult UsbDk_WritePipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Request, LPOVERLAPPED Overlapped)
 {
     try

@@ -48,8 +48,6 @@ public:
         :UsbDkDriverFile( (tstring(USBDK_REDIRECTOR_USERMODE_NAME_PREFIX) + to_tstring(RedirectorID)).c_str(), true )
     {}
 
-    TransferResult DoControlTransfer(PVOID Buffer, ULONG &Length, LPOVERLAPPED Overlapped);
-
     TransferResult ReadPipe(USB_DK_TRANSFER_REQUEST &Request, LPOVERLAPPED Overlapped)
     {
         DWORD BytesRead;

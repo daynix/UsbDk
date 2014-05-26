@@ -66,17 +66,30 @@ NTSTATUS CUsbDkRedirectorStrategy::Create(CUsbDkFilterDevice *Owner)
         return status;
     }
 
-    m_IncomingQueue = new CUsbDkRedirectorQueue(*m_Owner);
-    if (!m_IncomingQueue)
+    m_IncomingRWQueue = new CUsbDkRedirectorQueueData(*m_Owner);
+    if (!m_IncomingRWQueue)
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! Queue allocation failed");
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! RW Queue allocation failed");
         return STATUS_INSUFFICIENT_RESOURCES;
     }
 
-    status = m_IncomingQueue->Create();
+    status = m_IncomingRWQueue->Create();
     if (!NT_SUCCESS(status))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! Queue creation failed");
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! RW Queue creation failed");
+    }
+
+    m_IncomingIOCTLQueue = new CUsbDkRedirectorQueueConfig(*m_Owner);
+    if (!m_IncomingIOCTLQueue)
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! IOCTL Queue allocation failed");
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+
+    status = m_IncomingIOCTLQueue->Create();
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! IOCTL Queue creation failed");
     }
     return status;
 }
@@ -551,13 +564,35 @@ size_t CUsbDkRedirectorStrategy::GetRequestContextSize()
 }
 //--------------------------------------------------------------------------------------------------
 
-void CUsbDkRedirectorQueue::SetCallbacks(WDF_IO_QUEUE_CONFIG &QueueConfig)
+void CUsbDkRedirectorQueueData::SetCallbacks(WDF_IO_QUEUE_CONFIG &QueueConfig)
 {
-    QueueConfig.EvtIoDeviceControl = [](WDFQUEUE Q, WDFREQUEST R, size_t OL, size_t IL, ULONG CTL)
-                                     { UsbDkFilterGetContext(WdfIoQueueGetDevice(Q))->UsbDkFilter->m_Strategy->IoDeviceControl(R, OL, IL, CTL); };;
     QueueConfig.EvtIoWrite = [](WDFQUEUE Q, WDFREQUEST R, size_t L)
                              { UsbDkFilterGetContext(WdfIoQueueGetDevice(Q))->UsbDkFilter->m_Strategy->WritePipe(R, L); };
     QueueConfig.EvtIoRead = [](WDFQUEUE Q, WDFREQUEST R, size_t L)
                             { UsbDkFilterGetContext(WdfIoQueueGetDevice(Q))->UsbDkFilter->m_Strategy->ReadPipe(R, L); };
+}
+//--------------------------------------------------------------------------------------------------
+
+NTSTATUS CUsbDkRedirectorQueueData::SetDispatching()
+{
+    auto status = WdfDeviceConfigureRequestDispatching(m_OwnerDevice.WdfObject(), m_Queue, WdfRequestTypeRead);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC!: WdfDeviceConfigureRequestDispatching failed for type WdfRequestTypeRead. %!STATUS!", status);
+        return status;
+    }
+    status = WdfDeviceConfigureRequestDispatching(m_OwnerDevice.WdfObject(), m_Queue, WdfRequestTypeWrite);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC!: WdfDeviceConfigureRequestDispatching failed for type WdfRequestTypeWrite. %!STATUS!", status);
+    }
+    return status;
+}
+//--------------------------------------------------------------------------------------------------
+
+void CUsbDkRedirectorQueueConfig::SetCallbacks(WDF_IO_QUEUE_CONFIG &QueueConfig)
+{
+    QueueConfig.EvtIoDeviceControl = [](WDFQUEUE Q, WDFREQUEST R, size_t OL, size_t IL, ULONG CTL)
+                                     { UsbDkFilterGetContext(WdfIoQueueGetDevice(Q))->UsbDkFilter->m_Strategy->IoDeviceControl(R, OL, IL, CTL); };;
 }
 //--------------------------------------------------------------------------------------------------

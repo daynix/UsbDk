@@ -29,17 +29,32 @@
 
 class CRegText;
 
-class CUsbDkRedirectorQueue : public CWdfDefaultQueue, public CAllocatable<PagedPool, 'QRHR'>
+class CUsbDkRedirectorQueueData : public CWdfSpecificQueue, public CAllocatable<PagedPool, 'PQRH'>
 {
 public:
-    CUsbDkRedirectorQueue(CWdfDevice &Device)
-        : CWdfDefaultQueue(Device, WdfIoQueueDispatchParallel)
+    CUsbDkRedirectorQueueData(CWdfDevice &Device)
+        : CWdfSpecificQueue(Device, WdfIoQueueDispatchParallel)
     {}
 
 private:
     virtual void SetCallbacks(WDF_IO_QUEUE_CONFIG &QueueConfig) override;
-    CUsbDkRedirectorQueue(const CUsbDkRedirectorQueue&) = delete;
-    CUsbDkRedirectorQueue& operator= (const CUsbDkRedirectorQueue&) = delete;
+    virtual NTSTATUS SetDispatching() override;
+    CUsbDkRedirectorQueueData(const CUsbDkRedirectorQueueData&) = delete;
+    CUsbDkRedirectorQueueData& operator= (const CUsbDkRedirectorQueueData&) = delete;
+};
+//--------------------------------------------------------------------------------------------------
+
+class CUsbDkRedirectorQueueConfig : public CWdfDefaultQueue, public CAllocatable<PagedPool, 'SQRH'>
+{
+public:
+    CUsbDkRedirectorQueueConfig(CWdfDevice &Device)
+        : CWdfDefaultQueue(Device, WdfIoQueueDispatchSequential)
+    {}
+
+private:
+    virtual void SetCallbacks(WDF_IO_QUEUE_CONFIG &QueueConfig) override;
+    CUsbDkRedirectorQueueConfig(const CUsbDkRedirectorQueueConfig&) = delete;
+    CUsbDkRedirectorQueueConfig& operator= (const CUsbDkRedirectorQueueConfig&) = delete;
 };
 //--------------------------------------------------------------------------------------------------
 
@@ -82,7 +97,8 @@ private:
 
     CWdfUsbTarget m_Target;
 
-    CObjHolder<CUsbDkRedirectorQueue> m_IncomingQueue;
+    CObjHolder<CUsbDkRedirectorQueueData> m_IncomingRWQueue;
+    CObjHolder<CUsbDkRedirectorQueueConfig> m_IncomingIOCTLQueue;
 
     CObjHolder<CRegText> m_DeviceID;
     CObjHolder<CRegText> m_InstanceID;

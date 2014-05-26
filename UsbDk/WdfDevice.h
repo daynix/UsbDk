@@ -146,11 +146,12 @@ public:
         , m_DispatchType(DispatchType)
     {}
 
-    NTSTATUS Create();
+    virtual NTSTATUS Create();
 protected:
     virtual void InitConfig(WDF_IO_QUEUE_CONFIG &QueueConfig) = 0;
     virtual void SetCallbacks(WDF_IO_QUEUE_CONFIG &QueueConfig) = 0;
 
+    WDFQUEUE m_Queue;
     CWdfDevice &m_OwnerDevice;
     WDF_IO_QUEUE_DISPATCH_TYPE m_DispatchType;
 
@@ -170,4 +171,23 @@ private:
 
     CWdfDefaultQueue(const CWdfDefaultQueue&) = delete;
     CWdfDefaultQueue& operator= (const CWdfDefaultQueue&) = delete;
+};
+
+class CWdfSpecificQueue : public CWdfQueue
+{
+public:
+    CWdfSpecificQueue(CWdfDevice &Device, WDF_IO_QUEUE_DISPATCH_TYPE DispatchType)
+        : CWdfQueue(Device, DispatchType)
+    {}
+
+    virtual NTSTATUS Create() override;
+
+protected:
+    virtual NTSTATUS SetDispatching() = 0;
+
+private:
+    virtual void InitConfig(WDF_IO_QUEUE_CONFIG &QueueConfig) override;
+
+    CWdfSpecificQueue(const CWdfSpecificQueue&) = delete;
+    CWdfSpecificQueue& operator= (const CWdfSpecificQueue&) = delete;
 };

@@ -172,7 +172,8 @@ private:
     CInstanceCounter<CUsbDkFilterDevice> m_InstanceNumber;
 
     friend class CUsbDkFilterDeviceInit;
-    friend class CUsbDkRedirectorQueue;
+    friend class CUsbDkRedirectorQueueData;
+    friend class CUsbDkRedirectorQueueConfig;
 
     DECLARE_CWDMLIST_ENTRY(CUsbDkFilterDevice);
 };

@@ -117,7 +117,7 @@ public:
     {}
 
     NTSTATUS Create(WDFUSBDEVICE Device, UCHAR InterfaceIdx);
-    NTSTATUS SetAltSetting(UCHAR AltSettingIdx);
+    NTSTATUS SetAltSetting(ULONG64 AltSettingIdx);
 
     CWdfUsbPipe *FindPipeByEndpointAddress(ULONG64 EndpointAddress);
 
@@ -132,10 +132,12 @@ private:
     CWdfUsbInterface& operator= (const CWdfUsbInterface&) = delete;
 };
 
-NTSTATUS CWdfUsbInterface::SetAltSetting(UCHAR AltSettingIdx)
+NTSTATUS CWdfUsbInterface::SetAltSetting(ULONG64 AltSettingIdx)
 {
+    TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! start");
+
     WDF_USB_INTERFACE_SELECT_SETTING_PARAMS params;
-    WDF_USB_INTERFACE_SELECT_SETTING_PARAMS_INIT_SETTING(&params, AltSettingIdx);
+    WDF_USB_INTERFACE_SELECT_SETTING_PARAMS_INIT_SETTING(&params, static_cast<UCHAR>(AltSettingIdx));
 
     auto status = WdfUsbInterfaceSelectSetting(m_Interface, WDF_NO_OBJECT_ATTRIBUTES, &params);
     if (!NT_SUCCESS(status))
@@ -366,7 +368,7 @@ NTSTATUS CWdfUsbTarget::ConfigurationDescriptor(UCHAR Index, PUSB_CONFIGURATION_
     return status;
 }
 
-NTSTATUS CWdfUsbTarget::SetInterfaceAltSetting(UCHAR InterfaceIdx, UCHAR AltSettingIdx)
+NTSTATUS CWdfUsbTarget::SetInterfaceAltSetting(ULONG64 InterfaceIdx, ULONG64 AltSettingIdx)
 {
     if (InterfaceIdx >= m_NumInterfaces)
     {

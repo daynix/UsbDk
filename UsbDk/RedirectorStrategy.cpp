@@ -466,6 +466,18 @@ void CUsbDkRedirectorStrategy::IoDeviceControl(WDFREQUEST Request,
                                             {return m_Target.AbortPipe(Request, *endpointAddress); });
             return;
         }
+        case IOCTL_USBDK_DEVICE_SET_ALTSETTING:
+        {
+            ASSERT(m_IncomingRWQueue);
+
+            m_IncomingRWQueue->StopSync();
+            CWdfRequest WdfRequest(Request);
+            UsbDkHandleRequestWithInput<USBDK_ALTSETTINGS_IDXS>(WdfRequest,
+                                                [this, Request](USBDK_ALTSETTINGS_IDXS *altSetting, size_t)
+                                                {return m_Target.SetInterfaceAltSetting(altSetting->InterfaceIdx, altSetting->AltSettingIdx);});
+            m_IncomingRWQueue->Start();
+            return;
+        }
     }
 }
 //--------------------------------------------------------------------------------------------------

@@ -65,6 +65,8 @@ extern "C" {
     DLL BOOL             UsbDk_AbortPipe(HANDLE DeviceHandle, ULONG64 PipeAddress);
     DLL BOOL             UsbDk_SetAltsetting(HANDLE DeviceHandle, ULONG64 InterfaceIdx, ULONG64 AltSettingIdx);
 
+    DLL BOOL             UsbDk_ResetDevice(HANDLE DeviceHandle);
+
     DLL HANDLE           UsbDk_GetRedirectorSystemHandle(HANDLE DeviceHandle);
 #ifdef __cplusplus
 }

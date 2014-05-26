@@ -41,6 +41,12 @@ void UsbDkRedirectorAccess::SetAltsetting(ULONG64 InterfaceIdx, ULONG64 AltSetti
 }
 //------------------------------------------------------------------------------------------------
 
+void UsbDkRedirectorAccess::ResetDevice()
+{
+    IoctlSync(IOCTL_USBDK_DEVICE_RESET_DEVICE);
+}
+//------------------------------------------------------------------------------------------------
+
 bool UsbDkRedirectorAccess::IoctlSync(DWORD Code,
                                       bool ShortBufferOk,
                                       LPVOID InBuffer,

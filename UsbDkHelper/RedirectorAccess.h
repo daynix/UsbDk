@@ -62,6 +62,7 @@ public:
 
     void AbortPipe(ULONG64 PipeAddress);
     void SetAltsetting(ULONG64 InterfaceIdx, ULONG64 AltSettingIdx);
+    void ResetDevice();
 
     HANDLE GetSystemHandle() const
     { return m_hDriver; }

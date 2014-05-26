@@ -291,6 +291,22 @@ BOOL UsbDk_SetAltsetting(HANDLE DeviceHandle, ULONG64 InterfaceIdx, ULONG64 AltS
 }
 //-------------------------------------------------------------------------------------------
 
+DLL BOOL UsbDk_ResetDevice(HANDLE DeviceHandle)
+{
+    try
+    {
+        auto deviceHandle = reinterpret_cast<PREDIRECTED_DEVICE_HANDLE>(DeviceHandle);
+        deviceHandle->RedirectorAccess->ResetDevice();
+        return TRUE;
+    }
+    catch (const exception &e)
+    {
+        printExceptionString(e.what());
+        return FALSE;
+    }
+}
+//-------------------------------------------------------------------------------------------
+
 HANDLE UsbDk_GetRedirectorSystemHandle(HANDLE DeviceHandle)
 {
     auto deviceHandle = reinterpret_cast<PREDIRECTED_DEVICE_HANDLE>(DeviceHandle);

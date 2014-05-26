@@ -462,7 +462,7 @@ NTSTATUS CUsbDkControlDevice::GetConfigurationDescriptor(const USB_DK_CONFIG_DES
                                                          PUSB_CONFIGURATION_DESCRIPTOR Descriptor,
                                                          size_t *OutputBuffLen)
 {
-    auto status = GetUsbDeviceConfigurationDescriptor(Request.ID, Request.Index, *Descriptor, *OutputBuffLen);
+    auto status = GetUsbDeviceConfigurationDescriptor(Request.ID, static_cast<UCHAR>(Request.Index), *Descriptor, *OutputBuffLen);
     *OutputBuffLen = NT_SUCCESS(status) ? min(Descriptor->wTotalLength, *OutputBuffLen) : 0;
     return status;
 }

@@ -70,3 +70,5 @@ typedef enum
     TransferSuccess,
     TransferSuccessAsync
 } TransferResult;
+
+#define CONTROL_TRANSFER_ENDPOINT_ADDRESS -1

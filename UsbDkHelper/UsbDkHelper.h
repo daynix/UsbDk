@@ -63,6 +63,7 @@ extern "C" {
     DLL TransferResult   UsbDk_ReadPipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Request, LPOVERLAPPED Overlapped);
 
     DLL BOOL             UsbDk_AbortPipe(HANDLE DeviceHandle, ULONG64 PipeAddress);
+    DLL BOOL             UsbDk_SetAltsetting(HANDLE DeviceHandle, ULONG64 InterfaceIdx, ULONG64 AltSettingIdx);
 
     DLL HANDLE           UsbDk_GetRedirectorSystemHandle(HANDLE DeviceHandle);
 #ifdef __cplusplus

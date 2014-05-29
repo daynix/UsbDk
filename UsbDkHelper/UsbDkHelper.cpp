@@ -218,7 +218,6 @@ BOOL UsbDk_StopRedirect(HANDLE DeviceHandle)
         UsbDkDriverAccess driverAccess;
         unique_ptr<REDIRECTED_DEVICE_HANDLE> deviceHandle(reinterpret_cast<PREDIRECTED_DEVICE_HANDLE>(DeviceHandle));
         deviceHandle->RedirectorAccess.reset();
-        driverAccess.RemoveRedirect(deviceHandle->DeviceID);
         return TRUE;
     }
     catch (const exception &e)

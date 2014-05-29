@@ -584,6 +584,19 @@ size_t CUsbDkRedirectorStrategy::GetRequestContextSize()
 }
 //--------------------------------------------------------------------------------------------------
 
+void CUsbDkRedirectorStrategy::OnClose()
+{
+    USB_DK_DEVICE_ID ID;
+    UsbDkFillIDStruct(&ID, *m_DeviceID->begin(), *m_InstanceID->begin());
+
+    auto status = m_ControlDevice->RemoveRedirect(ID);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! RemoveRedirect failed: %!STATUS!", status);
+    }
+}
+//--------------------------------------------------------------------------------------------------
+
 void CUsbDkRedirectorQueueData::SetCallbacks(WDF_IO_QUEUE_CONFIG &QueueConfig)
 {
     QueueConfig.EvtIoWrite = [](WDFQUEUE Q, WDFREQUEST R, size_t L)

@@ -77,6 +77,8 @@ public:
     virtual void WritePipe(WDFREQUEST Request, size_t Length) override;
     virtual void ReadPipe(WDFREQUEST Request, size_t Length) override;
 
+    virtual void OnClose() override;
+
     void SetDeviceID(CRegText *DevID)
     { m_DeviceID = DevID; }
 

@@ -59,6 +59,9 @@ public:
 
     CUsbDkControlDevice* GetControlDevice()
     { return m_ControlDevice; }
+
+    virtual void OnClose(){}
+
 protected:
     CUsbDkFilterDevice *m_Owner = nullptr;
     CUsbDkControlDevice *m_ControlDevice = nullptr;

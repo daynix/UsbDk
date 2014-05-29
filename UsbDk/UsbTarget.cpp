@@ -24,7 +24,6 @@
 #include "UsbTarget.h"
 #include "Trace.h"
 #include "UsbTarget.tmh"
-#include "Usbdlib.h"
 #include "DeviceAccess.h"
 #include "WdfRequest.h"
 

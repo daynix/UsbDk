@@ -80,6 +80,14 @@ public:
         WdfDeviceInitSetIoInCallerContextCallback(m_DeviceInit, Callback);
     }
 
+    void SetFileEventCallbacks(PFN_WDF_DEVICE_FILE_CREATE EvtDeviceFileCreate, PFN_WDF_FILE_CLOSE EvtFileClose, PFN_WDF_FILE_CLEANUP EvtFileCleanup)
+    {
+        WDF_FILEOBJECT_CONFIG fileConfig;
+        WDF_FILEOBJECT_CONFIG_INIT(&fileConfig, EvtDeviceFileCreate, EvtFileClose, EvtFileCleanup);
+        WdfDeviceInitSetFileObjectConfig(m_DeviceInit, &fileConfig, WDF_NO_OBJECT_ATTRIBUTES);
+    }
+
+
     NTSTATUS SetName(const UNICODE_STRING &Name);
 
     CPreAllocatedDeviceInit(const CPreAllocatedDeviceInit&) = delete;

@@ -66,6 +66,14 @@ NTSTATUS CUsbDkFilterDeviceInit::Configure()
     SetIoInCallerContextCallback([](_In_ WDFDEVICE Device, WDFREQUEST  Request)
                                  { return Strategy(Device)->IoInCallerContext(Device, Request); });
 
+    SetFileEventCallbacks(WDF_NO_EVENT_CALLBACK,
+                          [](_In_ WDFFILEOBJECT FileObject)
+                          {
+                                WDFDEVICE Device = WdfFileObjectGetDevice(FileObject);
+                                Strategy(Device)->OnClose();
+                          },
+                          WDF_NO_EVENT_CALLBACK);
+
     auto status = SetPreprocessCallback([](_In_ WDFDEVICE Device, _Inout_  PIRP Irp)
                                         { return Strategy(Device)->PNPPreProcess(Irp); },
                                         IRP_MJ_PNP);

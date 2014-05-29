@@ -27,7 +27,6 @@
 #include "DeviceAccess.h"
 #include "ControlDevice.h"
 #include "UsbDkNames.h"
-#include "Public.h"
 
 void CUsbDkChildDevice::Dump()
 {
@@ -180,6 +179,13 @@ void CUsbDkHubFilterStrategy::RegisterNewChild(PDEVICE_OBJECT PDO)
         return;
     }
 
+    auto Speed = UsbDkWdmUsbDeviceGetSpeed(PDO, m_Owner->GetDriverObject());
+    if (Speed == NoSpeed)
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Cannot query device speed");
+        return;
+    }
+
     USB_DEVICE_DESCRIPTOR DevDescriptor;
     auto status = pdoAccess.GetDeviceDescriptor(DevDescriptor);
     if (!NT_SUCCESS(status))
@@ -196,7 +202,7 @@ void CUsbDkHubFilterStrategy::RegisterNewChild(PDEVICE_OBJECT PDO)
         return;
     }
 
-    CUsbDkChildDevice *Device = new CUsbDkChildDevice(DevID, InstanceID, Port, DevDescriptor,
+    CUsbDkChildDevice *Device = new CUsbDkChildDevice(DevID, InstanceID, Port, Speed, DevDescriptor,
                                                       *m_Owner, PDO);
 
     if (Device == nullptr)

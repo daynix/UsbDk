@@ -30,6 +30,7 @@
 #include "RegText.h"
 #include "Irp.h"
 #include "RedirectorStrategy.h"
+#include "Public.h"
 
 class CUsbDkControlDevice;
 class CUsbDkFilterDevice;
@@ -50,12 +51,14 @@ public:
     CUsbDkChildDevice(CRegText *DeviceID,
                       CRegText *InstanceID,
                       ULONG Port,
+                      USB_DK_DEVICE_SPEED Speed,
                       USB_DEVICE_DESCRIPTOR &DevDescriptor,
                       const CUsbDkFilterDevice &ParentDevice,
                       PDEVICE_OBJECT PDO)
         : m_DeviceID(DeviceID)
         , m_InstanceID(InstanceID)
         , m_Port(Port)
+        , m_Speed(Speed)
         , m_DevDescriptor(DevDescriptor)
         , m_ParentDevice(ParentDevice)
         , m_PDO(PDO)
@@ -66,6 +69,8 @@ public:
     PCWCHAR InstanceID() const { return *m_InstanceID->begin(); }
     ULONG Port() const
     { return m_Port; }
+    USB_DK_DEVICE_SPEED Speed() const
+    { return m_Speed; }
     const USB_DEVICE_DESCRIPTOR &DeviceDescriptor() const
     { return m_DevDescriptor; }
     PDEVICE_OBJECT PDO() const { return m_PDO; }
@@ -84,6 +89,7 @@ private:
     CObjHolder<CRegText> m_DeviceID;
     CObjHolder<CRegText> m_InstanceID;
     ULONG m_Port;
+    USB_DK_DEVICE_SPEED m_Speed;
     USB_DEVICE_DESCRIPTOR m_DevDescriptor;
     PDEVICE_OBJECT m_PDO;
     const CUsbDkFilterDevice &m_ParentDevice;

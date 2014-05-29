@@ -122,7 +122,8 @@ void Controller_EnumerateDevices()
                     << setw(4) << setfill(L'0') << static_cast<int>(Dev.DeviceDescriptor.idVendor) << TEXT(":")
                     << setw(4) << setfill(L'0') << static_cast<int>(Dev.DeviceDescriptor.idProduct) << TEXT(", ")
                     << dec
-                  << TEXT("Configurations: ") << static_cast<int>(Dev.DeviceDescriptor.bNumConfigurations) << TEXT(" ")
+                  << TEXT("Configs: ") << static_cast<int>(Dev.DeviceDescriptor.bNumConfigurations) << TEXT(", ")
+                  << TEXT("Speed: ") << static_cast<int>(Dev.Speed) << endl << TEXT("\t")
                   << Dev.ID.DeviceID << TEXT(" ")
                   << Dev.ID.InstanceID
                   << endl;

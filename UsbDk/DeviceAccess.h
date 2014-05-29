@@ -26,7 +26,12 @@
 #include "ntddk.h"
 #include "wdf.h"
 #include "usb.h"
+
+extern "C"
+{
 #include "usbdlib.h"
+}
+
 #include "Alloc.h"
 #include "RegText.h"
 #include "MemoryBuffer.h"
@@ -124,6 +129,41 @@ public:
 
     CWdmUsbDeviceAccess(const CWdmUsbDeviceAccess&) = delete;
     CWdmUsbDeviceAccess& operator= (const CWdmUsbDeviceAccess&) = delete;
+};
+
+class CWdmUSBD
+{
+public:
+    CWdmUSBD(PDRIVER_OBJECT Driver, PDEVICE_OBJECT TargetDevice)
+        : m_Driver(Driver)
+        , m_TargetDevice(TargetDevice)
+    {}
+
+    ~CWdmUSBD();
+
+    bool Create();
+
+    bool IsSuperSpeed() const
+    { return IsCapable(GUID_USB_CAPABILITY_DEVICE_CONNECTION_SUPER_SPEED_COMPATIBLE); }
+
+    bool IsHighSpeed() const
+    { return IsCapable(GUID_USB_CAPABILITY_DEVICE_CONNECTION_HIGH_SPEED_COMPATIBLE); }
+
+private:
+    bool IsCapable(const GUID& CapabilityGuid) const
+    {
+        auto status = USBD_QueryUsbCapability(m_USBDHandle, &CapabilityGuid, 0, nullptr, nullptr);
+        ASSERT(status != STATUS_INVALID_PARAMETER);
+        return NT_SUCCESS(status);
+    }
+
+    PDRIVER_OBJECT m_Driver;
+    PDEVICE_OBJECT m_TargetDevice;
+
+    PDEVICE_OBJECT m_USBDDevice = nullptr;
+    PDEVICE_OBJECT m_AttachmentPoint = nullptr;
+
+    USBD_HANDLE m_USBDHandle = nullptr;
 };
 
 bool UsbDkGetWdmDeviceIdentity(const PDEVICE_OBJECT PDO,

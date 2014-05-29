@@ -314,6 +314,28 @@ NTSTATUS CWdmUsbDeviceAccess::GetConfigurationDescriptor(UCHAR Index, USB_CONFIG
     return STATUS_SUCCESS;
 }
 
+USB_DK_DEVICE_SPEED UsbDkWdmUsbDeviceGetSpeed(PDEVICE_OBJECT DevObj, PDRIVER_OBJECT DriverObj)
+{
+    CWdmUSBD USBD(DriverObj, DevObj);
+
+    if (!USBD.Create())
+    {
+        return NoSpeed;
+    }
+
+    if (USBD.IsSuperSpeed())
+    {
+        return SuperSpeed;
+    }
+
+    if (USBD.IsHighSpeed())
+    {
+        return HighSpeed;
+    }
+
+    return FullSpeed;
+}
+
 bool UsbDkWdmUsbDeviceIsHub(PDEVICE_OBJECT PDO)
 {
     CWdmUsbDeviceAccess pdoAccess(PDO);

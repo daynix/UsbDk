@@ -60,10 +60,10 @@ public:
 
     void SetPowerCallbacks(PFN_WDF_DEVICE_SELF_MANAGED_IO_INIT SelfManagedIoFunc);
 
-    NTSTATUS CPreAllocatedDeviceInit::SetPreprocessCallback(PFN_WDFDEVICE_WDM_IRP_PREPROCESS Callback,
-                                                            UCHAR MajorFunction,
-                                                            const PUCHAR MinorFunctions,
-                                                            ULONG NumMinorFunctions);
+    NTSTATUS SetPreprocessCallback(PFN_WDFDEVICE_WDM_IRP_PREPROCESS Callback,
+                                   UCHAR MajorFunction,
+                                   const PUCHAR MinorFunctions,
+                                   ULONG NumMinorFunctions);
 
     NTSTATUS SetPreprocessCallback(PFN_WDFDEVICE_WDM_IRP_PREPROCESS Callback, UCHAR MajorFunction, UCHAR MinorFunction)
     {

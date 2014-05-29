@@ -41,6 +41,7 @@ typedef struct tag_USB_DK_DEVICE_INFO
     USB_DK_DEVICE_ID ID;
     ULONG64 FilterID;
     ULONG64 Port;
+    ULONG64 Speed;
     USB_DEVICE_DESCRIPTOR DeviceDescriptor;
 } USB_DK_DEVICE_INFO, *PUSB_DK_DEVICE_INFO;
 
@@ -70,5 +71,14 @@ typedef enum
     TransferSuccess,
     TransferSuccessAsync
 } TransferResult;
+
+typedef enum
+{
+    NoSpeed = 0,
+    LowSpeed,
+    FullSpeed,
+    HighSpeed,
+    SuperSpeed
+} USB_DK_DEVICE_SPEED;
 
 #define CONTROL_TRANSFER_ENDPOINT_ADDRESS -1

@@ -23,8 +23,7 @@
 
 #pragma once
 
-#include "ntddk.h"
-#include "wdf.h"
+#include "stdafx.h"
 #include "usb.h"
 
 extern "C"
@@ -132,6 +131,7 @@ public:
     CWdmUsbDeviceAccess& operator= (const CWdmUsbDeviceAccess&) = delete;
 };
 
+#if !TARGET_OS_WIN_XP
 class CWdmUSBD
 {
 public:
@@ -166,6 +166,7 @@ private:
 
     USBD_HANDLE m_USBDHandle = nullptr;
 };
+#endif
 
 bool UsbDkGetWdmDeviceIdentity(const PDEVICE_OBJECT PDO,
                                CObjHolder<CRegText> *DeviceID,

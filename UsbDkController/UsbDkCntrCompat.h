@@ -23,33 +23,36 @@
 
 #pragma once
 
-#include "stdafx.h"
+#include <PSHPACK1.H>
 
-#include "Alloc.h"
+typedef struct _USB_CONFIGURATION_DESCRIPTOR {
+    UCHAR   bLength;
+    UCHAR   bDescriptorType;
+    USHORT  wTotalLength;
+    UCHAR   bNumInterfaces;
+    UCHAR   bConfigurationValue;
+    UCHAR   iConfiguration;
+    UCHAR   bmAttributes;
+    UCHAR   MaxPower;
+} USB_CONFIGURATION_DESCRIPTOR, *PUSB_CONFIGURATION_DESCRIPTOR;
 
-class CWdfWorkitem : public CAllocatable<NonPagedPool, 'IWHR'>
-{
-private:
-    typedef VOID(*PayloadFunc)(PVOID Ctx);
+typedef struct _USB_DEVICE_DESCRIPTOR {
+    UCHAR   bLength;
+    UCHAR   bDescriptorType;
+    USHORT  bcdUSB;
+    UCHAR   bDeviceClass;
+    UCHAR   bDeviceSubClass;
+    UCHAR   bDeviceProtocol;
+    UCHAR   bMaxPacketSize0;
+    USHORT  idVendor;
+    USHORT  idProduct;
+    USHORT  bcdDevice;
+    UCHAR   iManufacturer;
+    UCHAR   iProduct;
+    UCHAR   iSerialNumber;
+    UCHAR   bNumConfigurations;
+} USB_DEVICE_DESCRIPTOR, *PUSB_DEVICE_DESCRIPTOR;
 
-public:
-    CWdfWorkitem(PayloadFunc payload, PVOID payloadCtx)
-        : m_Payload(payload)
-        , m_PayloadCtx(payloadCtx)
-    {}
+#include <POPPACK.H>
 
-    CWdfWorkitem(const CWdfWorkitem&) = delete;
-    CWdfWorkitem& operator= (const CWdfWorkitem&) = delete;
-
-    ~CWdfWorkitem();
-
-    NTSTATUS Create(WDFOBJECT parent);
-    VOID Enqueue();
-
-private:
-    WDFWORKITEM m_hWorkItem = WDF_NO_HANDLE;
-    static VOID Callback(_In_  WDFWORKITEM WorkItem);
-
-    PayloadFunc m_Payload;
-    PVOID m_PayloadCtx;
-};
+C_ASSERT(sizeof(USB_CONFIGURATION_DESCRIPTOR) == 9);

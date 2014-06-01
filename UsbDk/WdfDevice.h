@@ -23,8 +23,7 @@
 
 #pragma once
 
-#include "ntddk.h"
-#include "wdf.h"
+#include "stdafx.h"
 #include "Alloc.h"
 
 class CPreAllocatedDeviceInit : public CAllocatable<PagedPool, 'IDHR'>

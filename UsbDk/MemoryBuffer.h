@@ -23,8 +23,7 @@
 
 #pragma once
 
-#include "ntddk.h"
-#include "wdf.h"
+#include "stdafx.h"
 #include "Alloc.h"
 
 class CMemoryBuffer : public CAllocatable<NonPagedPool, 'BMHR'>

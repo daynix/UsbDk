@@ -23,10 +23,7 @@
 
 #pragma once
 
-#include "ntddk.h"
-#include "wdf.h"
-#include "usb.h"
-#include "UsbSpec.h"
+#include "stdafx.h"
 #include "wdfusb.h"
 #include "Alloc.h"
 

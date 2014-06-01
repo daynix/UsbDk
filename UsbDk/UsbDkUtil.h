@@ -66,9 +66,7 @@ class CWdmRefCounter
 {
 public:
     void AddRef() { InterlockedIncrement(&m_Counter); }
-    void AddRef(LONG RefCnt) { InterlockedAdd(&m_Counter, RefCnt); }
     LONG Release() { return InterlockedDecrement(&m_Counter); }
-    LONG Release(LONG RefCnt) { AddRef(-RefCnt); }
     operator LONG () { return m_Counter; }
 private:
     LONG m_Counter = 0;

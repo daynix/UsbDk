@@ -34,7 +34,14 @@
 #include <tchar.h>
 #include <windows.h>
 #include <cfgmgr32.h>
+#include <initguid.h>
+
+#ifndef _USING_V110_SDK71_
 #include <usbspec.h>
+#include <Usbiodef.h>
+#else
+#include "UsbDkHlprCompat.h"
+#endif
 
 #include <memory>
 #include <ios>

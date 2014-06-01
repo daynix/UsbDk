@@ -31,6 +31,11 @@
 #include "windows.h"
 #include <tstrings.h>
 #include <cfgmgr32.h>
+
+#ifndef _USING_V110_SDK71_
 #include <usbspec.h>
+#else
+#include "UsbDkCntrCompat.h"
+#endif
 
 // TODO: reference additional headers your program requires here

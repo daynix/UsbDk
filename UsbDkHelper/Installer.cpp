@@ -26,9 +26,6 @@
 #include "Public.h"
 #include "DeviceMgr.h"
 
-#include <initguid.h>
-#include <Usbiodef.h>
-
 //------------------------------------------------------------------------------------------
 
 #define SYSTEM32_DRIVERS    TEXT("\\System32\\Drivers\\")
@@ -179,7 +176,10 @@ void UsbDkInstaller::addUsbDkToRegistry()
     buildMultiStringVectorFromList(valVector, newfiltersList);
 
     // set new value to registry
-    if (!m_regAccess.WriteMultiString(upperFilterString, &valVector[0], 2*valVector.size(), upperFiltersKeyStr))
+    if (!m_regAccess.WriteMultiString(upperFilterString,
+                                      &valVector[0],
+                                      static_cast<DWORD>(sizeof(TCHAR) * valVector.size()),
+                                      upperFiltersKeyStr))
     {
         throw UsbDkInstallerFailedException(TEXT("addUsbDkToRegistry failed in WriteMultiString."));
     }
@@ -228,7 +228,10 @@ void UsbDkInstaller::removeUsbDkFromRegistry()
         buildMultiStringVectorFromList(valVector, newfiltersList);
 
         // set new value to registry
-        if (!m_regAccess.WriteMultiString(upperFilterString, &valVector[0], 2 * valVector.size(), upperFiltersKeyStr))
+        if (!m_regAccess.WriteMultiString(upperFilterString,
+                                          &valVector[0],
+                                          static_cast<DWORD>(sizeof(TCHAR) * valVector.size()),
+                                          upperFiltersKeyStr))
         {
             return;
         }
@@ -254,7 +257,7 @@ void UsbDkInstaller::buildMultiStringVectorFromList(vector<TCHAR> &valVector, ts
 void UsbDkInstaller::buildStringListFromVector(tstringlist &filtersList, vector<TCHAR> &valVector)
 {
     tstring currFilter;
-    DWORD   currPos = 0;
+    tstring::size_type currPos = 0;
 
     do
     {

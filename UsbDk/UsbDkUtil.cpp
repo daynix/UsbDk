@@ -21,6 +21,7 @@
 *
 **********************************************************************/
 
+#include "stdafx.h"
 #include "Alloc.h"
 #include "UsbDkUtil.h"
 #include "Trace.h"

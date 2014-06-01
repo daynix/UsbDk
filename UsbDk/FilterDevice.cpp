@@ -111,7 +111,7 @@ public:
     {}
 
     template <typename TPredicate, typename TFunctor>
-    ForEachIf(TPredicate Predicate, TFunctor Functor) const
+    bool ForEachIf(TPredicate Predicate, TFunctor Functor) const
     {
         if (m_Relations != nullptr)
         {
@@ -128,7 +128,7 @@ public:
     }
 
     template <typename TFunctor>
-    ForEach(TFunctor Functor) const
+    bool ForEach(TFunctor Functor) const
     { return ForEachIf(ConstTrue, Functor); }
 
     bool Contains(const CUsbDkChildDevice &Dev) const

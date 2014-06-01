@@ -23,8 +23,7 @@
 
 #pragma once
 
-#include "ntddk.h"
-#include "wdf.h"
+#include "stdafx.h"
 #include "WdfDevice.h"
 #include "Alloc.h"
 #include "RegText.h"

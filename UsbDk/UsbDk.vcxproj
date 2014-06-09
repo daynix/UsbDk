@@ -143,7 +143,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='XP Debug|Win32'" Label="PropertySheets">
     <PlatformToolset>WindowsKernelModeDriver8.1</PlatformToolset>
     <ConfigurationType>Driver</ConfigurationType>
-    <DriverType>KMDF</DriverType>
+    <DriverType>WDM</DriverType>
   </PropertyGroup>
   <PropertyGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Win7 Release|Win32'">
     <PlatformToolset>WindowsKernelModeDriver8.1</PlatformToolset>
@@ -153,7 +153,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='XP Release|Win32'" Label="PropertySheets">
     <PlatformToolset>WindowsKernelModeDriver8.1</PlatformToolset>
     <ConfigurationType>Driver</ConfigurationType>
-    <DriverType>KMDF</DriverType>
+    <DriverType>WDM</DriverType>
   </PropertyGroup>
   <PropertyGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug|x64'">
     <PlatformToolset>WindowsKernelModeDriver8.1</PlatformToolset>
@@ -183,7 +183,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='XP Debug|x64'" Label="PropertySheets">
     <PlatformToolset>WindowsKernelModeDriver8.1</PlatformToolset>
     <ConfigurationType>Driver</ConfigurationType>
-    <DriverType>KMDF</DriverType>
+    <DriverType>WDM</DriverType>
   </PropertyGroup>
   <PropertyGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Win7 Release|x64'">
     <PlatformToolset>WindowsKernelModeDriver8.1</PlatformToolset>
@@ -193,7 +193,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='XP Release|x64'" Label="PropertySheets">
     <PlatformToolset>WindowsKernelModeDriver8.1</PlatformToolset>
     <ConfigurationType>Driver</ConfigurationType>
-    <DriverType>KMDF</DriverType>
+    <DriverType>WDM</DriverType>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug|Win32'" Label="Configuration">
@@ -302,7 +302,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='XP Debug|Win32'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
     <IncludePath>$(ProjectDir);C:\WinDDK\7600.16385.1\inc\wdf\kmdf\1.9\;C:\WinDDK\7600.16385.1\inc\ddk\;C:\WinDDK\7600.16385.1\inc\crt;C:\WinDDK\7600.16385.1\inc\api</IncludePath>
-    <LibraryPath>C:\WinDDK\7600.16385.1\lib\wdf\kmdf\i386\1.9\;C:\WinDDK\7600.16385.1\lib\wnet\i386</LibraryPath>
+    <LibraryPath>C:\WinDDK\7600.16385.1\lib\wdf\kmdf\i386\1.9\;C:\WinDDK\7600.16385.1\lib\wxp\i386</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Win7 Release|Win32'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
@@ -310,7 +310,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='XP Release|Win32'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
     <IncludePath>$(ProjectDir);C:\WinDDK\7600.16385.1\inc\wdf\kmdf\1.9\;C:\WinDDK\7600.16385.1\inc\ddk\;C:\WinDDK\7600.16385.1\inc\crt;C:\WinDDK\7600.16385.1\inc\api</IncludePath>
-    <LibraryPath>C:\WinDDK\7600.16385.1\lib\wdf\kmdf\i386\1.9\;C:\WinDDK\7600.16385.1\lib\wnet\i386</LibraryPath>
+    <LibraryPath>C:\WinDDK\7600.16385.1\lib\wdf\kmdf\i386\1.9\;C:\WinDDK\7600.16385.1\lib\wxp\i386</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug|x64'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
@@ -399,9 +399,10 @@
       <ForcedIncludeFiles />
     </ClCompile>
     <Link>
-      <AdditionalDependencies>%(AdditionalDependencies);$(DDK_LIB_PATH)\usbdex.lib;$(DDK_LIB_PATH)\ntstrsafe.lib;$(DDK_LIB_PATH)\wdmsec.lib</AdditionalDependencies>
+      <AdditionalDependencies>libcntpr.lib;ntstrsafe.lib;wdmsec.lib;BUFFEROVERFLOWK.LIB;NTOSKRNL.LIB;HAL.LIB;WMILIB.LIB;WDFLDR.LIB;WDFDRIVERENTRY.LIB</AdditionalDependencies>
       <Version>5.1</Version>
       <MinimumRequiredVersion>5.1</MinimumRequiredVersion>
+      <EntryPointSymbol>FxDriverEntry@8</EntryPointSymbol>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win7 Release|Win32'">
@@ -423,9 +424,10 @@
       <ForcedIncludeFiles />
     </ClCompile>
     <Link>
-      <AdditionalDependencies>%(AdditionalDependencies);$(DDK_LIB_PATH)\usbdex.lib;$(DDK_LIB_PATH)\ntstrsafe.lib;$(DDK_LIB_PATH)\wdmsec.lib</AdditionalDependencies>
+      <AdditionalDependencies>libcntpr.lib;ntstrsafe.lib;wdmsec.lib;BUFFEROVERFLOWK.LIB;NTOSKRNL.LIB;HAL.LIB;WMILIB.LIB;WDFLDR.LIB;WDFDRIVERENTRY.LIB</AdditionalDependencies>
       <Version>5.1</Version>
       <MinimumRequiredVersion>5.1</MinimumRequiredVersion>
+      <EntryPointSymbol>FxDriverEntry@8</EntryPointSymbol>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug|x64'">
@@ -487,9 +489,10 @@
       <ForcedIncludeFiles />
     </ClCompile>
     <Link>
-      <AdditionalDependencies>%(AdditionalDependencies);$(DDK_LIB_PATH)\usbdex.lib;$(DDK_LIB_PATH)\ntstrsafe.lib;$(DDK_LIB_PATH)\wdmsec.lib</AdditionalDependencies>
+      <AdditionalDependencies>libcntpr.lib;ntstrsafe.lib;wdmsec.lib;BUFFEROVERFLOWK.LIB;NTOSKRNL.LIB;HAL.LIB;WMILIB.LIB;WDFLDR.LIB;WDFDRIVERENTRY.LIB</AdditionalDependencies>
       <Version>5.2</Version>
       <MinimumRequiredVersion>5.2</MinimumRequiredVersion>
+      <EntryPointSymbol>FxDriverEntry</EntryPointSymbol>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win7 Release|x64'">
@@ -511,9 +514,10 @@
       <PreprocessorDefinitions>_WIN64;_AMD64_;AMD64;_WIN32_WINNT=0x502;WINVER=0x502;WINNT=1;NTDDI_VERSION=0x05020000;UNICODE;_UNICODE</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>%(AdditionalDependencies);$(DDK_LIB_PATH)\usbdex.lib;$(DDK_LIB_PATH)\ntstrsafe.lib;$(DDK_LIB_PATH)\wdmsec.lib</AdditionalDependencies>
+      <AdditionalDependencies>libcntpr.lib;ntstrsafe.lib;wdmsec.lib;BUFFEROVERFLOWK.LIB;NTOSKRNL.LIB;HAL.LIB;WMILIB.LIB;WDFLDR.LIB;WDFDRIVERENTRY.LIB</AdditionalDependencies>
       <Version>5.2</Version>
       <MinimumRequiredVersion>5.2</MinimumRequiredVersion>
+      <EntryPointSymbol>FxDriverEntry</EntryPointSymbol>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

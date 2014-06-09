@@ -63,4 +63,6 @@ typedef struct _WDF_USB_DEVICE_CREATE_CONFIG
 #define WdfUsbTargetDeviceCreateWithParameters(Device, Config, Attributes, UsbDevice) \
     WdfUsbTargetDeviceCreate(Device, Attributes, UsbDevice)
 
+#define wcsncpy_s(T, S, N) wcsncpy(T, S, N)
+
 #endif

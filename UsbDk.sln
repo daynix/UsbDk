@@ -20,6 +20,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{32B6DBE0-42AC-41FB-B9AC-A46C306EF1E2}"
 	ProjectSection(SolutionItems) = preProject
 		ARCHITECTURE = ARCHITECTURE
+		UsbDkHelper\LICENSE = UsbDkHelper\LICENSE
+		UsbDkHelper\UsbDk.inf = UsbDkHelper\UsbDk.inf
+		UsbDkHelper\UsbDk_XP.inf = UsbDkHelper\UsbDk_XP.inf
 	EndProjectSection
 EndProject
 Global

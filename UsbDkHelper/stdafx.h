@@ -40,6 +40,7 @@
 #include <usbspec.h>
 #include <Usbiodef.h>
 #else
+#define TARGET_OS_WIN_XP (1)
 #include "UsbDkHlprCompat.h"
 #endif
 

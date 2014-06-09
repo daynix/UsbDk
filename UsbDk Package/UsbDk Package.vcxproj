@@ -445,7 +445,7 @@ copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk Package"</Command>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='XP Debug|Win32'">
     <PostBuildEvent>
       <Command>mkdir "$(OutDir)UsbDk Package"
-copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk Package"
+copy "$(ProjectDir)\..\UsbDkHelper\UsbDk_XP.inf" "$(OutDir)UsbDk Package\UsbDk.inf"
 copy "$(OutDir)UsbDk.sys" "$(OutDir)UsbDk Package"
 copy "$(OutDir)UsbDkController.exe" "$(OutDir)UsbDk Package"
 copy "$(OutDir)UsbDkHelper.dll" "$(OutDir)UsbDk Package"
@@ -470,7 +470,7 @@ copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk Package"</Command>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='XP Release|Win32'">
     <PostBuildEvent>
       <Command>mkdir "$(OutDir)UsbDk Package"
-copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk Package"
+copy "$(ProjectDir)\..\UsbDkHelper\UsbDk_XP.inf" "$(OutDir)UsbDk Package\UsbDk.inf"
 copy "$(OutDir)UsbDk.sys" "$(OutDir)UsbDk Package"
 copy "$(OutDir)UsbDkController.exe" "$(OutDir)UsbDk Package"
 copy "$(OutDir)UsbDkHelper.dll" "$(OutDir)UsbDk Package"
@@ -531,7 +531,7 @@ copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk Package"</Command>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='XP Debug|x64'">
     <PostBuildEvent>
       <Command>mkdir "$(OutDir)UsbDk Package"
-copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk Package"
+copy "$(ProjectDir)\..\UsbDkHelper\UsbDk_XP.inf" "$(OutDir)UsbDk Package\UsbDk.inf"
 copy "$(OutDir)UsbDk.sys" "$(OutDir)UsbDk Package"
 copy "$(OutDir)UsbDkController.exe" "$(OutDir)UsbDk Package"
 copy "$(OutDir)UsbDkHelper.dll" "$(OutDir)UsbDk Package"
@@ -556,7 +556,7 @@ copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk Package"</Command>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='XP Release|x64'">
     <PostBuildEvent>
       <Command>mkdir "$(OutDir)UsbDk Package"
-copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk Package"
+copy "$(ProjectDir)\..\UsbDkHelper\UsbDk_XP.inf" "$(OutDir)UsbDk Package\UsbDk.inf"
 copy "$(OutDir)UsbDk.sys" "$(OutDir)UsbDk Package"
 copy "$(OutDir)UsbDkController.exe" "$(OutDir)UsbDk Package"
 copy "$(OutDir)UsbDkHelper.dll" "$(OutDir)UsbDk Package"

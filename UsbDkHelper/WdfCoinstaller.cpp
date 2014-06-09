@@ -28,7 +28,11 @@
 //--------------------------------------------------------------------------------
 
 #define WDF_SECTION_NAME    TEXT("UsbDk.NT.Wdf")
+#if !TARGET_OS_WIN_XP
 #define COINSTALLER_VERSION TEXT("01011")
+#else
+#define COINSTALLER_VERSION TEXT("01009")
+#endif
 
 //--------------------------------------------------------------------------------
 WdfCoinstaller::WdfCoinstaller()

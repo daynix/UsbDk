@@ -44,7 +44,6 @@ WdfUsbTargetDeviceCreateUrb(
     UNREFERENCED_PARAMETER(UrbMemory);
     UNREFERENCED_PARAMETER(Urb);
 
-    ASSERT(false);
     return STATUS_NOT_IMPLEMENTED;
 }
 

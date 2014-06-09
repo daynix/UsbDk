@@ -341,7 +341,6 @@ USB_DK_DEVICE_SPEED UsbDkWdmUsbDeviceGetSpeed(PDEVICE_OBJECT DevObj, PDRIVER_OBJ
     //TODO: Not implemented
     UNREFERENCED_PARAMETER(DriverObj);
     UNREFERENCED_PARAMETER(DevObj);
-    ASSERT(false);
     return NoSpeed;
 #endif
 }

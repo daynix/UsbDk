@@ -21,13 +21,6 @@
 *
 **********************************************************************/
 
-extern "C"
-{
-    #include "stdafx.h"
-    #include <usb.h>
-    #include <wdfusb.h>
-}
-
 #include "trace.h"
 
 //

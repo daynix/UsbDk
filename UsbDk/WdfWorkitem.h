@@ -23,8 +23,6 @@
 
 #pragma once
 
-#include "stdafx.h"
-
 #include "Alloc.h"
 
 class CWdfWorkitem : public CAllocatable<NonPagedPool, 'IWHR'>

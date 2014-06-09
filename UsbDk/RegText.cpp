@@ -21,6 +21,7 @@
 *
 **********************************************************************/
 
+#include "stdafx.h"
 #include "Trace.h"
 #include "RegText.h"
 #include "regtext.tmh"

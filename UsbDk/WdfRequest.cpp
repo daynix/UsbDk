@@ -20,8 +20,7 @@
 * limitations under the License.
 *
 **********************************************************************/
-
-#include <ntddk.h>
+#include "stdafx.h"
 #include "WdfRequest.h"
 
 NTSTATUS CWdfRequest::SendAndForget(WDFIOTARGET Target)

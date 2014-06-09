@@ -21,6 +21,7 @@
 *
 **********************************************************************/
 
+#include "stdafx.h"
 #include "ControlDevice.h"
 #include "trace.h"
 #include "DeviceAccess.h"

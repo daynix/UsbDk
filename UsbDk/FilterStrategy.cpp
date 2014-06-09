@@ -21,6 +21,7 @@
 *
 **********************************************************************/
 
+#include "stdafx.h"
 #include "FilterStrategy.h"
 #include "trace.h"
 #include "FilterStrategy.tmh"

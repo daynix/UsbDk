@@ -21,6 +21,7 @@
 *
 **********************************************************************/
 
+#include "stdafx.h"
 #include "MemoryBuffer.h"
 
 CMemoryBuffer* CMemoryBuffer::GetMemoryBuffer(WDFMEMORY MemObj)

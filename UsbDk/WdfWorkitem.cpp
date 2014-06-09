@@ -21,6 +21,7 @@
 *
 **********************************************************************/
 
+#include "stdafx.h"
 #include "WdfWorkitem.h"
 
 CWdfWorkitem::~CWdfWorkitem()

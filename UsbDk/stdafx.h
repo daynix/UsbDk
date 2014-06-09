@@ -9,6 +9,8 @@
 #pragma warning(push,3)
 #endif
 
+extern "C"
+{
 #include <ntddk.h>
 #include <wdf.h>
 #include <usb.h>
@@ -16,6 +18,12 @@
 #if !TARGET_OS_WIN_XP
 #include <UsbSpec.h>
 #endif
+
+#include <wdfusb.h>
+#include <usbdlib.h>
+#include <ntstrsafe.h>
+#include <usbioctl.h>
+}
 
 #if TARGET_OS_WIN_XP
 #pragma warning(pop)

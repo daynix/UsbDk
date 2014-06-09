@@ -21,6 +21,7 @@
 *
 **********************************************************************/
 
+#include "stdafx.h"
 #include "UsbTarget.h"
 #include "Trace.h"
 #include "UsbTarget.tmh"

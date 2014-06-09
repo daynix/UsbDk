@@ -23,8 +23,6 @@
 
 #pragma once
 
-#include "stdafx.h"
-#include "wdfusb.h"
 #include "Alloc.h"
 
 class CWdfUsbInterface;

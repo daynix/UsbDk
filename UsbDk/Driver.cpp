@@ -21,6 +21,7 @@
 *
 **********************************************************************/
 
+#include "stdafx.h"
 #include "driver.h"
 #include "ControlDevice.h"
 #include "FilterDevice.h"

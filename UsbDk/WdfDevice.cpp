@@ -21,6 +21,7 @@
 *
 **********************************************************************/
 
+#include "stdafx.h"
 #include "WdfDevice.h"
 #include "trace.h"
 #include "WdfDevice.tmh"

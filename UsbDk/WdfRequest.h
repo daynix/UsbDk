@@ -23,8 +23,6 @@
 
 #pragma once
 
-#include "stdafx.h"
-
 class CWdfRequest
 {
 public:

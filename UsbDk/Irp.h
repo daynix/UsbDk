@@ -23,7 +23,6 @@
 
 #pragma once
 
-#include "ntddk.h"
 #include "Alloc.h"
 #include "UsbDkUtil.h"
 

@@ -23,14 +23,6 @@
 
 #pragma once
 
-#include "stdafx.h"
-#include "usb.h"
-
-extern "C"
-{
-#include "usbdlib.h"
-}
-
 #include "Alloc.h"
 #include "RegText.h"
 #include "MemoryBuffer.h"

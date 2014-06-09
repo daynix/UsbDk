@@ -23,8 +23,6 @@
 
 #pragma once
 
-#include <ntddk.h>
-
 template <POOL_TYPE PoolType, ULONG Tag>
 class CAllocatable
 {

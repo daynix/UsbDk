@@ -21,6 +21,7 @@
 *
 **********************************************************************/
 
+#include "stdafx.h"
 #include "RedirectorStrategy.h"
 #include "trace.h"
 #include "RedirectorStrategy.tmh"
@@ -28,7 +29,6 @@
 #include "UsbDkNames.h"
 #include "ControlDevice.h"
 #include "WdfRequest.h"
-#include "Public.h"
 //--------------------------------------------------------------------------------------------------
 
 NTSTATUS CUsbDkRedirectorStrategy::MakeAvailable()

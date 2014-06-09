@@ -21,13 +21,14 @@
 *
 **********************************************************************/
 
+#include "stdafx.h"
 #include "DeviceAccess.h"
 #include "trace.h"
 #include "Irp.h"
 #include "RegText.h"
 #include "DeviceAccess.tmh"
 
-#include "UsbIOCtl.h"
+#include "stdafx.h"
 
 #if !TARGET_OS_WIN_XP
 bool CWdmUSBD::Create()

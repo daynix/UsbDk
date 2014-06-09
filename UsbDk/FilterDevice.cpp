@@ -21,6 +21,7 @@
 *
 **********************************************************************/
 
+#include "stdafx.h"
 #include "FilterDevice.h"
 #include "trace.h"
 #include "FilterDevice.tmh"

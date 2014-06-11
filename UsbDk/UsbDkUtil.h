@@ -466,6 +466,21 @@ private:
     CInstanceCounter& operator= (const CInstanceCounter&) = delete;
 };
 
+template <typename T>
+NTSTATUS UsdDkReadUserBufferSafe(PVOID Src, T &Dst)
+{
+    __try
+    {
+        ProbeForRead(Src, sizeof(Dst), 1);
+        Dst = *reinterpret_cast<T*>(Src);
+        return STATUS_SUCCESS;
+    }
+    __except (EXCEPTION_EXECUTE_HANDLER)
+    {
+        return STATUS_ACCESS_VIOLATION;
+    }
+}
+
 static inline
 LONGLONG SecondsTo100Nanoseconds(LONGLONG Seconds)
 {

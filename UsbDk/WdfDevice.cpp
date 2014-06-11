@@ -171,3 +171,44 @@ NTSTATUS CWdfSpecificQueue::Create()
     status = SetDispatching();
     return status;
 }
+
+NTSTATUS CWdfDevice::CreateUserModeHandle(PHANDLE ObjectHandle)
+{
+    WDFSTRING deviceName;
+    auto status = WdfStringCreate(NULL, WDF_NO_OBJECT_ATTRIBUTES, &deviceName);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_WDFDEVICE, "%!FUNC! WdfStringCreate failed. %!STATUS!", status);
+        return status;
+    }
+
+    status = WdfDeviceRetrieveDeviceName(m_Device, deviceName);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_WDFDEVICE, "%!FUNC! WdfDeviceRetrieveDeviceName failed. %!STATUS!", status);
+        WdfObjectDelete(deviceName);
+        return status;
+    }
+
+    UNICODE_STRING UnicodeDeviceName;
+    WdfStringGetUnicodeString(deviceName, &UnicodeDeviceName);
+
+    IO_STATUS_BLOCK IoStatusBlock;
+
+    OBJECT_ATTRIBUTES ObjectAttributes;
+    InitializeObjectAttributes(&ObjectAttributes, &UnicodeDeviceName, 0, nullptr, nullptr);
+
+    status = ZwOpenFile(ObjectHandle,
+                        GENERIC_READ | GENERIC_WRITE,
+                        &ObjectAttributes, &IoStatusBlock, 0,
+                        FILE_NON_DIRECTORY_FILE | FILE_RANDOM_ACCESS);
+
+    WdfObjectDelete(deviceName);
+
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_WDFDEVICE, "%!FUNC! ZwOpenFile failed, %!STATUS! IoStatusBlock.Status: %!STATUS!", status, IoStatusBlock.Status);
+    }
+
+    return status;
+}

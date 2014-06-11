@@ -128,6 +128,11 @@ public:
     { return WdfDeviceGetIoTarget(m_Device); }
 
     void Delete() { WdfObjectDelete(m_Device); }
+
+    NTSTATUS CreateUserModeHandle(PHANDLE ObjectHandle);
+    void Reference() { WdfObjectReference(m_Device);}
+    void Dereference() { WdfObjectDereference(m_Device); }
+
 protected:
     WDFDEVICE m_Device = WDF_NO_HANDLE;
 

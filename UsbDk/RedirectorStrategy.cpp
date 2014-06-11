@@ -40,13 +40,6 @@ NTSTATUS CUsbDkRedirectorStrategy::MakeAvailable()
         return status;
     }
 
-    status = m_Owner->CreatePerInstanceSymLink(USBDK_REDIRECTOR_NAME_PREFIX);
-    if (!NT_SUCCESS(status))
-    {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! Cannot create symlink");
-        return status;
-    }
-
     status = m_ControlDevice->NotifyRedirectorAttached(m_DeviceID, m_InstanceID, m_Owner);
     if (!NT_SUCCESS(status))
     {

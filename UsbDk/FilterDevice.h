@@ -147,8 +147,6 @@ public:
     ULONG GetInstanceNumber() const
     { return m_InstanceNumber; }
 
-    NTSTATUS CreatePerInstanceSymLink(PCWSTR Prefix);
-
 private:
     NTSTATUS InitializeFilterDevice(PWDFDEVICE_INIT DevInit);
     NTSTATUS DefineStrategy();

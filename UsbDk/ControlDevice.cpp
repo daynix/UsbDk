@@ -54,6 +54,8 @@ NTSTATUS CUsbDkControlDeviceInit::Create(WDFDRIVER Driver)
     SetExclusive();
     SetIoBuffered();
 
+    SetIoInCallerContextCallback(CUsbDkControlDevice::IoInCallerContext);
+
     DECLARE_CONST_UNICODE_STRING(ntDeviceName, USBDK_DEVICE_NAME);
     return SetName(ntDeviceName);
 }
@@ -84,11 +86,6 @@ void CUsbDkControlDeviceQueue::DeviceControl(WDFQUEUE Queue,
         case IOCTL_USBDK_ENUM_DEVICES:
         {
             EnumerateDevices(WdfRequest, Queue);
-            break;
-        }
-        case IOCTL_USBDK_ADD_REDIRECT:
-        {
-            AddRedirect(WdfRequest, Queue);
             break;
         }
         case IOCTL_USBDK_REMOVE_REDIRECT:
@@ -212,12 +209,6 @@ void CUsbDkControlDeviceQueue::DoUSBDeviceOp(CWdfRequest &Request, WDFQUEUE Queu
 void CUsbDkControlDeviceQueue::GetConfigurationDescriptor(CWdfRequest &Request, WDFQUEUE Queue)
 {
     DoUSBDeviceOp<USB_DK_CONFIG_DESCRIPTOR_REQUEST, USB_CONFIGURATION_DESCRIPTOR>(Request, Queue, &CUsbDkControlDevice::GetConfigurationDescriptor);
-}
-//------------------------------------------------------------------------------------------------------------
-
-void CUsbDkControlDeviceQueue::AddRedirect(CWdfRequest &Request, WDFQUEUE Queue)
-{
-    DoUSBDeviceOp<USB_DK_DEVICE_ID, ULONG>(Request, Queue, &CUsbDkControlDevice::AddRedirect);
 }
 //------------------------------------------------------------------------------------------------------------
 
@@ -390,6 +381,86 @@ NTSTATUS CUsbDkControlDevice::Create(WDFDRIVER Driver)
     return status;
 }
 
+void CUsbDkControlDevice::IoInCallerContext(WDFDEVICE Device, WDFREQUEST Request)
+{
+    CWdfRequest WdfRequest(Request);
+    WDF_REQUEST_PARAMETERS Params;
+    WdfRequest.GetParameters(Params);
+
+    if (Params.Type == WdfRequestTypeDeviceControl &&
+        Params.Parameters.DeviceIoControl.IoControlCode == IOCTL_USBDK_ADD_REDIRECT)
+    {
+        PUSB_DK_DEVICE_ID DeviceId;
+        PULONG64 RedirectorDevice;
+        if (FetchBuffersForAddRedirectRequest(WdfRequest, DeviceId, RedirectorDevice))
+        {
+            auto controlDevice = UsbDkControlGetContext(Device)->UsbDkControl;
+            auto status = controlDevice->AddRedirect(*DeviceId, reinterpret_cast<PHANDLE>(RedirectorDevice));
+            WdfRequest.SetOutputDataLen(NT_SUCCESS(status) ? sizeof(*RedirectorDevice) : 0);
+            WdfRequest.SetStatus(status);
+        }
+    }
+    else
+    {
+        auto status = WdfDeviceEnqueueRequest(Device, WdfRequest);
+        if (NT_SUCCESS(status))
+        {
+            WdfRequest.Detach();
+        }
+        else
+        {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! WdfDeviceEnqueueRequest failed, %!STATUS!", status);
+            WdfRequest.SetStatus(status);
+            WdfRequest.SetOutputDataLen(0);
+        }
+    }
+}
+//-----------------------------------------------------------------------------------------------------
+
+bool CUsbDkControlDevice::FetchBuffersForAddRedirectRequest(CWdfRequest &WdfRequest, PUSB_DK_DEVICE_ID &DeviceId, PULONG64 &RedirectorDevice)
+{
+    size_t DeviceIdLen;
+    auto status = WdfRequest.FetchInputObject(DeviceId, &DeviceIdLen);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! FetchInputObject failed, %!STATUS!", status);
+        WdfRequest.SetStatus(status);
+        WdfRequest.SetOutputDataLen(0);
+        return false;
+    }
+
+    if (DeviceIdLen != sizeof(USB_DK_DEVICE_ID))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! Wrong request buffer size (%llu, expected %llu)",
+                    DeviceIdLen, sizeof(USB_DK_DEVICE_ID));
+        WdfRequest.SetStatus(STATUS_INVALID_BUFFER_SIZE);
+        WdfRequest.SetOutputDataLen(0);
+        return false;
+    }
+
+    size_t RedirectorDeviceLength;
+    status = WdfRequest.FetchOutputObject(RedirectorDevice, &RedirectorDeviceLength);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! Failed to fetch output buffer. %!STATUS!", status);
+        WdfRequest.SetOutputDataLen(0);
+        WdfRequest.SetStatus(status);
+        return false;
+    }
+
+    if (RedirectorDeviceLength != sizeof(ULONG64))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! Wrong request input buffer size (%llu, expected %llu)",
+            RedirectorDeviceLength, sizeof(ULONG64));
+        WdfRequest.SetStatus(STATUS_INVALID_BUFFER_SIZE);
+        WdfRequest.SetOutputDataLen(0);
+        return false;
+    }
+
+    return true;
+}
+//-----------------------------------------------------------------------------------------------------
+
 CRefCountingHolder<CUsbDkControlDevice> *CUsbDkControlDevice::m_UsbDkControlDevice = nullptr;
 
 CUsbDkControlDevice* CUsbDkControlDevice::Reference(WDFDRIVER Driver)
@@ -468,11 +539,10 @@ NTSTATUS CUsbDkControlDevice::GetConfigurationDescriptor(const USB_DK_CONFIG_DES
     *OutputBuffLen = NT_SUCCESS(status) ? min(Descriptor->wTotalLength, *OutputBuffLen) : 0;
     return status;
 }
+//-------------------------------------------------------------------------------------------------------------
 
-NTSTATUS CUsbDkControlDevice::AddRedirect(const USB_DK_DEVICE_ID &DeviceId, PULONG RedirectorID, size_t *OutputBuffLen)
+NTSTATUS CUsbDkControlDevice::AddRedirect(const USB_DK_DEVICE_ID &DeviceId, PHANDLE RedirectorDevice)
 {
-    *OutputBuffLen = sizeof(*RedirectorID);
-
     CUsbDkRedirection *Redirection;
     auto addRes = AddDeviceToSet(DeviceId, &Redirection);
     if (!NT_SUCCESS(addRes))
@@ -499,10 +569,10 @@ NTSTATUS CUsbDkControlDevice::AddRedirect(const USB_DK_DEVICE_ID &DeviceId, PULO
         return (waitRes == STATUS_TIMEOUT) ? STATUS_DEVICE_NOT_CONNECTED : waitRes;
     }
 
-    *RedirectorID = Redirection->RedirectorID();
-    if (*RedirectorID == CUsbDkRedirection::NO_REDIRECTOR)
+    auto status = Redirection->CreateRedirectorHandle(RedirectorDevice);
+    if (!NT_SUCCESS(status))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! No redirector attached. %!STATUS!", waitRes);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! CreateRedirectorHandle() failed. %!STATUS!", status);
         AddRedirectRollBack(DeviceId, true);
         return STATUS_DEVICE_NOT_CONNECTED;
     }
@@ -580,12 +650,12 @@ NTSTATUS CUsbDkControlDevice::RemoveRedirect(const USB_DK_DEVICE_ID &DeviceId)
 }
 //-------------------------------------------------------------------------------------------------------------
 
-bool CUsbDkControlDevice::NotifyRedirectorAttached(CRegText *DeviceID, CRegText *InstanceID, ULONG RedrectorID)
+bool CUsbDkControlDevice::NotifyRedirectorAttached(CRegText *DeviceID, CRegText *InstanceID, CUsbDkFilterDevice *RedirectorDevice)
 {
     USB_DK_DEVICE_ID ID;
     UsbDkFillIDStruct(&ID, *DeviceID->begin(), *InstanceID->begin());
 
-    return m_Redirections.ModifyOne(&ID, [RedrectorID](CUsbDkRedirection *R){ R->NotifyRedirectorCreated(RedrectorID); });
+    return m_Redirections.ModifyOne(&ID, [RedirectorDevice](CUsbDkRedirection *R){ R->NotifyRedirectorCreated(RedirectorDevice); });
 }
 //-------------------------------------------------------------------------------------------------------------
 
@@ -631,16 +701,18 @@ void CUsbDkRedirection::Dump() const
                 m_DeviceID, m_InstanceID);
 }
 
-void CUsbDkRedirection::NotifyRedirectorCreated(ULONG RedirectorID)
+void CUsbDkRedirection::NotifyRedirectorCreated(CUsbDkFilterDevice *RedirectorDevice)
 {
-    m_RedirectorID = RedirectorID;
+    m_RedirectorDevice = RedirectorDevice;
+    m_RedirectorDevice->Reference();
     m_RedirectionCreated.Set();
 }
 
 void CUsbDkRedirection::NotifyRedirectionRemovalStarted()
 {
     m_RemovalInProgress = true;
-    m_RedirectorID = NO_REDIRECTOR;
+    m_RedirectorDevice->Dereference();
+    m_RedirectorDevice = nullptr;
     m_RedirectionCreated.Clear();
 }
 
@@ -672,4 +744,35 @@ bool CUsbDkRedirection::operator==(const CUsbDkRedirection &Other) const
 {
     return (m_DeviceID == Other.m_DeviceID) &&
            (m_InstanceID == Other.m_InstanceID);
+}
+
+NTSTATUS CUsbDkRedirection::CreateRedirectorHandle(PHANDLE ObjectHandle)
+{
+    // Although we got notification from devices enumeration thread regarding redirector creation
+    // system requires some (rather short) time to get the device ready for requests processing.
+    // In case of unfortunate timing we may try to open newly created redirector device before
+    // it is ready, in this case we will get "no such device" error.
+    // Unfortunately it looks like there is no way to ensure device is ready but spin around
+    // and poll it for some time.
+
+    static const LONGLONG RETRY_TIMEOUT_MS = 20;
+    unsigned int iterationsLeft = 10000 / RETRY_TIMEOUT_MS; //Max timeout is 10 seconds
+
+    NTSTATUS status;
+    LARGE_INTEGER interval;
+    interval.QuadPart = -MillisecondsTo100Nanoseconds(RETRY_TIMEOUT_MS);
+
+    do
+    {
+        status = m_RedirectorDevice->CreateUserModeHandle(ObjectHandle);
+        if (NT_SUCCESS(status))
+        {
+            return status;
+        }
+
+        KeDelayExecutionThread(KernelMode, FALSE, &interval);
+    } while (iterationsLeft-- > 0);
+
+    TraceEvents(TRACE_LEVEL_ERROR, TRACE_WDFDEVICE, "%!FUNC! failed, %!STATUS!", status);
+    return status;
 }

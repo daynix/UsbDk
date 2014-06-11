@@ -52,7 +52,6 @@ private:
     static void CountDevices(CWdfRequest &Request, WDFQUEUE Queue);
     static void EnumerateDevices(CWdfRequest &Request, WDFQUEUE Queue);
     static void GetConfigurationDescriptor(CWdfRequest &Request, WDFQUEUE Queue);
-    static void AddRedirect(CWdfRequest &Request, WDFQUEUE Queue);
     static void RemoveRedirect(CWdfRequest &Request, WDFQUEUE Queue);
 
     typedef NTSTATUS(CUsbDkControlDevice::*USBDevControlMethod)(const USB_DK_DEVICE_ID&);
@@ -87,13 +86,13 @@ public:
 
     void Dump() const;
 
-    void NotifyRedirectorCreated(ULONG RedirectorID);
+    void NotifyRedirectorCreated(CUsbDkFilterDevice *RedirectorDevice);
     void NotifyRedirectionRemoved()
     { m_RedirectionRemoved.Set(); }
     void NotifyRedirectionRemovalStarted();
 
     bool IsRedirected() const
-    { return m_RedirectorID != NO_REDIRECTOR; }
+    { return m_RedirectorDevice != nullptr; }
 
     bool IsPreparedForRemove() const
     { return m_RemovalInProgress; }
@@ -103,8 +102,7 @@ public:
 
     bool WaitForDetachment();
 
-    ULONG RedirectorID()
-    { return m_RedirectorID; }
+    NTSTATUS CreateRedirectorHandle(PHANDLE ObjectHandle);
 
 protected:
     virtual void OnLastReferenceGone()
@@ -116,7 +114,7 @@ private:
 
     CWdmEvent m_RedirectionCreated;
     CWdmEvent m_RedirectionRemoved;
-    ULONG m_RedirectorID = NO_REDIRECTOR;
+    CUsbDkFilterDevice *m_RedirectorDevice = nullptr;
 
     bool m_RemovalInProgress = false;
 
@@ -137,7 +135,7 @@ public:
     ULONG CountDevices();
     bool EnumerateDevices(USB_DK_DEVICE_INFO *outBuff, size_t numberAllocatedDevices, size_t &numberExistingDevices);
     NTSTATUS ResetUsbDevice(const USB_DK_DEVICE_ID &DeviceId);
-    NTSTATUS AddRedirect(const USB_DK_DEVICE_ID &DeviceId, PULONG RedirectorID, size_t *OutputBuffLen);
+    NTSTATUS AddRedirect(const USB_DK_DEVICE_ID &DeviceId, PHANDLE ObjectHandle);
     NTSTATUS RemoveRedirect(const USB_DK_DEVICE_ID &DeviceId);
     NTSTATUS GetConfigurationDescriptor(const USB_DK_CONFIG_DESCRIPTOR_REQUEST &Request,
                                         PUSB_CONFIGURATION_DESCRIPTOR Descriptor,
@@ -166,7 +164,7 @@ public:
                                                                        { Entry->NotifyRedirectionRemoved();} );
    }
 
-    bool NotifyRedirectorAttached(CRegText *DeviceID, CRegText *InstanceID, ULONG RedrectorID);
+    bool NotifyRedirectorAttached(CRegText *DeviceID, CRegText *InstanceID, CUsbDkFilterDevice *RedirectorDevice);
     bool NotifyRedirectorRemovalStarted(const USB_DK_DEVICE_ID &ID);
     bool WaitForDetachment(const USB_DK_DEVICE_ID &ID);
 
@@ -197,6 +195,11 @@ private:
                                                  UCHAR DescriptorIndex,
                                                  USB_CONFIGURATION_DESCRIPTOR &Descriptor,
                                                  size_t Length);
+
+    static void IoInCallerContext(WDFDEVICE Device, WDFREQUEST Request);
+    static bool FetchBuffersForAddRedirectRequest(CWdfRequest &WdfRequest, PUSB_DK_DEVICE_ID &DeviceId, PULONG64 &RedirectorDevice);
+
+    friend class CUsbDkControlDeviceInit;
 };
 
 typedef struct _USBDK_CONTROL_DEVICE_EXTENSION {

@@ -42,7 +42,7 @@ public:
     CUsbDkFilterDeviceInit(PWDFDEVICE_INIT DeviceInit)
     { Attach(DeviceInit); }
 
-    NTSTATUS Configure();
+    NTSTATUS Configure(ULONG InstanceNumber);
 
     CUsbDkFilterDeviceInit(const CUsbDkFilterDeviceInit&) = delete;
     CUsbDkFilterDeviceInit& operator= (const CUsbDkFilterDeviceInit&) = delete;
@@ -51,7 +51,7 @@ private:
     { return UsbDkFilterGetContext(Device)->UsbDkFilter->m_Strategy; }
 };
 
-NTSTATUS CUsbDkFilterDeviceInit::Configure()
+NTSTATUS CUsbDkFilterDeviceInit::Configure(ULONG InstanceNumber)
 {
     PAGED_CODE();
 
@@ -61,6 +61,22 @@ NTSTATUS CUsbDkFilterDeviceInit::Configure()
 
     SetRequestAttributes(requestAttributes);
     SetFilter();
+
+    CString DeviceName;
+    auto status = DeviceName.Create(TEXT("\\Device\\UsbDkFilter"), InstanceNumber);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Failed to allocate filter device name (%!STATUS!)", status);
+        return status;
+    }
+
+    status = SetName(*DeviceName);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! SetName failed %!STATUS!", status);
+        return status;
+    }
+
     SetPowerCallbacks([](_In_ WDFDEVICE Device)
                       { return Strategy(Device)->MakeAvailable(); });
 
@@ -75,7 +91,7 @@ NTSTATUS CUsbDkFilterDeviceInit::Configure()
                           },
                           WDF_NO_EVENT_CALLBACK);
 
-    auto status = SetPreprocessCallback([](_In_ WDFDEVICE Device, _Inout_  PIRP Irp)
+    status = SetPreprocessCallback([](_In_ WDFDEVICE Device, _Inout_  PIRP Irp)
                                         { return Strategy(Device)->PNPPreProcess(Irp); },
                                         IRP_MJ_PNP);
 
@@ -322,7 +338,7 @@ NTSTATUS CUsbDkFilterDevice::InitializeFilterDevice(PWDFDEVICE_INIT DevInit)
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Entry");
 
-    auto status = DeviceInit.Configure();
+    auto status = DeviceInit.Configure(GetInstanceNumber());
     if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Failed to create device init");

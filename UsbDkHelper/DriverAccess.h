@@ -52,7 +52,7 @@ public:
     static void ReleaseDevicesList(PUSB_DK_DEVICE_INFO DevicesArray);
     static void ReleaseConfigurationDescriptor(PUSB_CONFIGURATION_DESCRIPTOR Descriptor);
 
-    ULONG AddRedirect(USB_DK_DEVICE_ID &DeviceID);
+    HANDLE AddRedirect(USB_DK_DEVICE_ID &DeviceID);
     void RemoveRedirect(USB_DK_DEVICE_ID &DeviceID);
 
 private:

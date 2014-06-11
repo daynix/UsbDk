@@ -88,12 +88,12 @@ PUSB_CONFIGURATION_DESCRIPTOR UsbDkDriverAccess::GetConfigurationDescriptor(USB_
 }
 //------------------------------------------------------------------------------------------------
 
-ULONG UsbDkDriverAccess::AddRedirect(USB_DK_DEVICE_ID &DeviceID)
+HANDLE UsbDkDriverAccess::AddRedirect(USB_DK_DEVICE_ID &DeviceID)
 {
-    ULONG RedirectorID;
-    SendIoctlWithDeviceId(IOCTL_USBDK_ADD_REDIRECT, DeviceID, &RedirectorID);
+    ULONG64 RedirectorHandle;
+    SendIoctlWithDeviceId(IOCTL_USBDK_ADD_REDIRECT, DeviceID, &RedirectorHandle);
 
-    return RedirectorID;
+    return reinterpret_cast<HANDLE>(RedirectorHandle);
 }
 //------------------------------------------------------------------------------------------------
 

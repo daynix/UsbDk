@@ -42,6 +42,9 @@ class UsbDkDriverFile
 {
 public:
     UsbDkDriverFile(LPCTSTR lpFileName, bool bOverlapped = false);
+    UsbDkDriverFile(HANDLE ObjectHandle, bool bOverlapped = false)
+                    : m_bOverlapped(bOverlapped), m_hDriver(ObjectHandle)
+    {}
     virtual ~UsbDkDriverFile()
     { CloseHandle(m_hDriver); }
 

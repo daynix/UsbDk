@@ -44,8 +44,8 @@ public:
 class UsbDkRedirectorAccess : public UsbDkDriverFile
 {
 public:
-    UsbDkRedirectorAccess(ULONG RedirectorID)
-        :UsbDkDriverFile( (tstring(USBDK_REDIRECTOR_USERMODE_NAME_PREFIX) + to_tstring(RedirectorID)).c_str(), true )
+    UsbDkRedirectorAccess(HANDLE ObjectHandle)
+        :UsbDkDriverFile(ObjectHandle, true)
     {}
 
     TransferResult ReadPipe(USB_DK_TRANSFER_REQUEST &Request, LPOVERLAPPED Overlapped)

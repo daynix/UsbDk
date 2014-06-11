@@ -471,3 +471,9 @@ LONGLONG SecondsTo100Nanoseconds(LONGLONG Seconds)
 {
     return Seconds * 10 * 1000 * 1000;
 }
+
+static inline
+LONGLONG MillisecondsTo100Nanoseconds(LONGLONG Milliseconds)
+{
+    return Milliseconds * 10 * 1000;
+}

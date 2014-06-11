@@ -235,8 +235,6 @@ private:
     static NTSTATUS FetchTransferRequest(USB_DK_TRANSFER_REQUEST &Request,
                                          PUSB_DK_TRANSFER_RESULT &UnsafeTransferResult,
                                          TWdfRequestBufferRetriever RetrieverFunc);
-
-    static NTSTATUS ReadTransferRequestSafe(PVOID requestBuffer, USB_DK_TRANSFER_REQUEST &Request);
 };
 
 template<typename TWdfRequestBufferRetriever>
@@ -261,10 +259,10 @@ static NTSTATUS CRedirectorRequest::FetchTransferRequest(USB_DK_TRANSFER_REQUEST
         return STATUS_INVALID_BUFFER_SIZE;
     }
 
-    status = ReadTransferRequestSafe(buf, Request);
+    status = UsdDkReadUserBufferSafe(buf, Request);
     if (!NT_SUCCESS(status))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! ReadTransferRequestSafe failed, %!STATUS!", status);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! UsdDkReadUserBufferSafe failed, %!STATUS!", status);
     }
     else
     {
@@ -272,21 +270,6 @@ static NTSTATUS CRedirectorRequest::FetchTransferRequest(USB_DK_TRANSFER_REQUEST
     }
 
     return status;
-}
-//--------------------------------------------------------------------------------------------------
-
-NTSTATUS CRedirectorRequest::ReadTransferRequestSafe(PVOID requestBuffer, USB_DK_TRANSFER_REQUEST &Request)
-{
-    __try
-    {
-        ProbeForRead(requestBuffer, sizeof(Request), 1);
-        Request = *(PUSB_DK_TRANSFER_REQUEST)requestBuffer;
-        return STATUS_SUCCESS;
-    }
-    __except (EXCEPTION_EXECUTE_HANDLER)
-    {
-        return STATUS_ACCESS_VIOLATION;
-    }
 }
 //--------------------------------------------------------------------------------------------------
 

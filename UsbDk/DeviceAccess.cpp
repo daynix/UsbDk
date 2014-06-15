@@ -28,7 +28,10 @@
 #include "RegText.h"
 #include "DeviceAccess.tmh"
 
-#include "stdafx.h"
+#if TARGET_OS_WIN_XP
+#include <initguid.h>
+#include <Usbbusif.h>
+#endif
 
 #if !TARGET_OS_WIN_XP
 bool CWdmUSBD::Create()
@@ -265,6 +268,35 @@ CMemoryBuffer *CWdmDeviceAccess::GetDeviceProperty(DEVICE_REGISTRY_PROPERTY prop
     return nullptr;
 }
 
+NTSTATUS CWdmDeviceAccess::QueryForInterface(const GUID &guid, __out INTERFACE &intf,
+    USHORT intfSize, USHORT intfVer, __in_opt PVOID intfCtx)
+{
+    ASSERT(intfSize >= sizeof(INTERFACE));
+    CIrp Irp;
+    NTSTATUS status = Irp.Create(m_DevObj);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVACCESS, "%!FUNC! IRP alloc failed");
+        return status;
+    }
+
+    Irp.Configure([&](PIO_STACK_LOCATION s)
+    {
+        s->MajorFunction = IRP_MJ_PNP;
+        s->MinorFunction = IRP_MN_QUERY_INTERFACE;
+        auto q = &s->Parameters.QueryInterface;
+        q->InterfaceType = &guid;
+        q->Version = intfVer;
+        q->Interface = &intf;
+        q->Size = intfSize;
+        q->InterfaceSpecificData = intfCtx;
+        memset(q->Interface, 0, q->Size);
+    });
+
+    status = Irp.SendSynchronously();
+    return status;
+}
+
 NTSTATUS CWdmUsbDeviceAccess::Reset()
 {
     CIoControlIrp Irp;
@@ -337,12 +369,28 @@ USB_DK_DEVICE_SPEED UsbDkWdmUsbDeviceGetSpeed(PDEVICE_OBJECT DevObj, PDRIVER_OBJ
     }
 
     return FullSpeed;
-#else
-    //TODO: Not implemented
+#else //TARGET_OS_WIN_XP
+    // Using IsDeviceHighSpeed() method of USB_BUS_INTERFACE_USBDI_V1
+    // Note: placing the interface on stack because we release it before return
     UNREFERENCED_PARAMETER(DriverObj);
-    UNREFERENCED_PARAMETER(DevObj);
-    return NoSpeed;
-#endif
+    auto res = NoSpeed;
+    USB_BUS_INTERFACE_USBDI_V1 iusbb;
+    CWdmDeviceAccess wda(DevObj);
+    NTSTATUS status = wda.QueryForInterface(
+        USB_BUS_INTERFACE_USBDI_GUID,
+        reinterpret_cast<INTERFACE &>(iusbb),
+        sizeof(USB_BUS_INTERFACE_USBDI_V1),
+        USB_BUSIF_USBDI_VERSION_1
+        );
+
+    if (NT_SUCCESS(status)) {
+        ASSERT(iusbb.IsDeviceHighSpeed && iusbb.InterfaceDereference);
+        res = iusbb.IsDeviceHighSpeed(iusbb.BusContext) ? HighSpeed : LowSpeed;
+        iusbb.InterfaceDereference(iusbb.BusContext);
+    }
+
+    return res;
+#endif //TARGET_OS_WIN_XP
 }
 
 bool UsbDkWdmUsbDeviceIsHub(PDEVICE_OBJECT PDO)

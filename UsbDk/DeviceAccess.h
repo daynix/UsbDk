@@ -96,6 +96,8 @@ public:
     CWdmDeviceAccess(const CWdmDeviceAccess&) = delete;
     CWdmDeviceAccess& operator= (const CWdmDeviceAccess&) = delete;
 
+    NTSTATUS QueryForInterface(const GUID &, __out INTERFACE &, USHORT intfSize, USHORT intfVer, __in_opt PVOID intfCtx = nullptr);
+
 protected:
     PDEVICE_OBJECT m_DevObj;
 

@@ -62,6 +62,7 @@ public:
     template<typename SendFuncT>
     static NTSTATUS ForwardAndWait(PIRP Irp, SendFuncT SendFunc)
     {
+        VERIFY_IS_IRQL_PASSIVE_LEVEL(); // because of wait
         CWdmEvent Event;
         IoSetCompletionRoutine(Irp,
                                [](PDEVICE_OBJECT, PIRP Irp, PVOID Context) -> NTSTATUS

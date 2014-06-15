@@ -22,29 +22,3 @@
 **********************************************************************/
 
 #include "stdafx.h"
-
-#if TARGET_OS_WIN_XP
-
-_Must_inspect_result_
-_IRQL_requires_max_(DISPATCH_LEVEL)
-NTSTATUS
-WdfUsbTargetDeviceCreateUrb(
-    _In_
-    WDFUSBDEVICE UsbDevice,
-    _In_opt_
-    PWDF_OBJECT_ATTRIBUTES Attributes,
-    _Out_
-    WDFMEMORY* UrbMemory,
-    _Outptr_opt_result_bytebuffer_(sizeof(URB))
-    PURB* Urb
-    )
-{
-    UNREFERENCED_PARAMETER(UsbDevice);
-    UNREFERENCED_PARAMETER(Attributes);
-    UNREFERENCED_PARAMETER(UrbMemory);
-    UNREFERENCED_PARAMETER(Urb);
-
-    return STATUS_NOT_IMPLEMENTED;
-}
-
-#endif

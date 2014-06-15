@@ -37,7 +37,6 @@ public:
 
     NTSTATUS Create(WDFDEVICE Device);
     void DeviceDescriptor(USB_DEVICE_DESCRIPTOR &Descriptor);
-    NTSTATUS ConfigurationDescriptor(UCHAR Index, PUSB_CONFIGURATION_DESCRIPTOR Descriptor, PULONG TotalLength);
     NTSTATUS SetInterfaceAltSetting(ULONG64 InterfaceIdx, ULONG64 AltSettingIdx);
 
     void WritePipeAsync(WDFREQUEST Request, ULONG64 EndpointAddress, WDFMEMORY Buffer, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion);

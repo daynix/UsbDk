@@ -36,20 +36,6 @@
 #define _Must_inspect_result_
 #define _Outptr_opt_result_bytebuffer_(X)
 
-_Must_inspect_result_
-_IRQL_requires_max_(DISPATCH_LEVEL)
-NTSTATUS
-WdfUsbTargetDeviceCreateUrb(
-    _In_
-    WDFUSBDEVICE UsbDevice,
-    _In_opt_
-    PWDF_OBJECT_ATTRIBUTES Attributes,
-    _Out_
-    WDFMEMORY* UrbMemory,
-    _Outptr_opt_result_bytebuffer_(sizeof(URB))
-    PURB* Urb
-    );
-
 #define ObReferenceObjectWithTag(O, T)    ObReferenceObject(O)
 #define ObDereferenceObjectWithTag(O, T)  ObDereferenceObject(O)
 

@@ -1,0 +1,18 @@
+# EditorConfig file, see editorconfig.org
+
+# This is top level folder, don't look up the tree
+root = true
+
+# Windows-style newlines, yeah!
+# Indentation = 4 spaces, trim trailing spaces
+[{*.cpp,*.h,*.c}]
+end_of_line = crlf
+insert_final_newline = true
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+
+#[*]
+# defs for all other file types go here...
+
+###

@@ -385,6 +385,10 @@ void CUsbDkRedirectorStrategy::IoInCallerContext(WDFDEVICE Device, WDFREQUEST Re
     {
         CUsbDkFilterStrategy::IoInCallerContext(Device, WdfRequest.Detach());
     }
+    else
+    {
+        WdfRequest.SetStatus(status);
+    }
 }
 //--------------------------------------------------------------------------------------------------
 

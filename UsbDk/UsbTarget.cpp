@@ -77,8 +77,6 @@ private:
 
 NTSTATUS CWdfUsbInterface::SetAltSetting(ULONG64 AltSettingIdx)
 {
-    TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! start");
-
     WDF_USB_INTERFACE_SELECT_SETTING_PARAMS params;
     WDF_USB_INTERFACE_SELECT_SETTING_PARAMS_INIT_SETTING(&params, static_cast<UCHAR>(AltSettingIdx));
 

@@ -204,11 +204,5 @@ NTSTATUS CWdfDevice::CreateUserModeHandle(PHANDLE ObjectHandle)
                         FILE_NON_DIRECTORY_FILE | FILE_RANDOM_ACCESS);
 
     WdfObjectDelete(deviceName);
-
-    if (!NT_SUCCESS(status))
-    {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_WDFDEVICE, "%!FUNC! ZwOpenFile failed, %!STATUS! IoStatusBlock.Status: %!STATUS!", status, IoStatusBlock.Status);
-    }
-
     return status;
 }

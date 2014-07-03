@@ -301,55 +301,63 @@ NTSTATUS CUsbDkRedirectorStrategy::IoInCallerContextRW(CRedirectorRequest &WdfRe
     }
     else
     {
-        __try
-        {
-#pragma warning(push)
-#pragma warning(disable:4244) //Unsafe conversions on 32 bit
-            ProbeForRead(static_cast<PVOID>(TransferRequest.buffer), sizeof(WDF_USB_CONTROL_SETUP_PACKET), 1);
-            context->SetupPacket = *static_cast<PWDF_USB_CONTROL_SETUP_PACKET>(TransferRequest.buffer);
-#pragma warning(pop)
-        }
-        __except (EXCEPTION_EXECUTE_HANDLER)
-        {
-            TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! ProbeForRead failed!");
-            return STATUS_ACCESS_VIOLATION;
-        }
+        status = IoInCallerContextRWControlTransfer(WdfRequest, TransferRequest);
+    }
 
-        size_t bufferLength = static_cast<size_t>(TransferRequest.bufferLength) - sizeof(WDF_USB_CONTROL_SETUP_PACKET);
-        if (bufferLength > 0)
-        {
-            if (context->SetupPacket.Packet.bm.Request.Dir == BMREQUEST_HOST_TO_DEVICE) // write
-            {
-                {
+    return status;
+}
+//--------------------------------------------------------------------------------------------------
+
+NTSTATUS CUsbDkRedirectorStrategy::IoInCallerContextRWControlTransfer(CRedirectorRequest &WdfRequest, USB_DK_TRANSFER_REQUEST &TransferRequest)
+{
+    NTSTATUS status;
+    PUSBDK_REDIRECTOR_REQUEST_CONTEXT context = WdfRequest.Context();
+    __try
+    {
 #pragma warning(push)
 #pragma warning(disable:4244) //Unsafe conversions on 32 bit
-                    status = WdfRequest.LockUserBufferForRead(static_cast<PVOID>(static_cast<PWDF_USB_CONTROL_SETUP_PACKET>(TransferRequest.buffer) + 1),
-                        bufferLength, context->LockedBuffer);
+        ProbeForRead(static_cast<PVOID>(TransferRequest.buffer), sizeof(WDF_USB_CONTROL_SETUP_PACKET), 1);
+        context->SetupPacket = *static_cast<PWDF_USB_CONTROL_SETUP_PACKET>(TransferRequest.buffer);
 #pragma warning(pop)
-                    if (!NT_SUCCESS(status))
-                    {
-                        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! LockUserBufferForRead failed %!STATUS!", status);
-                    }
-                }
-            }
-            else // read
-            {
+    }
+    __except (EXCEPTION_EXECUTE_HANDLER)
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! ProbeForRead failed!");
+        return STATUS_ACCESS_VIOLATION;
+    }
+
+    size_t bufferLength = static_cast<size_t>(TransferRequest.bufferLength) - sizeof(WDF_USB_CONTROL_SETUP_PACKET);
+    if (bufferLength > 0)
+    {
+        if (context->SetupPacket.Packet.bm.Request.Dir == BMREQUEST_HOST_TO_DEVICE) // write
+        {
 #pragma warning(push)
 #pragma warning(disable:4244) //Unsafe conversions on 32 bit
-                status = WdfRequest.LockUserBufferForWrite(static_cast<PVOID>(static_cast<PWDF_USB_CONTROL_SETUP_PACKET>(TransferRequest.buffer) + 1),
-                    bufferLength, context->LockedBuffer);
+            status = WdfRequest.LockUserBufferForRead(static_cast<PVOID>(static_cast<PWDF_USB_CONTROL_SETUP_PACKET>(TransferRequest.buffer) + 1),
+                                                      bufferLength, context->LockedBuffer);
 #pragma warning(pop)
-                if (!NT_SUCCESS(status))
-                {
-                    TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! LockUserBufferForWrite failed %!STATUS!", status);
-                }
+            if (!NT_SUCCESS(status))
+            {
+                TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! LockUserBufferForRead failed %!STATUS!", status);
             }
         }
-        else
+        else // read
         {
-            context->LockedBuffer = WDF_NO_HANDLE;
-            status = STATUS_SUCCESS;
+#pragma warning(push)
+#pragma warning(disable:4244) //Unsafe conversions on 32 bit
+            status = WdfRequest.LockUserBufferForWrite(static_cast<PVOID>(static_cast<PWDF_USB_CONTROL_SETUP_PACKET>(TransferRequest.buffer) + 1),
+                                                       bufferLength, context->LockedBuffer);
+#pragma warning(pop)
+            if (!NT_SUCCESS(status))
+            {
+                TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! LockUserBufferForWrite failed %!STATUS!", status);
+            }
         }
+    }
+    else
+    {
+        context->LockedBuffer = WDF_NO_HANDLE;
+        status = STATUS_SUCCESS;
     }
 
     return status;

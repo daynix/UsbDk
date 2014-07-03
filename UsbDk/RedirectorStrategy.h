@@ -26,6 +26,7 @@
 #include "FilterStrategy.h"
 #include "UsbTarget.h"
 #include "WdfDevice.h"
+#include "Public.h"
 
 class CRegText;
 
@@ -94,6 +95,8 @@ private:
     static NTSTATUS IoInCallerContextRW(CRedirectorRequest &WdfRequest,
                                         TRetrieverFunc RetrieverFunc,
                                         TLockerFunc LockerFunc);
+
+    static NTSTATUS IoInCallerContextRWControlTransfer(CRedirectorRequest &WdfRequest, USB_DK_TRANSFER_REQUEST &TransferRequest);
 
     void PatchDeviceID(PIRP Irp);
 

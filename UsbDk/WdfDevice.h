@@ -159,7 +159,7 @@ public:
 
     virtual NTSTATUS Create();
     void StopSync()
-    {WdfIoQueueStopSynchronously(m_Queue);}
+    {WdfIoQueueDrain(m_Queue, nullptr, nullptr); }
     void Start()
     {WdfIoQueueStart(m_Queue);}
 

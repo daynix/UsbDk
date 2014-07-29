@@ -61,6 +61,7 @@ typedef struct tag_USB_DK_TRANSFER_REQUEST
     ULONG64 endpointAddress;
     PVOID64 buffer;
     ULONG64 bufferLength;
+    ULONG64 transferType;
 
     USB_DK_TRANSFER_RESULT Result;
 } USB_DK_TRANSFER_REQUEST, *PUSB_DK_TRANSFER_REQUEST;
@@ -81,4 +82,10 @@ typedef enum
     SuperSpeed
 } USB_DK_DEVICE_SPEED;
 
-#define CONTROL_TRANSFER_ENDPOINT_ADDRESS -1
+typedef enum
+{
+    ControlTransferType,
+    BulkTransferType,
+    IntertuptTransferType,
+    IsochronousTransferType
+} USB_DK_TRANSFER_TYPE;

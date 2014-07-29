@@ -195,6 +195,7 @@ typedef struct tag_USBDK_REDIRECTOR_REQUEST_CONTEXT
     WDFMEMORY LockedBuffer;
     WDFMEMORY LockedResultBuffer;
     ULONG64 EndpointAddress;
+    USB_DK_TRANSFER_TYPE TransferType;
     WDF_USB_CONTROL_SETUP_PACKET SetupPacket;
 } USBDK_REDIRECTOR_REQUEST_CONTEXT, *PUSBDK_REDIRECTOR_REQUEST_CONTEXT;
 
@@ -283,6 +284,7 @@ NTSTATUS CUsbDkRedirectorStrategy::IoInCallerContextRW(CRedirectorRequest &WdfRe
 
     PUSBDK_REDIRECTOR_REQUEST_CONTEXT context = WdfRequest.Context();
     context->EndpointAddress = TransferRequest.endpointAddress;
+    context->TransferType = static_cast<USB_DK_TRANSFER_TYPE>(TransferRequest.transferType);
 
     status = WdfRequest.LockUserBufferForWrite(UnsafeResultbuffer, sizeof(UnsafeResultbuffer), context->LockedResultBuffer);
     if (!NT_SUCCESS(status))
@@ -291,17 +293,17 @@ NTSTATUS CUsbDkRedirectorStrategy::IoInCallerContextRW(CRedirectorRequest &WdfRe
         return status;
     }
 
-    if (context->EndpointAddress != CONTROL_TRANSFER_ENDPOINT_ADDRESS)
+    switch (context->TransferType)
     {
+    case ControlTransferType:
+        status = IoInCallerContextRWControlTransfer(WdfRequest, TransferRequest);
+        break;
+    default:
         status = LockerFunc(WdfRequest, TransferRequest, context->LockedBuffer);
         if (!NT_SUCCESS(status))
         {
             TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! Failed to lock user buffer, %!STATUS!", status);
         }
-    }
-    else
-    {
-        status = IoInCallerContextRWControlTransfer(WdfRequest, TransferRequest);
     }
 
     return status;
@@ -500,8 +502,12 @@ void CUsbDkRedirectorStrategy::WritePipe(WDFREQUEST Request, size_t Length)
     CRedirectorRequest WdfRequest(Request);
     PUSBDK_REDIRECTOR_REQUEST_CONTEXT Context = WdfRequest.Context();
 
-    if (Context->EndpointAddress != CONTROL_TRANSFER_ENDPOINT_ADDRESS)
+    switch (Context->TransferType)
     {
+    case ControlTransferType:
+        DoControlTransfer(WdfRequest, Context->LockedBuffer);
+        break;
+    default:
         if (Context->LockedBuffer != WDF_NO_HANDLE)
         {
             m_Target.WritePipeAsync(WdfRequest.Detach(), Context->EndpointAddress, Context->LockedBuffer,
@@ -529,10 +535,7 @@ void CUsbDkRedirectorStrategy::WritePipe(WDFREQUEST Request, size_t Length)
         {
             WdfRequest.SetStatus(STATUS_INVALID_PARAMETER);
         }
-    }
-    else // for DEVICE CONTROL TRANSFER
-    {
-        DoControlTransfer(WdfRequest, Context->LockedBuffer);
+        break;
     }
 }
 //--------------------------------------------------------------------------------------------------
@@ -543,9 +546,12 @@ void CUsbDkRedirectorStrategy::ReadPipe(WDFREQUEST Request, size_t Length)
 
     CRedirectorRequest WdfRequest(Request);
     PUSBDK_REDIRECTOR_REQUEST_CONTEXT Context = WdfRequest.Context();
-
-    if (Context->EndpointAddress != CONTROL_TRANSFER_ENDPOINT_ADDRESS)
+    switch (Context->TransferType)
     {
+    case ControlTransferType:
+        DoControlTransfer(WdfRequest, Context->LockedBuffer);
+        break;
+    default:
         if (Context->LockedBuffer != WDF_NO_HANDLE)
         {
             m_Target.ReadPipeAsync(WdfRequest.Detach(), Context->EndpointAddress, Context->LockedBuffer,
@@ -573,10 +579,7 @@ void CUsbDkRedirectorStrategy::ReadPipe(WDFREQUEST Request, size_t Length)
         {
             WdfRequest.SetStatus(STATUS_INVALID_PARAMETER);
         }
-    }
-    else // for DEVICE CONTROL TRANSFER
-    {
-        DoControlTransfer(WdfRequest, Context->LockedBuffer);
+        break;
     }
 }
 //--------------------------------------------------------------------------------------------------

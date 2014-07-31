@@ -26,6 +26,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		UsbDkHelper\UsbDk_XP.inf = UsbDkHelper\UsbDk_XP.inf
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{2D75FDE2-6273-4399-A7FC-7A497C72D559}"
+	ProjectSection(SolutionItems) = preProject
+		buildAll.bat = buildAll.bat
+		Tools\vs_cmdline.vbs = Tools\vs_cmdline.vbs
+		Tools\vs_run.bat = Tools\vs_run.bat
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Win7 Debug|Win32 = Win7 Debug|Win32
@@ -229,5 +236,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{2D75FDE2-6273-4399-A7FC-7A497C72D559} = {32B6DBE0-42AC-41FB-B9AC-A46C306EF1E2}
 	EndGlobalSection
 EndGlobal

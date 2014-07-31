@@ -5,3 +5,4 @@ Win*Release
 *.opensdf
 *.ipch
 *.vcxproj.user
+build*.log

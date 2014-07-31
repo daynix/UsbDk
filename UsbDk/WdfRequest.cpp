@@ -43,11 +43,11 @@ NTSTATUS CWdfRequest::SendAndForget(WDFIOTARGET Target)
     return status;
 }
 
-NTSTATUS CWdfRequest::SendWithCompletion(WDFIOTARGET Target, PFN_WDF_REQUEST_COMPLETION_ROUTINE CompletionFunc)
+NTSTATUS CWdfRequest::SendWithCompletion(WDFIOTARGET Target, PFN_WDF_REQUEST_COMPLETION_ROUTINE CompletionFunc, WDFCONTEXT CompletionContext)
 {
     auto status = STATUS_SUCCESS;
 
-    WdfRequestSetCompletionRoutine(m_Request, CompletionFunc, nullptr);
+    WdfRequestSetCompletionRoutine(m_Request, CompletionFunc, CompletionContext);
     if (WdfRequestSend(m_Request, Target, WDF_NO_SEND_OPTIONS))
     {
         Detach();

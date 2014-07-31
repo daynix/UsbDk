@@ -111,7 +111,7 @@ public:
     }
 
     NTSTATUS SendAndForget(WDFIOTARGET Target);
-    NTSTATUS SendWithCompletion(WDFIOTARGET Target, PFN_WDF_REQUEST_COMPLETION_ROUTINE CompletionFunc);
+    NTSTATUS SendWithCompletion(WDFIOTARGET Target, PFN_WDF_REQUEST_COMPLETION_ROUTINE CompletionFunc, WDFCONTEXT CompletionContext = nullptr);
 
     WDFREQUEST Detach()
     {

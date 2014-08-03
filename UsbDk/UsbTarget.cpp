@@ -27,6 +27,7 @@
 #include "UsbTarget.tmh"
 #include "DeviceAccess.h"
 #include "WdfRequest.h"
+#include "Urb.h"
 
 class CWdfUsbPipe : public CAllocatable<NonPagedPool, 'PUHR'>
 {
@@ -34,19 +35,41 @@ public:
     CWdfUsbPipe()
     {}
 
-    void Create(WDFUSBINTERFACE Interface, UCHAR PipeIndex);
+    void Create(WDFUSBDEVICE Device, WDFUSBINTERFACE Interface, UCHAR PipeIndex);
     void ReadAsync(CWdfRequest &Request, WDFMEMORY Buffer, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion);
     void WriteAsync(CWdfRequest &Request, WDFMEMORY Buffer, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion);
+
+    void ReadIsochronousAsync(CWdfRequest &Request,
+                              WDFMEMORY Buffer,
+                              PULONG64 PacketSizes,
+                              size_t PacketNumber,
+                              PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion)
+    { SubmitIsochronousTransfer(Request, CIsochronousUrb::URB_DIRECTION_IN, Buffer, PacketSizes, PacketNumber, Completion); }
+
+    void WriteIsochronousAsync(CWdfRequest &Request,
+                               WDFMEMORY Buffer,
+                               PULONG64 PacketSizes,
+                               size_t PacketNumber,
+                               PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion)
+    { SubmitIsochronousTransfer(Request, CIsochronousUrb::URB_DIRECTION_OUT, Buffer, PacketSizes, PacketNumber, Completion); }
+
     NTSTATUS Abort(WDFREQUEST Request);
     NTSTATUS Reset(WDFREQUEST Request);
     UCHAR EndpointAddress() const
     { return m_Info.EndpointAddress; }
 
 private:
-    WDFUSBINTERFACE m_Interface;
-    WDFUSBPIPE m_Pipe;
+    WDFUSBINTERFACE m_Interface = WDF_NO_HANDLE;
+    WDFUSBDEVICE m_Device = WDF_NO_HANDLE;
+    WDFUSBPIPE m_Pipe = WDF_NO_HANDLE;
     WDF_USB_PIPE_INFORMATION m_Info;
 
+    void SubmitIsochronousTransfer(CWdfRequest &Request,
+                                   CIsochronousUrb::Direction Direction,
+                                   WDFMEMORY Buffer,
+                                   PULONG64 PacketSizes,
+                                   size_t PacketNumber,
+                                   PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion);
     CWdfUsbPipe(const CWdfUsbPipe&) = delete;
     CWdfUsbPipe& operator= (const CWdfUsbPipe&) = delete;
 };
@@ -103,7 +126,7 @@ NTSTATUS CWdfUsbInterface::SetAltSetting(ULONG64 AltSettingIdx)
 
     for (UCHAR i = 0; i < m_NumPipes; i++)
     {
-        m_Pipes[i].Create(m_Interface, i);
+        m_Pipes[i].Create(m_UsbDevice, m_Interface, i);
     }
 
     return STATUS_SUCCESS;
@@ -152,8 +175,9 @@ NTSTATUS CWdfUsbInterface::Create(WDFUSBDEVICE Device, UCHAR InterfaceIdx)
     return SetAltSetting(0);
 }
 
-void CWdfUsbPipe::Create(WDFUSBINTERFACE Interface, UCHAR PipeIndex)
+void CWdfUsbPipe::Create(WDFUSBDEVICE Device, WDFUSBINTERFACE Interface, UCHAR PipeIndex)
 {
+    m_Device = Device;
     m_Interface = Interface;
 
     WDF_USB_PIPE_INFORMATION_INIT(&m_Info);
@@ -198,6 +222,45 @@ void CWdfUsbPipe::WriteAsync(CWdfRequest &Request, WDFMEMORY Buffer, PFN_WDF_REQ
         }
     }
 }
+//-------------------------------------------------------------------------------------------------------------------
+
+void CWdfUsbPipe::SubmitIsochronousTransfer(CWdfRequest &Request,
+                                            CIsochronousUrb::Direction Direction,
+                                            WDFMEMORY Buffer,
+                                            PULONG64 PacketSizes,
+                                            size_t PacketNumber,
+                                            PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion)
+{
+    CIsochronousUrb Urb(m_Device, m_Pipe, Request);
+    CPreAllocatedWdfMemoryBuffer DataBuffer(Buffer);
+
+    auto status = Urb.Create(Direction,
+                             DataBuffer,
+                             DataBuffer.Size(),
+                             PacketNumber,
+                             PacketSizes);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed to create URB: %!STATUS!", status);
+        Request.SetStatus(status);
+        return;
+    }
+
+    status = WdfUsbTargetPipeFormatRequestForUrb(m_Pipe, Request, Urb, nullptr);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed to build a USB request: %!STATUS!", status);
+        Request.SetStatus(status);
+        return;
+    }
+
+    status = Request.SendWithCompletion(WdfUsbTargetPipeGetIoTarget(m_Pipe), Completion);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! send failed: %!STATUS!", status);
+    }
+}
+//-------------------------------------------------------------------------------------------------------------------
 
 NTSTATUS CWdfUsbPipe::Abort(WDFREQUEST Request)
 {
@@ -351,6 +414,45 @@ void CWdfUsbTarget::ReadPipeAsync(WDFREQUEST Request, ULONG64 EndpointAddress, W
         WdfRequest.SetStatus(STATUS_NOT_FOUND);
     }
 }
+//----------------------------------------------------------------------------------------------------------
+
+void CWdfUsbTarget::ReadIsochronousPipeAsync(WDFREQUEST Request, ULONG64 EndpointAddress, WDFMEMORY Buffer,
+                                             PULONG64 PacketSizes, size_t PacketNumber,
+                                             PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion)
+{
+    CWdfRequest WdfRequest(Request);
+
+    CWdfUsbPipe *Pipe = FindPipeByEndpointAddress(EndpointAddress);
+    if (Pipe != nullptr)
+    {
+        Pipe->ReadIsochronousAsync(WdfRequest, Buffer, PacketSizes, PacketNumber, Completion);
+    }
+    else
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed: Pipe not found");
+        WdfRequest.SetStatus(STATUS_NOT_FOUND);
+    }
+}
+//----------------------------------------------------------------------------------------------------------
+
+void CWdfUsbTarget::WriteIsochronousPipeAsync(WDFREQUEST Request, ULONG64 EndpointAddress, WDFMEMORY Buffer,
+                                              PULONG64 PacketSizes, size_t PacketNumber,
+                                              PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion)
+{
+    CWdfRequest WdfRequest(Request);
+
+    CWdfUsbPipe *Pipe = FindPipeByEndpointAddress(EndpointAddress);
+    if (Pipe != nullptr)
+    {
+        Pipe->WriteIsochronousAsync(WdfRequest, Buffer, PacketSizes, PacketNumber, Completion);
+    }
+    else
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed: Pipe not found");
+        WdfRequest.SetStatus(STATUS_NOT_FOUND);
+    }
+}
+//----------------------------------------------------------------------------------------------------------
 
 NTSTATUS CWdfUsbTarget::AbortPipe(WDFREQUEST Request, ULONG64 EndpointAddress)
 {

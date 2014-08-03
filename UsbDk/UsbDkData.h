@@ -51,9 +51,16 @@ typedef struct tag_USB_DK_CONFIG_DESCRIPTOR_REQUEST
     ULONG64 Index;
 } USB_DK_CONFIG_DESCRIPTOR_REQUEST, *PUSB_DK_CONFIG_DESCRIPTOR_REQUEST;
 
+typedef struct tag_USB_DK_ISO_TARNSFER_RESULT
+{
+    ULONG64 actualLength;
+    ULONG64 transferResult;
+} USB_DK_ISO_TRANSFER_RESULT, *PUSB_DK_ISO_TRANSFER_RESULT;
+
 typedef struct tag_USB_DK_TRANSFER_RESULT
 {
     ULONG64 bytesTransferred;
+    PVOID64 isochronousResultsArray; // array of USB_DK_ISO_TRANSFER_RESULT
 } USB_DK_TRANSFER_RESULT, *PUSB_DK_TRANSFER_RESULT;
 
 typedef struct tag_USB_DK_TRANSFER_REQUEST
@@ -62,6 +69,8 @@ typedef struct tag_USB_DK_TRANSFER_REQUEST
     PVOID64 buffer;
     ULONG64 bufferLength;
     ULONG64 transferType;
+    ULONG64 IsochronousPacketsArraySize;
+    PVOID64 IsochronousPacketsArray;
 
     USB_DK_TRANSFER_RESULT Result;
 } USB_DK_TRANSFER_REQUEST, *PUSB_DK_TRANSFER_REQUEST;

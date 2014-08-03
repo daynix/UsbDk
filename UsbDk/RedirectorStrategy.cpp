@@ -197,6 +197,9 @@ typedef struct tag_USBDK_REDIRECTOR_REQUEST_CONTEXT
     ULONG64 EndpointAddress;
     USB_DK_TRANSFER_TYPE TransferType;
     WDF_USB_CONTROL_SETUP_PACKET SetupPacket;
+
+    WDFMEMORY LockedIsochronousPacketsArray;
+    WDFMEMORY LockedIsochronousResultsArray;
 } USBDK_REDIRECTOR_REQUEST_CONTEXT, *PUSBDK_REDIRECTOR_REQUEST_CONTEXT;
 
 class CRedirectorRequest : public CWdfRequest
@@ -298,12 +301,60 @@ NTSTATUS CUsbDkRedirectorStrategy::IoInCallerContextRW(CRedirectorRequest &WdfRe
     case ControlTransferType:
         status = IoInCallerContextRWControlTransfer(WdfRequest, TransferRequest);
         break;
-    default:
+    case BulkTransferType:
+    case IntertuptTransferType:
         status = LockerFunc(WdfRequest, TransferRequest, context->LockedBuffer);
         if (!NT_SUCCESS(status))
         {
             TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! Failed to lock user buffer, %!STATUS!", status);
         }
+        break;
+
+    case IsochronousTransferType:
+        status = IoInCallerContextRWIsoTransfer(WdfRequest, TransferRequest, LockerFunc);
+        break;
+
+    default:
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! Error: Wrong TransferType: %d", context->TransferType);
+        status = STATUS_INVALID_PARAMETER;
+        break;
+    }
+
+    return status;
+}
+//--------------------------------------------------------------------------------------------------
+
+template <typename TLockerFunc>
+NTSTATUS CUsbDkRedirectorStrategy::IoInCallerContextRWIsoTransfer(CRedirectorRequest &WdfRequest, USB_DK_TRANSFER_REQUEST &TransferRequest,
+                                                                  TLockerFunc LockerFunc)
+{
+    PUSBDK_REDIRECTOR_REQUEST_CONTEXT context = WdfRequest.Context();
+    auto status = LockerFunc(WdfRequest, TransferRequest, context->LockedBuffer);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! Failed to lock user buffer, %!STATUS!", status);
+        return status;
+    }
+
+#pragma warning(push)
+#pragma warning(disable:4244) //Unsafe conversions on 32 bit
+    status = WdfRequest.LockUserBufferForRead(reinterpret_cast<PVOID>(TransferRequest.IsochronousPacketsArray),
+        sizeof(ULONG64) * TransferRequest.IsochronousPacketsArraySize, context->LockedIsochronousPacketsArray);
+#pragma warning(pop)
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! Failed to lock user buffer of Iso Packet Lengths, %!STATUS!", status);
+        return status;
+    }
+
+#pragma warning(push)
+#pragma warning(disable:4244) //Unsafe conversions on 32 bit
+    status = WdfRequest.LockUserBufferForWrite(reinterpret_cast<PVOID>(TransferRequest.Result.isochronousResultsArray),
+        sizeof(USB_DK_ISO_TRANSFER_RESULT) * TransferRequest.IsochronousPacketsArraySize, context->LockedIsochronousResultsArray);
+#pragma warning(pop)
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! Failed to lock user buffer of Iso Packet Result, %!STATUS!", status);
     }
 
     return status;
@@ -507,7 +558,8 @@ void CUsbDkRedirectorStrategy::WritePipe(WDFREQUEST Request, size_t Length)
     case ControlTransferType:
         DoControlTransfer(WdfRequest, Context->LockedBuffer);
         break;
-    default:
+    case BulkTransferType:
+    case IntertuptTransferType:
         if (Context->LockedBuffer != WDF_NO_HANDLE)
         {
             m_Target.WritePipeAsync(WdfRequest.Detach(), Context->EndpointAddress, Context->LockedBuffer,
@@ -515,7 +567,7 @@ void CUsbDkRedirectorStrategy::WritePipe(WDFREQUEST Request, size_t Length)
                                     {
                                         CRedirectorRequest WdfRequest(Request);
                                         auto RequestContext = WdfRequest.Context();
-                                        auto ResultBuffer = static_cast<PUSB_DK_TRANSFER_RESULT>(WdfMemoryGetBuffer(RequestContext->LockedResultBuffer, nullptr));
+                                        CPreAllocatedWdfMemoryBufferT<USB_DK_TRANSFER_RESULT> ResultBuffer(RequestContext->LockedResultBuffer);
 
                                         auto status = Params->IoStatus.Status;
                                         auto usbCompletionParams = Params->Parameters.Usb.Completion;
@@ -536,6 +588,26 @@ void CUsbDkRedirectorStrategy::WritePipe(WDFREQUEST Request, size_t Length)
             WdfRequest.SetStatus(STATUS_INVALID_PARAMETER);
         }
         break;
+    case IsochronousTransferType:
+        if (Context->LockedBuffer != WDF_NO_HANDLE)
+        {
+            CPreAllocatedWdfMemoryBufferT<ULONG64> PacketSizesArray(Context->LockedIsochronousPacketsArray);
+
+            m_Target.WriteIsochronousPipeAsync(WdfRequest.Detach(),
+                                               Context->EndpointAddress,
+                                               Context->LockedBuffer,
+                                               PacketSizesArray,
+                                               PacketSizesArray.ArraySize(),
+                                               IsoRWCompletion);
+        }
+        else
+        {
+            WdfRequest.SetStatus(STATUS_INVALID_PARAMETER);
+        }
+        break;
+    default:
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Error: Wrong transfer type: %d\n", Context->TransferType);
+        WdfRequest.SetStatus(STATUS_INVALID_PARAMETER);
     }
 }
 //--------------------------------------------------------------------------------------------------
@@ -551,7 +623,8 @@ void CUsbDkRedirectorStrategy::ReadPipe(WDFREQUEST Request, size_t Length)
     case ControlTransferType:
         DoControlTransfer(WdfRequest, Context->LockedBuffer);
         break;
-    default:
+    case BulkTransferType:
+    case IntertuptTransferType:
         if (Context->LockedBuffer != WDF_NO_HANDLE)
         {
             m_Target.ReadPipeAsync(WdfRequest.Detach(), Context->EndpointAddress, Context->LockedBuffer,
@@ -559,7 +632,7 @@ void CUsbDkRedirectorStrategy::ReadPipe(WDFREQUEST Request, size_t Length)
                                    {
                                         CRedirectorRequest WdfRequest(Request);
                                         auto RequestContext = WdfRequest.Context();
-                                        auto ResultBuffer = static_cast<PUSB_DK_TRANSFER_RESULT>(WdfMemoryGetBuffer(RequestContext->LockedResultBuffer, nullptr));
+                                        CPreAllocatedWdfMemoryBufferT<USB_DK_TRANSFER_RESULT> ResultBuffer(RequestContext->LockedResultBuffer);
 
                                         auto status = Params->IoStatus.Status;
                                         auto usbCompletionParams = Params->Parameters.Usb.Completion;
@@ -580,7 +653,63 @@ void CUsbDkRedirectorStrategy::ReadPipe(WDFREQUEST Request, size_t Length)
             WdfRequest.SetStatus(STATUS_INVALID_PARAMETER);
         }
         break;
+    case IsochronousTransferType:
+        if (Context->LockedBuffer != WDF_NO_HANDLE)
+        {
+            CPreAllocatedWdfMemoryBufferT<ULONG64> PacketSizesArray(Context->LockedIsochronousPacketsArray);
+
+            m_Target.ReadIsochronousPipeAsync(WdfRequest.Detach(),
+                                              Context->EndpointAddress,
+                                              Context->LockedBuffer,
+                                              PacketSizesArray,
+                                              PacketSizesArray.ArraySize(),
+                                              IsoRWCompletion);
+        }
+        else
+        {
+            WdfRequest.SetStatus(STATUS_INVALID_PARAMETER);
+        }
+        break;
+    default:
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Error: Wrong transfer type: %d\n", Context->TransferType);
+        WdfRequest.SetStatus(STATUS_INVALID_PARAMETER);
     }
+}
+//--------------------------------------------------------------------------------------------------
+
+void CUsbDkRedirectorStrategy::IsoRWCompletion(WDFREQUEST Request, WDFIOTARGET, PWDF_REQUEST_COMPLETION_PARAMS CompletionParams, WDFCONTEXT)
+{
+    CRedirectorRequest WdfRequest(Request);
+    auto Context = WdfRequest.Context();
+
+    CPreAllocatedWdfMemoryBufferT<URB> urb(CompletionParams->Parameters.Usb.Completion->Parameters.PipeUrb.Buffer);
+    CPreAllocatedWdfMemoryBufferT<USB_DK_ISO_TRANSFER_RESULT> IsoPacketResult(Context->LockedIsochronousResultsArray);
+    CPreAllocatedWdfMemoryBufferT<USB_DK_TRANSFER_RESULT> TransferResult(Context->LockedResultBuffer);
+
+    ASSERT(urb->UrbIsochronousTransfer.NumberOfPackets == IsoPacketResult.ArraySize());
+
+    TransferResult->bytesTransferred = 0;
+
+    for (ULONG i = 0; i < urb->UrbIsochronousTransfer.NumberOfPackets; i++)
+    {
+        IsoPacketResult[i].actualLength = urb->UrbIsochronousTransfer.IsoPacket[i].Length;
+        IsoPacketResult[i].transferResult = urb->UrbIsochronousTransfer.IsoPacket[i].Status;
+        TransferResult->bytesTransferred += IsoPacketResult[i].actualLength;
+    }
+
+    auto status = CompletionParams->IoStatus.Status;
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! Request completion error %!STATUS!", status);
+    }
+    else if (!USBD_SUCCESS(urb->UrbHeader.Status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! USB request completion error %lu", urb->UrbHeader.Status);
+        status = STATUS_INVALID_DEVICE_REQUEST;
+    }
+
+    WdfRequest.SetStatus(status);
+    WdfRequest.SetOutputDataLen(urb->UrbIsochronousTransfer.TransferBufferLength);
 }
 //--------------------------------------------------------------------------------------------------
 

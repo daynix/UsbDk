@@ -98,6 +98,11 @@ private:
 
     static NTSTATUS IoInCallerContextRWControlTransfer(CRedirectorRequest &WdfRequest, USB_DK_TRANSFER_REQUEST &TransferRequest);
 
+    template <typename TLockerFunc>
+    static NTSTATUS IoInCallerContextRWIsoTransfer(CRedirectorRequest &WdfRequest, USB_DK_TRANSFER_REQUEST &TransferRequest, TLockerFunc LockerFunc);
+
+    static void IsoRWCompletion(WDFREQUEST Request, WDFIOTARGET Target, PWDF_REQUEST_COMPLETION_PARAMS Params, WDFCONTEXT Context);
+
     void PatchDeviceID(PIRP Irp);
 
     CWdfUsbTarget m_Target;

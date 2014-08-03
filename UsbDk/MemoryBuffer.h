@@ -57,6 +57,7 @@ public:
     T *operator ->() { return m_Ptr; }
     T* Ptr() const { return m_Ptr; }
     size_t Size() const { return m_Size; }
+    size_t ArraySize() const { return m_Size / sizeof(T); }
 
     CPreAllocatedWdfMemoryBufferT(const CPreAllocatedWdfMemoryBufferT&) = delete;
     CPreAllocatedWdfMemoryBufferT& operator= (const CPreAllocatedWdfMemoryBufferT&) = delete;

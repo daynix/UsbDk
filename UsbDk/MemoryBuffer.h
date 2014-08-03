@@ -45,25 +45,29 @@ protected:
     size_t m_Size;
 };
 
-class CPreAllocatedWdfMemoryBuffer
+template<typename T>
+class CPreAllocatedWdfMemoryBufferT
 {
 public:
-    CPreAllocatedWdfMemoryBuffer(WDFMEMORY MemObj)
+    CPreAllocatedWdfMemoryBufferT(WDFMEMORY MemObj)
         : m_MemObj(MemObj)
-    { m_Ptr = WdfMemoryGetBuffer(MemObj, &m_Size); }
+    { m_Ptr = reinterpret_cast<T*>(WdfMemoryGetBuffer(MemObj, &m_Size)); }
 
-    operator PVOID () const { return m_Ptr; }
-    PVOID Ptr() const { return m_Ptr; }
+    operator T* () const { return m_Ptr; }
+    T *operator ->() { return m_Ptr; }
+    T* Ptr() const { return m_Ptr; }
     size_t Size() const { return m_Size; }
 
-    CPreAllocatedWdfMemoryBuffer(const CPreAllocatedWdfMemoryBuffer&) = delete;
-    CPreAllocatedWdfMemoryBuffer& operator= (const CPreAllocatedWdfMemoryBuffer&) = delete;
+    CPreAllocatedWdfMemoryBufferT(const CPreAllocatedWdfMemoryBufferT&) = delete;
+    CPreAllocatedWdfMemoryBufferT& operator= (const CPreAllocatedWdfMemoryBufferT&) = delete;
 
 private:
     WDFMEMORY m_MemObj;
-    PVOID m_Ptr;
+    T* m_Ptr;
     size_t m_Size;
 };
+
+typedef CPreAllocatedWdfMemoryBufferT<void> CPreAllocatedWdfMemoryBuffer;
 
 class CWdfMemoryBuffer : public CMemoryBuffer
 {

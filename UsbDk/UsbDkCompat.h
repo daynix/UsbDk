@@ -51,4 +51,7 @@ typedef struct _WDF_USB_DEVICE_CREATE_CONFIG
 
 #define wcsncpy_s(T, S, N) wcsncpy(T, S, N)
 
+NTSTATUS WdfUsbTargetDeviceCreateIsochUrb(WDFUSBDEVICE UsbDevice, PWDF_OBJECT_ATTRIBUTES Attributes, ULONG NumberOfIsochPackets,
+                                          WDFMEMORY* UrbMemory, PURB *Urb);
+
 #endif

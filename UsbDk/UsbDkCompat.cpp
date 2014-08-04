@@ -22,3 +22,20 @@
 **********************************************************************/
 
 #include "stdafx.h"
+
+#if TARGET_OS_WIN_XP
+NTSTATUS WdfUsbTargetDeviceCreateIsochUrb(WDFUSBDEVICE UsbDevice, PWDF_OBJECT_ATTRIBUTES Attributes, ULONG NumberOfIsochPackets,
+    WDFMEMORY* UrbMemory, PURB *Urb)
+{
+    UNREFERENCED_PARAMETER(UsbDevice);
+
+    size_t size = GET_ISO_URB_SIZE(NumberOfIsochPackets);
+    auto status = WdfMemoryCreate(Attributes, NonPagedPool, 'SBSU', size, UrbMemory, (PVOID*)Urb);
+    if (NT_SUCCESS(status))
+    {
+        RtlZeroMemory(Urb, size);
+    }
+
+    return status;
+}
+#endif

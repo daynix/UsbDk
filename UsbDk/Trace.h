@@ -44,6 +44,7 @@
         WPP_DEFINE_BIT(TRACE_UTILS)                                    \
         WPP_DEFINE_BIT(TRACE_USBTARGET)                                \
         WPP_DEFINE_BIT(TRACE_FILTERSTRATEGY)                           \
+        WPP_DEFINE_BIT(TRACE_URB)                                      \
         )
 
 #define WPP_FLAG_LEVEL_LOGGER(flag, level)                                  \

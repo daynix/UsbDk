@@ -76,6 +76,7 @@
     <ClCompile Include="MemoryBuffer.cpp" />
     <ClCompile Include="RedirectorStrategy.cpp" />
     <ClCompile Include="RegText.cpp" />
+    <ClCompile Include="Urb.cpp" />
     <ClCompile Include="UsbDkCompat.cpp" />
     <ClCompile Include="UsbDkUtil.cpp" />
     <ClCompile Include="UsbTarget.cpp" />
@@ -96,6 +97,7 @@
     <ClInclude Include="RedirectorStrategy.h" />
     <ClInclude Include="RegText.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="Urb.h" />
     <ClInclude Include="UsbDkCompat.h" />
     <ClInclude Include="UsbDkData.h" />
     <ClInclude Include="UsbDkNames.h" />

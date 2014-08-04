@@ -24,6 +24,7 @@
 #pragma once
 
 #define ARRAY_SIZE(a) (sizeof(a)/sizeof((a)[0]))
+#define USHORT_MAX ((USHORT)(-1))
 
 class CWdmSpinLock
 {

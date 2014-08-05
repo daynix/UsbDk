@@ -74,6 +74,7 @@
     <Configuration>Win8.1 Debug</Configuration>
     <Platform Condition="'$(Platform)' == ''">Win32</Platform>
     <RootNamespace>UsbDk_Package</RootNamespace>
+    <ProjectName>UsbDk_Package</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug|Win32'" Label="Configuration">
@@ -438,175 +439,175 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win8 Debug|Win32'">
     <PostBuildEvent>
-      <Command>mkdir "$(OutDir)UsbDk Package"
-copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk Package"</Command>
+      <Command>mkdir "$(OutDir)UsbDk_Package"
+copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>IF EXIST "$(OutDir)UsbDk Package\UsbDk.inf" del "$(OutDir)UsbDk Package\UsbDk.inf"</Command>
+      <Command>IF EXIST "$(OutDir)UsbDk_Package\UsbDk.inf" del "$(OutDir)UsbDk_Package\UsbDk.inf"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|Win32'">
     <PostBuildEvent>
-      <Command>mkdir "$(OutDir)UsbDk Package"
-copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk Package"</Command>
+      <Command>mkdir "$(OutDir)UsbDk_Package"
+copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>IF EXIST "$(OutDir)UsbDk Package\UsbDk.inf" del "$(OutDir)UsbDk Package\UsbDk.inf"</Command>
+      <Command>IF EXIST "$(OutDir)UsbDk_Package\UsbDk.inf" del "$(OutDir)UsbDk_Package\UsbDk.inf"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='XP Debug|Win32'">
     <PostBuildEvent>
-      <Command>mkdir "$(OutDir)UsbDk Package"
-copy "$(ProjectDir)\..\UsbDkHelper\UsbDk_XP.inf" "$(OutDir)UsbDk Package\UsbDk.inf"
-copy "$(OutDir)UsbDk.sys" "$(OutDir)UsbDk Package"
-copy "$(OutDir)UsbDkController.exe" "$(OutDir)UsbDk Package"
-copy "$(OutDir)UsbDkHelper.dll" "$(OutDir)UsbDk Package"
-copy C:\WinDDK\7600.16385.1\redist\wdf\x86\WdfCoInstaller01009.dll "$(OutDir)UsbDk Package"
-mkdir "$(OutDir)UsbDk Package\include"
-copy "$(ProjectDir)\..\UsbDk\UsbDkData.h" "$(OutDir)UsbDk Package\include"
-copy "$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" "$(OutDir)UsbDk Package\include"</Command>
+      <Command>mkdir "$(OutDir)UsbDk_Package"
+copy "$(ProjectDir)\..\UsbDkHelper\UsbDk_XP.inf" "$(OutDir)UsbDk_Package\UsbDk.inf"
+copy "$(OutDir)UsbDk.sys" "$(OutDir)UsbDk_Package"
+copy "$(OutDir)UsbDkController.exe" "$(OutDir)UsbDk_Package"
+copy "$(OutDir)UsbDkHelper.dll" "$(OutDir)UsbDk_Package"
+copy C:\WinDDK\7600.16385.1\redist\wdf\x86\WdfCoInstaller01009.dll "$(OutDir)UsbDk_Package"
+mkdir "$(OutDir)UsbDk_Package\include"
+copy "$(ProjectDir)\..\UsbDk\UsbDkData.h" "$(OutDir)UsbDk_Package\include"
+copy "$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" "$(OutDir)UsbDk_Package\include"</Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>IF EXIST "$(OutDir)UsbDk Package\UsbDk.inf" del "$(OutDir)UsbDk Package\UsbDk.inf"</Command>
+      <Command>IF EXIST "$(OutDir)UsbDk_Package\UsbDk.inf" del "$(OutDir)UsbDk_Package\UsbDk.inf"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win7 Release|Win32'">
     <PostBuildEvent>
-      <Command>mkdir "$(OutDir)UsbDk Package"
-copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk Package"</Command>
+      <Command>mkdir "$(OutDir)UsbDk_Package"
+copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>IF EXIST "$(OutDir)UsbDk Package\UsbDk.inf" del "$(OutDir)UsbDk Package\UsbDk.inf"</Command>
+      <Command>IF EXIST "$(OutDir)UsbDk_Package\UsbDk.inf" del "$(OutDir)UsbDk_Package\UsbDk.inf"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='XP Release|Win32'">
     <PostBuildEvent>
-      <Command>mkdir "$(OutDir)UsbDk Package"
-copy "$(ProjectDir)\..\UsbDkHelper\UsbDk_XP.inf" "$(OutDir)UsbDk Package\UsbDk.inf"
-copy "$(OutDir)UsbDk.sys" "$(OutDir)UsbDk Package"
-copy "$(OutDir)UsbDkController.exe" "$(OutDir)UsbDk Package"
-copy "$(OutDir)UsbDkHelper.dll" "$(OutDir)UsbDk Package"
-copy C:\WinDDK\7600.16385.1\redist\wdf\x86\WdfCoInstaller01009.dll "$(OutDir)UsbDk Package"
-mkdir "$(OutDir)UsbDk Package\include"
-copy "$(ProjectDir)\..\UsbDk\UsbDkData.h" "$(OutDir)UsbDk Package\include"
-copy "$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" "$(OutDir)UsbDk Package\include"</Command>
+      <Command>mkdir "$(OutDir)UsbDk_Package"
+copy "$(ProjectDir)\..\UsbDkHelper\UsbDk_XP.inf" "$(OutDir)UsbDk_Package\UsbDk.inf"
+copy "$(OutDir)UsbDk.sys" "$(OutDir)UsbDk_Package"
+copy "$(OutDir)UsbDkController.exe" "$(OutDir)UsbDk_Package"
+copy "$(OutDir)UsbDkHelper.dll" "$(OutDir)UsbDk_Package"
+copy C:\WinDDK\7600.16385.1\redist\wdf\x86\WdfCoInstaller01009.dll "$(OutDir)UsbDk_Package"
+mkdir "$(OutDir)UsbDk_Package\include"
+copy "$(ProjectDir)\..\UsbDk\UsbDkData.h" "$(OutDir)UsbDk_Package\include"
+copy "$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" "$(OutDir)UsbDk_Package\include"</Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>IF EXIST "$(OutDir)UsbDk Package\UsbDk.inf" del "$(OutDir)UsbDk Package\UsbDk.inf"</Command>
+      <Command>IF EXIST "$(OutDir)UsbDk_Package\UsbDk.inf" del "$(OutDir)UsbDk_Package\UsbDk.inf"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug|Win32'">
     <PostBuildEvent>
-      <Command>mkdir "$(OutDir)UsbDk Package"
-copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk Package"</Command>
+      <Command>mkdir "$(OutDir)UsbDk_Package"
+copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>IF EXIST "$(OutDir)UsbDk Package\UsbDk.inf" del "$(OutDir)UsbDk Package\UsbDk.inf"</Command>
+      <Command>IF EXIST "$(OutDir)UsbDk_Package\UsbDk.inf" del "$(OutDir)UsbDk_Package\UsbDk.inf"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win8 Release|Win32'">
     <PostBuildEvent>
-      <Command>mkdir "$(OutDir)UsbDk Package"
-copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk Package"</Command>
+      <Command>mkdir "$(OutDir)UsbDk_Package"
+copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>IF EXIST "$(OutDir)UsbDk Package\UsbDk.inf" del "$(OutDir)UsbDk Package\UsbDk.inf"</Command>
+      <Command>IF EXIST "$(OutDir)UsbDk_Package\UsbDk.inf" del "$(OutDir)UsbDk_Package\UsbDk.inf"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win8.1 Release|Win32'">
     <PostBuildEvent>
-      <Command>mkdir "$(OutDir)UsbDk Package"
-copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk Package"</Command>
+      <Command>mkdir "$(OutDir)UsbDk_Package"
+copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>IF EXIST "$(OutDir)UsbDk Package\UsbDk.inf" del "$(OutDir)UsbDk Package\UsbDk.inf"</Command>
+      <Command>IF EXIST "$(OutDir)UsbDk_Package\UsbDk.inf" del "$(OutDir)UsbDk_Package\UsbDk.inf"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win8 Debug|x64'">
     <PostBuildEvent>
-      <Command>mkdir "$(OutDir)UsbDk Package"
-copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk Package"</Command>
+      <Command>mkdir "$(OutDir)UsbDk_Package"
+copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>IF EXIST "$(OutDir)UsbDk Package\UsbDk.inf" del "$(OutDir)UsbDk Package\UsbDk.inf"</Command>
+      <Command>IF EXIST "$(OutDir)UsbDk_Package\UsbDk.inf" del "$(OutDir)UsbDk_Package\UsbDk.inf"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
     <PostBuildEvent>
-      <Command>mkdir "$(OutDir)UsbDk Package"
-copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk Package"</Command>
+      <Command>mkdir "$(OutDir)UsbDk_Package"
+copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>IF EXIST "$(OutDir)UsbDk Package\UsbDk.inf" del "$(OutDir)UsbDk Package\UsbDk.inf"</Command>
+      <Command>IF EXIST "$(OutDir)UsbDk_Package\UsbDk.inf" del "$(OutDir)UsbDk_Package\UsbDk.inf"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='XP Debug|x64'">
     <PostBuildEvent>
-      <Command>mkdir "$(OutDir)UsbDk Package"
-copy "$(ProjectDir)\..\UsbDkHelper\UsbDk_XP.inf" "$(OutDir)UsbDk Package\UsbDk.inf"
-copy "$(OutDir)UsbDk.sys" "$(OutDir)UsbDk Package"
-copy "$(OutDir)UsbDkController.exe" "$(OutDir)UsbDk Package"
-copy "$(OutDir)UsbDkHelper.dll" "$(OutDir)UsbDk Package"
-copy C:\WinDDK\7600.16385.1\redist\wdf\amd64\WdfCoInstaller01009.dll "$(OutDir)UsbDk Package"
-mkdir "$(OutDir)UsbDk Package\include"
-copy "$(ProjectDir)\..\UsbDk\UsbDkData.h" "$(OutDir)UsbDk Package\include"
-copy "$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" "$(OutDir)UsbDk Package\include"</Command>
+      <Command>mkdir "$(OutDir)UsbDk_Package"
+copy "$(ProjectDir)\..\UsbDkHelper\UsbDk_XP.inf" "$(OutDir)UsbDk_Package\UsbDk.inf"
+copy "$(OutDir)UsbDk.sys" "$(OutDir)UsbDk_Package"
+copy "$(OutDir)UsbDkController.exe" "$(OutDir)UsbDk_Package"
+copy "$(OutDir)UsbDkHelper.dll" "$(OutDir)UsbDk_Package"
+copy C:\WinDDK\7600.16385.1\redist\wdf\amd64\WdfCoInstaller01009.dll "$(OutDir)UsbDk_Package"
+mkdir "$(OutDir)UsbDk_Package\include"
+copy "$(ProjectDir)\..\UsbDk\UsbDkData.h" "$(OutDir)UsbDk_Package\include"
+copy "$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" "$(OutDir)UsbDk_Package\include"</Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>IF EXIST "$(OutDir)UsbDk Package\UsbDk.inf" del "$(OutDir)UsbDk Package\UsbDk.inf"</Command>
+      <Command>IF EXIST "$(OutDir)UsbDk_Package\UsbDk.inf" del "$(OutDir)UsbDk_Package\UsbDk.inf"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win7 Release|x64'">
     <PostBuildEvent>
-      <Command>mkdir "$(OutDir)UsbDk Package"
-copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk Package"</Command>
+      <Command>mkdir "$(OutDir)UsbDk_Package"
+copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>IF EXIST "$(OutDir)UsbDk Package\UsbDk.inf" del "$(OutDir)UsbDk Package\UsbDk.inf"</Command>
+      <Command>IF EXIST "$(OutDir)UsbDk_Package\UsbDk.inf" del "$(OutDir)UsbDk_Package\UsbDk.inf"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='XP Release|x64'">
     <PostBuildEvent>
-      <Command>mkdir "$(OutDir)UsbDk Package"
-copy "$(ProjectDir)\..\UsbDkHelper\UsbDk_XP.inf" "$(OutDir)UsbDk Package\UsbDk.inf"
-copy "$(OutDir)UsbDk.sys" "$(OutDir)UsbDk Package"
-copy "$(OutDir)UsbDkController.exe" "$(OutDir)UsbDk Package"
-copy "$(OutDir)UsbDkHelper.dll" "$(OutDir)UsbDk Package"
-copy C:\WinDDK\7600.16385.1\redist\wdf\amd64\WdfCoInstaller01009.dll "$(OutDir)UsbDk Package"
-mkdir "$(OutDir)UsbDk Package\include"
-copy "$(ProjectDir)\..\UsbDk\UsbDkData.h" "$(OutDir)UsbDk Package\include"
-copy "$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" "$(OutDir)UsbDk Package\include"
+      <Command>mkdir "$(OutDir)UsbDk_Package"
+copy "$(ProjectDir)\..\UsbDkHelper\UsbDk_XP.inf" "$(OutDir)UsbDk_Package\UsbDk.inf"
+copy "$(OutDir)UsbDk.sys" "$(OutDir)UsbDk_Package"
+copy "$(OutDir)UsbDkController.exe" "$(OutDir)UsbDk_Package"
+copy "$(OutDir)UsbDkHelper.dll" "$(OutDir)UsbDk_Package"
+copy C:\WinDDK\7600.16385.1\redist\wdf\amd64\WdfCoInstaller01009.dll "$(OutDir)UsbDk_Package"
+mkdir "$(OutDir)UsbDk_Package\include"
+copy "$(ProjectDir)\..\UsbDk\UsbDkData.h" "$(OutDir)UsbDk_Package\include"
+copy "$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" "$(OutDir)UsbDk_Package\include"
 </Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>IF EXIST "$(OutDir)UsbDk Package\UsbDk.inf" del "$(OutDir)UsbDk Package\UsbDk.inf"</Command>
+      <Command>IF EXIST "$(OutDir)UsbDk_Package\UsbDk.inf" del "$(OutDir)UsbDk_Package\UsbDk.inf"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug|x64'">
     <PostBuildEvent>
-      <Command>mkdir "$(OutDir)UsbDk Package"
-copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk Package"</Command>
+      <Command>mkdir "$(OutDir)UsbDk_Package"
+copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>IF EXIST "$(OutDir)UsbDk Package\UsbDk.inf" del "$(OutDir)UsbDk Package\UsbDk.inf"</Command>
+      <Command>IF EXIST "$(OutDir)UsbDk_Package\UsbDk.inf" del "$(OutDir)UsbDk_Package\UsbDk.inf"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win8 Release|x64'">
     <PostBuildEvent>
-      <Command>mkdir "$(OutDir)UsbDk Package"
-copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk Package"</Command>
+      <Command>mkdir "$(OutDir)UsbDk_Package"
+copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>IF EXIST "$(OutDir)UsbDk Package\UsbDk.inf" del "$(OutDir)UsbDk Package\UsbDk.inf"</Command>
+      <Command>IF EXIST "$(OutDir)UsbDk_Package\UsbDk.inf" del "$(OutDir)UsbDk_Package\UsbDk.inf"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win8.1 Release|x64'">
     <PostBuildEvent>
-      <Command>mkdir "$(OutDir)UsbDk Package"
-copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk Package"</Command>
+      <Command>mkdir "$(OutDir)UsbDk_Package"
+copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>IF EXIST "$(OutDir)UsbDk Package\UsbDk.inf" del "$(OutDir)UsbDk Package\UsbDk.inf"</Command>
+      <Command>IF EXIST "$(OutDir)UsbDk_Package\UsbDk.inf" del "$(OutDir)UsbDk_Package\UsbDk.inf"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

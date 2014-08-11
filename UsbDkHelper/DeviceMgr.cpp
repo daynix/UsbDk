@@ -26,7 +26,7 @@
 
 #include <cfgmgr32.h>
 
-InstallResult DeviceMgr::ResetDeviceByClass(const GUID &ClassGuid)
+bool DeviceMgr::ResetDeviceByClass(const GUID &ClassGuid)
 {
     auto hDevInfo = SetupDiGetClassDevsEx(&ClassGuid, nullptr, nullptr, DIGCF_DEVICEINTERFACE | DIGCF_PRESENT, nullptr, nullptr, nullptr);
     if (hDevInfo == INVALID_HANDLE_VALUE)
@@ -34,28 +34,24 @@ InstallResult DeviceMgr::ResetDeviceByClass(const GUID &ClassGuid)
         throw UsbDkDeviceMgrException(TEXT("SetupDiGetClassDevsEx() failed!!"));
     }
 
-    InstallResult   installRes = InstallSuccess;
     SP_DEVINFO_DATA devInfo;
     devInfo.cbSize = sizeof(devInfo);
     for (DWORD devIndex = 0; SetupDiEnumDeviceInfo(hDevInfo, devIndex, &devInfo); devIndex++)
     {
-        installRes = ResetDevice(hDevInfo, &devInfo);
-        if (installRes != InstallSuccess)
+        if (!ResetDevice(hDevInfo, &devInfo))
         {
-            break;
+            return false;
         }
     }
 
     SetupDiDestroyDeviceInfoList(hDevInfo);
 
-    return installRes;
+    return true;
 }
 //--------------------------------------------------------------------------------
 
-InstallResult DeviceMgr::ResetDevice(HDEVINFO devs, PSP_DEVINFO_DATA devInfo)
+bool DeviceMgr::ResetDevice(HDEVINFO devs, PSP_DEVINFO_DATA devInfo)
 {
-    InstallResult installRes = InstallSuccess;
-
     SP_PROPCHANGE_PARAMS pcParams;
     pcParams.ClassInstallHeader.cbSize = sizeof(SP_CLASSINSTALL_HEADER);
     pcParams.ClassInstallHeader.InstallFunction = DIF_PROPERTYCHANGE;
@@ -66,7 +62,7 @@ InstallResult DeviceMgr::ResetDevice(HDEVINFO devs, PSP_DEVINFO_DATA devInfo)
     if (!SetupDiSetClassInstallParams(devs, devInfo, &pcParams.ClassInstallHeader, sizeof(pcParams)) ||
         !SetupDiCallClassInstaller(DIF_PROPERTYCHANGE, devs, devInfo))
     {
-        installRes = InstallFailureNeedReboot;
+        return false;
     }
     else
     {
@@ -74,10 +70,10 @@ InstallResult DeviceMgr::ResetDevice(HDEVINFO devs, PSP_DEVINFO_DATA devInfo)
         devInstallParams.cbSize = sizeof(devInstallParams);
         if (SetupDiGetDeviceInstallParams(devs, devInfo, &devInstallParams) && (devInstallParams.Flags & (DI_NEEDRESTART | DI_NEEDREBOOT)))
         {
-            installRes = InstallFailureNeedReboot;
+            return false;
         }
     }
 
-    return installRes;
+    return true;
 }
 //--------------------------------------------------------------------------------

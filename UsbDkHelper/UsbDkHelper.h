@@ -40,7 +40,7 @@
 typedef enum
 {
     InstallFailure,
-    InstallFailureNeedReboot,
+    InstallSuccessNeedReboot,
     InstallSuccess
 } InstallResult;
 

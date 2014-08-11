@@ -50,15 +50,14 @@ bool UsbDkInstaller::Install(bool &NeedRollBack)
     auto driverLocation = CopyDriver();
     NeedRollBack = true;
     auto infFilePath = buildInfFilePath();
-    if (m_wdfCoinstaller.PreDeviceInstallEx(infFilePath))
-    {
-        m_scManager.CreateServiceObject(USBDK_DRIVER_NAME, driverLocation.c_str());
-        m_wdfCoinstaller.PostDeviceInstall(infFilePath);
-        addUsbDkToRegistry();
-        DeviceMgr::ResetDeviceByClass(GUID_DEVINTERFACE_USB_HOST_CONTROLLER);
-        return true;
-    }
-    return false;
+
+    auto rebootRequired = !m_wdfCoinstaller.PreDeviceInstallEx(infFilePath);
+
+    m_scManager.CreateServiceObject(USBDK_DRIVER_NAME, driverLocation.c_str());
+    m_wdfCoinstaller.PostDeviceInstall(infFilePath);
+    addUsbDkToRegistry();
+
+    return rebootRequired ? false : DeviceMgr::ResetDeviceByClass(GUID_DEVINTERFACE_USB_HOST_CONTROLLER);
 }
 //--------------------------------------------------------------------------------
 

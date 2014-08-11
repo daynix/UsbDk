@@ -43,8 +43,8 @@ public:
 class DeviceMgr
 {
 public:
-    static InstallResult    ResetDeviceByClass(const GUID &ClassGuid);
+    static bool    ResetDeviceByClass(const GUID &ClassGuid);
 private:
-    static InstallResult    ResetDevice(HDEVINFO devs, PSP_DEVINFO_DATA devInfo);
+    static bool    ResetDevice(HDEVINFO devs, PSP_DEVINFO_DATA devInfo);
 };
 //-----------------------------------------------------------------------------------

@@ -53,8 +53,8 @@ void Controller_InstallDriver()
     case InstallFailure:
         tcout << TEXT("UsbDk driver installation failed") << endl;
         break;
-    case InstallFailureNeedReboot:
-        tcout << TEXT("UsbDk driver installation failed. Reboot your machine") << endl;
+    case InstallSuccessNeedReboot:
+        tcout << TEXT("UsbDk driver installation succeeded but reboot is required in order to make it functional.") << endl;
         break;
     default:
         tcout << TEXT("UsbDk driver installation returns unknown value") << endl;

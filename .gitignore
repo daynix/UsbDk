@@ -6,3 +6,12 @@ Win*Release
 *.ipch
 *.vcxproj.user
 build*.log
+resource.h
+Resource.aps
+Install
+Install_debug
+XP Debug
+XP Release
+XPDebug
+XPRelease
+x64

@@ -259,6 +259,7 @@ void CUsbDkHubFilterStrategy::ApplyRedirectionPolicy(CUsbDkChildDevice &Device)
     }
     else
     {
+        m_ControlDevice->NotifyRedirectionRemoved(Device);
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Adding new PDO 0x%p as non-redirected initially", Device.PDO());
     }
 }
@@ -426,8 +427,6 @@ bool CUsbDkFilterDevice::CStrategist::SelectStrategy(PDEVICE_OBJECT DevObj)
     if (!m_Strategy->GetControlDevice()->ShouldRedirect(ID))
     {
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Do not redirect or already redirected device, no strategy assigned");
-        m_Strategy->GetControlDevice()->NotifyRedirectionRemoved(ID);
-
         return false;
     }
 

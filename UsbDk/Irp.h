@@ -98,29 +98,3 @@ private:
     void DestroyIrp();
     void ReleaseTarget();
 };
-//-------------------------------------------------------------------------------------------------
-
-class CIoControlIrp : public CIrpBase
-{
-public:
-    CIoControlIrp() {}
-    ~CIoControlIrp();
-
-    NTSTATUS Create(PDEVICE_OBJECT TargetDevice,
-                    ULONG IoControlCode,
-                    bool IsInternal = true,
-                    PVOID InputBuffer = nullptr,
-                    ULONG InputBufferLength = 0,
-                    PVOID OutputBuffer = nullptr,
-                    ULONG OutputBufferLength = 0);
-    void Destroy();
-    NTSTATUS SendSynchronously();
-
-    CIoControlIrp(const CIoControlIrp&) = delete;
-    CIoControlIrp& operator= (const CIoControlIrp&) = delete;
-
-private:
-    CWdmEvent m_Event;
-    IO_STATUS_BLOCK m_IoControlStatus;
-};
-//-------------------------------------------------------------------------------------------------

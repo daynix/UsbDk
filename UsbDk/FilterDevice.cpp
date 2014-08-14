@@ -239,9 +239,9 @@ void CUsbDkHubFilterStrategy::RegisterNewChild(PDEVICE_OBJECT PDO)
     DevID.detach();
     InstanceID.detach();
 
-    ApplyRedirectionPolicy(*Device);
-
     Children().PushBack(Device);
+
+    ApplyRedirectionPolicy(*Device);
 }
 
 void CUsbDkHubFilterStrategy::ApplyRedirectionPolicy(CUsbDkChildDevice &Device)

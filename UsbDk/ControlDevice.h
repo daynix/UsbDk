@@ -52,7 +52,6 @@ private:
     static void CountDevices(CWdfRequest &Request, WDFQUEUE Queue);
     static void EnumerateDevices(CWdfRequest &Request, WDFQUEUE Queue);
     static void GetConfigurationDescriptor(CWdfRequest &Request, WDFQUEUE Queue);
-    static void RemoveRedirect(CWdfRequest &Request, WDFQUEUE Queue);
 
     typedef NTSTATUS(CUsbDkControlDevice::*USBDevControlMethod)(const USB_DK_DEVICE_ID&);
     static void DoUSBDeviceOp(CWdfRequest &Request, WDFQUEUE Queue, USBDevControlMethod Method);

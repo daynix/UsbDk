@@ -88,11 +88,6 @@ void CUsbDkControlDeviceQueue::DeviceControl(WDFQUEUE Queue,
             EnumerateDevices(WdfRequest, Queue);
             break;
         }
-        case IOCTL_USBDK_REMOVE_REDIRECT:
-        {
-            RemoveRedirect(WdfRequest, Queue);
-            break;
-        }
         case IOCTL_USBDK_GET_CONFIG_DESCRIPTOR:
         {
             GetConfigurationDescriptor(WdfRequest, Queue);
@@ -209,12 +204,6 @@ void CUsbDkControlDeviceQueue::DoUSBDeviceOp(CWdfRequest &Request, WDFQUEUE Queu
 void CUsbDkControlDeviceQueue::GetConfigurationDescriptor(CWdfRequest &Request, WDFQUEUE Queue)
 {
     DoUSBDeviceOp<USB_DK_CONFIG_DESCRIPTOR_REQUEST, USB_CONFIGURATION_DESCRIPTOR>(Request, Queue, &CUsbDkControlDevice::GetConfigurationDescriptor);
-}
-//------------------------------------------------------------------------------------------------------------
-
-void CUsbDkControlDeviceQueue::RemoveRedirect(CWdfRequest &Request, WDFQUEUE Queue)
-{
-    DoUSBDeviceOp(Request, Queue, &CUsbDkControlDevice::RemoveRedirect);
 }
 //------------------------------------------------------------------------------------------------------------
 

@@ -53,7 +53,6 @@ public:
     static void ReleaseConfigurationDescriptor(PUSB_CONFIGURATION_DESCRIPTOR Descriptor);
 
     HANDLE AddRedirect(USB_DK_DEVICE_ID &DeviceID);
-    void RemoveRedirect(USB_DK_DEVICE_ID &DeviceID);
 
 private:
     template <typename TOutputObj = char>

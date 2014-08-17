@@ -96,9 +96,3 @@ HANDLE UsbDkDriverAccess::AddRedirect(USB_DK_DEVICE_ID &DeviceID)
     return reinterpret_cast<HANDLE>(RedirectorHandle);
 }
 //------------------------------------------------------------------------------------------------
-
-void UsbDkDriverAccess::RemoveRedirect(USB_DK_DEVICE_ID &DeviceID)
-{
-    SendIoctlWithDeviceId(IOCTL_USBDK_REMOVE_REDIRECT, DeviceID);
-}
-//------------------------------------------------------------------------------------------------

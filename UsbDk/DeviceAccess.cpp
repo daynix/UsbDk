@@ -299,27 +299,20 @@ NTSTATUS CWdmDeviceAccess::QueryForInterface(const GUID &guid, __out INTERFACE &
 
 NTSTATUS CWdmUsbDeviceAccess::Reset()
 {
-    CIrp irp;
-
-    auto status = irp.Create(m_DevObj);
+    CIoControlIrp Irp;
+    auto status = Irp.Create(m_DevObj, IOCTL_INTERNAL_USB_CYCLE_PORT);
 
     if (!NT_SUCCESS(status))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVACCESS, "%!FUNC! Error %!STATUS! during IRP creation", status);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVACCESS, "%!FUNC! Error %!STATUS! during IOCTL IRP creation", status);
         return status;
     }
 
-    irp.Configure([](PIO_STACK_LOCATION s)
-    {
-        s->MajorFunction = IRP_MJ_INTERNAL_DEVICE_CONTROL;
-        s->Parameters.DeviceIoControl.IoControlCode = IOCTL_INTERNAL_USB_CYCLE_PORT;
-    });
-
-    status = irp.SendSynchronously();
+    status = Irp.SendSynchronously();
 
     if (!NT_SUCCESS(status))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVACCESS, "%!FUNC! Error %!STATUS!", status);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVACCESS, "%!FUNC! Send IOCTL IRP Error %!STATUS!", status);
     }
 
     return status;
@@ -445,28 +438,22 @@ bool UsbDkGetWdmDeviceIdentity(const PDEVICE_OBJECT PDO,
 
 NTSTATUS UsbDkSendUrbSynchronously(PDEVICE_OBJECT Target, URB &Urb)
 {
-    CIrp irp;
-
-    auto status = irp.Create(Target);
-
+    CIoControlIrp Irp;
+    auto status = Irp.Create(Target, IOCTL_INTERNAL_USB_SUBMIT_URB);
     if (!NT_SUCCESS(status))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVACCESS, "%!FUNC! Error %!STATUS! during IRP creation", status);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVACCESS, "%!FUNC! Error %!STATUS! during IOCTL IRP creation", status);
         return status;
     }
 
-    irp.Configure([&Urb](PIO_STACK_LOCATION s)
-    {
-        s->MajorFunction = IRP_MJ_INTERNAL_DEVICE_CONTROL;
-        s->Parameters.DeviceIoControl.IoControlCode = IOCTL_INTERNAL_USB_SUBMIT_URB;
-        s->Parameters.Others.Argument1 = (PVOID)&Urb;
-    });
+    Irp.Configure([&Urb] (PIO_STACK_LOCATION s)
+                  { s->Parameters.Others.Argument1 = &Urb; });
 
-    status = irp.SendSynchronously();
+    status = Irp.SendSynchronously();
 
     if (!NT_SUCCESS(status))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVACCESS, "%!FUNC! Error %!STATUS!", status);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVACCESS, "%!FUNC! Send URB IRP Error %!STATUS!", status);
     }
 
     return status;

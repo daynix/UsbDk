@@ -72,3 +72,59 @@ NTSTATUS CIrp::Create(PDEVICE_OBJECT TargetDevice)
     m_TargetDevice = TargetDevice;
     return STATUS_SUCCESS;
 }
+
+CIoControlIrp::~CIoControlIrp()
+{
+    if (m_TargetDevice != nullptr)
+    {
+        Destroy();
+    }
+}
+
+void CIoControlIrp::Destroy()
+{
+    ASSERT(m_TargetDevice != nullptr);
+
+    ObDereferenceObject(m_TargetDevice);
+    m_TargetDevice = nullptr;
+}
+
+NTSTATUS CIoControlIrp::Create(PDEVICE_OBJECT TargetDevice,
+                               ULONG IoControlCode,
+                               bool IsInternal,
+                               PVOID InputBuffer,
+                               ULONG InputBufferLength,
+                               PVOID OutputBuffer,
+                               ULONG OutputBufferLength)
+{
+    m_Irp = IoBuildDeviceIoControlRequest(IoControlCode,
+                                          TargetDevice,
+                                          InputBuffer,
+                                          InputBufferLength,
+                                          OutputBuffer,
+                                          OutputBufferLength,
+                                          IsInternal ? TRUE : FALSE,
+                                          m_Event,
+                                          &m_IoControlStatus);
+
+    if (m_Irp == nullptr)
+    {
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+
+    ObReferenceObject(TargetDevice);
+    m_TargetDevice = TargetDevice;
+    return STATUS_SUCCESS;
+}
+
+NTSTATUS CIoControlIrp::SendSynchronously()
+{
+    auto res = IoCallDriver(m_TargetDevice, m_Irp);
+    if (res == STATUS_PENDING)
+    {
+        KeWaitForSingleObject(&m_Event, Executive, KernelMode, FALSE, nullptr);
+        return m_IoControlStatus.Status;
+    }
+
+    return res;
+}

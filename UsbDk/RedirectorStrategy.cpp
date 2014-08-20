@@ -207,7 +207,7 @@ class CRedirectorRequest : public CWdfRequest
 public:
     CRedirectorRequest(WDFREQUEST Request)
         : CWdfRequest(Request)
-    {}
+    { CWdfRequest::SetOutputDataLen(sizeof(USB_DK_TRANSFER_REQUEST)); }
 
     PUSBDK_REDIRECTOR_REQUEST_CONTEXT Context()
     { return reinterpret_cast<PUSBDK_REDIRECTOR_REQUEST_CONTEXT>(UsbDkFilterRequestGetContext(m_Request)); }
@@ -227,6 +227,9 @@ public:
     }
 
 private:
+    void SetOutputDataLen(size_t lenBytes);
+    void SetBytesWritten(size_t numBytes);
+    void SetBytesRead(size_t numBytes);
 
     template<typename TWdfRequestBufferRetriever>
     static NTSTATUS FetchTransferRequest(USB_DK_TRANSFER_REQUEST &Request,
@@ -483,10 +486,14 @@ void CUsbDkRedirectorStrategy::DoControlTransfer(CRedirectorRequest &WdfRequest,
                                   {
                                          UNREFERENCED_PARAMETER(Target);
                                          UNREFERENCED_PARAMETER(Context);
-                                         CWdfRequest WdfRequest(Request);
+
+                                         CRedirectorRequest WdfRequest(Request);
+                                         auto RequestContext = WdfRequest.Context();
+                                         CPreAllocatedWdfMemoryBufferT<USB_DK_TRANSFER_RESULT> ResultBuffer(RequestContext->LockedResultBuffer);
 
                                          auto status = Params->IoStatus.Status;
                                          auto usbCompletionParams = Params->Parameters.Usb.Completion;
+                                         ResultBuffer->bytesTransferred = usbCompletionParams->Parameters.DeviceControlTransfer.Length + sizeof(WDF_USB_CONTROL_SETUP_PACKET);
 
                                          if (!NT_SUCCESS(status))
                                          {
@@ -495,10 +502,8 @@ void CUsbDkRedirectorStrategy::DoControlTransfer(CRedirectorRequest &WdfRequest,
                                          }
 
                                          WdfRequest.SetStatus(status);
-                                         WdfRequest.SetOutputDataLen(usbCompletionParams->Parameters.DeviceControlTransfer.Length + sizeof(WDF_USB_CONTROL_SETUP_PACKET));
                                   });
 
-    WdfRequest.SetOutputDataLen(0);
     WdfRequest.SetStatus(status);
 }
 //--------------------------------------------------------------------------------------------------
@@ -580,7 +585,6 @@ void CUsbDkRedirectorStrategy::WritePipe(WDFREQUEST Request, size_t Length)
                                         }
 
                                         WdfRequest.SetStatus(status);
-                                        WdfRequest.SetBytesWritten(sizeof(USB_DK_TRANSFER_REQUEST));
                                     });
         }
         else
@@ -645,7 +649,6 @@ void CUsbDkRedirectorStrategy::ReadPipe(WDFREQUEST Request, size_t Length)
                                         }
 
                                         WdfRequest.SetStatus(status);
-                                        WdfRequest.SetBytesRead(sizeof(USB_DK_TRANSFER_REQUEST));
                                     });
         }
         else
@@ -709,7 +712,6 @@ void CUsbDkRedirectorStrategy::IsoRWCompletion(WDFREQUEST Request, WDFIOTARGET, 
     }
 
     WdfRequest.SetStatus(status);
-    WdfRequest.SetOutputDataLen(urb->UrbIsochronousTransfer.TransferBufferLength);
 }
 //--------------------------------------------------------------------------------------------------
 

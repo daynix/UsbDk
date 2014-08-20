@@ -169,6 +169,9 @@ NTSTATUS CWdmDeviceAccess::QueryCapabilities(DEVICE_CAPABILITIES &Capabilities)
 
     Capabilities = {};
     Capabilities.Size = sizeof(Capabilities);
+    Capabilities.Version = 1;
+    Capabilities.Address = 0xFFFFFFFF;
+    Capabilities.UINumber = 0xFFFFFFFF;
 
     irp.Configure([&Capabilities](PIO_STACK_LOCATION s)
                   {

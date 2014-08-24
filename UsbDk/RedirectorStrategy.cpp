@@ -497,7 +497,7 @@ void CUsbDkRedirectorStrategy::DoControlTransfer(CRedirectorRequest &WdfRequest,
 
                                          auto status = Params->IoStatus.Status;
                                          auto usbCompletionParams = Params->Parameters.Usb.Completion;
-                                         ResultBuffer->bytesTransferred = usbCompletionParams->Parameters.DeviceControlTransfer.Length + sizeof(WDF_USB_CONTROL_SETUP_PACKET);
+                                         ResultBuffer->bytesTransferred = usbCompletionParams->Parameters.DeviceControlTransfer.Length;
 
                                          if (!NT_SUCCESS(status))
                                          {

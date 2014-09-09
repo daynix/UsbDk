@@ -83,8 +83,11 @@ public:
         }
     }
 
-    void operator= (T *ptr)
-    { m_Obj = ptr; }
+    T* operator= (T *ptr)
+    {
+      m_Obj = ptr;
+      return ptr;
+    }
 
     static void ArrayHolderDelete(T *Obj)
     { delete[] Obj; }

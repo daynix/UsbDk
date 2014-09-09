@@ -231,8 +231,22 @@ void CUsbDkHubFilterStrategy::RegisterNewChild(PDEVICE_OBJECT PDO)
     DevID->Dump();
     InstanceID->Dump();
 
+    CUsbDkChildDevice::TDescriptorsCache CfgDescriptors(DevDescriptor.bNumConfigurations);
+
+    if (!CfgDescriptors.Create())
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Cannot create descriptors cache");
+        return;
+    }
+
+    if (!FetchConfigurationDescriptors(pdoAccess, CfgDescriptors))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Cannot fetch configuration descriptors");
+        return;
+    }
+
     CUsbDkChildDevice *Device = new CUsbDkChildDevice(DevID, InstanceID, Port, Speed, DevDescriptor,
-                                                      *m_Owner, PDO);
+                                                      CfgDescriptors, *m_Owner, PDO);
 
     if (Device == nullptr)
     {
@@ -246,6 +260,40 @@ void CUsbDkHubFilterStrategy::RegisterNewChild(PDEVICE_OBJECT PDO)
     Children().PushBack(Device);
 
     ApplyRedirectionPolicy(*Device);
+}
+
+bool CUsbDkHubFilterStrategy::FetchConfigurationDescriptors(CWdmUsbDeviceAccess &devAccess,
+                                                            CUsbDkChildDevice::TDescriptorsCache &DescriptorsHolder)
+{
+    for (size_t i = 0; i < DescriptorsHolder.Size(); i++)
+    {
+        USB_CONFIGURATION_DESCRIPTOR Descriptor;
+        auto status = devAccess.GetConfigurationDescriptor(static_cast<UCHAR>(i), Descriptor, sizeof(Descriptor));
+
+        if (!NT_SUCCESS(status))
+        {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Failed to read header for configuration descriptor %llu: %!STATUS!", i, status);
+            return false;
+        }
+
+        if(!DescriptorsHolder.EmplaceEntry(i, Descriptor.wTotalLength,
+                                           [&devAccess, &Descriptor, i](PUCHAR Buffer) -> bool
+                                           {
+                                                auto status = devAccess.GetConfigurationDescriptor(static_cast<UCHAR>(i),
+                                                                                                   *reinterpret_cast<PUSB_CONFIGURATION_DESCRIPTOR>(Buffer),
+                                                                                                   Descriptor.wTotalLength);
+                                                if (!NT_SUCCESS(status))
+                                                {
+                                                    TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Failed to read configuration descriptor %llu: %!STATUS!", i, status);
+                                                    return false;
+                                                }
+                                                return true;
+                                           }))
+        {
+            return false;
+        }
+    }
+    return true;
 }
 
 void CUsbDkHubFilterStrategy::ApplyRedirectionPolicy(CUsbDkChildDevice &Device)

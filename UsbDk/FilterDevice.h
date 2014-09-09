@@ -46,11 +46,15 @@ WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(USBDK_FILTER_DEVICE_EXTENSION, UsbDkFilterGet
 class CUsbDkChildDevice : public CAllocatable<NonPagedPool, 'DCHR'>
 {
 public:
+
+    typedef CBufferSet<NonPagedPool, 'CCHR', UCHAR> TDescriptorsCache;
+
     CUsbDkChildDevice(CRegText *DeviceID,
                       CRegText *InstanceID,
                       ULONG Port,
                       USB_DK_DEVICE_SPEED Speed,
                       USB_DEVICE_DESCRIPTOR &DevDescriptor,
+                      TDescriptorsCache &CfgDescriptors,
                       const CUsbDkFilterDevice &ParentDevice,
                       PDEVICE_OBJECT PDO)
         : m_DeviceID(DeviceID)
@@ -58,6 +62,7 @@ public:
         , m_Port(Port)
         , m_Speed(Speed)
         , m_DevDescriptor(DevDescriptor)
+        , m_CfgDescriptors(CfgDescriptors)
         , m_ParentDevice(ParentDevice)
         , m_PDO(PDO)
     {}
@@ -72,6 +77,16 @@ public:
     const USB_DEVICE_DESCRIPTOR &DeviceDescriptor() const
     { return m_DevDescriptor; }
     PDEVICE_OBJECT PDO() const { return m_PDO; }
+
+    bool ConfigurationDescriptor(UCHAR Index, USB_CONFIGURATION_DESCRIPTOR &Buffer, size_t BufferLength)
+    {
+        if (Index < m_CfgDescriptors.Size())
+        {
+            m_CfgDescriptors.CopyEntry(Index, (PVOID)&Buffer, BufferLength);
+            return true;
+        }
+        return false;
+    }
 
     bool Match(PCWCHAR deviceID, PCWCHAR instanceID) const
     { return m_DeviceID->Match(deviceID) && m_InstanceID->Match(instanceID); }
@@ -89,6 +104,7 @@ private:
     ULONG m_Port;
     USB_DK_DEVICE_SPEED m_Speed;
     USB_DEVICE_DESCRIPTOR m_DevDescriptor;
+    TDescriptorsCache m_CfgDescriptors;
     PDEVICE_OBJECT m_PDO;
     const CUsbDkFilterDevice &m_ParentDevice;
 
@@ -101,6 +117,7 @@ private:
 };
 
 class CDeviceRelations;
+class CWdmUsbDeviceAccess;
 
 class CUsbDkHubFilterStrategy : public CUsbDkFilterStrategy
 {
@@ -116,6 +133,8 @@ private:
     void AddNewDevices(const CDeviceRelations &Relations);
     void RegisterNewChild(PDEVICE_OBJECT PDO);
     void ApplyRedirectionPolicy(CUsbDkChildDevice &Device);
+    bool FetchConfigurationDescriptors(CWdmUsbDeviceAccess &devAccess,
+                                       CUsbDkChildDevice::TDescriptorsCache &DescriptorsHolder);
 
     bool IsChildRegistered(PDEVICE_OBJECT PDO)
     { return !Children().ForEachIf([PDO](CUsbDkChildDevice *Child){ return Child->Match(PDO); }, ConstFalse); }

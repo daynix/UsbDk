@@ -299,17 +299,18 @@ NTSTATUS CUsbDkControlDevice::GetUsbDeviceConfigurationDescriptor(const USB_DK_D
                                                                   USB_CONFIGURATION_DESCRIPTOR &Descriptor,
                                                                   size_t Length)
 {
-    PDEVICE_OBJECT PDO = GetPDOByDeviceID(DeviceID);
-    if (PDO == nullptr)
+    bool result = false;
+
+    if (EnumUsbDevicesByID(DeviceID, [&result, DescriptorIndex, &Descriptor, Length](CUsbDkChildDevice *Child) -> bool
+                                     {
+                                        result = Child->ConfigurationDescriptor(DescriptorIndex, Descriptor, Length);
+                                        return false;
+                                     }))
     {
         return STATUS_NOT_FOUND;
     }
 
-    CWdmUsbDeviceAccess pdoAccess(PDO);
-    auto status = pdoAccess.GetConfigurationDescriptor(DescriptorIndex, Descriptor, Length);
-    ObDereferenceObject(PDO);
-
-    return status;
+    return result ? STATUS_SUCCESS : STATUS_INVALID_DEVICE_REQUEST;
 }
 //------------------------------------------------------------------------------------------------------------
 

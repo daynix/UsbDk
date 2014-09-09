@@ -183,6 +183,10 @@ NTSTATUS CUsbDkRedirectorStrategy::PNPPreProcess(PIRP Irp)
                                     {
                                         auto irpStack = IoGetCurrentIrpStackLocation(Irp);
                                         irpStack->Parameters.DeviceCapabilities.Capabilities->RawDeviceOK = 1;
+                                        irpStack->Parameters.DeviceCapabilities.Capabilities->NoDisplayInUI = 1;
+                                        irpStack->Parameters.DeviceCapabilities.Capabilities->Removable = 0;
+                                        irpStack->Parameters.DeviceCapabilities.Capabilities->EjectSupported = 0;
+                                        irpStack->Parameters.DeviceCapabilities.Capabilities->SilentInstall = 1;
                                     });
     default:
         return CUsbDkFilterStrategy::PNPPreProcess(Irp);

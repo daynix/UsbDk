@@ -227,6 +227,10 @@ void CUsbDkHubFilterStrategy::RegisterNewChild(PDEVICE_OBJECT PDO)
         return;
     }
 
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Registering new child");
+    DevID->Dump();
+    InstanceID->Dump();
+
     CUsbDkChildDevice *Device = new CUsbDkChildDevice(DevID, InstanceID, Port, Speed, DevDescriptor,
                                                       *m_Owner, PDO);
 

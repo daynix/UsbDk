@@ -51,14 +51,25 @@ protected:
 };
 
 template<typename T>
+class CScalarDeleter
+{
+public:
+    static void destroy(T *Obj){ delete Obj; }
+};
+
+template<typename T>
+class CVectorDeleter
+{
+public:
+    static void destroy(T *Obj){ delete[] Obj; }
+};
+
+template<typename T, typename Deleter = CScalarDeleter<T> >
 class CObjHolder
 {
 public:
-    typedef void(*TDeleteFunc)(T *Obj);
-
-    CObjHolder(T *Obj = nullptr, TDeleteFunc DeleteFunc = [](T *Obj){ delete Obj; })
+    CObjHolder(T *Obj = nullptr)
         : m_Obj(Obj)
-        , m_DeleteFunc(DeleteFunc)
     {}
 
     ~CObjHolder()
@@ -77,10 +88,7 @@ public:
 
     void destroy()
     {
-        if (*this)
-        {
-            m_DeleteFunc(m_Obj);
-        }
+        Deleter::destroy(m_Obj);
     }
 
     T* operator= (T *ptr)
@@ -89,15 +97,11 @@ public:
       return ptr;
     }
 
-    static void ArrayHolderDelete(T *Obj)
-    { delete[] Obj; }
-
     CObjHolder(const CObjHolder&) = delete;
     CObjHolder& operator= (const CObjHolder&) = delete;
 
 private:
     T *m_Obj = nullptr;
-    TDeleteFunc m_DeleteFunc;
 };
 
 template<typename T>

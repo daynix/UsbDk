@@ -22,81 +22,13 @@
 **********************************************************************/
 
 #include "stdafx.h"
+#include "Urb.h"
 #include "UsbTarget.h"
 #include "Trace.h"
 #include "UsbTarget.tmh"
 #include "DeviceAccess.h"
 #include "WdfRequest.h"
 #include "Urb.h"
-
-class CWdfUsbPipe : public CAllocatable<NonPagedPool, 'PUHR'>
-{
-public:
-    CWdfUsbPipe()
-    {}
-
-    void Create(WDFUSBDEVICE Device, WDFUSBINTERFACE Interface, UCHAR PipeIndex);
-    void ReadAsync(CWdfRequest &Request, WDFMEMORY Buffer, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion);
-    void WriteAsync(CWdfRequest &Request, WDFMEMORY Buffer, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion);
-
-    void ReadIsochronousAsync(CWdfRequest &Request,
-                              WDFMEMORY Buffer,
-                              PULONG64 PacketSizes,
-                              size_t PacketNumber,
-                              PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion)
-    { SubmitIsochronousTransfer(Request, CIsochronousUrb::URB_DIRECTION_IN, Buffer, PacketSizes, PacketNumber, Completion); }
-
-    void WriteIsochronousAsync(CWdfRequest &Request,
-                               WDFMEMORY Buffer,
-                               PULONG64 PacketSizes,
-                               size_t PacketNumber,
-                               PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion)
-    { SubmitIsochronousTransfer(Request, CIsochronousUrb::URB_DIRECTION_OUT, Buffer, PacketSizes, PacketNumber, Completion); }
-
-    NTSTATUS Abort(WDFREQUEST Request);
-    NTSTATUS Reset(WDFREQUEST Request);
-    UCHAR EndpointAddress() const
-    { return m_Info.EndpointAddress; }
-
-private:
-    WDFUSBINTERFACE m_Interface = WDF_NO_HANDLE;
-    WDFUSBDEVICE m_Device = WDF_NO_HANDLE;
-    WDFUSBPIPE m_Pipe = WDF_NO_HANDLE;
-    WDF_USB_PIPE_INFORMATION m_Info;
-
-    void SubmitIsochronousTransfer(CWdfRequest &Request,
-                                   CIsochronousUrb::Direction Direction,
-                                   WDFMEMORY Buffer,
-                                   PULONG64 PacketSizes,
-                                   size_t PacketNumber,
-                                   PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion);
-    CWdfUsbPipe(const CWdfUsbPipe&) = delete;
-    CWdfUsbPipe& operator= (const CWdfUsbPipe&) = delete;
-};
-
-class CWdfUsbInterface : public CAllocatable<NonPagedPool, 'IUHR'>
-{
-public:
-    CWdfUsbInterface()
-        : m_Pipes(nullptr, CObjHolder<CWdfUsbPipe>::ArrayHolderDelete)
-    {}
-
-    NTSTATUS Create(WDFUSBDEVICE Device, UCHAR InterfaceIdx);
-    NTSTATUS SetAltSetting(ULONG64 AltSettingIdx);
-
-    CWdfUsbPipe *FindPipeByEndpointAddress(ULONG64 EndpointAddress);
-    NTSTATUS Reset(WDFREQUEST Request);
-
-private:
-    WDFUSBDEVICE m_UsbDevice;
-    WDFUSBINTERFACE m_Interface;
-
-    CObjHolder<CWdfUsbPipe> m_Pipes;
-    BYTE m_NumPipes = 0;
-
-    CWdfUsbInterface(const CWdfUsbInterface&) = delete;
-    CWdfUsbInterface& operator= (const CWdfUsbInterface&) = delete;
-};
 
 NTSTATUS CWdfUsbInterface::SetAltSetting(ULONG64 AltSettingIdx)
 {
@@ -338,10 +270,6 @@ NTSTATUS CWdfUsbTarget::Create(WDFDEVICE Device)
 
     return STATUS_SUCCESS;
 }
-
-CWdfUsbTarget::CWdfUsbTarget()
-    : m_Interfaces(nullptr, CObjHolder<CWdfUsbInterface>::ArrayHolderDelete)
-{}
 
 CWdfUsbTarget::~CWdfUsbTarget()
 {

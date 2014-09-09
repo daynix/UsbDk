@@ -25,14 +25,86 @@
 
 #include "Alloc.h"
 
-class CWdfUsbInterface;
-class CWdfUsbPipe;
 class CWdfRequest;
+
+class CWdfUsbPipe : public CAllocatable<NonPagedPool, 'PUHR'>
+{
+public:
+    CWdfUsbPipe()
+    {}
+
+    void Create(WDFUSBDEVICE Device, WDFUSBINTERFACE Interface, UCHAR PipeIndex);
+    void ReadAsync(CWdfRequest &Request, WDFMEMORY Buffer, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion);
+    void WriteAsync(CWdfRequest &Request, WDFMEMORY Buffer, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion);
+
+    void ReadIsochronousAsync(CWdfRequest &Request,
+        WDFMEMORY Buffer,
+        PULONG64 PacketSizes,
+        size_t PacketNumber,
+        PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion)
+    {
+        SubmitIsochronousTransfer(Request, CIsochronousUrb::URB_DIRECTION_IN, Buffer, PacketSizes, PacketNumber, Completion);
+    }
+
+    void WriteIsochronousAsync(CWdfRequest &Request,
+        WDFMEMORY Buffer,
+        PULONG64 PacketSizes,
+        size_t PacketNumber,
+        PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion)
+    {
+        SubmitIsochronousTransfer(Request, CIsochronousUrb::URB_DIRECTION_OUT, Buffer, PacketSizes, PacketNumber, Completion);
+    }
+
+    NTSTATUS Abort(WDFREQUEST Request);
+    NTSTATUS Reset(WDFREQUEST Request);
+    UCHAR EndpointAddress() const
+    {
+        return m_Info.EndpointAddress;
+    }
+
+private:
+    WDFUSBINTERFACE m_Interface = WDF_NO_HANDLE;
+    WDFUSBDEVICE m_Device = WDF_NO_HANDLE;
+    WDFUSBPIPE m_Pipe = WDF_NO_HANDLE;
+    WDF_USB_PIPE_INFORMATION m_Info;
+
+    void SubmitIsochronousTransfer(CWdfRequest &Request,
+        CIsochronousUrb::Direction Direction,
+        WDFMEMORY Buffer,
+        PULONG64 PacketSizes,
+        size_t PacketNumber,
+        PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion);
+    CWdfUsbPipe(const CWdfUsbPipe&) = delete;
+    CWdfUsbPipe& operator= (const CWdfUsbPipe&) = delete;
+};
+
+class CWdfUsbInterface : public CAllocatable<NonPagedPool, 'IUHR'>
+{
+public:
+    CWdfUsbInterface()
+    {}
+
+    NTSTATUS Create(WDFUSBDEVICE Device, UCHAR InterfaceIdx);
+    NTSTATUS SetAltSetting(ULONG64 AltSettingIdx);
+
+    CWdfUsbPipe *FindPipeByEndpointAddress(ULONG64 EndpointAddress);
+    NTSTATUS Reset(WDFREQUEST Request);
+
+private:
+    WDFUSBDEVICE m_UsbDevice;
+    WDFUSBINTERFACE m_Interface;
+
+    CObjHolder<CWdfUsbPipe, CVectorDeleter<CWdfUsbPipe> > m_Pipes;
+    BYTE m_NumPipes = 0;
+
+    CWdfUsbInterface(const CWdfUsbInterface&) = delete;
+    CWdfUsbInterface& operator= (const CWdfUsbInterface&) = delete;
+};
 
 class CWdfUsbTarget
 {
 public:
-    CWdfUsbTarget();
+    CWdfUsbTarget() {}
     ~CWdfUsbTarget();
 
     NTSTATUS Create(WDFDEVICE Device);
@@ -60,7 +132,7 @@ private:
     WDFDEVICE m_Device = WDF_NO_HANDLE;
     WDFUSBDEVICE m_UsbDevice = WDF_NO_HANDLE;
 
-    CObjHolder<CWdfUsbInterface> m_Interfaces;
+    CObjHolder<CWdfUsbInterface, CVectorDeleter<CWdfUsbInterface> > m_Interfaces;
     UCHAR m_NumInterfaces = 0;
 
     CWdfUsbTarget(const CWdfUsbTarget&) = delete;

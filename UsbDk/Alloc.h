@@ -64,6 +64,14 @@ public:
     static void destroy(T *Obj){ delete[] Obj; }
 };
 
+template<POOL_TYPE Pooltype, typename TObject, ULONG Tag>
+class CPrimitiveAllocator
+{
+public:
+    static TObject* allocate(size_t NumObjects) { return static_cast<TObject*>(ExAllocatePoolWithTag(Pooltype, sizeof(TObject) * NumObjects, Tag)); }
+    static void destroy(TObject *Obj){ ExFreePoolWithTag(Obj, Tag); }
+};
+
 template<typename T, typename Deleter = CScalarDeleter<T> >
 class CObjHolder
 {
@@ -102,6 +110,68 @@ public:
 
 private:
     T *m_Obj = nullptr;
+};
+
+template <POOL_TYPE PoolType, ULONG Tag, typename TObject>
+class CBufferSet final
+{
+public:
+    explicit CBufferSet(size_t NumEntries)
+        : m_NumEntries(NumEntries)
+    {}
+
+    bool Create()
+    {
+        m_Entries = new CBufferHolder[m_NumEntries];
+        return m_Entries;
+    }
+
+    size_t Size()
+    { return m_NumEntries; }
+
+    template <typename TConstructor>
+    bool EmplaceEntry(size_t Index, size_t NumObjects, TConstructor EntryConstructor)
+    {
+        ASSERT(Index < m_NumEntries);
+
+        m_Entries[Index] = TAllocator::allocate(NumObjects);
+        m_Entries[Index].m_NumObjects = NumObjects;
+        return (m_Entries[Index] != nullptr) ? EntryConstructor(m_Entries[Index]) : false;
+    }
+
+    void CopyEntry(size_t Index, PVOID Buffer, size_t NumObjects)
+    {
+        ASSERT(Index < m_NumEntries);
+        RtlCopyBytes(Buffer, m_Entries[Index], min(NumObjects, m_Entries[Index].m_NumObjects) * sizeof(TObject));
+    }
+
+    CBufferSet(CBufferSet<PoolType, Tag, TObject> &Other)
+    {
+        *this = Other;
+    }
+
+    CBufferSet& operator= (CBufferSet<PoolType, Tag, TObject> &Other)
+    {
+        m_NumEntries = Other.m_NumEntries;
+        m_Entries = Other.m_Entries.detach();
+        return *this;
+    }
+
+private:
+    size_t m_NumEntries;
+
+    using TAllocator = CPrimitiveAllocator < PoolType, TObject, Tag > ;
+    struct CBufferHolder : public CObjHolder<TObject, TAllocator>, public CAllocatable<PoolType, Tag>
+    {
+        size_t m_NumObjects = 0;
+
+        TObject* operator= (TObject *Ptr)
+        {
+            return *static_cast< CObjHolder<TObject, TAllocator>* > (this) = Ptr;
+        }
+    };
+
+    CObjHolder<CBufferHolder, CVectorDeleter<CBufferHolder> > m_Entries;
 };
 
 template<typename T>

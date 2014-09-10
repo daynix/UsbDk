@@ -248,6 +248,14 @@ bool CUsbDkControlDevice::EnumerateDevices(USB_DK_DEVICE_INFO *outBuff, size_t n
 }
 //------------------------------------------------------------------------------------------------------------
 
+// EnumUsbDevicesByID runs over the list of USB devices looking for device by ID.
+// For each device with matching ID Functor() is called.
+// If Functor() returns false EnumUsbDevicesByID() interrupts the loop and exits immediately.
+//
+// Return values:
+//     - false: the loop was interrupted,
+//     - true: the loop went over all devices registered
+
 template <typename TFunctor>
 bool CUsbDkControlDevice::EnumUsbDevicesByID(const USB_DK_DEVICE_ID &ID, TFunctor Functor)
 {

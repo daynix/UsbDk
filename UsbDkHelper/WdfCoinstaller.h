@@ -26,7 +26,7 @@
 #include <wdfinstaller.h>
 
 //-----------------------------------------------------------------------------------
-#define WDF_COINSTALLER_EXCEPTION_STRING TEXT("WdfCoinstaller throw the exception. ")
+#define WDF_COINSTALLER_EXCEPTION_STRING TEXT("WdfCoinstaller exception: ")
 
 class UsbDkWdfCoinstallerFailedException : public UsbDkW32ErrorException
 {
@@ -65,7 +65,7 @@ private:
         auto ptfFunction = (CallbackType)GetProcAddress(m_wdfCoinstallerLibrary, functionName);
         if (ptfFunction == nullptr)
         {
-            throw UsbDkWdfCoinstallerFailedException(L"WdfCoinstaller throw the exception. GetProcAddress failed!");
+            throw UsbDkWdfCoinstallerFailedException(TEXT("GetProcAddress() failed"));
         }
 
         return ptfFunction;

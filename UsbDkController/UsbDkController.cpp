@@ -57,7 +57,7 @@ void Controller_InstallDriver()
         tcout << TEXT("UsbDk driver installation succeeded but reboot is required in order to make it functional.") << endl;
         break;
     default:
-        tcout << TEXT("UsbDk driver installation returns unknown value") << endl;
+        tcout << TEXT("UsbDk driver installation returned unknown error code") << endl;
         assert(0);
     }
 }

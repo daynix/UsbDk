@@ -29,7 +29,7 @@
 #include "RegAccess.h"
 
 //-----------------------------------------------------------------------------------
-#define INSTALLER_EXCEPTION_STRING TEXT("UsbDkInstaller throw the exception. ")
+#define INSTALLER_EXCEPTION_STRING TEXT("UsbDkInstaller exception: ")
 
 class UsbDkInstallerFailedException : public UsbDkW32ErrorException
 {

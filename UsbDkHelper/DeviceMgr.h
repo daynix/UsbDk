@@ -27,7 +27,7 @@
 #include "UsbDkHelper.h"
 
 //-----------------------------------------------------------------------------------
-#define DEVICE_MANAGER_EXCEPTION_STRING TEXT("DeviceMgr throw the exception. ")
+#define DEVICE_MANAGER_EXCEPTION_STRING TEXT("DeviceMgr exception: ")
 
 class UsbDkDeviceMgrException : public UsbDkW32ErrorException
 {

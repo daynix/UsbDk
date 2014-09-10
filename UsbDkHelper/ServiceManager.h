@@ -24,7 +24,7 @@
 #pragma once
 
 //-----------------------------------------------------------------------------------
-#define SERVICE_MANAGER_EXCEPTION_STRING TEXT("ServiceManager throw the exception. ")
+#define SERVICE_MANAGER_EXCEPTION_STRING TEXT("ServiceManager exception: ")
 
 class UsbDkServiceManagerFailedException : public UsbDkW32ErrorException
 {

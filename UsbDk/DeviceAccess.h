@@ -28,62 +28,8 @@
 #include "MemoryBuffer.h"
 #include "Public.h"
 
-class CDeviceAccess : public CAllocatable<PagedPool, 'ADHR'>
-{
-public:
-    CRegText *GetHardwareIdProperty() { return new CRegText(GetDeviceProperty(DevicePropertyHardwareID)); };
-    CRegText *GetDeviceID() { return QueryBusIDWrapped<CRegSz>(BusQueryDeviceID); }
-    CRegText *GetInstanceID() { return QueryBusIDWrapped<CRegSz>(BusQueryInstanceID); }
-    CRegText *GetHardwareIDs() { return QueryBusIDWrapped<CRegMultiSz>(BusQueryHardwareIDs); }
 
-    enum : ULONG
-    {
-        NO_ADDRESS = (ULONG) -1
-    };
-
-    ULONG     GetAddress();
-
-    virtual ~CDeviceAccess()
-    {}
-
-protected:
-    virtual CMemoryBuffer *GetDeviceProperty(DEVICE_REGISTRY_PROPERTY propertyId) = 0;
-    virtual PWCHAR QueryBusID(BUS_QUERY_ID_TYPE idType) = 0;
-    virtual NTSTATUS QueryCapabilities(DEVICE_CAPABILITIES &Capabilities) = 0;
-
-    CDeviceAccess()
-    {}
-
-private:
-
-    template<typename ResT>
-    ResT *QueryBusIDWrapped(BUS_QUERY_ID_TYPE idType)
-    { return new ResT(QueryBusID(idType)); }
-
-};
-
-class CWdfDeviceAccess : public CDeviceAccess
-{
-public:
-    CWdfDeviceAccess(WDFDEVICE WdfDevice)
-        : m_DevObj(WdfDevice)
-    { WdfObjectReferenceWithTag(m_DevObj, (PVOID) 'DWHR'); }
-
-    virtual ~CWdfDeviceAccess()
-    { WdfObjectDereferenceWithTag(m_DevObj, (PVOID) 'DWHR'); }
-
-    CWdfDeviceAccess(const CWdfDeviceAccess&) = delete;
-    CWdfDeviceAccess& operator= (const CWdfDeviceAccess&) = delete;
-
-private:
-    virtual CMemoryBuffer *GetDeviceProperty(DEVICE_REGISTRY_PROPERTY propertyId) override;
-    virtual PWCHAR QueryBusID(BUS_QUERY_ID_TYPE idType) override;
-    virtual NTSTATUS QueryCapabilities(DEVICE_CAPABILITIES &Capabilities) override;
-
-    WDFDEVICE m_DevObj;
-};
-
-class CWdmDeviceAccess : public CDeviceAccess
+class CWdmDeviceAccess : public CAllocatable<PagedPool, 'ADHR'>
 {
 public:
     CWdmDeviceAccess(PDEVICE_OBJECT WdmDevice)
@@ -98,13 +44,21 @@ public:
 
     NTSTATUS QueryForInterface(const GUID &, __out INTERFACE &, USHORT intfSize, USHORT intfVer, __in_opt PVOID intfCtx = nullptr);
 
+    enum : ULONG
+    {
+        NO_ADDRESS = (ULONG)-1
+    };
+
+    ULONG GetAddress();
+    CRegText *GetDeviceID() { return new CRegSz(QueryBusID(BusQueryDeviceID)); }
+    CRegText *GetInstanceID() { return new CRegSz(QueryBusID(BusQueryInstanceID)); }
+
 protected:
     PDEVICE_OBJECT m_DevObj;
 
 private:
-    virtual CMemoryBuffer *GetDeviceProperty(DEVICE_REGISTRY_PROPERTY propertyId) override;
-    virtual PWCHAR QueryBusID(BUS_QUERY_ID_TYPE idType) override;
-    virtual NTSTATUS QueryCapabilities(DEVICE_CAPABILITIES &Capabilities) override;
+    PWCHAR QueryBusID(BUS_QUERY_ID_TYPE idType);
+    NTSTATUS QueryCapabilities(DEVICE_CAPABILITIES &Capabilities);
 
     static PWCHAR MakeNonPagedDuplicate(BUS_QUERY_ID_TYPE idType, PWCHAR idData);
     static SIZE_T GetIdBufferLength(BUS_QUERY_ID_TYPE idType, PWCHAR idData);

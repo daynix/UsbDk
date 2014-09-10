@@ -77,7 +77,7 @@ CWdmUSBD::~CWdmUSBD()
 }
 #endif
 
-ULONG CDeviceAccess::GetAddress()
+ULONG CWdmDeviceAccess::GetAddress()
 {
     DEVICE_CAPABILITIES Capabilities;
 
@@ -87,39 +87,6 @@ ULONG CDeviceAccess::GetAddress()
     }
 
     return Capabilities.Address;
-}
-
-PWCHAR CWdfDeviceAccess::QueryBusID(BUS_QUERY_ID_TYPE idType)
-{
-    UNREFERENCED_PARAMETER(idType);
-    ASSERT(!"NOT IMPLEMENTED");
-    return nullptr;
-}
-
-NTSTATUS CWdfDeviceAccess::QueryCapabilities(DEVICE_CAPABILITIES &Capabilities)
-{
-    UNREFERENCED_PARAMETER(Capabilities);
-    ASSERT(!"NOT IMPLEMENTED");
-    return STATUS_NOT_IMPLEMENTED;
-}
-
-CMemoryBuffer *CWdfDeviceAccess::GetDeviceProperty(DEVICE_REGISTRY_PROPERTY propertyId)
-{
-    PAGED_CODE();
-    WDFMEMORY devProperty;
-
-    NTSTATUS status = WdfDeviceAllocAndQueryProperty(m_DevObj,
-                                                     propertyId,
-                                                     NonPagedPool,
-                                                     WDF_NO_OBJECT_ATTRIBUTES,
-                                                     &devProperty);
-
-    if (NT_SUCCESS(status))
-    {
-        return CMemoryBuffer::GetMemoryBuffer(devProperty);
-    }
-
-    return nullptr;
 }
 
 PWCHAR CWdmDeviceAccess::QueryBusID(BUS_QUERY_ID_TYPE idType)
@@ -217,58 +184,6 @@ PWCHAR CWdmDeviceAccess::MakeNonPagedDuplicate(BUS_QUERY_ID_TYPE idType, PWCHAR 
 
     ExFreePool(idData);
     return static_cast<PWCHAR>(newIdData);
-}
-
-CMemoryBuffer *CWdmDeviceAccess::GetDeviceProperty(DEVICE_REGISTRY_PROPERTY propertyId)
-{
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVACCESS, "%!FUNC! Entry for device 0x%p, %!devprop!", m_DevObj, propertyId);
-
-    PAGED_CODE();
-
-    ULONG bytesNeeded = 0;
-    auto status = IoGetDeviceProperty(m_DevObj, propertyId, 0, nullptr, &bytesNeeded);
-
-    if (!NT_SUCCESS(status))
-    {
-        if (status == STATUS_BUFFER_TOO_SMALL)
-        {
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVACCESS,
-                "%!FUNC! Property %!devprop! size for device 0x%p is %lu bytes", propertyId, m_DevObj, bytesNeeded);
-
-            CObjHolder<CWdmMemoryBuffer> buffer(new CWdmMemoryBuffer());
-            if (buffer)
-            {
-                status = buffer->Create(bytesNeeded, NonPagedPool);
-                if (!NT_SUCCESS(status))
-                {
-                    TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVACCESS,
-                        "%!FUNC! Error %!STATUS! during memory buffer creation", status);
-                    return nullptr;
-                }
-
-                status = IoGetDeviceProperty(m_DevObj, propertyId, static_cast<ULONG>(buffer->Size()), buffer->Ptr(), &bytesNeeded);
-                if (NT_SUCCESS(status))
-                {
-                    TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVACCESS,
-                        "%!FUNC! Error %!STATUS! while reading property for device 0x%p, %!devprop!", status, m_DevObj, propertyId);
-                    return buffer.detach();
-                }
-            }
-        }
-        else
-        {
-            TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVACCESS,
-                "%!FUNC! Error %!STATUS! while reading property for device 0x%p, %!devprop!", status, m_DevObj, propertyId);
-        }
-    }
-    else
-    {
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVACCESS,
-            "%!FUNC! Empty property read for device 0x%p, %!devprop!", m_DevObj, propertyId);
-        return CMemoryBuffer::GetMemoryBuffer(nullptr, 0);
-    }
-
-    return nullptr;
 }
 
 NTSTATUS CWdmDeviceAccess::QueryForInterface(const GUID &guid, __out INTERFACE &intf,

@@ -24,6 +24,7 @@
 #pragma once
 
 #include "Alloc.h"
+#include "Urb.h"
 
 class CWdfRequest;
 

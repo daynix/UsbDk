@@ -22,13 +22,11 @@
 **********************************************************************/
 
 #include "stdafx.h"
-#include "Urb.h"
 #include "UsbTarget.h"
 #include "Trace.h"
 #include "UsbTarget.tmh"
 #include "DeviceAccess.h"
 #include "WdfRequest.h"
-#include "Urb.h"
 
 NTSTATUS CWdfUsbInterface::SetAltSetting(ULONG64 AltSettingIdx)
 {

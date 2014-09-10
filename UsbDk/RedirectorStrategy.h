@@ -24,7 +24,6 @@
 #pragma once
 
 #include "FilterStrategy.h"
-#include "Urb.h"
 #include "UsbTarget.h"
 #include "WdfDevice.h"
 #include "Public.h"

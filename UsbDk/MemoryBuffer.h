@@ -25,26 +25,6 @@
 
 #include "Alloc.h"
 
-class CMemoryBuffer : public CAllocatable<NonPagedPool, 'BMHR'>
-{
-public:
-    static CMemoryBuffer* GetMemoryBuffer(WDFMEMORY MemObj);
-    static CMemoryBuffer* GetMemoryBuffer(PVOID Buffer, SIZE_T Size);
-
-    virtual PVOID Ptr() const { return m_Ptr; }
-    virtual SIZE_T Size() const { return m_Size; }
-
-    virtual ~CMemoryBuffer()
-    {}
-
-protected:
-    CMemoryBuffer()
-    {}
-
-    PVOID m_Ptr;
-    size_t m_Size;
-};
-
 template<typename T>
 class CPreAllocatedWdfMemoryBufferT
 {
@@ -70,36 +50,13 @@ private:
 
 typedef CPreAllocatedWdfMemoryBufferT<void> CPreAllocatedWdfMemoryBuffer;
 
-class CWdfMemoryBuffer : public CMemoryBuffer
+class CWdmMemoryBuffer final : public CAllocatable<NonPagedPool, 'BMHR'>
 {
 public:
-    CWdfMemoryBuffer(WDFMEMORY MemObj)
-        : m_MemObj(MemObj)
-    { m_Ptr = WdfMemoryGetBuffer(MemObj, &m_Size); }
-
-    virtual ~CWdfMemoryBuffer()
-    { WdfObjectDelete(m_MemObj); }
-
-    CWdfMemoryBuffer(const CWdfMemoryBuffer&) = delete;
-    CWdfMemoryBuffer& operator= (const CWdfMemoryBuffer&) = delete;
-
-private:
-    WDFMEMORY m_MemObj;
-};
-
-class CWdmMemoryBuffer : public CMemoryBuffer
-{
-public:
-    CWdmMemoryBuffer(PVOID Buffer, SIZE_T Size)
+    CWdmMemoryBuffer(PVOID Buffer = nullptr, SIZE_T Size = 0)
     {
         m_Ptr = Buffer;
         m_Size = Size;
-    }
-
-    CWdmMemoryBuffer()
-    {
-        m_Ptr = nullptr;
-        m_Size = 0;
     }
 
     NTSTATUS Create(SIZE_T Size, POOL_TYPE PoolType)
@@ -114,9 +71,18 @@ public:
         return STATUS_SUCCESS;
     }
 
-    virtual ~CWdmMemoryBuffer()
+    ~CWdmMemoryBuffer()
     { if(m_Ptr != nullptr) { ExFreePool(m_Ptr); } }
+
+    static CWdmMemoryBuffer* GetMemoryBuffer(PVOID Buffer, SIZE_T Size);
+
+    PVOID Ptr() const { return m_Ptr; }
+    SIZE_T Size() const { return m_Size; }
 
     CWdmMemoryBuffer(const CWdmMemoryBuffer&) = delete;
     CWdmMemoryBuffer& operator= (const CWdmMemoryBuffer&) = delete;
+
+private:
+    PVOID m_Ptr;
+    size_t m_Size;
 };

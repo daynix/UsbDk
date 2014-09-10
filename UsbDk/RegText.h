@@ -51,11 +51,11 @@ public:
     bool MatchPrefix(PCWSTR String) const;
     void Dump() const;
 
-    CRegText(CMemoryBuffer* Data)
+    CRegText(CWdmMemoryBuffer* Data)
         : m_Data(Data) {}
 
 private:
-    CObjHolder<CMemoryBuffer> m_Data;
+    CObjHolder<CWdmMemoryBuffer> m_Data;
     SIZE_T m_currPos = 0;
 };
 
@@ -63,7 +63,7 @@ class CRegSz : public CRegText
 {
 public:
     CRegSz(PWCHAR Data)
-        : CRegText(CMemoryBuffer::GetMemoryBuffer(static_cast<PVOID>(Data), GetBufferLength(Data)))
+        : CRegText(CWdmMemoryBuffer::GetMemoryBuffer(static_cast<PVOID>(Data), GetBufferLength(Data)))
     {}
     static SIZE_T GetBufferLength(PWCHAR Data) { return (Data != nullptr) ? (wcslen(Data) + 1) * sizeof(WCHAR) : 0; }
 };
@@ -72,7 +72,7 @@ class CRegMultiSz : public CRegText
 {
 public:
     CRegMultiSz(PWCHAR Data)
-        : CRegText(CMemoryBuffer::GetMemoryBuffer(static_cast<PVOID>(Data), GetBufferLength(Data)))
+        : CRegText(CWdmMemoryBuffer::GetMemoryBuffer(static_cast<PVOID>(Data), GetBufferLength(Data)))
     {}
     static SIZE_T GetBufferLength(PWCHAR Data);
 };

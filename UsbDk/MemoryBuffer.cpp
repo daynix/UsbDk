@@ -23,8 +23,3 @@
 
 #include "stdafx.h"
 #include "MemoryBuffer.h"
-
-CWdmMemoryBuffer* CWdmMemoryBuffer::GetMemoryBuffer(PVOID Buffer, SIZE_T Size)
-{
-    return new CWdmMemoryBuffer(Buffer, Size);
-}

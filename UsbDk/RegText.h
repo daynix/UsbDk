@@ -43,19 +43,19 @@ public:
 
     virtual ~CRegText() {}
 
-    iterator begin() const { return static_cast<PWCHAR> (m_Data->Ptr()); }
-    iterator end() const { return reinterpret_cast<PWCHAR>(static_cast<PCHAR>(m_Data->Ptr()) + m_Data->Size()); }
-    bool empty() const { return (m_Data->Size() == 0); }
+    iterator begin() const { return static_cast<PWCHAR> (m_Data.Ptr()); }
+    iterator end() const { return reinterpret_cast<PWCHAR>(static_cast<PCHAR>(m_Data.Ptr()) + m_Data.Size()); }
+    bool empty() const { return (m_Data.Size() == 0); }
 
     bool Match(PCWSTR String) const;
     bool MatchPrefix(PCWSTR String) const;
     void Dump() const;
 
-    CRegText(CWdmMemoryBuffer* Data)
-        : m_Data(Data) {}
+    CRegText(PVOID Buffer, SIZE_T Size)
+        : m_Data(Buffer, Size) {}
 
 private:
-    CObjHolder<CWdmMemoryBuffer> m_Data;
+    CWdmMemoryBuffer m_Data;
     SIZE_T m_currPos = 0;
 };
 
@@ -63,7 +63,7 @@ class CRegSz : public CRegText
 {
 public:
     CRegSz(PWCHAR Data)
-        : CRegText(CWdmMemoryBuffer::GetMemoryBuffer(static_cast<PVOID>(Data), GetBufferLength(Data)))
+        : CRegText(static_cast<PVOID>(Data), GetBufferLength(Data))
     {}
     static SIZE_T GetBufferLength(PWCHAR Data) { return (Data != nullptr) ? (wcslen(Data) + 1) * sizeof(WCHAR) : 0; }
 };
@@ -72,7 +72,7 @@ class CRegMultiSz : public CRegText
 {
 public:
     CRegMultiSz(PWCHAR Data)
-        : CRegText(CWdmMemoryBuffer::GetMemoryBuffer(static_cast<PVOID>(Data), GetBufferLength(Data)))
+        : CRegText(static_cast<PVOID>(Data), GetBufferLength(Data))
     {}
     static SIZE_T GetBufferLength(PWCHAR Data);
 };

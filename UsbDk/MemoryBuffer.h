@@ -74,8 +74,6 @@ public:
     ~CWdmMemoryBuffer()
     { if(m_Ptr != nullptr) { ExFreePool(m_Ptr); } }
 
-    static CWdmMemoryBuffer* GetMemoryBuffer(PVOID Buffer, SIZE_T Size);
-
     PVOID Ptr() const { return m_Ptr; }
     SIZE_T Size() const { return m_Size; }
 

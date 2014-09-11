@@ -306,7 +306,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(OutDir)UsbDkHelper.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(OutDir)UsbDkHelper.lib;%(AdditionalDependencies);Shlwapi.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)$(ConfigurationName)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <ResourceCompile>
@@ -327,7 +327,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(OutDir)UsbDkHelper.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(OutDir)UsbDkHelper.lib;%(AdditionalDependencies);Shlwapi.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)$(ConfigurationName)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <ResourceCompile>
@@ -348,7 +348,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(OutDir)UsbDkHelper.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(OutDir)UsbDkHelper.lib;%(AdditionalDependencies);Shlwapi.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)$(ConfigurationName)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <ResourceCompile>
@@ -369,7 +369,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(OutDir)UsbDkHelper.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(OutDir)UsbDkHelper.lib;%(AdditionalDependencies);Shlwapi.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)$(ConfigurationName)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <ResourceCompile>
@@ -392,7 +392,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)$(ConfigurationName)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(OutDir)UsbDkHelper.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(OutDir)UsbDkHelper.lib;%(AdditionalDependencies);Shlwapi.lib</AdditionalDependencies>
     </Link>
     <ResourceCompile>
       <PreprocessorDefinitions>USBDK_MAJOR_VERSION=$(USBDK_MAJOR_VERSION);USBDK_MINOR_VERSION=$(USBDK_MINOR_VERSION);USBDK_BUILD_NUMBER=$(USBDK_BUILD_NUMBER);_WIN64;_AMD64_=1;AMD64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -414,7 +414,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)$(ConfigurationName)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(OutDir)UsbDkHelper.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(OutDir)UsbDkHelper.lib;%(AdditionalDependencies);Shlwapi.lib</AdditionalDependencies>
     </Link>
     <ResourceCompile>
       <PreprocessorDefinitions>USBDK_MAJOR_VERSION=$(USBDK_MAJOR_VERSION);USBDK_MINOR_VERSION=$(USBDK_MINOR_VERSION);USBDK_BUILD_NUMBER=$(USBDK_BUILD_NUMBER);_USING_V110_SDK71_;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -435,7 +435,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(OutDir)UsbDkHelper.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(OutDir)UsbDkHelper.lib;%(AdditionalDependencies);Shlwapi.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)$(ConfigurationName)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <ResourceCompile>
@@ -456,7 +456,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(OutDir)UsbDkHelper.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(OutDir)UsbDkHelper.lib;%(AdditionalDependencies);Shlwapi.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)$(ConfigurationName)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <ResourceCompile>
@@ -481,7 +481,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>$(OutDir)UsbDkHelper.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(OutDir)UsbDkHelper.lib;%(AdditionalDependencies);Shlwapi.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)$(ConfigurationName)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <ResourceCompile>
@@ -506,7 +506,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>$(OutDir)UsbDkHelper.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(OutDir)UsbDkHelper.lib;%(AdditionalDependencies);Shlwapi.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)$(ConfigurationName)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <ResourceCompile>
@@ -531,7 +531,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>$(OutDir)UsbDkHelper.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(OutDir)UsbDkHelper.lib;%(AdditionalDependencies);Shlwapi.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)$(ConfigurationName)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <ResourceCompile>
@@ -556,7 +556,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>$(OutDir)UsbDkHelper.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(OutDir)UsbDkHelper.lib;%(AdditionalDependencies);Shlwapi.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)$(ConfigurationName)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <ResourceCompile>
@@ -582,7 +582,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>$(OutDir)UsbDkHelper.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(OutDir)UsbDkHelper.lib;%(AdditionalDependencies);Shlwapi.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)$(ConfigurationName)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <ResourceCompile>
@@ -608,7 +608,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>$(OutDir)UsbDkHelper.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(OutDir)UsbDkHelper.lib;%(AdditionalDependencies);Shlwapi.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)$(ConfigurationName)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <ResourceCompile>
@@ -634,7 +634,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>$(OutDir)UsbDkHelper.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(OutDir)UsbDkHelper.lib;%(AdditionalDependencies);Shlwapi.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)$(ConfigurationName)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <ResourceCompile>
@@ -659,7 +659,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>$(OutDir)UsbDkHelper.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(OutDir)UsbDkHelper.lib;%(AdditionalDependencies);Shlwapi.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)$(ConfigurationName)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <ResourceCompile>

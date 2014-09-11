@@ -171,10 +171,44 @@ static void Controller_RedirectDevice(TCHAR *DeviceID, TCHAR *InstanceID)
 }
 //-------------------------------------------------------------------------------
 
+static bool Controller_ChdirToPackageFolder()
+{
+    TCHAR PackagePath[MAX_PATH];
+
+    auto Length = GetModuleFileName(NULL, PackagePath, ARRAY_SIZE(PackagePath));
+
+    if ((Length == 0) || (Length == ARRAY_SIZE(PackagePath)))
+    {
+        tcout << TEXT("Failed to get executable path.") << endl;
+        return false;
+    }
+
+    if (!PathRemoveFileSpec(PackagePath))
+    {
+        tcout << TEXT("Failed to get package directory.") << endl;
+        return false;
+    }
+
+    if (!SetCurrentDirectory(PackagePath))
+    {
+        auto Error = GetLastError();
+        tcout << TEXT("Failed to make package directory current, error: ") << Error << TEXT(".") << endl;
+        return false;
+    }
+
+    return true;
+}
+//-------------------------------------------------------------------------------
+
 int __cdecl _tmain(int argc, TCHAR* argv[])
 {
     if (argc > 1)
     {
+        if (!Controller_ChdirToPackageFolder())
+        {
+            return -1;
+        }
+
         if (_tcsicmp(L"-i", argv[1]) == 0)
         {
             Controller_InstallDriver();

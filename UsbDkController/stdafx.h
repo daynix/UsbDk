@@ -28,7 +28,7 @@
 #include <stdio.h>
 #include <tchar.h>
 #include <assert.h>
-#include "windows.h"
+#include <windows.h>
 #include <tstrings.h>
 #include <cfgmgr32.h>
 

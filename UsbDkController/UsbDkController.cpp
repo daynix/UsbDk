@@ -28,7 +28,7 @@
 using namespace std;
 //-------------------------------------------------------------------------------
 
-void ShowUsage()
+static void ShowUsage()
 {
     tcout << endl;
     tcout << TEXT("              UsbDkController usage:") << endl;
@@ -41,7 +41,7 @@ void ShowUsage()
 }
 //-------------------------------------------------------------------------------
 
-void Controller_InstallDriver()
+static void Controller_InstallDriver()
 {
     tcout << TEXT("Installing UsbDk driver") << endl;
     auto res = UsbDk_InstallDriver();
@@ -63,7 +63,7 @@ void Controller_InstallDriver()
 }
 //-------------------------------------------------------------------------------
 
-void Controller_UninstallDriver()
+static void Controller_UninstallDriver()
 {
     tcout << TEXT("Uninstalling UsbDk driver") << endl;
     if (UsbDk_UninstallDriver())
@@ -101,7 +101,7 @@ static void Controller_DumpConfigurationDescriptors(USB_DK_DEVICE_INFO &Device)
 }
 //-------------------------------------------------------------------------------
 
-void Controller_EnumerateDevices()
+static void Controller_EnumerateDevices()
 {
     PUSB_DK_DEVICE_INFO devicesArray;
     ULONG               numberDevices;
@@ -140,7 +140,7 @@ void Controller_EnumerateDevices()
 }
 //-------------------------------------------------------------------------------
 
-void Controller_RedirectDevice(_TCHAR *DeviceID, _TCHAR *InstanceID)
+static void Controller_RedirectDevice(_TCHAR *DeviceID, _TCHAR *InstanceID)
 {
     USB_DK_DEVICE_ID   deviceID;
     UsbDkFillIDStruct(&deviceID, tstring2wstring(DeviceID), tstring2wstring(InstanceID));

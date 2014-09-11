@@ -140,7 +140,7 @@ static void Controller_EnumerateDevices()
 }
 //-------------------------------------------------------------------------------
 
-static void Controller_RedirectDevice(_TCHAR *DeviceID, _TCHAR *InstanceID)
+static void Controller_RedirectDevice(TCHAR *DeviceID, TCHAR *InstanceID)
 {
     USB_DK_DEVICE_ID   deviceID;
     UsbDkFillIDStruct(&deviceID, tstring2wstring(DeviceID), tstring2wstring(InstanceID));
@@ -171,7 +171,7 @@ static void Controller_RedirectDevice(_TCHAR *DeviceID, _TCHAR *InstanceID)
 }
 //-------------------------------------------------------------------------------
 
-int __cdecl _tmain(int argc, _TCHAR* argv[])
+int __cdecl _tmain(int argc, TCHAR* argv[])
 {
     if (argc > 1)
     {

@@ -114,7 +114,14 @@ UsbDkEvtDeviceAdd(
         return STATUS_INSUFFICIENT_RESOURCES;
     }
 
-    auto status = FilterDevice->Create(DeviceInit, Driver);
+    auto status = FilterDevice->Create(DeviceInit);
+    if (!NT_SUCCESS(status))
+    {
+        delete FilterDevice;
+        return status;
+    }
+
+    status = FilterDevice->AttachToStack(Driver);
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit %!STATUS!", status);
 

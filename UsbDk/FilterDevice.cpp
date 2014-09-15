@@ -337,19 +337,13 @@ bool CUsbDkChildDevice::CreateRedirectorDevice()
     return NT_SUCCESS(DriverObj->DriverExtension->AddDevice(DriverObj, m_PDO));
 }
 
-NTSTATUS CUsbDkFilterDevice::Create(PWDFDEVICE_INIT DevInit, WDFDRIVER Driver)
+NTSTATUS CUsbDkFilterDevice::AttachToStack(WDFDRIVER Driver)
 {
     PAGED_CODE();
 
     m_Driver = Driver;
 
-    auto status = InitializeFilterDevice(DevInit);
-    if (!NT_SUCCESS(status))
-    {
-        return status;
-    }
-
-    status = DefineStrategy();
+    auto status = DefineStrategy();
     if (!NT_SUCCESS(status))
     {
         return status;
@@ -385,7 +379,7 @@ NTSTATUS CUsbDkFilterDevice::DefineStrategy()
     return STATUS_SUCCESS;
 }
 
-NTSTATUS CUsbDkFilterDevice::InitializeFilterDevice(PWDFDEVICE_INIT DevInit)
+NTSTATUS CUsbDkFilterDevice::Create(PWDFDEVICE_INIT DevInit)
 {
     CUsbDkFilterDeviceInit DeviceInit(DevInit);
 

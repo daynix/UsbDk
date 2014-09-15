@@ -148,7 +148,8 @@ public:
     ~CUsbDkFilterDevice()
     { m_Strategy->Delete(); }
 
-    NTSTATUS Create(PWDFDEVICE_INIT DevInit, WDFDRIVER Driver);
+    NTSTATUS Create(PWDFDEVICE_INIT DevInit);
+    NTSTATUS AttachToStack(WDFDRIVER Driver);
 
     template <typename TPredicate, typename TFunctor>
     bool EnumerateChildrenIf(TPredicate Predicate, TFunctor Functor)
@@ -167,7 +168,6 @@ public:
     { return m_InstanceNumber; }
 
 private:
-    NTSTATUS InitializeFilterDevice(PWDFDEVICE_INIT DevInit);
     NTSTATUS DefineStrategy();
     static void ContextCleanup(_In_ WDFOBJECT DeviceObject);
 

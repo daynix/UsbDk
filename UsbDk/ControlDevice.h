@@ -126,6 +126,8 @@ public:
     CUsbDkControlDevice() {}
 
     NTSTATUS Create(WDFDRIVER Driver);
+    NTSTATUS Register();
+
     void RegisterFilter(CUsbDkFilterDevice &FilterDevice)
     { m_FilterDevices.PushBack(&FilterDevice); }
     void UnregisterFilter(CUsbDkFilterDevice &FilterDevice)

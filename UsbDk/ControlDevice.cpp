@@ -348,13 +348,18 @@ NTSTATUS CUsbDkControlDevice::Create(WDFDRIVER Driver)
     attr.EvtCleanupCallback = ContextCleanup;
 
     status = CWdfControlDevice::Create(DeviceInit, attr);
-    if (!NT_SUCCESS(status))
+    if (NT_SUCCESS(status))
     {
-        return status;
+        UsbDkControlGetContext(m_Device)->UsbDkControl = this;
     }
 
+    return status;
+}
+
+NTSTATUS CUsbDkControlDevice::Register()
+{
     DECLARE_CONST_UNICODE_STRING(ntDosDeviceName, USBDK_DOSDEVICE_NAME);
-    status = CreateSymLink(ntDosDeviceName);
+    auto status = CreateSymLink(ntDosDeviceName);
     if (!NT_SUCCESS(status))
     {
         return status;
@@ -370,9 +375,6 @@ NTSTATUS CUsbDkControlDevice::Create(WDFDRIVER Driver)
     status = m_DeviceQueue->Create();
     if (NT_SUCCESS(status))
     {
-        auto deviceContext = UsbDkControlGetContext(m_Device);
-        deviceContext->UsbDkControl = this;
-
         FinishInitializing();
     }
 
@@ -473,16 +475,15 @@ CUsbDkControlDevice* CUsbDkControlDevice::Reference(WDFDRIVER Driver)
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "%!FUNC! creating control device");
     }
 
-    CUsbDkControlDevice *dev = new CUsbDkControlDevice();
-    if (dev == nullptr)
+    CObjHolder<CUsbDkControlDevice> dev(new CUsbDkControlDevice());
+    if (!dev)
     {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! cannot allocate control device");
         m_UsbDkControlDevice->Release();
         return nullptr;
     }
 
-    *m_UsbDkControlDevice = dev;
-    auto status = (*m_UsbDkControlDevice)->Create(Driver);
+    auto status = dev->Create(Driver);
     if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! cannot create control device %!STATUS!", status);
@@ -490,7 +491,17 @@ CUsbDkControlDevice* CUsbDkControlDevice::Reference(WDFDRIVER Driver)
         return nullptr;
     }
 
-    return dev;
+    *m_UsbDkControlDevice = dev.detach();
+
+    status = (*m_UsbDkControlDevice)->Register();
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! cannot register control device %!STATUS!", status);
+        m_UsbDkControlDevice->Release();
+        return nullptr;
+    }
+
+    return *m_UsbDkControlDevice;
 }
 
 bool CUsbDkControlDevice::Allocate()

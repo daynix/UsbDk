@@ -99,6 +99,12 @@ public:
         Deleter::destroy(m_Obj);
     }
 
+    void reset(T *Ptr = nullptr)
+    {
+        destroy();
+        m_Obj = Ptr;
+    }
+
     T* operator= (T *ptr)
     {
       m_Obj = ptr;

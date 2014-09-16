@@ -146,7 +146,12 @@ public:
     CUsbDkFilterDevice()
     {}
     ~CUsbDkFilterDevice()
-    { m_Strategy->Delete(); }
+    {
+        if (m_Strategy)
+        {
+            m_Strategy->Delete();
+        }
+    }
 
     NTSTATUS Create(PWDFDEVICE_INIT DevInit);
     NTSTATUS AttachToStack(WDFDRIVER Driver);
@@ -180,6 +185,7 @@ private:
         void SetNullStrategy() { m_Strategy = &m_NullStrategy; }
         CUsbDkFilterStrategy *operator ->() const { return m_Strategy; }
         static size_t GetRequestContextSize();
+        operator bool() const { return m_Strategy != nullptr; }
     private:
         CUsbDkFilterStrategy *m_Strategy = nullptr;
         CUsbDkNullFilterStrategy m_NullStrategy;

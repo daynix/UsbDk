@@ -40,13 +40,14 @@ NTSTATUS CWdfUsbInterface::SetAltSetting(ULONG64 AltSettingIdx)
         return status;
     }
 
+    m_Pipes.reset();
+
     m_NumPipes = WdfUsbInterfaceGetNumConfiguredPipes(m_Interface);
     if (m_NumPipes == 0)
     {
         return STATUS_SUCCESS;
     }
 
-    m_Pipes.destroy();
     m_Pipes = new CWdfUsbPipe[m_NumPipes];
     if (!m_Pipes)
     {

@@ -303,7 +303,7 @@ USB_DK_DEVICE_SPEED UsbDkWdmUsbDeviceGetSpeed(PDEVICE_OBJECT DevObj, PDRIVER_OBJ
 
     if (NT_SUCCESS(status)) {
         ASSERT(iusbb.IsDeviceHighSpeed && iusbb.InterfaceDereference);
-        res = iusbb.IsDeviceHighSpeed(iusbb.BusContext) ? HighSpeed : LowSpeed;
+        res = iusbb.IsDeviceHighSpeed(iusbb.BusContext) ? HighSpeed : FullSpeed;
         iusbb.InterfaceDereference(iusbb.BusContext);
     }
 

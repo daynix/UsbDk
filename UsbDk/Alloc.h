@@ -69,7 +69,7 @@ class CPrimitiveAllocator
 {
 public:
     static TObject* allocate(size_t NumObjects) { return static_cast<TObject*>(ExAllocatePoolWithTag(Pooltype, sizeof(TObject) * NumObjects, Tag)); }
-    static void destroy(TObject *Obj){ ExFreePoolWithTag(Obj, Tag); }
+    static void destroy(TObject *Obj){ if (Obj) ExFreePoolWithTag(Obj, Tag); }
 };
 
 template<typename T, typename Deleter = CScalarDeleter<T> >

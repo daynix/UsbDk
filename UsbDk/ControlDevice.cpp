@@ -629,29 +629,31 @@ NTSTATUS CUsbDkControlDevice::RemoveRedirect(const USB_DK_DEVICE_ID &DeviceId)
 {
     if (NotifyRedirectorRemovalStarted(DeviceId))
     {
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "%!FUNC! Success. New redirections list:");
-        m_Redirections.Dump();
-
         auto res = ResetUsbDevice(DeviceId);
-        if (!NT_SUCCESS(res))
+        if (NT_SUCCESS(res))
         {
-            TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! Reset after stop redirection failed! Return redirection.");
+            if (!WaitForDetachment(DeviceId))
+            {
+                TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! Wait for redirector detachment failed.");
+                return STATUS_DEVICE_NOT_CONNECTED;
+            }
+        }
+        else if (res != STATUS_NOT_FOUND)
+        {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! Usb device reset failed.");
             return res;
         }
 
-        if (! WaitForDetachment(DeviceId))
+        if (!m_Redirections.Delete(&DeviceId))
         {
-            TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! Wait for redirector detachment failed.");
-            return STATUS_DEVICE_NOT_CONNECTED;
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! No such redirection registered.");
+            res = STATUS_OBJECT_NAME_NOT_FOUND;
         }
 
-         if (!m_Redirections.Delete(&DeviceId))
-         {
-             TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! Delete device from set failed.");
-             return STATUS_OBJECT_NAME_NOT_FOUND;
-         }
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "%!FUNC! Finished successfully. New redirections list:");
+        m_Redirections.Dump();
 
-        return res;
+        return STATUS_SUCCESS;
     }
 
     TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! failed.");

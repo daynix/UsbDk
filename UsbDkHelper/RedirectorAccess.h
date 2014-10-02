@@ -27,7 +27,6 @@
 #include "DriverFile.h"
 #include "UsbDkNames.h"
 
-class UsbDkDriverAccess;
 //-----------------------------------------------------------------------------------
 #define REDIRECTOR_ACCESS_EXCEPTION_STRING TEXT("Redirection operation error. ")
 

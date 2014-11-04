@@ -41,7 +41,7 @@ static void ShowUsage()
 }
 //-------------------------------------------------------------------------------
 
-static void Controller_InstallDriver()
+static int Controller_InstallDriver()
 {
     tcout << TEXT("Installing UsbDk driver") << endl;
     auto res = UsbDk_InstallDriver();
@@ -49,30 +49,33 @@ static void Controller_InstallDriver()
     {
     case InstallSuccess:
         tcout << TEXT("UsbDk driver installation succeeded") << endl;
-        break;
+        return 0;
     case InstallFailure:
         tcout << TEXT("UsbDk driver installation failed") << endl;
-        break;
+        return 1;
     case InstallSuccessNeedReboot:
         tcout << TEXT("UsbDk driver installation succeeded but reboot is required in order to make it functional.") << endl;
-        break;
+        return 2;
     default:
         tcout << TEXT("UsbDk driver installation returned unknown error code") << endl;
         assert(0);
+        return 3;
     }
 }
 //-------------------------------------------------------------------------------
 
-static void Controller_UninstallDriver()
+static int Controller_UninstallDriver()
 {
     tcout << TEXT("Uninstalling UsbDk driver") << endl;
     if (UsbDk_UninstallDriver())
     {
         tcout << TEXT("UsbDk driver uninstall succeeded") << endl;
+        return 0;
     }
     else
     {
         tcout << TEXT("UsbDk driver uninstall failed") << endl;
+        return 1;
     }
 }
 //-------------------------------------------------------------------------------
@@ -101,7 +104,7 @@ static void Controller_DumpConfigurationDescriptors(USB_DK_DEVICE_INFO &Device)
 }
 //-------------------------------------------------------------------------------
 
-static void Controller_EnumerateDevices()
+static int Controller_EnumerateDevices()
 {
     PUSB_DK_DEVICE_INFO devicesArray;
     ULONG               numberDevices;
@@ -132,15 +135,17 @@ static void Controller_EnumerateDevices()
         }
 
         UsbDk_ReleaseDevicesList(devicesArray);
+        return 0;
     }
     else
     {
         tcout << TEXT("Enumeration failed") << endl;
+        return 1;
     }
 }
 //-------------------------------------------------------------------------------
 
-static void Controller_RedirectDevice(TCHAR *DeviceID, TCHAR *InstanceID)
+static int Controller_RedirectDevice(TCHAR *DeviceID, TCHAR *InstanceID)
 {
     USB_DK_DEVICE_ID   deviceID;
     UsbDkFillIDStruct(&deviceID, tstring2wstring(DeviceID), tstring2wstring(InstanceID));
@@ -151,7 +156,7 @@ static void Controller_RedirectDevice(TCHAR *DeviceID, TCHAR *InstanceID)
     if (INVALID_HANDLE_VALUE == redirectedDevice)
     {
         tcout << TEXT("Redirect of USB device failed") << endl;
-        return;
+        return 100;
     }
     tcout << TEXT("USB device was redirected successfully. Redirected device handle = ") << redirectedDevice << endl;
     tcout << TEXT("Press some key to stop redirection");
@@ -162,10 +167,12 @@ static void Controller_RedirectDevice(TCHAR *DeviceID, TCHAR *InstanceID)
     if (TRUE == UsbDk_StopRedirect(redirectedDevice))
     {
         tcout << TEXT("USB device redirection was stopped successfully.") << endl;
+        return 0;
     }
     else
     {
         tcout << TEXT("Stopping of USB device redirection failed.") << endl;
+        return 101;
     }
 
 }
@@ -211,36 +218,37 @@ int __cdecl _tmain(int argc, TCHAR* argv[])
 
         if (_tcsicmp(L"-i", argv[1]) == 0)
         {
-            Controller_InstallDriver();
+            return Controller_InstallDriver();
         }
         else if (_tcsicmp(L"-u", argv[1]) == 0)
         {
-            Controller_UninstallDriver();
+            return Controller_UninstallDriver();
         }
         else if (_tcsicmp(L"-n", argv[1]) == 0)
         {
-            Controller_EnumerateDevices();
+            return Controller_EnumerateDevices();
         }
         else if (_tcsicmp(L"-r", argv[1]) == 0)
         {
             if (argc < 4)
             {
                 ShowUsage();
-                return 0;
+                return -2;
             }
 
-            Controller_RedirectDevice(argv[2], argv[3]);
+            return Controller_RedirectDevice(argv[2], argv[3]);
         }
         else
         {
             ShowUsage();
+            return -3;
+
         }
     }
     else
     {
         ShowUsage();
+        return -4;
     }
-
-    return 0;
 }
 //-------------------------------------------------------------------------------

@@ -21,22 +21,4 @@
 *
 **********************************************************************/
 
-#pragma once
-
-#include "targetver.h"
-
-#include <stdio.h>
-#include <tchar.h>
-#include <assert.h>
-#include <windows.h>
-#include <tstrings.h>
-#include <cfgmgr32.h>
-#include <shlwapi.h>
-
-#ifndef _USING_V110_SDK71_
-#include <usbspec.h>
-#else
-#include "UsbDkCompat.h"
-#endif
-
-// TODO: reference additional headers your program requires here
+#include "stdafx.h"

@@ -981,6 +981,7 @@
     <ClInclude Include="RedirectorAccess.h" />
     <ClInclude Include="RegAccess.h" />
     <ClInclude Include="DeviceMgr.h" />
+    <ClInclude Include="UsbDkCompat.h" />
     <ClInclude Include="UsbDkHelper.h" />
     <ClInclude Include="ServiceManager.h" />
     <ClInclude Include="stdafx.h" />

@@ -23,20 +23,9 @@
 
 #pragma once
 
-#include "targetver.h"
+// Including SDKDDKVer.h defines the highest available Windows platform.
 
-#include <stdio.h>
-#include <tchar.h>
-#include <assert.h>
-#include <windows.h>
-#include <tstrings.h>
-#include <cfgmgr32.h>
-#include <shlwapi.h>
+// If you wish to build your application for a previous Windows platform, include WinSDKVer.h and
+// set the _WIN32_WINNT macro to the platform you wish to support before including SDKDDKVer.h.
 
-#ifndef _USING_V110_SDK71_
-#include <usbspec.h>
-#else
-#include "UsbDkCompat.h"
-#endif
-
-// TODO: reference additional headers your program requires here
+#include <SDKDDKVer.h>

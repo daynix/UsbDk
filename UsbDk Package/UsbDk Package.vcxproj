@@ -461,6 +461,7 @@ copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
 copy "$(ProjectDir)\..\UsbDkHelper\UsbDk_XP.inf" "$(OutDir)UsbDk_Package\UsbDk.inf"
 copy "$(OutDir)UsbDk.sys" "$(OutDir)UsbDk_Package"
 copy "$(OutDir)UsbDkController.exe" "$(OutDir)UsbDk_Package"
+copy "$(OutDir)UsbDkInstHelper.exe" "$(OutDir)UsbDk_Package"
 copy "$(OutDir)UsbDkHelper.dll" "$(OutDir)UsbDk_Package"
 copy C:\WinDDK\7600.16385.1\redist\wdf\x86\WdfCoInstaller01009.dll "$(OutDir)UsbDk_Package"
 mkdir "$(OutDir)UsbDk_Package\include"
@@ -486,6 +487,7 @@ copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
 copy "$(ProjectDir)\..\UsbDkHelper\UsbDk_XP.inf" "$(OutDir)UsbDk_Package\UsbDk.inf"
 copy "$(OutDir)UsbDk.sys" "$(OutDir)UsbDk_Package"
 copy "$(OutDir)UsbDkController.exe" "$(OutDir)UsbDk_Package"
+copy "$(OutDir)UsbDkInstHelper.exe" "$(OutDir)UsbDk_Package"
 copy "$(OutDir)UsbDkHelper.dll" "$(OutDir)UsbDk_Package"
 copy C:\WinDDK\7600.16385.1\redist\wdf\x86\WdfCoInstaller01009.dll "$(OutDir)UsbDk_Package"
 mkdir "$(OutDir)UsbDk_Package\include"
@@ -547,6 +549,7 @@ copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
 copy "$(ProjectDir)\..\UsbDkHelper\UsbDk_XP.inf" "$(OutDir)UsbDk_Package\UsbDk.inf"
 copy "$(OutDir)UsbDk.sys" "$(OutDir)UsbDk_Package"
 copy "$(OutDir)UsbDkController.exe" "$(OutDir)UsbDk_Package"
+copy "$(OutDir)UsbDkInstHelper.exe" "$(OutDir)UsbDk_Package"
 copy "$(OutDir)UsbDkHelper.dll" "$(OutDir)UsbDk_Package"
 copy C:\WinDDK\7600.16385.1\redist\wdf\amd64\WdfCoInstaller01009.dll "$(OutDir)UsbDk_Package"
 mkdir "$(OutDir)UsbDk_Package\include"
@@ -572,6 +575,7 @@ copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
 copy "$(ProjectDir)\..\UsbDkHelper\UsbDk_XP.inf" "$(OutDir)UsbDk_Package\UsbDk.inf"
 copy "$(OutDir)UsbDk.sys" "$(OutDir)UsbDk_Package"
 copy "$(OutDir)UsbDkController.exe" "$(OutDir)UsbDk_Package"
+copy "$(OutDir)UsbDkInstHelper.exe" "$(OutDir)UsbDk_Package"
 copy "$(OutDir)UsbDkHelper.dll" "$(OutDir)UsbDk_Package"
 copy C:\WinDDK\7600.16385.1\redist\wdf\amd64\WdfCoInstaller01009.dll "$(OutDir)UsbDk_Package"
 mkdir "$(OutDir)UsbDk_Package\include"
@@ -672,6 +676,70 @@ copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
       </PackageRelativeDirectory>
     </FilesToPackage>
     <FilesToPackage Include="$(OutDir)UsbDkController.exe" Condition="'$(Configuration)|$(Platform)'=='Win8.1 Release|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkInstHelper.exe" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkInstHelper.exe" Condition="'$(Configuration)|$(Platform)'=='XP Debug|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkInstHelper.exe" Condition="'$(Configuration)|$(Platform)'=='Win7 Release|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkInstHelper.exe" Condition="'$(Configuration)|$(Platform)'=='XP Release|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkInstHelper.exe" Condition="'$(Configuration)|$(Platform)'=='Win8 Debug|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkInstHelper.exe" Condition="'$(Configuration)|$(Platform)'=='Win8 Release|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkInstHelper.exe" Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkInstHelper.exe" Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug|Win32'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkInstHelper.exe" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|Win32'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkInstHelper.exe" Condition="'$(Configuration)|$(Platform)'=='XP Debug|Win32'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkInstHelper.exe" Condition="'$(Configuration)|$(Platform)'=='Win7 Release|Win32'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkInstHelper.exe" Condition="'$(Configuration)|$(Platform)'=='XP Release|Win32'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkInstHelper.exe" Condition="'$(Configuration)|$(Platform)'=='Win8 Debug|Win32'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkInstHelper.exe" Condition="'$(Configuration)|$(Platform)'=='Win8 Release|Win32'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkInstHelper.exe" Condition="'$(Configuration)|$(Platform)'=='Win8.1 Release|Win32'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkInstHelper.exe" Condition="'$(Configuration)|$(Platform)'=='Win8.1 Release|x64'">
       <PackageRelativeDirectory>
       </PackageRelativeDirectory>
     </FilesToPackage>
@@ -848,6 +916,9 @@ copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
     </ProjectReference>
     <ProjectReference Include="..\UsbDkHelper\UsbDkHelper.vcxproj">
       <Project>{30450fdc-051a-46f0-ad53-b10622834c30}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\UsbDkInstHelper\UsbDkInstHelper.vcxproj">
+      <Project>{357d3992-0282-41de-be4d-dc749d1e0fd8}</Project>
     </ProjectReference>
     <ProjectReference Include="..\UsbDk\UsbDk.vcxproj">
       <Project>{2008215f-40fe-4383-9c98-c46bf8d8c87c}</Project>

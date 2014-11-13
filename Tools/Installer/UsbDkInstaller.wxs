@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+
+  <?ifdef UsbDk64Bit ?>
+    <?define UsbDkPlatform=x64 ?>
+    <?define UsbDkProgramFilesFolder= ProgramFiles64Folder ?>
+    <?define UsbDkWin64= yes ?>
+    <?else?>
+    <?define UsbDkPlatform=x86 ?>
+    <?define UsbDkProgramFilesFolder= ProgramFilesFolder ?>
+    <?define UsbDkWin64= no ?>
+    <?endif?>
+
+  <Product
+    Name="UsbDk Runtime Libraries"
+    Id="*"
+    UpgradeCode="{15770BF3-6D18-418B-BB78-B51DBEABA52A}"
+    Manufacturer="Red Hat, Inc."
+    Version="$(var.UsbDkVersion)"
+    Language="1033">
+    <Package
+      Manufacturer="Red Hat, Inc."
+      InstallerVersion="200"
+      Languages="1033"
+      Platform="$(var.UsbDkPlatform)"
+      Compressed="yes"
+      InstallScope="perMachine"
+      InstallPrivileges="elevated" />
+
+    <Media Id="1" Cabinet="usbdk.1.1.0.0.cab" EmbedCab="yes" />
+
+    <Property Id="WHSLogo">1</Property>
+
+    <Property Id="PREVIOUSVERSIONSINSTALLED" Secure="yes" />
+    <Upgrade Id="{15770BF3-6D18-418B-BB78-B51DBEABA52A}">
+      <UpgradeVersion
+        Minimum="0.0.0.0" Maximum="$(var.UsbDkVersion)"
+        Property="PREVIOUSVERSIONSINSTALLED"
+        IncludeMinimum="yes" IncludeMaximum="no" />
+    </Upgrade>
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="$(var.UsbDkProgramFilesFolder)" Name="UsbDk Runtime Library">
+        <Directory Id="UsbDk_Directory" Name="UsbDk Runtime Library">
+
+          <Component Id="UsbDk_Pre7" Guid="{4A0BC5BD-0EEF-4F19-8A31-C940126131D8}" Win64="$(var.UsbDkWin64)">
+            <Condition>VersionNT &lt;= 600</Condition>
+            <?define SourceSubPath= "XP$(var.Config)" ?>
+            <?define OsName= "Pre7" ?>
+            <?define CoinstallerVersion= "01009" ?>
+            <?include UsbDkFiles.wxi ?>
+            <?undef SourceSubPath ?>
+            <?undef OsName ?>
+          </Component>
+
+          <Component Id="UsbDk_7" Guid="{103BC042-778C-4373-BD5A-B0C0E45258CB}" Win64="$(var.UsbDkWin64)">
+            <Condition>VersionNT = 601</Condition>
+            <?define SourceSubPath= "Win7$(var.Config)" ?>
+            <?define OsName= "7" ?>
+            <?include UsbDkFiles.wxi ?>
+            <?undef SourceSubPath ?>
+            <?undef OsName ?>
+          </Component>
+
+          <Component Id="UsbDk_8" Guid="{2E5BB970-EE2B-450A-90F1-9EBE05942E21}" Win64="$(var.UsbDkWin64)">
+            <Condition>VersionNT = 602</Condition>
+            <?define SourceSubPath= "Win8$(var.Config)" ?>
+            <?define OsName= "8" ?>
+            <?include UsbDkFiles.wxi ?>
+            <?undef SourceSubPath ?>
+            <?undef OsName ?>
+          </Component>
+
+          <Component Id="UsbDk_81" Guid="{3C24F894-3604-41D0-9FC2-D6A3B3676A20}" Win64="$(var.UsbDkWin64)">
+            <Condition>VersionNT &gt;= 603</Condition>
+            <?define SourceSubPath= "Win8.1$(var.Config)" ?>
+            <?define OsName= "81" ?>
+            <?include UsbDkFiles.wxi ?>
+            <?undef SourceSubPath ?>
+            <?undef OsName ?>
+          </Component>
+        </Directory>
+      </Directory>
+    </Directory>
+
+    <CustomAction Id="InstallDriver"
+              Directory="UsbDk_Directory"
+              ExeCommand="[UsbDk_Directory]\UsbDkInstHelper.exe i"
+              Execute="deferred"
+              Impersonate="no"
+              Return="check">
+    </CustomAction>
+
+    <CustomAction Id="UninstallDriver"
+              Directory="UsbDk_Directory"
+              ExeCommand="[UsbDk_Directory]\UsbDkInstHelper.exe u"
+              Execute="deferred"
+              Impersonate="no"
+              Return="ignore">
+    </CustomAction>
+
+    <InstallExecuteSequence>
+      <RemoveExistingProducts Before="InstallInitialize" />
+      <Custom Action="InstallDriver" After="InstallFiles">NOT Installed</Custom>
+      <Custom Action="UninstallDriver" Before="RemoveFiles">Installed</Custom>
+    </InstallExecuteSequence>
+
+    <Feature Id="ProductFeature" Title="UsbDk Runtime Libraries" Level="1">
+      <ComponentRef Id="UsbDk_Pre7" />
+      <ComponentRef Id="UsbDk_7" />
+      <ComponentRef Id="UsbDk_8" />
+      <ComponentRef Id="UsbDk_81" />
+    </Feature>
+  </Product>
+</Wix>

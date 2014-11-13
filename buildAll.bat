@@ -2,6 +2,8 @@
 
 SETLOCAL EnableExtensions EnableDelayedExpansion
 
+if [%1] EQU [MSIONLY] goto BUILD_MSI
+
 del *.log
 
 for %%x in (Win7, Win8, Win8.1, XP) do (
@@ -12,5 +14,18 @@ for %%x in (Win7, Win8, Win8.1, XP) do (
     )
   )
 )
+
+if [%1] EQU [NOMSI] goto NOMSI
+
+:BUILD_MSI
+
+pushd Tools\Installer
+
+SET UsbDkVersion="%USBDK_MAJOR_VERSION%.%USBDK_MINOR_VERSION%.%USBDK_BUILD_NUMBER%"
+buildmsi.bat
+
+popd
+
+:NOMSI
 
 ENDLOCAL

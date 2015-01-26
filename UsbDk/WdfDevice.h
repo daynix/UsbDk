@@ -111,6 +111,19 @@ private:
     bool m_Attached = false;
 };
 
+template<typename T>
+class CWdfDeviceDeleter
+{
+public:
+    static void destroy(T *Dev)
+    {
+        if (Dev != nullptr)
+        {
+            Dev->Delete();
+        }
+    }
+};
+
 class CWdfDevice
 {
 public:

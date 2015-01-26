@@ -144,6 +144,26 @@ public:
         return true;
     }
 
+    template <typename TPredicate>
+    void WipeIf(TPredicate Predicate) const
+    {
+        if (m_Relations != nullptr)
+        {
+            ULONG WritePosition = 0;
+
+            for (ULONG ReadPosition = 0; ReadPosition < m_Relations->Count; ReadPosition++)
+            {
+                if (!Predicate(m_Relations->Objects[ReadPosition]))
+                {
+                    m_Relations->Objects[WritePosition] = m_Relations->Objects[ReadPosition];
+                    WritePosition++;
+                }
+            }
+
+            m_Relations->Count = WritePosition;
+        }
+    }
+
     template <typename TFunctor>
     bool ForEach(TFunctor Functor) const
     { return ForEachIf(ConstTrue, Functor); }
@@ -171,6 +191,7 @@ NTSTATUS CUsbDkHubFilterStrategy::PNPPreProcess(PIRP Irp)
                                         CDeviceRelations Relations((PDEVICE_RELATIONS)Irp->IoStatus.Information);
                                         DropRemovedDevices(Relations);
                                         AddNewDevices(Relations);
+                                        WipeHiddenDevices(Relations);
                                     });
     }
 
@@ -190,6 +211,24 @@ void CUsbDkHubFilterStrategy::AddNewDevices(const CDeviceRelations &Relations)
 {
     Relations.ForEachIf([this](PDEVICE_OBJECT PDO){ return !IsChildRegistered(PDO); },
                         [this](PDEVICE_OBJECT PDO){ RegisterNewChild(PDO); return true; });
+}
+
+void CUsbDkHubFilterStrategy::WipeHiddenDevices(CDeviceRelations &Relations)
+{
+    Relations.WipeIf([this](PDEVICE_OBJECT PDO)
+    {
+        bool Hide = false;
+
+        Children().ForEachIf([PDO](CUsbDkChildDevice *Child){ return Child->Match(PDO); },
+                             [this, &Hide](CUsbDkChildDevice *Child)
+                             {
+                                 Hide = !Child->IsRedirected() &&
+                                        m_ControlDevice->ShouldHide(Child->DeviceDescriptor());
+                                 return false;
+                             });
+
+        return Hide;
+    });
 }
 
 void CUsbDkHubFilterStrategy::RegisterNewChild(PDEVICE_OBJECT PDO)
@@ -323,12 +362,13 @@ ULONG CUsbDkChildDevice::ParentID() const
 
 bool CUsbDkChildDevice::MakeRedirected()
 {
-    if (!CreateRedirectorDevice())
+    m_Redirected = CreateRedirectorDevice();
+    if (!m_Redirected)
     {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Failed to create redirector for child");
-        return false;
     }
-    return true;
+
+    return m_Redirected;
 }
 
 bool CUsbDkChildDevice::CreateRedirectorDevice()

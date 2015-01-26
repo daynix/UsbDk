@@ -76,6 +76,8 @@ public:
     { return m_Speed; }
     const USB_DEVICE_DESCRIPTOR &DeviceDescriptor() const
     { return m_DevDescriptor; }
+    bool IsRedirected() const
+    { return m_Redirected; }
     PDEVICE_OBJECT PDO() const { return m_PDO; }
 
     bool ConfigurationDescriptor(UCHAR Index, USB_CONFIGURATION_DESCRIPTOR &Buffer, size_t BufferLength)
@@ -107,6 +109,7 @@ private:
     TDescriptorsCache m_CfgDescriptors;
     PDEVICE_OBJECT m_PDO;
     const CUsbDkFilterDevice &m_ParentDevice;
+    bool m_Redirected = false;
 
     bool CreateRedirectorDevice();
 
@@ -131,6 +134,7 @@ public:
 private:
     void DropRemovedDevices(const CDeviceRelations &Relations);
     void AddNewDevices(const CDeviceRelations &Relations);
+    void WipeHiddenDevices(CDeviceRelations &Relations);
     void RegisterNewChild(PDEVICE_OBJECT PDO);
     void ApplyRedirectionPolicy(CUsbDkChildDevice &Device);
     bool FetchConfigurationDescriptors(CWdmUsbDeviceAccess &devAccess,

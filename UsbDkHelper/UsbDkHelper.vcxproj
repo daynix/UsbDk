@@ -974,6 +974,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\UsbDk\UsbDkHelperHider.h" />
     <ClInclude Include="DriverAccess.h" />
     <ClInclude Include="DriverFile.h" />
     <ClInclude Include="Exception.h" />

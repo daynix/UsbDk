@@ -25,6 +25,8 @@
 
 #include "stdafx.h"
 #include "UsbDkHelper.h"
+#include "UsbDkHelperHider.h"
+#include "UsbDkDataHider.h"
 #include "Installer.h"
 #include "DriverAccess.h"
 #include "RedirectorAccess.h"
@@ -262,3 +264,54 @@ HANDLE UsbDk_GetRedirectorSystemHandle(HANDLE DeviceHandle)
     return deviceHandle->RedirectorAccess->GetSystemHandle();
 }
 //-------------------------------------------------------------------------------------------
+
+HANDLE UsbDk_CreateHiderHandle()
+{
+    try
+    {
+        unique_ptr<UsbDkHiderAccess> hiderAccess(new UsbDkHiderAccess);
+        return reinterpret_cast<HANDLE>(hiderAccess.release());
+    }
+    catch (const exception &e)
+    {
+        printExceptionString(e.what());
+        return INVALID_HANDLE_VALUE;
+    }
+}
+
+BOOL UsbDk_AddHideRule(HANDLE HiderHandle, PUSB_DK_HIDE_RULE Rule)
+{
+    auto HiderAccess = reinterpret_cast<UsbDkHiderAccess *>(HiderHandle);
+
+    try
+    {
+        HiderAccess->AddHideRule(*Rule);
+        return TRUE;
+    }
+    catch (const exception &e)
+    {
+        printExceptionString(e.what());
+        return FALSE;
+    }
+}
+
+BOOL UsbDk_ClearHideRules(HANDLE HiderHandle)
+{
+    auto HiderAccess = reinterpret_cast<UsbDkHiderAccess *>(HiderHandle);
+
+    try
+    {
+        HiderAccess->ClearHideRules();
+        return TRUE;
+    }
+    catch (const exception &e)
+    {
+        printExceptionString(e.what());
+        return FALSE;
+    }
+}
+
+void UsbDk_CloseHiderHandle(HANDLE HiderHandle)
+{
+    delete reinterpret_cast<UsbDkHiderAccess *>(HiderHandle);
+}

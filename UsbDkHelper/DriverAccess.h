@@ -24,6 +24,7 @@
 #pragma once
 
 #include "UsbDkData.h"
+#include "UsbDkDataHider.h"
 #include "DriverFile.h"
 #include "UsbDkNames.h"
 
@@ -63,3 +64,14 @@ private:
     }
 };
 //-----------------------------------------------------------------------------------
+
+class UsbDkHiderAccess : public UsbDkDriverFile
+{
+public:
+    UsbDkHiderAccess()
+        : UsbDkDriverFile(USBDK_USERMODE_HIDER_NAME)
+    {}
+
+    void AddHideRule(const USB_DK_HIDE_RULE &Rule);
+    void ClearHideRules();
+};

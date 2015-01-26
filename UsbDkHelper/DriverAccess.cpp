@@ -92,7 +92,16 @@ HANDLE UsbDkDriverAccess::AddRedirect(USB_DK_DEVICE_ID &DeviceID)
 {
     ULONG64 RedirectorHandle;
     SendIoctlWithDeviceId(IOCTL_USBDK_ADD_REDIRECT, DeviceID, &RedirectorHandle);
-
     return reinterpret_cast<HANDLE>(RedirectorHandle);
 }
 //------------------------------------------------------------------------------------------------
+
+void UsbDkHiderAccess::AddHideRule(const USB_DK_HIDE_RULE &Rule)
+{
+    Ioctl(IOCTL_USBDK_ADD_HIDE_RULE, false, const_cast<PUSB_DK_HIDE_RULE>(&Rule), sizeof(Rule));
+}
+
+void UsbDkHiderAccess::ClearHideRules()
+{
+    Ioctl(IOCTL_USBDK_CLEAR_HIDE_RULES);
+}

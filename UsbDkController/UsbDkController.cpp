@@ -24,6 +24,8 @@
 #include "stdafx.h"
 
 #include "UsbDkHelper.h"
+#include "UsbDkHelperHider.h"
+#include "UsbDkDataHider.h"
 
 using namespace std;
 //-------------------------------------------------------------------------------

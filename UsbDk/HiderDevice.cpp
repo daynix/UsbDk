@@ -22,6 +22,7 @@
 
 #include "stdafx.h"
 #include "HiderDevice.h"
+#include "ControlDevice.h"
 #include "trace.h"
 #include "WdfRequest.h"
 #include "HiderDevice.tmh"
@@ -52,6 +53,20 @@ NTSTATUS CUsbDkHiderDeviceInit::Create(WDFDRIVER Driver)
     SetExclusive();
     SetIoBuffered();
 
+    SetFileEventCallbacks(WDF_NO_EVENT_CALLBACK,
+                          [](_In_ WDFFILEOBJECT FileObject)
+                          {
+                              auto Device = WdfFileObjectGetDevice(FileObject);
+                              auto devExt = UsbDkHiderGetContext(Device);
+                              auto ControlDevice = CUsbDkControlDevice::Reference(devExt->UsbDkHider->DriverHandle());
+                              if (ControlDevice != nullptr)
+                              {
+                                  ControlDevice->ClearHideRules();
+                                  CUsbDkControlDevice::Release();
+                              }
+                          },
+                          WDF_NO_EVENT_CALLBACK);
+
     DECLARE_CONST_UNICODE_STRING(ntDeviceName, USBDK_HIDER_DEVICE_NAME);
     return SetName(ntDeviceName);
 }
@@ -67,14 +82,69 @@ void CUsbDkHiderDeviceQueue::DeviceControl(WDFQUEUE Queue,
                                            size_t InputBufferLength,
                                            ULONG IoControlCode)
 {
+    CWdfRequest WdfRequest(Request);
+
+    switch (IoControlCode)
+    {
+        case IOCTL_USBDK_ADD_HIDE_RULE:
+        {
+            PUSB_DK_HIDE_RULE Rule;
+
+            auto status = WdfRequest.FetchInputObject(Rule);
+            if (!NT_SUCCESS(status))
+            {
+                WdfRequest.SetBytesRead(0);
+                WdfRequest.SetStatus(status);
+                return;
+            }
+
+            auto devExt = UsbDkHiderGetContext(WdfIoQueueGetDevice(Queue));
+            auto ControlDevice = CUsbDkControlDevice::Reference(devExt->UsbDkHider->DriverHandle());
+            if (ControlDevice == nullptr)
+            {
+                WdfRequest.SetBytesRead(0);
+                WdfRequest.SetStatus(STATUS_INSUFFICIENT_RESOURCES);
+                return;
+            }
+
+            status = ControlDevice->AddHideRule(*Rule);
+
+            CUsbDkControlDevice::Release();
+            WdfRequest.SetBytesRead(sizeof(Rule));
+            WdfRequest.SetStatus(status);
+            return;
+        }
+        case IOCTL_USBDK_CLEAR_HIDE_RULES:
+        {
+            WdfRequest.SetBytesRead(0);
+
+            auto devExt = UsbDkHiderGetContext(WdfIoQueueGetDevice(Queue));
+            auto ControlDevice = CUsbDkControlDevice::Reference(devExt->UsbDkHider->DriverHandle());
+            if (ControlDevice == nullptr)
+            {
+                WdfRequest.SetStatus(STATUS_INSUFFICIENT_RESOURCES);
+                return;
+            }
+
+            ControlDevice->ClearHideRules();
+
+            CUsbDkControlDevice::Release();
+            WdfRequest.SetStatus(STATUS_SUCCESS);
+            return;
+        }
+        default:
+        {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_HIDERDEVICE, "Wrong IoControlCode 0x%X\n", IoControlCode);
+            WdfRequest.SetStatus(STATUS_INVALID_DEVICE_REQUEST);
+            break;
+        }
+    }
+
     UNREFERENCED_PARAMETER(Queue);
     UNREFERENCED_PARAMETER(OutputBufferLength);
     UNREFERENCED_PARAMETER(InputBufferLength);
 
-    CWdfRequest WdfRequest(Request);
 
-    TraceEvents(TRACE_LEVEL_ERROR, TRACE_HIDERDEVICE, "Wrong IoControlCode 0x%X\n", IoControlCode);
-    WdfRequest.SetStatus(STATUS_INVALID_DEVICE_REQUEST);
 }
 //------------------------------------------------------------------------------------------------------------
 

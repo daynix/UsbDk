@@ -325,6 +325,16 @@ public:
                                     [&ModifierFunc](TEntryType *Entry) { ModifierFunc(Entry); return false; });
     }
 
+    template <typename TFunctor>
+    bool ForEach(TFunctor Functor)
+    {
+        return m_Objects.ForEach(Functor);
+    }
+
+    void Clear()
+    {
+        m_Objects.Clear();
+    }
 private:
     template <typename TEntryId>
     bool Contains_LockLess(TEntryId *Id)

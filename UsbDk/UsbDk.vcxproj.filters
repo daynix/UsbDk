@@ -144,6 +144,9 @@
     <ClCompile Include="Urb.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="HiderDevice.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource.rc">

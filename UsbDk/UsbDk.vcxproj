@@ -72,6 +72,7 @@
     <ClCompile Include="Driver.cpp" />
     <ClCompile Include="FilterDevice.cpp" />
     <ClCompile Include="FilterStrategy.cpp" />
+    <ClCompile Include="HiderDevice.cpp" />
     <ClCompile Include="Irp.cpp" />
     <ClCompile Include="MemoryBuffer.cpp" />
     <ClCompile Include="RedirectorStrategy.cpp" />
@@ -91,6 +92,7 @@
     <ClInclude Include="Driver.h" />
     <ClInclude Include="FilterDevice.h" />
     <ClInclude Include="FilterStrategy.h" />
+    <ClInclude Include="HiderDevice.h" />
     <ClInclude Include="Irp.h" />
     <ClInclude Include="MemoryBuffer.h" />
     <ClInclude Include="Public.h" />

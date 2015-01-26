@@ -366,12 +366,29 @@ NTSTATUS CUsbDkControlDevice::Create(WDFDRIVER Driver)
     attr.EvtCleanupCallback = ContextCleanup;
 
     status = CWdfControlDevice::Create(DeviceInit, attr);
-    if (NT_SUCCESS(status))
+    if (!NT_SUCCESS(status))
     {
-        UsbDkControlGetContext(m_Device)->UsbDkControl = this;
+        return status;
     }
 
-    return status;
+    UsbDkControlGetContext(m_Device)->UsbDkControl = this;
+
+    CObjHolder<CUsbDkHiderDevice> HiderDevice(new CUsbDkHiderDevice());
+    if (!HiderDevice)
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! Hider device allocation failed");
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+
+    status = HiderDevice->Create(Driver);
+    if (!NT_SUCCESS(status))
+    {
+        return status;
+    }
+
+    m_HiderDevice = HiderDevice.detach();
+
+    return m_HiderDevice->Register();
 }
 
 NTSTATUS CUsbDkControlDevice::Register()

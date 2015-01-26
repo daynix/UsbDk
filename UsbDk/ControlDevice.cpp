@@ -787,3 +787,9 @@ NTSTATUS CUsbDkRedirection::CreateRedirectorHandle(PHANDLE ObjectHandle)
     TraceEvents(TRACE_LEVEL_ERROR, TRACE_WDFDEVICE, "%!FUNC! failed, %!STATUS!", status);
     return status;
 }
+
+void CUsbDkHideRule::Dump() const
+{
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "%!FUNC! Hide: %!bool!, C: %08X, V: %08X, P: %08X, BCD: %08X",
+                m_Hide, m_Class, m_VID, m_PID, m_BCD);
+}

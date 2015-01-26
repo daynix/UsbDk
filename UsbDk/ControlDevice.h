@@ -69,6 +69,66 @@ private:
     CUsbDkControlDeviceQueue& operator= (const CUsbDkControlDeviceQueue&) = delete;
 };
 
+class CUsbDkHideRule : public CAllocatable < NonPagedPool, 'RHHR' >
+{
+public:
+    static const ULONG MATCH_ALL = ULONG(-1);
+
+    CUsbDkHideRule(bool Hide, ULONG Class, ULONG VID, ULONG PID, ULONG BCD)
+        : m_Hide(Hide)
+        , m_Class(Class)
+        , m_VID(VID)
+        , m_PID(PID)
+        , m_BCD(BCD)
+    {}
+
+    bool Match(const USB_DEVICE_DESCRIPTOR &Descriptor) const
+    {
+        return MatchCharacteristic(m_Class, Descriptor.bDeviceClass) &&
+               MatchCharacteristic(m_VID, Descriptor.idVendor)       &&
+               MatchCharacteristic(m_PID, Descriptor.idProduct)      &&
+               MatchCharacteristic(m_BCD, Descriptor.bcdDevice);
+    }
+
+    bool ShouldHide() const
+    {
+        return m_Hide;
+    }
+
+    bool ForceDecision() const
+    {
+        //All do-not-hide rules are terminal
+        return !m_Hide;
+    }
+
+    bool operator ==(const CUsbDkHideRule &Other) const
+    {
+        return m_Hide == Other.m_Hide   &&
+               m_Class == Other.m_Class &&
+               m_VID == Other.m_VID     &&
+               m_PID == Other.m_PID     &&
+               m_BCD == Other.m_BCD;
+
+    }
+
+    void Dump() const;
+
+private:
+    bool MatchCharacteristic(ULONG CharacteristicFilter, ULONG CharacteristicValue) const
+    {
+        return (CharacteristicFilter == MATCH_ALL)                  ||
+               (CharacteristicValue == CharacteristicFilter);
+    }
+
+    bool    m_Hide;
+    ULONG   m_Class;
+    ULONG   m_VID;
+    ULONG   m_PID;
+    ULONG   m_BCD;
+
+    DECLARE_CWDMLIST_ENTRY(CUsbDkHideRule);
+};
+
 class CUsbDkRedirection : public CAllocatable<NonPagedPool, 'NRHR'>, public CWdmRefCountingObject
 {
 public:

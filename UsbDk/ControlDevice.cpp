@@ -221,6 +221,24 @@ ULONG CUsbDkControlDevice::CountDevices()
 }
 //------------------------------------------------------------------------------------------------------------
 
+bool CUsbDkControlDevice::ShouldHide(const USB_DEVICE_DESCRIPTOR &DevDescriptor) const
+{
+    auto Hide = false;
+
+    const_cast<HideRulesSet*>(&m_HideRules)->ForEach([&DevDescriptor, &Hide](CUsbDkHideRule *Entry) -> bool
+    {
+        if (Entry->Match(DevDescriptor))
+        {
+            Hide = Entry->ShouldHide();
+            return !Entry->ForceDecision();
+        }
+
+        return true;
+    });
+
+    return Hide;
+}
+
 bool CUsbDkControlDevice::EnumerateDevices(USB_DK_DEVICE_INFO *outBuff, size_t numberAllocatedDevices, size_t &numberExistingDevices)
 {
     numberExistingDevices = 0;
@@ -588,6 +606,44 @@ NTSTATUS CUsbDkControlDevice::AddRedirect(const USB_DK_DEVICE_ID &DeviceId, PHAN
 
     return STATUS_SUCCESS;
 }
+
+NTSTATUS CUsbDkControlDevice::AddHideRule(const USB_DK_HIDE_RULE &UsbDkRule)
+{
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "%!FUNC! entry");
+
+    auto MatchAllMapper = [](ULONG64 Value) -> ULONG
+    { return Value == USB_DK_HIDE_RULE_MATCH_ALL ? CUsbDkHideRule::MATCH_ALL : static_cast<ULONG>(Value); };
+
+    CObjHolder<CUsbDkHideRule> NewRule(new CUsbDkHideRule(UsbDkRule.Hide ? true : false,
+                                                          MatchAllMapper(UsbDkRule.Class),
+                                                          MatchAllMapper(UsbDkRule.VID),
+                                                          MatchAllMapper(UsbDkRule.PID),
+                                                          MatchAllMapper(UsbDkRule.BCD)));
+    if (!NewRule)
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! Failed to allocate new rule");
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+
+    if(!m_HideRules.Add(NewRule))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! failed. Hide rule already present.");
+        return STATUS_OBJECT_NAME_COLLISION;
+    }
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "%!FUNC! Current hide rules:");
+    m_HideRules.Dump();
+
+    NewRule.detach();
+    return STATUS_SUCCESS;
+}
+
+void CUsbDkControlDevice::ClearHideRules()
+{
+    m_HideRules.Clear();
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "%!FUNC! All hide rules dropped.");
+}
+
 //-------------------------------------------------------------------------------------------------------------
 
 NTSTATUS CUsbDkControlDevice::AddDeviceToSet(const USB_DK_DEVICE_ID &DeviceId, CUsbDkRedirection **NewRedirection)

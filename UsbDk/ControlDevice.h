@@ -27,6 +27,8 @@
 #include "Alloc.h"
 #include "UsbDkUtil.h"
 #include "FilterDevice.h"
+#include "HiderDevice.h"
+#include "UsbDkDataHider.h"
 
 typedef struct tag_USB_DK_DEVICE_ID USB_DK_DEVICE_ID;
 typedef struct tag_USB_DK_DEVICE_INFO USB_DK_DEVICE_INFO;
@@ -197,6 +199,9 @@ public:
     bool EnumerateDevices(USB_DK_DEVICE_INFO *outBuff, size_t numberAllocatedDevices, size_t &numberExistingDevices);
     NTSTATUS ResetUsbDevice(const USB_DK_DEVICE_ID &DeviceId);
     NTSTATUS AddRedirect(const USB_DK_DEVICE_ID &DeviceId, PHANDLE ObjectHandle);
+    NTSTATUS AddHideRule(const USB_DK_HIDE_RULE &UsbDkRule);
+    void ClearHideRules();
+
     NTSTATUS RemoveRedirect(const USB_DK_DEVICE_ID &DeviceId);
     NTSTATUS GetConfigurationDescriptor(const USB_DK_CONFIG_DESCRIPTOR_REQUEST &Request,
                                         PUSB_CONFIGURATION_DESCRIPTOR Descriptor,
@@ -218,6 +223,8 @@ public:
         return !DontRedirect;
     }
 
+    bool ShouldHide(const USB_DEVICE_DESCRIPTOR &DevDescriptor) const;
+
     template <typename TDevID>
     void NotifyRedirectionRemoved(const TDevID &Dev) const
     {
@@ -237,6 +244,9 @@ private:
 
     typedef CWdmSet<CUsbDkRedirection, CLockedAccess, CNonCountingObject> RedirectionsSet;
     RedirectionsSet m_Redirections;
+
+    typedef CWdmSet<CUsbDkHideRule, CLockedAccess, CNonCountingObject> HideRulesSet;
+    HideRulesSet m_HideRules;
 
     template <typename TPredicate, typename TFunctor>
     bool UsbDevicesForEachIf(TPredicate Predicate, TFunctor Functor)

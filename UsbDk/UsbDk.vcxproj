@@ -101,6 +101,7 @@
     <ClInclude Include="Urb.h" />
     <ClInclude Include="UsbDkCompat.h" />
     <ClInclude Include="UsbDkData.h" />
+    <ClInclude Include="UsbDkDataHider.h" />
     <ClInclude Include="UsbDkNames.h" />
     <ClInclude Include="UsbDkUtil.h" />
     <ClInclude Include="Trace.h" />

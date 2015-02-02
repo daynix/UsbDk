@@ -33,12 +33,12 @@ using namespace std;
 static void ShowUsage()
 {
     tcout << endl;
-    tcout << TEXT("              UsbDkController usage:") << endl;
+    tcout << TEXT("    UsbDkController usage:") << endl;
     tcout << endl;
-    tcout << TEXT("UsbDkController -i  - install UsbDk driver") << endl;
-    tcout << TEXT("UsbDkController -u  - uninstall UsbDk driver") << endl;
-    tcout << TEXT("UsbDkController -n  - enumerate USB devices") << endl;
-    tcout << TEXT("UsbDkController -r ID SN - Redirect USB device (start-stop) by ID and serial number") << endl;
+    tcout << TEXT("        UsbDkController -i  - install UsbDk driver") << endl;
+    tcout << TEXT("        UsbDkController -u  - uninstall UsbDk driver") << endl;
+    tcout << TEXT("        UsbDkController -n  - enumerate USB devices") << endl;
+    tcout << TEXT("        UsbDkController -r ID SN - Redirect device by ID and serial number") << endl;
     tcout << endl;
 }
 //-------------------------------------------------------------------------------

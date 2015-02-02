@@ -30,4 +30,4 @@ desired configuration.
 ## Installing and running
 
 Use UsbDkController.exe to install/uninstall and verify basic operation.
-Run UsbDkController.exe -h for command line options.
+Run UsbDkController.exe without parameters for command line options.

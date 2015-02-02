@@ -39,6 +39,7 @@ static void ShowUsage()
     tcout << TEXT("        UsbDkController -u  - uninstall UsbDk driver") << endl;
     tcout << TEXT("        UsbDkController -n  - enumerate USB devices") << endl;
     tcout << TEXT("        UsbDkController -r ID SN - Redirect device by ID and serial number") << endl;
+    tcout << TEXT("        UsbDkController -h VID - Hide devices by vendor ID") << endl;
     tcout << endl;
 }
 //-------------------------------------------------------------------------------
@@ -180,6 +181,70 @@ static int Controller_RedirectDevice(TCHAR *DeviceID, TCHAR *InstanceID)
 }
 //-------------------------------------------------------------------------------
 
+bool Controller_ParseRule(TCHAR *RuleString, USB_DK_HIDE_RULE &Rule)
+{
+    UNREFERENCED_PARAMETER(RuleString);
+
+    Rule.Hide = 1;
+    Rule.Class = ULONG64(-1);
+    Rule.BCD = ULONG64(-1);
+    Rule.PID = ULONG64(-1);
+
+    tstringstream VIDStream;
+    VIDStream << hex << tstring(RuleString);
+
+    if (VIDStream >> Rule.VID)
+    {
+        tcout << TEXT("Loading rule to hide devices with VID ") << hex << showbase << setw(4) << Rule.VID << endl;
+        return true;
+    }
+    else
+    {
+        tcout << TEXT("Invalid VID specification: ") << RuleString << endl;
+        return false;
+    }
+}
+
+static void Controller_HideDevice(TCHAR *RuleString)
+{
+    USB_DK_HIDE_RULE Rule;
+
+    if (!Controller_ParseRule(RuleString, Rule))
+    {
+        tcout << TEXT("Hide rule parsing failed") << endl;
+        return;
+    }
+
+    auto hiderHandle = UsbDk_CreateHiderHandle();
+    if (hiderHandle == INVALID_HANDLE_VALUE)
+    {
+        tcout << TEXT("Faiuled to open the hider device") << endl;
+        return;
+    }
+
+    if (UsbDk_AddHideRule(hiderHandle, &Rule))
+    {
+        tcout << TEXT("Hide rule loaded succesfully. Press any key to continue.") << endl;
+        getchar();
+    }
+    else
+    {
+        tcout << TEXT("Failed to load hide rule.") << endl;
+    }
+
+    if (UsbDk_ClearHideRules(hiderHandle))
+    {
+        tcout << TEXT("Hide rules cleared successfully.") << endl;
+    }
+    else
+    {
+        tcout << TEXT("Failed to clear hide rules.") << endl;
+    }
+
+    UsbDk_CloseHiderHandle(hiderHandle);
+}
+//-------------------------------------------------------------------------------
+
 static bool Controller_ChdirToPackageFolder()
 {
     TCHAR PackagePath[MAX_PATH];
@@ -239,6 +304,15 @@ int __cdecl _tmain(int argc, TCHAR* argv[])
             }
 
             return Controller_RedirectDevice(argv[2], argv[3]);
+        }
+        else if (_tcsicmp(L"-h", argv[1]) == 0)
+        {
+            if (argc < 3)
+            {
+                ShowUsage();
+                return 0;
+            }
+            Controller_HideDevice(argv[2]);
         }
         else
         {

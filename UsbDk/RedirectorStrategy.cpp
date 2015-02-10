@@ -96,9 +96,8 @@ void CUsbDkRedirectorStrategy::Delete()
 
 void CUsbDkRedirectorStrategy::PatchDeviceID(PIRP Irp)
 {
-    //TODO: Put RedHat VID/PID when obtained from USB.org
-    static const WCHAR RedirectorDeviceId[] = L"USB\\Vid_FEED&Pid_CAFE&Rev_0001";
-    static const WCHAR RedirectorHardwareIds[] = L"USB\\Vid_FEED&Pid_CAFE&Rev_0001\0USB\\Vid_FEED&Pid_CAFE\0";
+    static const WCHAR RedirectorDeviceId[] = L"USB\\Vid_2B23&Pid_CAFE&Rev_0001";
+    static const WCHAR RedirectorHardwareIds[] = L"USB\\Vid_2B23&Pid_CAFE&Rev_0001\0USB\\Vid_2B23&Pid_CAFE\0";
     static const WCHAR RedirectorCompatibleIds[] = L"USB\\Class_FF&SubClass_FF&Prot_FF\0USB\\Class_FF&SubClass_FF\0USB\\Class_FF\0";
 
     static const size_t MAX_DEC_NUMBER_LEN = 11;

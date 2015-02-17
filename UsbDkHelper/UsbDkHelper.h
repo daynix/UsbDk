@@ -47,26 +47,192 @@ typedef enum
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+    /* Install UsbDk Driver on the system
+     * Requires usbdk.inf , usbdk.sys,  usbdkHelper.dll and wdfcoinstaller01009.dll files to exist in current directory
+     *
+     *
+     * @params
+     *   None
+     *
+     * @return
+     *  installation status
+     *
+     */
     DLL InstallResult    UsbDk_InstallDriver(void);
+
+    /* Uninstall UsbDk Driver from the system
+    *
+    *
+    * @params
+    *   None
+    *
+    * @return
+    *  TRUE if uninstall succeeds
+    *
+    */
     DLL BOOL             UsbDk_UninstallDriver(void);
+
+    /* Returning all USB devices enumerated in the system
+    *
+    * @params
+    *    IN  - None
+    *    OUT - DevicesArray  pointer to array where devices will be stored
+               NumberDevices amount of returned devices
+    *
+    * @return
+    *  TRUE if function succeeds 
+    * @note
+    *  It is caller's responsibility to release device list by
+    *  using UsbDk_ReleaseDevicesList
+    *
+    */
     DLL BOOL             UsbDk_GetDevicesList(PUSB_DK_DEVICE_INFO *DevicesArray, PULONG NumberDevices);
+
+    /* Release deviceArray list returned by UsbDk_GetDevicesList
+    *
+    * @params
+    *    IN  - DevicesArray  pointer to  device list to be released
+    *    OUT - None
+    *
+    * @return
+    *  None
+    *
+    */
     DLL void             UsbDk_ReleaseDevicesList(PUSB_DK_DEVICE_INFO DevicesArray);
+
+    /* Retrieve USB device configuration descriptor
+    *
+    * @params
+    *    IN  - Request      pointer to descriptor request
+    *    OUT - Descriptor   pointer where configuration descriptor header will be stored
+    *        - Length       length of full descriptor
+    *
+    *
+    * @return
+    * TRUE if function succeeds
+    *
+    */
     DLL BOOL             UsbDk_GetConfigurationDescriptor(PUSB_DK_CONFIG_DESCRIPTOR_REQUEST Request,
-                                                    PUSB_CONFIGURATION_DESCRIPTOR *Descriptor,
-                                                    PULONG Length);
+                                                          PUSB_CONFIGURATION_DESCRIPTOR *Descriptor,
+                                                          PULONG Length);
+
+    /* Release configuration descriptor returned by UsbDk_GetConfigurationDescriptor
+    *
+    * @params
+    *    IN  - Descriptor - pointer to  descriptor to be released
+    *    OUT - None
+    *
+    * @return
+    *  None
+    *
+    */
     DLL void             UsbDk_ReleaseConfigurationDescriptor(PUSB_CONFIGURATION_DESCRIPTOR Descriptor);
 
+    /* Detach USB device from Windows and acquire it for exclusive access
+    *
+    * @params
+    *    IN  - DeviceID   id of device to be acquired
+    *    OUT - None
+    *
+    * @return
+    *  Handle to acquired device
+    *
+    * @note
+    *  Device returned to system automatically when handle is closed
+    *
+    */
     DLL HANDLE           UsbDk_StartRedirect(PUSB_DK_DEVICE_ID DeviceID);
+
+    /* Return USB device to system
+    *
+    * @params
+    *    IN  - DeviceHandle  handle of acquired device
+    *    OUT - None
+    *
+    * @return
+    * TRUE if function succeeds
+    *
+    */
     DLL BOOL             UsbDk_StopRedirect(HANDLE DeviceHandle);
 
+    /* Write to USB device pipe
+    *
+    * @params
+    *    IN  - DeviceHandle - handle of target USB device
+    *        - Request      - write request
+    *        - Overlapped   - asynchronous I/O definition
+    *    OUT - None
+    *
+    * @return
+    *  Status of transfer
+    *
+    */
     DLL TransferResult   UsbDk_WritePipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Request, LPOVERLAPPED Overlapped);
+
+    /* Read from USB device pipe
+    *
+    * @params
+    *    IN  - DeviceHandle - handle of target USB device
+    *        - Request      - read request
+    *        - Overlapped   - asynchronous I/O definition
+    *    OUT - None
+    *
+    * @return
+    *  Status of transfer
+    *
+    */
     DLL TransferResult   UsbDk_ReadPipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Request, LPOVERLAPPED Overlapped);
 
+    /* Issue an USB abort pipe request
+    *
+    * @params
+    *    IN  - DeviceHandle - handle of target USB device
+    *        - PipeAddress  - address of pipe to be aborted
+    *    OUT - None
+    *
+    * @return
+    * TRUE if function succeeds
+    *
+    */
     DLL BOOL             UsbDk_AbortPipe(HANDLE DeviceHandle, ULONG64 PipeAddress);
+
+    /* Set active alternative settings for USB device
+    *
+    * @params
+    *    IN  - DeviceHandle  - handle of target USB device
+    *        - InterfaceIdx  - interface index
+    *        - AltSettingIdx - alternative settings index
+    *    OUT - None
+    *
+    * @return
+    * TRUE if function succeeds
+    *
+    */
     DLL BOOL             UsbDk_SetAltsetting(HANDLE DeviceHandle, ULONG64 InterfaceIdx, ULONG64 AltSettingIdx);
 
+    /* Reset USB device
+    *
+    * @params
+    *    IN  - DeviceHandle  - handle of target USB device
+    *    OUT - None
+    *
+    * @return
+    * TRUE if function succeeds
+    *
+    */
     DLL BOOL             UsbDk_ResetDevice(HANDLE DeviceHandle);
 
+    /* Get system handle for asynchronous I/O cancellation requests
+    *
+    * @params
+    *    IN  - DeviceHandle  - handle of target USB device
+    *    OUT - None
+    *
+    * @return
+    *  handle
+    *
+    */
     DLL HANDLE           UsbDk_GetRedirectorSystemHandle(HANDLE DeviceHandle);
 #ifdef __cplusplus
 }

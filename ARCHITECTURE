@@ -104,6 +104,15 @@ At this stage any request to this vendor specific device will be forwarded
 to UsbDk.sys which in turn will patch and pass requests to/from original device
 created by USB hub as needed.
 
+There is also a separate API provided by UsbDkHelper.dll intended to detach
+USB device from USB stack without acquiring actual access to the device (hider API).
+
+This API may be useful for security applications that need to deny access
+to USB devices according to security policy. When UsbDk.sys discovers device
+to be hidden during enumeration phase (IRP_MJ_PNP/IRP_MN_QUERY_DEVICE_RELATIONS)
+it wipes corresponding PDO from device array returned by underlying USB
+bus driver, this effectively hides given device from PNP manager and OS
+driver stack.
 
 Device stack after UsbDk.sys installation
 ------------------------------------

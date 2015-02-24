@@ -49,7 +49,8 @@ extern "C" {
 #endif
 
     /* Install UsbDk Driver on the system
-     * Requires usbdk.inf , usbdk.sys,  usbdkHelper.dll and wdfcoinstaller01009.dll files to exist in current directory
+     * Requires usbdk.inf , usbdk.sys,  usbdkHelper.dll and
+     * wdfcoinstaller01009.dll files to exist in current directory
      *
      *
      * @params
@@ -73,7 +74,7 @@ extern "C" {
     */
     DLL BOOL             UsbDk_UninstallDriver(void);
 
-    /* Returning all USB devices enumerated in the system
+    /* List USB devices attached to the system
     *
     * @params
     *    IN  - None

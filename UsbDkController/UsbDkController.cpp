@@ -35,6 +35,7 @@ static void ShowUsage()
     tcout << endl;
     tcout << TEXT("    UsbDkController usage:") << endl;
     tcout << endl;
+    tcout << TEXT("        UsbDkController -h  - show this help screen and exit") << endl;
     tcout << TEXT("        UsbDkController -i  - install UsbDk driver") << endl;
     tcout << TEXT("        UsbDkController -u  - uninstall UsbDk driver") << endl;
     tcout << TEXT("        UsbDkController -n  - enumerate USB devices") << endl;
@@ -284,7 +285,12 @@ int __cdecl _tmain(int argc, TCHAR* argv[])
             return -1;
         }
 
-        if (_tcsicmp(L"-i", argv[1]) == 0)
+        if (_tcscmp(L"-h", argv[1]) == 0)
+        {
+            ShowUsage();
+            return 0;
+        }
+        else if (_tcsicmp(L"-i", argv[1]) == 0)
         {
             return Controller_InstallDriver();
         }

@@ -290,19 +290,19 @@ int __cdecl _tmain(int argc, TCHAR* argv[])
             ShowUsage();
             return 0;
         }
-        else if (_tcsicmp(L"-i", argv[1]) == 0)
+        else if (_tcscmp(L"-i", argv[1]) == 0)
         {
             return Controller_InstallDriver();
         }
-        else if (_tcsicmp(L"-u", argv[1]) == 0)
+        else if (_tcscmp(L"-u", argv[1]) == 0)
         {
             return Controller_UninstallDriver();
         }
-        else if (_tcsicmp(L"-n", argv[1]) == 0)
+        else if (_tcscmp(L"-n", argv[1]) == 0)
         {
             return Controller_EnumerateDevices();
         }
-        else if (_tcsicmp(L"-r", argv[1]) == 0)
+        else if (_tcscmp(L"-r", argv[1]) == 0)
         {
             if (argc < 4)
             {

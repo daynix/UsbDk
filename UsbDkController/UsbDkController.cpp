@@ -218,7 +218,7 @@ static void Controller_HideDevice(TCHAR *RuleString)
     auto hiderHandle = UsbDk_CreateHiderHandle();
     if (hiderHandle == INVALID_HANDLE_VALUE)
     {
-        tcout << TEXT("Faiuled to open the hider device") << endl;
+        tcout << TEXT("Failed to open the hider device") << endl;
         return;
     }
 

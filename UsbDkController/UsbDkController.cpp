@@ -224,7 +224,8 @@ static void Controller_HideDevice(TCHAR *RuleString)
 
     if (UsbDk_AddHideRule(hiderHandle, &Rule))
     {
-        tcout << TEXT("Hide rule loaded succesfully. Press any key to continue.") << endl;
+        tcout << TEXT("Hide rule loaded succesfully. ")
+              << TEXT("Press any key to un-hide and continue.") << endl;
         getchar();
     }
     else

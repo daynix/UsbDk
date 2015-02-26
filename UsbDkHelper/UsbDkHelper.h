@@ -82,7 +82,7 @@ extern "C" {
                NumberDevices amount of returned devices
     *
     * @return
-    *  TRUE if function succeeds 
+    *  TRUE if function succeeds
     * @note
     *  It is caller's responsibility to release device list by
     *  using UsbDk_ReleaseDevicesList

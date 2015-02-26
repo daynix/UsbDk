@@ -39,7 +39,7 @@ static void ShowUsage()
     tcout << TEXT("        UsbDkController -u  - uninstall UsbDk driver") << endl;
     tcout << TEXT("        UsbDkController -n  - enumerate USB devices") << endl;
     tcout << TEXT("        UsbDkController -r ID SN - Redirect device by ID and serial number") << endl;
-    tcout << TEXT("        UsbDkController -h VID - Hide devices by vendor ID") << endl;
+    tcout << TEXT("        UsbDkController -H VID - Hide devices by vendor ID") << endl;
     tcout << endl;
 }
 //-------------------------------------------------------------------------------
@@ -305,7 +305,7 @@ int __cdecl _tmain(int argc, TCHAR* argv[])
 
             return Controller_RedirectDevice(argv[2], argv[3]);
         }
-        else if (_tcsicmp(L"-h", argv[1]) == 0)
+        else if (_tcscmp(L"-H", argv[1]) == 0)
         {
             if (argc < 3)
             {

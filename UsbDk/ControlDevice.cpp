@@ -502,7 +502,6 @@ CUsbDkControlDevice* CUsbDkControlDevice::Reference(WDFDRIVER Driver)
 {
     if (!m_UsbDkControlDevice->InitialAddRef())
     {
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "%!FUNC! control device already exists");
         return m_UsbDkControlDevice->Get();
     }
     else

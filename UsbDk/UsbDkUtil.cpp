@@ -72,9 +72,14 @@ NTSTATUS CString::Create(NTSTRSAFE_PCWSTR String)
         return status;
     }
 
-    m_String.MaximumLength = StringHolder.MaximumLength;
+    return Create(&StringHolder);
+}
+
+NTSTATUS CString::Create(PCUNICODE_STRING String)
+{
+    m_String.MaximumLength = String->MaximumLength;
     m_String.Buffer = static_cast<PWCH>(ExAllocatePoolWithTag(NonPagedPool,
-        StringHolder.MaximumLength,
+        String->MaximumLength,
         'SUHR'));
 
     if (m_String.Buffer == nullptr)
@@ -82,19 +87,8 @@ NTSTATUS CString::Create(NTSTRSAFE_PCWSTR String)
         return STATUS_INSUFFICIENT_RESOURCES;
     }
 
-    RtlCopyUnicodeString(&m_String, &StringHolder);
+    RtlCopyUnicodeString(&m_String, String);
     return STATUS_SUCCESS;
-}
-
-NTSTATUS CString::Create(NTSTRSAFE_PCWSTR Prefix, ULONG Postfix)
-{
-    auto status = Create(Prefix);
-    if (!NT_SUCCESS(status))
-    {
-        return status;
-    }
-
-    return Append(Postfix);
 }
 
 NTSTATUS CString::Append(PCUNICODE_STRING String)

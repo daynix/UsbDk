@@ -433,7 +433,20 @@ class CString : public CStringBase
 {
 public:
     NTSTATUS Create(NTSTRSAFE_PCWSTR String);
-    NTSTATUS Create(NTSTRSAFE_PCWSTR Prefix, ULONG Postfix);
+    NTSTATUS Create(PCUNICODE_STRING String);
+
+    template <typename TPrefix, typename TPostfix>
+    NTSTATUS Create(const TPrefix &Prefix, const TPostfix &Postfix)
+    {
+        auto status = Create(Prefix);
+        if (!NT_SUCCESS(status))
+        {
+            return status;
+        }
+
+        return Append(Postfix);
+    }
+
     NTSTATUS Append(PCUNICODE_STRING String);
     NTSTATUS Append(ULONG Num, ULONG Base = 10);
     void Destroy();

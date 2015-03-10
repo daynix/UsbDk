@@ -26,6 +26,7 @@
 #include "trace.h"
 #include "DeviceAccess.h"
 #include "WdfRequest.h"
+#include "Registry.h"
 #include "ControlDevice.tmh"
 #include "Public.h"
 
@@ -411,6 +412,7 @@ NTSTATUS CUsbDkControlDevice::Register()
     if (NT_SUCCESS(status))
     {
         FinishInitializing();
+        LoadPersistentHideRules();
     }
 
     return status;
@@ -658,6 +660,184 @@ void CUsbDkControlDevice::ClearHideRules()
 {
     m_HideRules.Clear();
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "%!FUNC! All hide rules dropped.");
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "%!FUNC! Reloading persistent hide rules.");
+    LoadPersistentHideRules();
+}
+
+class CHideRulesRegKey final : public CRegKey
+{
+public:
+    NTSTATUS Open()
+    {
+        auto DriverParamsRegPath = CDriverParamsRegistryPath::Get();
+        if (DriverParamsRegPath->Length == 0)
+        {
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE,
+                "%!FUNC! Driver parameters registry key path not available.");
+
+            return STATUS_INVALID_DEVICE_STATE;
+        }
+
+        CStringHolder ParamsSubkey;
+        auto status = ParamsSubkey.Attach(TEXT("\\") USBDK_HIDE_RULES_SUBKEY_NAME);
+        ASSERT(NT_SUCCESS(status));
+
+        CString HideRulesRegPath;
+        status = HideRulesRegPath.Create(DriverParamsRegPath, ParamsSubkey);
+        if (!NT_SUCCESS(status))
+        {
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE,
+                "%!FUNC! Failed to allocate path to hide rules registry key.");
+
+            return status;
+        }
+
+        status = CRegKey::Open(*HideRulesRegPath);
+        if (!NT_SUCCESS(status))
+        {
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE,
+                "%!FUNC! Failed to open hide rules registry key.");
+        }
+
+        return status;
+    }
+};
+
+class CRegHideRule final : private CRegKey
+{
+public:
+    NTSTATUS Open(const CRegKey &HideRulesRegKey, const UNICODE_STRING &Name)
+    {
+        return CRegKey::Open(HideRulesRegKey, Name);
+    }
+
+    NTSTATUS Read(USB_DK_HIDE_RULE &Rule)
+    {
+        auto status = ReadBoolValue(USBDK_HIDE_RULE_SHOULD_HIDE, Rule.Hide);
+        if (!NT_SUCCESS(status))
+        {
+            return status;
+        }
+
+        status = ReadDwordMaskValue(USBDK_HIDE_RULE_VID, Rule.VID);
+        if (!NT_SUCCESS(status))
+        {
+            return status;
+        }
+
+        status = ReadDwordMaskValue(USBDK_HIDE_RULE_PID, Rule.PID);
+        if (!NT_SUCCESS(status))
+        {
+            return status;
+        }
+
+        status = ReadDwordMaskValue(USBDK_HIDE_RULE_BCD, Rule.BCD);
+        if (!NT_SUCCESS(status))
+        {
+            return status;
+        }
+
+        status = ReadDwordMaskValue(USBDK_HIDE_RULE_CLASS, Rule.Class);
+        if (!NT_SUCCESS(status))
+        {
+            return status;
+        }
+
+        return STATUS_SUCCESS;
+    }
+
+private:
+    NTSTATUS ReadDwordValue(PCWSTR ValueName, DWORD32 &Value)
+    {
+        CStringHolder ValueNameHolder;
+        auto status = ValueNameHolder.Attach(ValueName);
+        ASSERT(NT_SUCCESS(status));
+
+        CWdmMemoryBuffer Buffer;
+
+        status = QueryValueInfo(*ValueNameHolder, KeyValuePartialInformation, Buffer);
+        if (!NT_SUCCESS(status))
+        {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, 
+                "%!FUNC! Failed to query value %wZ (status %!STATUS!)", ValueNameHolder, status);
+
+            return status;
+        }
+
+        auto Info = reinterpret_cast<PKEY_VALUE_PARTIAL_INFORMATION>(Buffer.Ptr());
+        if (Info->Type != REG_DWORD)
+        {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE,
+                "%!FUNC! Wrong data type for value %wZ: %d", ValueNameHolder, Info->Type);
+
+            return STATUS_DATA_ERROR;
+        }
+
+        if (Info->DataLength != sizeof(DWORD32))
+        {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE,
+                "%!FUNC! Wrong data length for value %wZ: %lu", ValueNameHolder, Info->DataLength);
+
+            return STATUS_DATA_ERROR;
+        }
+
+        Value = *reinterpret_cast<PDWORD32>(&Info->Data[0]);
+        return STATUS_SUCCESS;
+    }
+
+    NTSTATUS ReadBoolValue(PCWSTR ValueName, ULONG64 &Value)
+    {
+        DWORD32 RawValue;
+        auto status = ReadDwordValue(ValueName, RawValue);
+
+        if (NT_SUCCESS(status))
+        {
+            Value = !!RawValue;
+        }
+
+        return status;
+    }
+
+    NTSTATUS ReadDwordMaskValue(PCWSTR ValueName, ULONG64 &Value)
+    {
+        DWORD32 RawValue;
+        auto status = ReadDwordValue(ValueName, RawValue);
+
+        if (NT_SUCCESS(status))
+        {
+            Value = (RawValue == CUsbDkHideRule::MATCH_ALL) ? USB_DK_HIDE_RULE_MATCH_ALL
+                                                            : RawValue;
+        }
+
+        return status;
+    }
+};
+
+NTSTATUS CUsbDkControlDevice::LoadPersistentHideRules()
+{
+    CHideRulesRegKey RulesKey;
+    auto status = RulesKey.Open();
+    if (NT_SUCCESS(status))
+    {
+        status = RulesKey.ForEachSubKey([&RulesKey, this](PCUNICODE_STRING Name)
+        {
+            CRegHideRule Rule;
+            USB_DK_HIDE_RULE ParsedRule;
+
+            if (NT_SUCCESS(Rule.Open(RulesKey, *Name)) &&
+                NT_SUCCESS(Rule.Read(ParsedRule)))
+            {
+                AddHideRule(ParsedRule);
+            }
+        });
+    }
+
+    if (status == STATUS_OBJECT_NAME_NOT_FOUND)
+    {
+        status = STATUS_SUCCESS;
+    }
+
+    return status;
 }
 
 //-------------------------------------------------------------------------------------------------------------
@@ -880,7 +1060,7 @@ void CDriverParamsRegistryPath::CreateFrom(PCUNICODE_STRING DriverRegPath)
     }
 
     CStringHolder ParamsSubkey;
-    auto status = ParamsSubkey.Attach(USBDK_PARAMS_SUBKEY_NAME);
+    auto status = ParamsSubkey.Attach(TEXT("\\") USBDK_PARAMS_SUBKEY_NAME);
     ASSERT(NT_SUCCESS(status));
 
     status = m_Path->Create(DriverRegPath, ParamsSubkey);

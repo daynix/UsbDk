@@ -257,6 +257,8 @@ public:
     bool WaitForDetachment(const USB_DK_DEVICE_ID &ID);
 
 private:
+    NTSTATUS LoadPersistentHideRules();
+
     CObjHolder<CUsbDkControlDeviceQueue> m_DeviceQueue;
     static CRefCountingHolder<CUsbDkControlDevice> *m_UsbDkControlDevice;
 

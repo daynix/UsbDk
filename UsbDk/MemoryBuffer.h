@@ -61,7 +61,7 @@ public:
 
     NTSTATUS Create(SIZE_T Size, POOL_TYPE PoolType)
     {
-        m_Ptr = ExAllocatePoolWithTag(PoolType, m_Size, 'BMHR');
+        m_Ptr = ExAllocatePoolWithTag(PoolType, Size, 'BMHR');
         if (m_Ptr == nullptr)
         {
             return STATUS_INSUFFICIENT_RESOURCES;

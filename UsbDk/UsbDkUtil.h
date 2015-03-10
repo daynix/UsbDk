@@ -405,7 +405,7 @@ protected:
     CStringBase() {};
     ~CStringBase() {};
 
-    UNICODE_STRING m_String;
+    UNICODE_STRING m_String = {};
 };
 class CStringHolder : public CStringBase
 {
@@ -421,10 +421,8 @@ public:
         return RtlUnicodeStringValidate(&m_String);
     }
 
-    //This initialization may be done in-class without
-    //constructor definition but MS compiler crashes with internal error
     CStringHolder()
-    { m_String = {}; }
+    { }
 
 private:
     CStringHolder(const CStringHolder&) = delete;
@@ -440,10 +438,8 @@ public:
     NTSTATUS Append(ULONG Num, ULONG Base = 10);
     void Destroy();
 
-    //This initialization may be done in-class without
-    //constructor definition but MS compiler crashes with internal error
     CString()
-    { m_String = {}; }
+    { }
 
     ~CString()
     { Destroy(); }

@@ -71,8 +71,24 @@ public:
         return STATUS_SUCCESS;
     }
 
+    NTSTATUS Recreate(SIZE_T Size, POOL_TYPE PoolType)
+    {
+        Destroy();
+        return (Size != 0) ? Create(Size, PoolType) : STATUS_SUCCESS;
+    }
+
     ~CWdmMemoryBuffer()
-    { if(m_Ptr != nullptr) { ExFreePool(m_Ptr); } }
+    { Destroy(); }
+
+    void Destroy()
+    {
+        if (m_Ptr != nullptr)
+        {
+            ExFreePool(m_Ptr);
+            m_Ptr = nullptr;
+            m_Size = 0;
+        }
+    }
 
     PVOID Ptr() const { return m_Ptr; }
     SIZE_T Size() const { return m_Size; }

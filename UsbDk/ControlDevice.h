@@ -182,6 +182,26 @@ private:
     DECLARE_CWDMLIST_ENTRY(CUsbDkRedirection);
 };
 
+class CDriverParamsRegistryPath final
+{
+public:
+    static PCUNICODE_STRING Get()
+    { return *m_Path; };
+
+private:
+    static void CreateFrom(PCUNICODE_STRING DriverRegPath);
+    static void Destroy();
+
+    class CAllocatablePath : public CString,
+                             public CAllocatable < PagedPool, 'PRHR' >
+    {};
+
+    static CAllocatablePath *m_Path;
+
+    friend NTSTATUS DriverEntry(PDRIVER_OBJECT, PUNICODE_STRING);
+    friend VOID DriverUnload(IN WDFDRIVER Driver);
+};
+
 class CUsbDkControlDevice : private CWdfControlDevice, public CAllocatable<NonPagedPool, 'DCHR'>
 {
 public:

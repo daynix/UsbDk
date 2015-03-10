@@ -60,6 +60,8 @@ DriverEntry(
 
     config.EvtDriverUnload = DriverUnload;
 
+    CDriverParamsRegistryPath::CreateFrom(RegistryPath);
+
     WDFDRIVER Driver;
     status = WdfDriverCreate(DriverObject,
                              RegistryPath,
@@ -93,6 +95,8 @@ DriverUnload(IN WDFDRIVER Driver)
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
 
     CUsbDkControlDevice::Deallocate();
+
+    CDriverParamsRegistryPath::Destroy();
 
     return;
 }

@@ -865,3 +865,35 @@ void CUsbDkHideRule::Dump() const
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "%!FUNC! Hide: %!bool!, C: %08X, V: %08X, P: %08X, BCD: %08X",
                 m_Hide, m_Class, m_VID, m_PID, m_BCD);
 }
+
+void CDriverParamsRegistryPath::CreateFrom(PCUNICODE_STRING DriverRegPath)
+{
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE,
+        "%!FUNC! Driver registry path: %wZ", DriverRegPath);
+
+    m_Path = new CAllocatablePath;
+    if (m_Path == nullptr)
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE,
+            "%!FUNC! Failed to allocate storage for parameters registry path");
+        return;
+    }
+
+    CStringHolder ParamsSubkey;
+    auto status = ParamsSubkey.Attach(USBDK_PARAMS_SUBKEY_NAME);
+    ASSERT(NT_SUCCESS(status));
+
+    status = m_Path->Create(DriverRegPath, ParamsSubkey);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE,
+            "%!FUNC! Failed to duplicate parameters registry path");
+    }
+}
+
+void CDriverParamsRegistryPath::Destroy()
+{
+    delete m_Path;
+}
+
+CDriverParamsRegistryPath::CAllocatablePath *CDriverParamsRegistryPath::m_Path = nullptr;

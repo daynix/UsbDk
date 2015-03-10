@@ -76,6 +76,7 @@
     <ClCompile Include="Irp.cpp" />
     <ClCompile Include="MemoryBuffer.cpp" />
     <ClCompile Include="RedirectorStrategy.cpp" />
+    <ClCompile Include="Registry.cpp" />
     <ClCompile Include="RegText.cpp" />
     <ClCompile Include="Urb.cpp" />
     <ClCompile Include="UsbDkCompat.cpp" />
@@ -97,6 +98,7 @@
     <ClInclude Include="MemoryBuffer.h" />
     <ClInclude Include="Public.h" />
     <ClInclude Include="RedirectorStrategy.h" />
+    <ClInclude Include="Registry.h" />
     <ClInclude Include="RegText.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />

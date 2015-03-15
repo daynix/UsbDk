@@ -57,7 +57,7 @@ public:
     BOOL  ReadKeyName(LPTSTR  lpsKeyName,
                       DWORD   dwNumberOfElements,
                       DWORD   dwIndex,
-                      LPCTSTR lpzSubKey = nullptr);
+                      LPCTSTR lpzSubKey = nullptr) const;
 
     BOOL GetValueInfo(LPCTSTR lpzValueName,
                       DWORD*  lpDataType,
@@ -72,10 +72,10 @@ public:
 
     DWORD ReadDWord(LPCTSTR lpzValueName,
                     DWORD   dwDefault = 0,
-                    LPCTSTR lpzSubKey = nullptr);
+                    LPCTSTR lpzSubKey = nullptr) const;
     BOOL  ReadDWord(LPCTSTR lpzValueName,
                     LPDWORD lpdwValue,
-                    LPCTSTR lpzSubKey = nullptr);
+                    LPCTSTR lpzSubKey = nullptr) const;
     DWORD ReadString(LPCTSTR lpzValueName,
                      LPTSTR  lpzData,
                      DWORD   dwNumberOfElements,
@@ -113,7 +113,7 @@ public:
 protected:
     VOID FormatFullRegPath(LPTSTR    lpzFullPathBuff,
                            DWORD_PTR dwNumberOfElements,
-                           LPCTSTR   lpzSubKey);
+                           LPCTSTR   lpzSubKey) const;
 
     LPTSTR m_lpsRegPath;
     HKEY   m_hkPrimaryHKey;

@@ -94,7 +94,7 @@ BOOL UsbDkRegAccess::GetRegPath(LPTSTR lpsBuffer, DWORD dwNumberOfElements)
 
 DWORD UsbDkRegAccess::ReadDWord(LPCTSTR lpzValueName,
                               DWORD   dwDefault,
-                              LPCTSTR lpzSubKey)
+                              LPCTSTR lpzSubKey) const
 {
     DWORD dwRes = 0;
 
@@ -103,7 +103,7 @@ DWORD UsbDkRegAccess::ReadDWord(LPCTSTR lpzValueName,
 
 BOOL UsbDkRegAccess::ReadDWord(LPCTSTR lpzValueName,
                              LPDWORD lpdwValue,
-                             LPCTSTR lpzSubKey)
+                             LPCTSTR lpzSubKey) const
 {
     BOOL  bRes = FALSE;
     DWORD dwValue = 0,
@@ -286,7 +286,7 @@ BOOL UsbDkRegAccess::ReadValueName(LPTSTR  lpsValueName,
 BOOL UsbDkRegAccess::ReadKeyName(LPTSTR lpsKeyName,
                                DWORD   dwNumberOfElements,
                                DWORD   dwIndex,
-                               LPCTSTR lpzSubKey)
+                               LPCTSTR lpzSubKey) const
 {
     BOOL bResult = FALSE;
     HKEY hkReadKeyHandle = nullptr;
@@ -606,7 +606,7 @@ BOOL UsbDkRegAccess::GetKeyInfo(LPDWORD lpdwNofSubKeys,
 }
 
 
-VOID UsbDkRegAccess::FormatFullRegPath(LPTSTR lpzFullPathBuff, DWORD_PTR dwNumberOfElements, LPCTSTR lpzSubKey)
+VOID UsbDkRegAccess::FormatFullRegPath(LPTSTR lpzFullPathBuff, DWORD_PTR dwNumberOfElements, LPCTSTR lpzSubKey) const
 {
     DWORD_PTR dwReqNumberOfElements = (m_lpsRegPath?_tcslen(m_lpsRegPath):0) +
                                       (lpzSubKey?_tcslen(lpzSubKey):0) +

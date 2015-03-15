@@ -35,6 +35,7 @@
 #include <windows.h>
 #include <cfgmgr32.h>
 #include <initguid.h>
+#include <rpc.h>
 
 #ifndef _USING_V110_SDK71_
 #include <usbspec.h>

@@ -46,6 +46,7 @@ string __wstring2string(const wstring& str);
 wstring __string2wstring(const string& str);
 
 #if defined(UNICODE)
+    typedef RPC_WSTR RPC_TSTR;
     typedef wstring tstring;
     typedef wstringstream tstringstream;
 #   define tcout wcout
@@ -55,6 +56,7 @@ wstring __string2wstring(const string& str);
 #   define wstring2tstring(str) (str)
 #   define to_tstring to_wstring
 #else
+    typedef RPC_CSTR RPC_TSTR;
     typedef string tstring;
     typedef stringstream tstringstream;
 #   define tcout cout

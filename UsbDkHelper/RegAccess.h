@@ -44,6 +44,46 @@ public:
     UsbDkRegAccess(HKEY hNewPrKey, LPCTSTR lpzNewRegPath);
     virtual ~UsbDkRegAccess();
 
+    class key_iterator
+    {
+    public:
+        key_iterator(const UsbDkRegAccess &Root)
+            : m_Root(&Root)
+            , m_End(false)
+        {
+            advance();
+        }
+
+        key_iterator()
+        {}
+
+        const key_iterator& operator++()
+        {
+            advance();
+            return *this;
+        }
+
+        bool operator !=(const key_iterator& other) const
+        { return !m_End || !other.m_End; }
+
+        LPCTSTR operator *()
+        { return m_CurrentKeyName; }
+
+       private:
+        void advance();
+
+        const            UsbDkRegAccess* m_Root = nullptr;
+        TCHAR            m_CurrentKeyName[DEFAULT_REG_ENTRY_DATA_LEN] = {};
+        int              m_NextIndex = 0;
+        bool             m_End = true;
+    };
+
+    key_iterator begin() const
+    { return  key_iterator(*this); }
+
+    key_iterator end() const
+    { return  key_iterator(); }
+
     VOID  SetPrimaryKey(HKEY hNewPrKey);
     BOOL  SetRegPath(LPCTSTR lpzNewRegPath);
     HKEY  GetPrimaryKey(VOID);

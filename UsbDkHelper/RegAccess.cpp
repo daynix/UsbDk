@@ -626,3 +626,15 @@ VOID UsbDkRegAccess::FormatFullRegPath(LPTSTR lpzFullPathBuff, DWORD_PTR dwNumbe
         }
     }
 }
+
+VOID UsbDkRegAccess::key_iterator::advance()
+{
+    assert(!m_End);
+
+    if (!m_Root->ReadKeyName(m_CurrentKeyName,
+                             TBUF_SIZEOF(m_CurrentKeyName),
+                             m_NextIndex++))
+    {
+        m_End = true;
+    }
+}

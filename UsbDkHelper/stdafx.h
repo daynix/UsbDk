@@ -50,6 +50,9 @@
 #include <vector>
 #include <winscard.h>
 
+//new behavior: elements of array 'array' will be default initialized
+#pragma warning(disable : 4351)
+
 #include "tstrings.h"
 #include "Exception.h"
 #include "Utils.h"

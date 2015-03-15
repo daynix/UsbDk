@@ -39,8 +39,14 @@ static void ShowUsage()
     tcout << TEXT("        UsbDkController -i         - install UsbDk driver") << endl;
     tcout << TEXT("        UsbDkController -u         - uninstall UsbDk driver") << endl;
     tcout << TEXT("        UsbDkController -n         - enumerate USB devices") << endl;
-    tcout << TEXT("        UsbDkController -r ID SN   - Redirect device by ID and serial number") << endl;
-    tcout << TEXT("        UsbDkController -H VID     - Hide devices by vendor ID") << endl;
+    tcout << TEXT("        UsbDkController -r ID SN   - redirect device by ID and serial number") << endl;
+    tcout << endl;
+    tcout << TEXT("    Hider API:") << endl;
+    tcout << endl;
+    tcout << TEXT("        UsbDkController -H VID PID BCD Class Hide   - add dynamic hide rule") << endl;
+    tcout << endl;
+    tcout << TEXT("            <VID PID BCD Class> May be specific value or -1 to match all") << endl;
+    tcout << TEXT("            <Hide>              Should be 0 or 1, if 0, the rule is terminal") << endl;
     tcout << endl;
 }
 //-------------------------------------------------------------------------------
@@ -182,35 +188,55 @@ static int Controller_RedirectDevice(TCHAR *DeviceID, TCHAR *InstanceID)
 }
 //-------------------------------------------------------------------------------
 
-bool Controller_ParseRule(TCHAR *RuleString, USB_DK_HIDE_RULE &Rule)
+static bool Controller_ParseIntRuleField(const TCHAR *Name, const TCHAR * Str, ULONG64 &Value)
 {
-    UNREFERENCED_PARAMETER(RuleString);
-
-    Rule.Hide = 1;
-    Rule.Class = ULONG64(-1);
-    Rule.BCD = ULONG64(-1);
-    Rule.PID = ULONG64(-1);
-
-    tstringstream VIDStream;
-    VIDStream << hex << tstring(RuleString);
-
-    if (VIDStream >> Rule.VID)
+    tstringstream strm;
+    strm << hex << tstring(Str);
+    if (strm >> Value)
     {
-        tcout << TEXT("Loading rule to hide devices with VID ") << hex << showbase << setw(4) << Rule.VID << endl;
+        tcout << Name << TEXT(":\t")
+              << hex << TEXT("0x") << left << Value
+              << endl;
         return true;
     }
     else
     {
-        tcout << TEXT("Invalid VID specification: ") << RuleString << endl;
-        return false;
+        tcout << TEXT("Invalid value for field \"") << Name << TEXT("\"") << endl;
+        return true;
     }
 }
 
-static void Controller_HideDevice(TCHAR *RuleString)
+static bool Controller_ParseBoolRuleField(const TCHAR *Name, const TCHAR * Str, ULONG64 &Value)
+{
+    if (!Controller_ParseIntRuleField(Name, Str, Value))
+    {
+        return false;
+    }
+
+    if (Value != !!Value)
+    {
+        tcout << TEXT("Invalid value for field \"") << Name
+              << TEXT("\". Must be 0 or 1.") << endl;
+        return false;
+    }
+
+    return true;
+}
+
+static bool Controller_ParseRule(TCHAR *VID, TCHAR *PID, TCHAR *BCD, TCHAR *UsbClass, TCHAR *Hide, USB_DK_HIDE_RULE &Rule)
+{
+    return Controller_ParseIntRuleField(TEXT("VID"), VID, Rule.VID) &&
+           Controller_ParseIntRuleField(TEXT("PID"), PID, Rule.PID) &&
+           Controller_ParseIntRuleField(TEXT("BCD"), BCD, Rule.BCD) &&
+           Controller_ParseIntRuleField(TEXT("Class"), UsbClass, Rule.Class) &&
+           Controller_ParseBoolRuleField(TEXT("Hide"), Hide, Rule.Hide);
+}
+
+static void Controller_HideDevice(TCHAR *VID, TCHAR *PID, TCHAR *BCD, TCHAR *UsbClass, TCHAR *Hide)
 {
     USB_DK_HIDE_RULE Rule;
 
-    if (!Controller_ParseRule(RuleString, Rule))
+    if (!Controller_ParseRule(VID, PID, BCD, UsbClass, Hide, Rule))
     {
         tcout << TEXT("Hide rule parsing failed") << endl;
         return;
@@ -225,8 +251,10 @@ static void Controller_HideDevice(TCHAR *RuleString)
 
     if (UsbDk_AddHideRule(hiderHandle, &Rule))
     {
-        tcout << TEXT("Hide rule loaded succesfully. ")
-              << TEXT("Press any key to un-hide and continue.") << endl;
+        tcout << endl
+              << TEXT("Hide rule loaded succesfully. ")
+              << TEXT("Press ENTER to un-hide and continue.")
+              << endl;
         getchar();
     }
     else
@@ -314,12 +342,12 @@ int __cdecl _tmain(int argc, TCHAR* argv[])
         }
         else if (_tcscmp(L"-H", argv[1]) == 0)
         {
-            if (argc < 3)
+            if (argc < 7)
             {
                 ShowUsage();
                 return 0;
             }
-            Controller_HideDevice(argv[2]);
+            Controller_HideDevice(argv[2], argv[3], argv[4], argv[5], argv[6]);
         }
         else
         {

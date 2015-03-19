@@ -59,8 +59,8 @@ extern "C" {
     */
     DLL HANDLE           UsbDk_CreateHiderHandle(void);
 
-   /* Add a rule to determine which USB devices
-    * to be hidden when plugged in, a rule contains:
+    /* Add rule for detaching USB devices from OS stack.
+    *  The rule consists of:
     *
     * class, vendor, product, version, allow
     *
@@ -68,11 +68,15 @@ extern "C" {
     *
     * @params
     *    IN  - HiderHandle  Handle to UsbDk driver
-             - rule - pointer to hiding rule
+             - Rule - pointer to hide rule
     *    OUT - None
     *
     * @return
     *  TRUE if function succeeds
+    *
+    * @note
+    * Hide rule stays until HiderHandle is closed, client process exits or
+    * UsbDk_ClearHideRules() called
     *
     */
     DLL BOOL             UsbDk_AddHideRule(HANDLE HiderHandle, PUSB_DK_HIDE_RULE Rule);
@@ -80,7 +84,7 @@ extern "C" {
     /* Clear all hider rules
     *
     * @params
-    *    IN  -  HiderHandle  Handle to UsbDk driver
+    *    IN  - HiderHandle  Handle to UsbDk driver
     *    OUT - None
     *
     * @return
@@ -92,7 +96,7 @@ extern "C" {
     /* Close Handle to UsbDk hider interface
     *
     * @params
-    *    IN  -  HiderHandle  Handle to UsbDk driver
+    *    IN  - HiderHandle  Handle to UsbDk driver
     *    OUT - None
     *
     * @return

@@ -283,7 +283,7 @@ BOOL UsbDkRegAccess::ReadValueName(LPTSTR  lpsValueName,
     return bResult;
 }
 
-BOOL UsbDkRegAccess::ReadKeyName(LPTSTR  lpsKeyName,
+BOOL UsbDkRegAccess::ReadKeyName(LPTSTR lpsKeyName,
                                DWORD   dwNumberOfElements,
                                DWORD   dwIndex,
                                LPCTSTR lpzSubKey)
@@ -501,8 +501,9 @@ BOOL UsbDkRegAccess::DeleteKey(LPCTSTR lpzKeyName, LPCTSTR lpzSubKey)
     {
         if (RegDeleteKey(hkDeleteKeyHandle,
                          lpzKeyName) == ERROR_SUCCESS)
+        {
             bResult = TRUE;
-
+        }
         RegCloseKey(hkDeleteKeyHandle);
     }
 

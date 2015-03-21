@@ -104,6 +104,47 @@ extern "C" {
     *
     */
     DLL void             UsbDk_CloseHiderHandle(HANDLE HiderHandle);
+
+    /* Add rule for detaching USB devices from OS stack persistently.
+    *  The rule consists of:
+    *
+    * class, vendor, product, version, allow
+    *
+    * Use -1 for @class/@vendor/@product/@version to accept any value.
+    *
+    * @params
+    *    IN  - Rule - pointer to hide rule
+    *    OUT - None
+    *
+    * @return
+    *  TRUE if function succeeds
+    *
+    * @note
+    * 1. Persistent rule stays until explicitly deleted by
+    *    UsbDk_DeletePersistentHideRule()
+    * 2. This API requires administrative privileges
+    * 3. For already attached devices the rule will be applied after
+    *    device re-plug or system reboot.
+    *
+    */
+    DLL BOOL             UsbDk_AddPersistentHideRule(PUSB_DK_HIDE_RULE Rule);
+
+    /* Delete specific persistent hide rule
+    *
+    * @params
+    *    IN  - Rule - pointer to hide rule
+    *    OUT - None
+    *
+    * @return
+    *  TRUE if function succeeds
+    *
+    * @note
+    * 1. This API requires administrative privileges
+    * 2. For already attached devices the rule will be applied after
+    *    device re-plug or system reboot.
+    *
+    */
+    DLL BOOL             UsbDk_DeletePersistentHideRule(PUSB_DK_HIDE_RULE Rule);
 #ifdef __cplusplus
 }
 #endif

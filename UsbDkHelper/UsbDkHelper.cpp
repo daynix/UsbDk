@@ -30,6 +30,7 @@
 #include "Installer.h"
 #include "DriverAccess.h"
 #include "RedirectorAccess.h"
+#include "RuleManager.h"
 
 //-------------------------------------------------------------------------------------------
 
@@ -314,4 +315,31 @@ BOOL UsbDk_ClearHideRules(HANDLE HiderHandle)
 void UsbDk_CloseHiderHandle(HANDLE HiderHandle)
 {
     delete reinterpret_cast<UsbDkHiderAccess *>(HiderHandle);
+}
+
+static inline
+BOOL ModifyPersistentHideRules(const USB_DK_HIDE_RULE &Rule,
+                               void(CRulesManager::*Modifier)(const USB_DK_HIDE_RULE&))
+{
+    try
+    {
+        CRulesManager Manager;
+        (Manager.*Modifier)(Rule);
+        return TRUE;
+    }
+    catch (const exception &e)
+    {
+        printExceptionString(e.what());
+        return FALSE;
+    }
+}
+
+DLL BOOL UsbDk_AddPersistentHideRule(PUSB_DK_HIDE_RULE Rule)
+{
+    return ModifyPersistentHideRules(*Rule, &CRulesManager::AddRule);
+}
+
+DLL BOOL UsbDk_DeletePersistentHideRule(PUSB_DK_HIDE_RULE Rule)
+{
+    return ModifyPersistentHideRules(*Rule, &CRulesManager::DeleteRule);
 }

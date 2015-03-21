@@ -60,6 +60,9 @@
     <ClCompile Include="GuidGen.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="RuleManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="UsbDkHelper.h">
@@ -111,6 +114,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GuidGen.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RuleManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

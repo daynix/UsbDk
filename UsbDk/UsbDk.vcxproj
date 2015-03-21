@@ -94,6 +94,7 @@
     <ClInclude Include="FilterDevice.h" />
     <ClInclude Include="FilterStrategy.h" />
     <ClInclude Include="HiderDevice.h" />
+    <ClInclude Include="HideRulesRegPublic.h" />
     <ClInclude Include="Irp.h" />
     <ClInclude Include="MemoryBuffer.h" />
     <ClInclude Include="Public.h" />

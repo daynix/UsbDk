@@ -29,6 +29,7 @@
 #include "FilterDevice.h"
 #include "HiderDevice.h"
 #include "UsbDkDataHider.h"
+#include "HideRulesRegPublic.h"
 
 typedef struct tag_USB_DK_DEVICE_ID USB_DK_DEVICE_ID;
 typedef struct tag_USB_DK_DEVICE_INFO USB_DK_DEVICE_INFO;
@@ -74,7 +75,6 @@ private:
 class CUsbDkHideRule : public CAllocatable < NonPagedPool, 'RHHR' >
 {
 public:
-    static const ULONG MATCH_ALL = ULONG(-1);
 
     CUsbDkHideRule(bool Hide, ULONG Class, ULONG VID, ULONG PID, ULONG BCD)
         : m_Hide(Hide)
@@ -118,7 +118,7 @@ public:
 private:
     bool MatchCharacteristic(ULONG CharacteristicFilter, ULONG CharacteristicValue) const
     {
-        return (CharacteristicFilter == MATCH_ALL)                  ||
+        return (CharacteristicFilter == USBDK_REG_HIDE_RULE_MATCH_ALL) ||
                (CharacteristicValue == CharacteristicFilter);
     }
 

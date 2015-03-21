@@ -34,12 +34,3 @@
 #define USBDK_HIDER_DEVICE_NAME     TEXT("\\Device\\") _USBDK_HIDER_NAME
 #define USBDK_DOS_HIDER_DEVICE_NAME TEXT("\\DosDevices\\") _USBDK_HIDER_NAME
 #define USBDK_USERMODE_HIDER_NAME   TEXT("\\\\.\\") _USBDK_HIDER_NAME
-
-#define USBDK_PARAMS_SUBKEY_NAME        TEXT("Parameters")
-#define USBDK_HIDE_RULES_SUBKEY_NAME    TEXT("HideRules")
-
-#define USBDK_HIDE_RULE_SHOULD_HIDE     TEXT("ShouldHide")
-#define USBDK_HIDE_RULE_VID             TEXT("VID")
-#define USBDK_HIDE_RULE_PID             TEXT("PID")
-#define USBDK_HIDE_RULE_BCD             TEXT("BCD")
-#define USBDK_HIDE_RULE_CLASS           TEXT("Class")

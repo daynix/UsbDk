@@ -630,7 +630,8 @@ NTSTATUS CUsbDkControlDevice::AddHideRule(const USB_DK_HIDE_RULE &UsbDkRule)
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "%!FUNC! entry");
 
     auto MatchAllMapper = [](ULONG64 Value) -> ULONG
-    { return Value == USB_DK_HIDE_RULE_MATCH_ALL ? CUsbDkHideRule::MATCH_ALL : static_cast<ULONG>(Value); };
+    { return Value == USB_DK_HIDE_RULE_MATCH_ALL ? USBDK_REG_HIDE_RULE_MATCH_ALL
+                                                 : static_cast<ULONG>(Value); };
 
     CObjHolder<CUsbDkHideRule> NewRule(new CUsbDkHideRule(UsbDkRule.Hide ? true : false,
                                                           MatchAllMapper(UsbDkRule.Class),
@@ -792,7 +793,7 @@ private:
 
         if (NT_SUCCESS(status))
         {
-            Value = !!RawValue;
+            Value = HideRuleBoolFromRegistry(RawValue);
         }
 
         return status;
@@ -805,8 +806,7 @@ private:
 
         if (NT_SUCCESS(status))
         {
-            Value = (RawValue == CUsbDkHideRule::MATCH_ALL) ? USB_DK_HIDE_RULE_MATCH_ALL
-                                                            : RawValue;
+            Value = HideRuleUlongMaskFromRegistry(RawValue);
         }
 
         return status;

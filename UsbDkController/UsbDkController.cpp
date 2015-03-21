@@ -391,7 +391,7 @@ int __cdecl _tmain(int argc, TCHAR* argv[])
             if (argc < 7)
             {
                 ShowUsage();
-                return 0;
+                return -3;
             }
             Controller_HideDevice(argv[2], argv[3], argv[4], argv[5], argv[6]);
         }
@@ -417,7 +417,6 @@ int __cdecl _tmain(int argc, TCHAR* argv[])
         {
             ShowUsage();
             return -3;
-
         }
     }
     else

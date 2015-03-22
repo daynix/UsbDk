@@ -238,7 +238,7 @@ bool CUsbDkControlDevice::ShouldHide(const USB_DEVICE_DESCRIPTOR &DevDescriptor)
 {
     auto Hide = false;
 
-    const_cast<HideRulesSet*>(&m_HideRules)->ForEach([&DevDescriptor, &Hide](CUsbDkHideRule *Entry) -> bool
+    const auto &HideVisitor = [&DevDescriptor, &Hide](CUsbDkHideRule *Entry) -> bool
     {
         if (Entry->Match(DevDescriptor))
         {
@@ -247,7 +247,10 @@ bool CUsbDkControlDevice::ShouldHide(const USB_DEVICE_DESCRIPTOR &DevDescriptor)
         }
 
         return true;
-    });
+    };
+
+    const_cast<HideRulesSet*>(&m_HideRules)->ForEach(HideVisitor);
+    const_cast<HideRulesSet*>(&m_PersistentHideRules)->ForEach(HideVisitor);
 
     return Hide;
 }
@@ -424,7 +427,7 @@ NTSTATUS CUsbDkControlDevice::Register()
     if (NT_SUCCESS(status))
     {
         FinishInitializing();
-        LoadPersistentHideRules();
+        ReloadPersistentHideRules();
     }
 
     return status;
@@ -637,7 +640,7 @@ NTSTATUS CUsbDkControlDevice::AddRedirect(const USB_DK_DEVICE_ID &DeviceId, PHAN
     return STATUS_SUCCESS;
 }
 
-NTSTATUS CUsbDkControlDevice::AddHideRule(const USB_DK_HIDE_RULE &UsbDkRule)
+NTSTATUS CUsbDkControlDevice::AddHideRuleToSet(const USB_DK_HIDE_RULE &UsbDkRule, HideRulesSet &Set)
 {
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "%!FUNC! entry");
 
@@ -656,14 +659,14 @@ NTSTATUS CUsbDkControlDevice::AddHideRule(const USB_DK_HIDE_RULE &UsbDkRule)
         return STATUS_INSUFFICIENT_RESOURCES;
     }
 
-    if(!m_HideRules.Add(NewRule))
+    if(!Set.Add(NewRule))
     {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! failed. Hide rule already present.");
         return STATUS_OBJECT_NAME_COLLISION;
     }
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "%!FUNC! Current hide rules:");
-    m_HideRules.Dump();
+    Set.Dump();
 
     NewRule.detach();
     return STATUS_SUCCESS;
@@ -672,9 +675,7 @@ NTSTATUS CUsbDkControlDevice::AddHideRule(const USB_DK_HIDE_RULE &UsbDkRule)
 void CUsbDkControlDevice::ClearHideRules()
 {
     m_HideRules.Clear();
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "%!FUNC! All hide rules dropped.");
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "%!FUNC! Reloading persistent hide rules.");
-    LoadPersistentHideRules();
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "%!FUNC! All dynamic hide rules dropped.");
 }
 
 class CHideRulesRegKey final : public CRegKey
@@ -825,8 +826,10 @@ private:
     }
 };
 
-NTSTATUS CUsbDkControlDevice::LoadPersistentHideRules()
+NTSTATUS CUsbDkControlDevice::ReloadPersistentHideRules()
 {
+    m_PersistentHideRules.Clear();
+
     CHideRulesRegKey RulesKey;
     auto status = RulesKey.Open();
     if (NT_SUCCESS(status))
@@ -839,7 +842,7 @@ NTSTATUS CUsbDkControlDevice::LoadPersistentHideRules()
             if (NT_SUCCESS(Rule.Open(RulesKey, *Name)) &&
                 NT_SUCCESS(Rule.Read(ParsedRule)))
             {
-                AddHideRule(ParsedRule);
+                AddPersistentHideRule(ParsedRule);
             }
         });
     }

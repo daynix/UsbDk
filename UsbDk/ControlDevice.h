@@ -218,12 +218,17 @@ public:
 
     ULONG CountDevices();
     NTSTATUS RescanRegistry()
-    { return LoadPersistentHideRules(); }
+    { return ReloadPersistentHideRules(); }
 
     bool EnumerateDevices(USB_DK_DEVICE_INFO *outBuff, size_t numberAllocatedDevices, size_t &numberExistingDevices);
     NTSTATUS ResetUsbDevice(const USB_DK_DEVICE_ID &DeviceId);
     NTSTATUS AddRedirect(const USB_DK_DEVICE_ID &DeviceId, PHANDLE ObjectHandle);
-    NTSTATUS AddHideRule(const USB_DK_HIDE_RULE &UsbDkRule);
+
+    NTSTATUS AddHideRule(const USB_DK_HIDE_RULE &UsbDkRule)
+    { return AddHideRuleToSet(UsbDkRule, m_HideRules); }
+    NTSTATUS AddPersistentHideRule(const USB_DK_HIDE_RULE &UsbDkRule)
+    { return AddHideRuleToSet(UsbDkRule, m_PersistentHideRules); }
+
     void ClearHideRules();
 
     NTSTATUS RemoveRedirect(const USB_DK_DEVICE_ID &DeviceId);
@@ -261,7 +266,7 @@ public:
     bool WaitForDetachment(const USB_DK_DEVICE_ID &ID);
 
 private:
-    NTSTATUS LoadPersistentHideRules();
+    NTSTATUS ReloadPersistentHideRules();
 
     CObjHolder<CUsbDkControlDeviceQueue> m_DeviceQueue;
     static CRefCountingHolder<CUsbDkControlDevice> *m_UsbDkControlDevice;
@@ -275,6 +280,9 @@ private:
 
     typedef CWdmSet<CUsbDkHideRule, CLockedAccess, CNonCountingObject> HideRulesSet;
     HideRulesSet m_HideRules;
+    HideRulesSet m_PersistentHideRules;
+
+    NTSTATUS AddHideRuleToSet(const USB_DK_HIDE_RULE &UsbDkRule, HideRulesSet &Set);
 
     template <typename TPredicate, typename TFunctor>
     bool UsbDevicesForEachIf(TPredicate Predicate, TFunctor Functor)

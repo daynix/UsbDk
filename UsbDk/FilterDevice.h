@@ -67,6 +67,14 @@ public:
         , m_PDO(PDO)
     {}
 
+    ~CUsbDkChildDevice()
+    {
+        if (!m_Indicated)
+        {
+            ObDereferenceObject(m_PDO);
+        }
+    }
+
     ULONG ParentID() const;
     PCWCHAR DeviceID() const { return *m_DeviceID->begin(); }
     PCWCHAR InstanceID() const { return *m_InstanceID->begin(); }
@@ -100,6 +108,12 @@ public:
 
     void Dump();
 
+    void MarkAsIndicated()
+    { m_Indicated = true; }
+
+    bool IsIndicated() const
+    { return m_Indicated; }
+
 private:
     CObjHolder<CRegText> m_DeviceID;
     CObjHolder<CRegText> m_InstanceID;
@@ -110,6 +124,7 @@ private:
     PDEVICE_OBJECT m_PDO;
     const CUsbDkFilterDevice &m_ParentDevice;
     bool m_Redirected = false;
+    bool m_Indicated = false;
 
     bool CreateRedirectorDevice();
 

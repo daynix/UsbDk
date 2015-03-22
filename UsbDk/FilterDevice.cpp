@@ -222,8 +222,18 @@ void CUsbDkHubFilterStrategy::WipeHiddenDevices(CDeviceRelations &Relations)
         Children().ForEachIf([PDO](CUsbDkChildDevice *Child){ return Child->Match(PDO); },
                              [this, &Hide](CUsbDkChildDevice *Child)
                              {
-                                 Hide = !Child->IsRedirected() &&
-                                        m_ControlDevice->ShouldHide(Child->DeviceDescriptor());
+                                 Hide = false;
+
+                                 if (!Child->IsRedirected() &&
+                                     !Child->IsIndicated())
+                                 {
+                                     Hide = m_ControlDevice->ShouldHide(Child->DeviceDescriptor());
+                                     if (!Hide)
+                                     {
+                                         Child->MarkAsIndicated();
+                                     }
+                                 }
+
                                  return false;
                              });
 

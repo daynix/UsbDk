@@ -88,6 +88,11 @@ PUSB_CONFIGURATION_DESCRIPTOR UsbDkDriverAccess::GetConfigurationDescriptor(USB_
 }
 //------------------------------------------------------------------------------------------------
 
+void UsbDkDriverAccess::UpdateRegistryParameters()
+{
+    Ioctl(IOCTL_USBDK_UPDATE_REG_PARAMETERS);
+}
+
 HANDLE UsbDkDriverAccess::AddRedirect(USB_DK_DEVICE_ID &DeviceID)
 {
     ULONG64 RedirectorHandle;

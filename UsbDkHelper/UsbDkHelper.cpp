@@ -318,28 +318,37 @@ void UsbDk_CloseHiderHandle(HANDLE HiderHandle)
 }
 
 static inline
-BOOL ModifyPersistentHideRules(const USB_DK_HIDE_RULE &Rule,
-                               void(CRulesManager::*Modifier)(const USB_DK_HIDE_RULE&))
+InstallResult ModifyPersistentHideRules(const USB_DK_HIDE_RULE &Rule,
+                                        void(CRulesManager::*Modifier)(const USB_DK_HIDE_RULE&))
 {
     try
     {
         CRulesManager Manager;
-        (Manager.*Modifier)(Rule);
-        return TRUE;
+        (CRulesManager().*Modifier)(Rule);
+
+        UsbDkDriverAccess driver;
+        driver.UpdateRegistryParameters();
+
+        return InstallSuccess;
+    }
+    catch (const UsbDkDriverFileException &e)
+    {
+        printExceptionString(e.what());
+        return InstallSuccessNeedReboot;
     }
     catch (const exception &e)
     {
         printExceptionString(e.what());
-        return FALSE;
+        return InstallFailure;
     }
 }
 
-DLL BOOL UsbDk_AddPersistentHideRule(PUSB_DK_HIDE_RULE Rule)
+DLL InstallResult UsbDk_AddPersistentHideRule(PUSB_DK_HIDE_RULE Rule)
 {
     return ModifyPersistentHideRules(*Rule, &CRulesManager::AddRule);
 }
 
-DLL BOOL UsbDk_DeletePersistentHideRule(PUSB_DK_HIDE_RULE Rule)
+DLL InstallResult UsbDk_DeletePersistentHideRule(PUSB_DK_HIDE_RULE Rule)
 {
     return ModifyPersistentHideRules(*Rule, &CRulesManager::DeleteRule);
 }

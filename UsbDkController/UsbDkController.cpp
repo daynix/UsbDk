@@ -53,26 +53,31 @@ static void ShowUsage()
 }
 //-------------------------------------------------------------------------------
 
+static int Controller_AnalyzeInstallResult(InstallResult Res, const tstring &OpName)
+{
+    switch (Res)
+    {
+    case InstallSuccess:
+        tcout << OpName << TEXT(" succeeded") << endl;
+        return 0;
+    case InstallFailure:
+        tcout << OpName << TEXT(" failed") << endl;
+        return 1;
+    case InstallSuccessNeedReboot:
+        tcout << OpName << TEXT(" succeeded but reboot is required in order to make it functional") << endl;
+        return 2;
+    default:
+        tcout << OpName << TEXT(" returned unknown error code") << endl;
+        assert(0);
+        return 3;
+    }
+}
+
 static int Controller_InstallDriver()
 {
     tcout << TEXT("Installing UsbDk driver") << endl;
     auto res = UsbDk_InstallDriver();
-    switch (res)
-    {
-    case InstallSuccess:
-        tcout << TEXT("UsbDk driver installation succeeded") << endl;
-        return 0;
-    case InstallFailure:
-        tcout << TEXT("UsbDk driver installation failed") << endl;
-        return 1;
-    case InstallSuccessNeedReboot:
-        tcout << TEXT("UsbDk driver installation succeeded but reboot is required in order to make it functional.") << endl;
-        return 2;
-    default:
-        tcout << TEXT("UsbDk driver installation returned unknown error code") << endl;
-        assert(0);
-        return 3;
-    }
+    return Controller_AnalyzeInstallResult(res, TEXT("UsbDk driver installation"));
 }
 //-------------------------------------------------------------------------------
 
@@ -234,7 +239,7 @@ static bool Controller_ParseRule(TCHAR *VID, TCHAR *PID, TCHAR *BCD, TCHAR *UsbC
            Controller_ParseBoolRuleField(TEXT("Hide"), Hide, Rule.Hide);
 }
 
-static bool Controller_AddPersistentHideRule(TCHAR *VID, TCHAR *PID, TCHAR *BCD, TCHAR *UsbClass, TCHAR *Hide)
+static int Controller_AddPersistentHideRule(TCHAR *VID, TCHAR *PID, TCHAR *BCD, TCHAR *UsbClass, TCHAR *Hide)
 {
     USB_DK_HIDE_RULE Rule;
 
@@ -244,19 +249,11 @@ static bool Controller_AddPersistentHideRule(TCHAR *VID, TCHAR *PID, TCHAR *BCD,
         return false;
     }
 
-    if (UsbDk_AddPersistentHideRule(&Rule))
-    {
-        tcout << TEXT("Persistent hide rule created succesfully.");
-        return true;
-    }
-    else
-    {
-        tcout << TEXT("Failed to create persistent hide rule.") << endl;
-        return false;
-    }
+    auto res = UsbDk_AddPersistentHideRule(&Rule);
+    return Controller_AnalyzeInstallResult(res, TEXT("Persistent hide rule creation"));
 }
 
-static bool Controller_DeletePersistentHideRule(TCHAR *VID, TCHAR *PID, TCHAR *BCD, TCHAR *UsbClass, TCHAR *Hide)
+static int Controller_DeletePersistentHideRule(TCHAR *VID, TCHAR *PID, TCHAR *BCD, TCHAR *UsbClass, TCHAR *Hide)
 {
     USB_DK_HIDE_RULE Rule;
 
@@ -266,16 +263,8 @@ static bool Controller_DeletePersistentHideRule(TCHAR *VID, TCHAR *PID, TCHAR *B
         return false;
     }
 
-    if (UsbDk_DeletePersistentHideRule(&Rule))
-    {
-        tcout << TEXT("Persistent rule deleted successfully.") << endl;
-        return true;
-    }
-    else
-    {
-        tcout << TEXT("Failed to delete persistent hide rule.") << endl;
-        return false;
-    }
+    auto res = UsbDk_DeletePersistentHideRule(&Rule);
+    return Controller_AnalyzeInstallResult(res, TEXT("Persistent hide rule removal"));
 }
 
 static void Controller_HideDevice(TCHAR *VID, TCHAR *PID, TCHAR *BCD, TCHAR *UsbClass, TCHAR *Hide)
@@ -402,7 +391,7 @@ int __cdecl _tmain(int argc, TCHAR* argv[])
                 ShowUsage();
                 return -4;
             }
-            return Controller_AddPersistentHideRule(argv[2], argv[3], argv[4], argv[5], argv[6]) ? 0 : -100;
+            return Controller_AddPersistentHideRule(argv[2], argv[3], argv[4], argv[5], argv[6]);
         }
         else if (_tcscmp(L"-D", argv[1]) == 0)
         {
@@ -411,7 +400,7 @@ int __cdecl _tmain(int argc, TCHAR* argv[])
                 ShowUsage();
                 return -5;
             }
-            return Controller_DeletePersistentHideRule(argv[2], argv[3], argv[4], argv[5], argv[6]) ? 0 : -100;
+            return Controller_DeletePersistentHideRule(argv[2], argv[3], argv[4], argv[5], argv[6]);
         }
         else
         {

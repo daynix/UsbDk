@@ -117,7 +117,7 @@ extern "C" {
     *    OUT - None
     *
     * @return
-    *  TRUE if function succeeds
+    *  Rule installation status
     *
     * @note
     * 1. Persistent rule stays until explicitly deleted by
@@ -127,7 +127,7 @@ extern "C" {
     *    device re-plug or system reboot.
     *
     */
-    DLL BOOL             UsbDk_AddPersistentHideRule(PUSB_DK_HIDE_RULE Rule);
+    DLL InstallResult    UsbDk_AddPersistentHideRule(PUSB_DK_HIDE_RULE Rule);
 
     /* Delete specific persistent hide rule
     *
@@ -136,7 +136,7 @@ extern "C" {
     *    OUT - None
     *
     * @return
-    *  TRUE if function succeeds
+    *  Rule removal status
     *
     * @note
     * 1. This API requires administrative privileges
@@ -144,7 +144,7 @@ extern "C" {
     *    device re-plug or system reboot.
     *
     */
-    DLL BOOL             UsbDk_DeletePersistentHideRule(PUSB_DK_HIDE_RULE Rule);
+    DLL InstallResult    UsbDk_DeletePersistentHideRule(PUSB_DK_HIDE_RULE Rule);
 #ifdef __cplusplus
 }
 #endif

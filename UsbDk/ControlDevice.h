@@ -53,6 +53,7 @@ private:
                               ULONG IoControlCode);
 
     static void CountDevices(CWdfRequest &Request, WDFQUEUE Queue);
+    static void UpdateRegistryParameters(CWdfRequest &Request, WDFQUEUE Queue);
     static void EnumerateDevices(CWdfRequest &Request, WDFQUEUE Queue);
     static void GetConfigurationDescriptor(CWdfRequest &Request, WDFQUEUE Queue);
 
@@ -216,6 +217,9 @@ public:
     { m_FilterDevices.Remove(&FilterDevice); }
 
     ULONG CountDevices();
+    NTSTATUS RescanRegistry()
+    { return LoadPersistentHideRules(); }
+
     bool EnumerateDevices(USB_DK_DEVICE_INFO *outBuff, size_t numberAllocatedDevices, size_t &numberExistingDevices);
     NTSTATUS ResetUsbDevice(const USB_DK_DEVICE_ID &DeviceId);
     NTSTATUS AddRedirect(const USB_DK_DEVICE_ID &DeviceId, PHANDLE ObjectHandle);

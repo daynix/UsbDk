@@ -94,6 +94,11 @@ void CUsbDkControlDeviceQueue::DeviceControl(WDFQUEUE Queue,
             GetConfigurationDescriptor(WdfRequest, Queue);
             break;
         }
+        case IOCTL_USBDK_UPDATE_REG_PARAMETERS:
+        {
+            UpdateRegistryParameters(WdfRequest, Queue);
+            break;
+        }
         default:
         {
             TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "Wrong IoControlCode 0x%X\n", IoControlCode);
@@ -119,6 +124,13 @@ void CUsbDkControlDeviceQueue::CountDevices(CWdfRequest &Request, WDFQUEUE Queue
     Request.SetStatus(status);
 }
 //------------------------------------------------------------------------------------------------------------
+
+void CUsbDkControlDeviceQueue::UpdateRegistryParameters(CWdfRequest &Request, WDFQUEUE Queue)
+{
+    auto devExt = UsbDkControlGetContext(WdfIoQueueGetDevice(Queue));
+    auto status = devExt->UsbDkControl->RescanRegistry();
+    Request.SetStatus(status);
+}
 
 void CUsbDkControlDeviceQueue::EnumerateDevices(CWdfRequest &Request, WDFQUEUE Queue)
 {

@@ -110,13 +110,13 @@
     <ClInclude Include="UsbDkCompat.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\UsbDk\UsbDkHelperHider.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="GuidGen.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RuleManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UsbDkHelperHider.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

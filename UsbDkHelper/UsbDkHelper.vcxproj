@@ -1010,7 +1010,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\UsbDk\UsbDkHelperHider.h" />
     <ClInclude Include="GuidGen.h" />
     <ClInclude Include="DriverAccess.h" />
     <ClInclude Include="DriverFile.h" />
@@ -1026,6 +1025,7 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="tstrings.h" />
+    <ClInclude Include="UsbDkHelperHider.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="WdfCoinstaller.h" />
   </ItemGroup>

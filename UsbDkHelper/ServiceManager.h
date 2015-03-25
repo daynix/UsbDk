@@ -23,7 +23,6 @@
 
 #pragma once
 
-//-----------------------------------------------------------------------------------
 #define SERVICE_MANAGER_EXCEPTION_STRING TEXT("ServiceManager exception: ")
 
 class UsbDkServiceManagerFailedException : public UsbDkW32ErrorException
@@ -35,7 +34,6 @@ public:
     UsbDkServiceManagerFailedException(tstring errMsg) : UsbDkW32ErrorException(tstring(SERVICE_MANAGER_EXCEPTION_STRING) + errMsg){}
     UsbDkServiceManagerFailedException(tstring errMsg, DWORD dwErrorCode) : UsbDkW32ErrorException(tstring(SERVICE_MANAGER_EXCEPTION_STRING) + errMsg, dwErrorCode){}
 };
-//-----------------------------------------------------------------------------------
 
 class ServiceManager
 {
@@ -52,4 +50,3 @@ private:
 
     SCMHandleHolder m_schSCManager;
 };
-//-----------------------------------------------------------------------------------

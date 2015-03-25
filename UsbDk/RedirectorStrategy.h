@@ -43,7 +43,6 @@ private:
     CUsbDkRedirectorQueueData(const CUsbDkRedirectorQueueData&) = delete;
     CUsbDkRedirectorQueueData& operator= (const CUsbDkRedirectorQueueData&) = delete;
 };
-//--------------------------------------------------------------------------------------------------
 
 class CUsbDkRedirectorQueueConfig : public CWdfDefaultQueue, public CAllocatable<PagedPool, 'SQRH'>
 {
@@ -57,7 +56,6 @@ private:
     CUsbDkRedirectorQueueConfig(const CUsbDkRedirectorQueueConfig&) = delete;
     CUsbDkRedirectorQueueConfig& operator= (const CUsbDkRedirectorQueueConfig&) = delete;
 };
-//--------------------------------------------------------------------------------------------------
 
 class CRedirectorRequest;
 

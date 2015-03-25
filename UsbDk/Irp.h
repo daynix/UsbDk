@@ -98,7 +98,6 @@ private:
     void DestroyIrp();
     void ReleaseTarget();
 };
-//-------------------------------------------------------------------------------------------------
 
 class CIoControlIrp : public CIrpBase
 {
@@ -123,4 +122,3 @@ private:
     CWdmEvent m_Event;
     IO_STATUS_BLOCK m_IoControlStatus;
 };
-//-------------------------------------------------------------------------------------------------

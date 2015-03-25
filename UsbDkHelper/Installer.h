@@ -28,7 +28,6 @@
 #include "UsbDkHelper.h"
 #include "RegAccess.h"
 
-//-----------------------------------------------------------------------------------
 #define INSTALLER_EXCEPTION_STRING TEXT("UsbDkInstaller exception: ")
 
 class UsbDkInstallerFailedException : public UsbDkW32ErrorException
@@ -40,7 +39,6 @@ public:
     UsbDkInstallerFailedException(tstring errMsg) : UsbDkW32ErrorException(tstring(INSTALLER_EXCEPTION_STRING) + errMsg){}
     UsbDkInstallerFailedException(tstring errMsg, DWORD dwErrorCode) : UsbDkW32ErrorException(tstring(INSTALLER_EXCEPTION_STRING) + errMsg, dwErrorCode){}
 };
-//-----------------------------------------------------------------------------------
 
 class UsbDkInstaller
 {
@@ -72,4 +70,3 @@ private:
     bool    isWow64B();
 
 };
-//-----------------------------------------------------------------------------------

@@ -25,7 +25,6 @@
 #include "DriverAccess.h"
 #include "Public.h"
 
-//------------------------------------------------------------------------------------------------
 
 void UsbDkDriverAccess::GetDevicesList(PUSB_DK_DEVICE_INFO &DevicesArray, ULONG &DeviceNumber)
 {
@@ -56,19 +55,16 @@ void UsbDkDriverAccess::GetDevicesList(PUSB_DK_DEVICE_INFO &DevicesArray, ULONG 
     DeviceNumber = bytesReturned / sizeof(USB_DK_DEVICE_INFO);
     DevicesArray = Result.release();
 }
-//------------------------------------------------------------------------------------------------
 
 void UsbDkDriverAccess::ReleaseConfigurationDescriptor(PUSB_CONFIGURATION_DESCRIPTOR Descriptor)
 {
     delete[] Descriptor;
 }
-//------------------------------------------------------------------------------------------------
 
 void UsbDkDriverAccess::ReleaseDevicesList(PUSB_DK_DEVICE_INFO DevicesArray)
 {
     delete[] DevicesArray;
 }
-//------------------------------------------------------------------------------------------------
 
 PUSB_CONFIGURATION_DESCRIPTOR UsbDkDriverAccess::GetConfigurationDescriptor(USB_DK_CONFIG_DESCRIPTOR_REQUEST &Request, ULONG &Length)
 {
@@ -86,7 +82,6 @@ PUSB_CONFIGURATION_DESCRIPTOR UsbDkDriverAccess::GetConfigurationDescriptor(USB_
 
     return FullDescriptor;
 }
-//------------------------------------------------------------------------------------------------
 
 void UsbDkDriverAccess::UpdateRegistryParameters()
 {
@@ -99,7 +94,6 @@ HANDLE UsbDkDriverAccess::AddRedirect(USB_DK_DEVICE_ID &DeviceID)
     SendIoctlWithDeviceId(IOCTL_USBDK_ADD_REDIRECT, DeviceID, &RedirectorHandle);
     return reinterpret_cast<HANDLE>(RedirectorHandle);
 }
-//------------------------------------------------------------------------------------------------
 
 void UsbDkHiderAccess::AddHideRule(const USB_DK_HIDE_RULE &Rule)
 {

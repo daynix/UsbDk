@@ -48,7 +48,6 @@ bool DeviceMgr::ResetDeviceByClass(const GUID &ClassGuid)
 
     return true;
 }
-//--------------------------------------------------------------------------------
 
 bool DeviceMgr::ResetDevice(HDEVINFO devs, PSP_DEVINFO_DATA devInfo)
 {
@@ -76,4 +75,3 @@ bool DeviceMgr::ResetDevice(HDEVINFO devs, PSP_DEVINFO_DATA devInfo)
 
     return true;
 }
-//--------------------------------------------------------------------------------

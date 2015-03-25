@@ -23,7 +23,6 @@
 
 #include "stdafx.h"
 
-//--------------------------------------------------------------------------------
 
 ServiceManager::ServiceManager()
     :m_schSCManager(OpenSCManager(nullptr, nullptr, SC_MANAGER_ALL_ACCESS))
@@ -33,7 +32,6 @@ ServiceManager::ServiceManager()
         throw UsbDkServiceManagerFailedException(TEXT("OpenSCManager failed"));
     }
 }
-//--------------------------------------------------------------------------------
 
 void ServiceManager::CreateServiceObject(const tstring &ServiceName, const tstring &ServicePath)
 {
@@ -46,7 +44,6 @@ void ServiceManager::CreateServiceObject(const tstring &ServiceName, const tstri
         throw UsbDkServiceManagerFailedException(TEXT("CreateService failed"));
     }
 }
-//--------------------------------------------------------------------------------
 
 void ServiceManager::DeleteServiceObject(const tstring &ServiceName)
 {
@@ -69,7 +66,6 @@ void ServiceManager::DeleteServiceObject(const tstring &ServiceName)
         throw UsbDkServiceManagerFailedException(TEXT("DeleteService failed"));
     }
 }
-//--------------------------------------------------------------------------------
 
 void ServiceManager::WaitForServiceStop(const SCMHandleHolder &schService)
 {
@@ -90,4 +86,3 @@ void ServiceManager::WaitForServiceStop(const SCMHandleHolder &schService)
         }
     } while ((ssp.dwCurrentState != SERVICE_STOPPED) && (iterationNumber++ < SERVICE_STOP_ITERATIONS));
 }
-//--------------------------------------------------------------------------------

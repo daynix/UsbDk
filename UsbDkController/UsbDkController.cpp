@@ -28,7 +28,6 @@
 #include "UsbDkDataHider.h"
 
 using namespace std;
-//-------------------------------------------------------------------------------
 
 static void ShowUsage()
 {
@@ -51,7 +50,6 @@ static void ShowUsage()
     tcout << TEXT("            <Hide>              Should be 0 or 1, if 0, the rule is terminal") << endl;
     tcout << endl;
 }
-//-------------------------------------------------------------------------------
 
 static int Controller_AnalyzeInstallResult(InstallResult Res, const tstring &OpName)
 {
@@ -79,7 +77,6 @@ static int Controller_InstallDriver()
     auto res = UsbDk_InstallDriver();
     return Controller_AnalyzeInstallResult(res, TEXT("UsbDk driver installation"));
 }
-//-------------------------------------------------------------------------------
 
 static int Controller_UninstallDriver()
 {
@@ -95,7 +92,6 @@ static int Controller_UninstallDriver()
         return 1;
     }
 }
-//-------------------------------------------------------------------------------
 
 static void Controller_DumpConfigurationDescriptors(USB_DK_DEVICE_INFO &Device)
 {
@@ -119,7 +115,6 @@ static void Controller_DumpConfigurationDescriptors(USB_DK_DEVICE_INFO &Device)
         }
     }
 }
-//-------------------------------------------------------------------------------
 
 static int Controller_EnumerateDevices()
 {
@@ -160,7 +155,6 @@ static int Controller_EnumerateDevices()
         return 1;
     }
 }
-//-------------------------------------------------------------------------------
 
 static int Controller_RedirectDevice(TCHAR *DeviceID, TCHAR *InstanceID)
 {
@@ -193,7 +187,6 @@ static int Controller_RedirectDevice(TCHAR *DeviceID, TCHAR *InstanceID)
     }
 
 }
-//-------------------------------------------------------------------------------
 
 static bool Controller_ParseIntRuleField(const TCHAR *Name, const TCHAR * Str, ULONG64 &Value)
 {
@@ -308,7 +301,6 @@ static void Controller_HideDevice(TCHAR *VID, TCHAR *PID, TCHAR *BCD, TCHAR *Usb
 
     UsbDk_CloseHiderHandle(hiderHandle);
 }
-//-------------------------------------------------------------------------------
 
 static bool Controller_ChdirToPackageFolder()
 {
@@ -337,7 +329,6 @@ static bool Controller_ChdirToPackageFolder()
 
     return true;
 }
-//-------------------------------------------------------------------------------
 
 int __cdecl _tmain(int argc, TCHAR* argv[])
 {
@@ -414,4 +405,3 @@ int __cdecl _tmain(int argc, TCHAR* argv[])
         return -4;
     }
 }
-//-------------------------------------------------------------------------------

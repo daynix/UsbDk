@@ -174,7 +174,6 @@ DWORD UsbDkRegAccess::ReadString(LPCTSTR lpzValueName,
 
     return dwRes;
 }
-//-----------------------------------------------------------------------------------------
 
 LONG UsbDkRegAccess::ReadMultiString(LPCTSTR lpzValueName,
                                       LPTSTR  lpzData,
@@ -211,7 +210,6 @@ LONG UsbDkRegAccess::ReadMultiString(LPCTSTR lpzValueName,
 
     return errorCode;
 }
-//-----------------------------------------------------------------------------------------
 
 DWORD UsbDkRegAccess::ReadBinary(LPCTSTR lpzValueName,
                                LPBYTE  lpzData,
@@ -385,7 +383,6 @@ BOOL UsbDkRegAccess::WriteString(LPCTSTR lpzValueName,
 
     return bResult;
 }
-//----------------------------------------------------------------------------------------------------
 
 BOOL UsbDkRegAccess::WriteMultiString(LPCTSTR lpzValueName,
                                       LPCTSTR lpzValue,
@@ -423,7 +420,6 @@ BOOL UsbDkRegAccess::WriteMultiString(LPCTSTR lpzValueName,
 
     return bResult;
 }
-//----------------------------------------------------------------------------------------------------
 
 BOOL UsbDkRegAccess::WriteBinary(LPCTSTR lpzValueName,
                                LPCBYTE lpData,

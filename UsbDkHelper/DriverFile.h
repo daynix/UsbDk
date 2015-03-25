@@ -25,7 +25,6 @@
 
 #include "UsbDkData.h"
 
-//-----------------------------------------------------------------------------------
 #define DRIVER_FILE_EXCEPTION_STRING TEXT("Driver file operation error. ")
 
 class UsbDkDriverFileException : public UsbDkW32ErrorException
@@ -37,7 +36,6 @@ public:
     UsbDkDriverFileException(tstring errMsg) : UsbDkW32ErrorException(tstring(DRIVER_FILE_EXCEPTION_STRING) + errMsg){}
     UsbDkDriverFileException(tstring errMsg, DWORD dwErrorCode) : UsbDkW32ErrorException(tstring(DRIVER_FILE_EXCEPTION_STRING) + errMsg, dwErrorCode){}
 };
-//-----------------------------------------------------------------------------------
 class UsbDkDriverFile
 {
 public:
@@ -73,4 +71,3 @@ protected:
 private:
     bool m_bOverlapped;
 };
-//-----------------------------------------------------------------------------------

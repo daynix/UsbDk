@@ -32,14 +32,12 @@
 #include "RedirectorAccess.h"
 #include "RuleManager.h"
 
-//-------------------------------------------------------------------------------------------
 
 typedef struct tag_REDIRECTED_DEVICE_HANDLE
 {
     USB_DK_DEVICE_ID DeviceID;
     unique_ptr<UsbDkRedirectorAccess> RedirectorAccess;
 } REDIRECTED_DEVICE_HANDLE, *PREDIRECTED_DEVICE_HANDLE;
-//-------------------------------------------------------------------------------------------
 
 void printExceptionString(const char *errorStr)
 {
@@ -47,7 +45,6 @@ void printExceptionString(const char *errorStr)
     OutputDebugString(tString.c_str());
     tcout << tString;
 }
-//------------------------------------------------------------------------------------------
 InstallResult UsbDk_InstallDriver(void)
 {
     bool NeedRollBack = false;
@@ -67,7 +64,6 @@ InstallResult UsbDk_InstallDriver(void)
         return InstallFailure;
     }
 }
-//-------------------------------------------------------------------------------------------
 
 BOOL UsbDk_UninstallDriver(void)
 {
@@ -83,7 +79,6 @@ BOOL UsbDk_UninstallDriver(void)
         return FALSE;
     }
 }
-//-------------------------------------------------------------------------------------------
 
 DLL BOOL UsbDk_GetConfigurationDescriptor(PUSB_DK_CONFIG_DESCRIPTOR_REQUEST Request,
                                     PUSB_CONFIGURATION_DESCRIPTOR *Descriptor,
@@ -101,7 +96,6 @@ DLL BOOL UsbDk_GetConfigurationDescriptor(PUSB_DK_CONFIG_DESCRIPTOR_REQUEST Requ
         return FALSE;
     }
 }
-//-------------------------------------------------------------------------------------------
 
 DLL void UsbDk_ReleaseConfigurationDescriptor(PUSB_CONFIGURATION_DESCRIPTOR Descriptor)
 {
@@ -114,7 +108,6 @@ DLL void UsbDk_ReleaseConfigurationDescriptor(PUSB_CONFIGURATION_DESCRIPTOR Desc
         printExceptionString(e.what());
     }
 }
-//-------------------------------------------------------------------------------------------
 
 BOOL UsbDk_GetDevicesList(PUSB_DK_DEVICE_INFO *DevicesArray, PULONG NumberDevices)
 {
@@ -130,7 +123,6 @@ BOOL UsbDk_GetDevicesList(PUSB_DK_DEVICE_INFO *DevicesArray, PULONG NumberDevice
         return FALSE;
     }
 }
-//-------------------------------------------------------------------------------------------
 
 void UsbDk_ReleaseDevicesList(PUSB_DK_DEVICE_INFO DevicesArray)
 {
@@ -143,7 +135,6 @@ void UsbDk_ReleaseDevicesList(PUSB_DK_DEVICE_INFO DevicesArray)
         printExceptionString(e.what());
     }
 }
-//-------------------------------------------------------------------------------------------
 
 HANDLE UsbDk_StartRedirect(PUSB_DK_DEVICE_ID DeviceID)
 {
@@ -162,7 +153,6 @@ HANDLE UsbDk_StartRedirect(PUSB_DK_DEVICE_ID DeviceID)
         return INVALID_HANDLE_VALUE;
     }
 }
-//-------------------------------------------------------------------------------------------
 
 BOOL UsbDk_StopRedirect(HANDLE DeviceHandle)
 {
@@ -179,7 +169,6 @@ BOOL UsbDk_StopRedirect(HANDLE DeviceHandle)
         return FALSE;
     }
 }
-//-------------------------------------------------------------------------------------------
 
 TransferResult UsbDk_WritePipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Request, LPOVERLAPPED Overlapped)
 {
@@ -194,7 +183,6 @@ TransferResult UsbDk_WritePipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Req
         return TransferFailure;
     }
 }
-//-------------------------------------------------------------------------------------------
 
 TransferResult UsbDk_ReadPipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Request, LPOVERLAPPED Overlapped)
 {
@@ -209,7 +197,6 @@ TransferResult UsbDk_ReadPipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Requ
         return TransferFailure;
     }
 }
-//-------------------------------------------------------------------------------------------
 
 BOOL UsbDk_AbortPipe(HANDLE DeviceHandle, ULONG64 PipeAddress)
 {
@@ -225,7 +212,6 @@ BOOL UsbDk_AbortPipe(HANDLE DeviceHandle, ULONG64 PipeAddress)
         return FALSE;
     }
 }
-//-------------------------------------------------------------------------------------------
 
 BOOL UsbDk_SetAltsetting(HANDLE DeviceHandle, ULONG64 InterfaceIdx, ULONG64 AltSettingIdx)
 {
@@ -241,7 +227,6 @@ BOOL UsbDk_SetAltsetting(HANDLE DeviceHandle, ULONG64 InterfaceIdx, ULONG64 AltS
         return FALSE;
     }
 }
-//-------------------------------------------------------------------------------------------
 
 DLL BOOL UsbDk_ResetDevice(HANDLE DeviceHandle)
 {
@@ -257,14 +242,12 @@ DLL BOOL UsbDk_ResetDevice(HANDLE DeviceHandle)
         return FALSE;
     }
 }
-//-------------------------------------------------------------------------------------------
 
 HANDLE UsbDk_GetRedirectorSystemHandle(HANDLE DeviceHandle)
 {
     auto deviceHandle = reinterpret_cast<PREDIRECTED_DEVICE_HANDLE>(DeviceHandle);
     return deviceHandle->RedirectorAccess->GetSystemHandle();
 }
-//-------------------------------------------------------------------------------------------
 
 HANDLE UsbDk_CreateHiderHandle()
 {

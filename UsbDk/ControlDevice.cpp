@@ -107,7 +107,6 @@ void CUsbDkControlDeviceQueue::DeviceControl(WDFQUEUE Queue,
         }
     }
 }
-//------------------------------------------------------------------------------------------------------------
 
 void CUsbDkControlDeviceQueue::CountDevices(CWdfRequest &Request, WDFQUEUE Queue)
 {
@@ -123,7 +122,6 @@ void CUsbDkControlDeviceQueue::CountDevices(CWdfRequest &Request, WDFQUEUE Queue
 
     Request.SetStatus(status);
 }
-//------------------------------------------------------------------------------------------------------------
 
 void CUsbDkControlDeviceQueue::UpdateRegistryParameters(CWdfRequest &Request, WDFQUEUE Queue)
 {
@@ -158,7 +156,6 @@ void CUsbDkControlDeviceQueue::EnumerateDevices(CWdfRequest &Request, WDFQUEUE Q
         Request.SetStatus(STATUS_BUFFER_TOO_SMALL);
     }
 }
-//------------------------------------------------------------------------------------------------------------
 
 template <typename TInputObj, typename TOutputObj>
 static void CUsbDkControlDeviceQueue::DoUSBDeviceOp(CWdfRequest &Request,
@@ -193,7 +190,6 @@ static void CUsbDkControlDeviceQueue::DoUSBDeviceOp(CWdfRequest &Request,
     Request.SetOutputDataLen(outputLength);
     Request.SetStatus(status);
 }
-//------------------------------------------------------------------------------------------------------------
 
 void CUsbDkControlDeviceQueue::DoUSBDeviceOp(CWdfRequest &Request, WDFQUEUE Queue, USBDevControlMethod Method)
 {
@@ -212,13 +208,11 @@ void CUsbDkControlDeviceQueue::DoUSBDeviceOp(CWdfRequest &Request, WDFQUEUE Queu
 
     Request.SetStatus(status);
 }
-//------------------------------------------------------------------------------------------------------------
 
 void CUsbDkControlDeviceQueue::GetConfigurationDescriptor(CWdfRequest &Request, WDFQUEUE Queue)
 {
     DoUSBDeviceOp<USB_DK_CONFIG_DESCRIPTOR_REQUEST, USB_CONFIGURATION_DESCRIPTOR>(Request, Queue, &CUsbDkControlDevice::GetConfigurationDescriptor);
 }
-//------------------------------------------------------------------------------------------------------------
 
 ULONG CUsbDkControlDevice::CountDevices()
 {
@@ -232,7 +226,6 @@ ULONG CUsbDkControlDevice::CountDevices()
 
     return numberDevices;
 }
-//------------------------------------------------------------------------------------------------------------
 
 bool CUsbDkControlDevice::ShouldHide(const USB_DEVICE_DESCRIPTOR &DevDescriptor) const
 {
@@ -280,7 +273,6 @@ bool CUsbDkControlDevice::EnumerateDevices(USB_DK_DEVICE_INFO *outBuff, size_t n
                                    return true;
                                });
 }
-//------------------------------------------------------------------------------------------------------------
 
 // EnumUsbDevicesByID runs over the list of USB devices looking for device by ID.
 // For each device with matching ID Functor() is called.
@@ -354,7 +346,6 @@ NTSTATUS CUsbDkControlDevice::GetUsbDeviceConfigurationDescriptor(const USB_DK_D
 
     return result ? STATUS_SUCCESS : STATUS_INVALID_DEVICE_REQUEST;
 }
-//------------------------------------------------------------------------------------------------------------
 
 void CUsbDkControlDevice::ContextCleanup(_In_ WDFOBJECT DeviceObject)
 {
@@ -365,7 +356,6 @@ void CUsbDkControlDevice::ContextCleanup(_In_ WDFOBJECT DeviceObject)
     auto deviceContext = UsbDkControlGetContext(DeviceObject);
     delete deviceContext->UsbDkControl;
 }
-//------------------------------------------------------------------------------------------------------------
 
 NTSTATUS CUsbDkControlDevice::Create(WDFDRIVER Driver)
 {
@@ -467,7 +457,6 @@ void CUsbDkControlDevice::IoInCallerContext(WDFDEVICE Device, WDFREQUEST Request
         }
     }
 }
-//-----------------------------------------------------------------------------------------------------
 
 bool CUsbDkControlDevice::FetchBuffersForAddRedirectRequest(CWdfRequest &WdfRequest, PUSB_DK_DEVICE_ID &DeviceId, PULONG64 &RedirectorDevice)
 {
@@ -511,7 +500,6 @@ bool CUsbDkControlDevice::FetchBuffersForAddRedirectRequest(CWdfRequest &WdfRequ
 
     return true;
 }
-//-----------------------------------------------------------------------------------------------------
 
 CRefCountingHolder<CUsbDkControlDevice> *CUsbDkControlDevice::m_UsbDkControlDevice = nullptr;
 
@@ -599,7 +587,6 @@ NTSTATUS CUsbDkControlDevice::GetConfigurationDescriptor(const USB_DK_CONFIG_DES
     *OutputBuffLen = NT_SUCCESS(status) ? min(Descriptor->wTotalLength, *OutputBuffLen) : 0;
     return status;
 }
-//-------------------------------------------------------------------------------------------------------------
 
 NTSTATUS CUsbDkControlDevice::AddRedirect(const USB_DK_DEVICE_ID &DeviceId, PHANDLE RedirectorDevice)
 {
@@ -855,7 +842,6 @@ NTSTATUS CUsbDkControlDevice::ReloadPersistentHideRules()
     return status;
 }
 
-//-------------------------------------------------------------------------------------------------------------
 
 NTSTATUS CUsbDkControlDevice::AddDeviceToSet(const USB_DK_DEVICE_ID &DeviceId, CUsbDkRedirection **NewRedirection)
 {
@@ -890,7 +876,6 @@ NTSTATUS CUsbDkControlDevice::AddDeviceToSet(const USB_DK_DEVICE_ID &DeviceId, C
 
     return STATUS_SUCCESS;
 }
-//-------------------------------------------------------------------------------------------------------------
 
 NTSTATUS CUsbDkControlDevice::RemoveRedirect(const USB_DK_DEVICE_ID &DeviceId)
 {
@@ -926,7 +911,6 @@ NTSTATUS CUsbDkControlDevice::RemoveRedirect(const USB_DK_DEVICE_ID &DeviceId)
     TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! failed.");
     return STATUS_OBJECT_NAME_NOT_FOUND;
 }
-//-------------------------------------------------------------------------------------------------------------
 
 bool CUsbDkControlDevice::NotifyRedirectorAttached(CRegText *DeviceID, CRegText *InstanceID, CUsbDkFilterDevice *RedirectorDevice)
 {
@@ -935,13 +919,11 @@ bool CUsbDkControlDevice::NotifyRedirectorAttached(CRegText *DeviceID, CRegText 
 
     return m_Redirections.ModifyOne(&ID, [RedirectorDevice](CUsbDkRedirection *R){ R->NotifyRedirectorCreated(RedirectorDevice); });
 }
-//-------------------------------------------------------------------------------------------------------------
 
 bool CUsbDkControlDevice::NotifyRedirectorRemovalStarted(const USB_DK_DEVICE_ID &ID)
 {
     return m_Redirections.ModifyOne(&ID, [](CUsbDkRedirection *R){ R->NotifyRedirectionRemovalStarted(); });
 }
-//-------------------------------------------------------------------------------------------------------------
 
 bool CUsbDkControlDevice::WaitForDetachment(const USB_DK_DEVICE_ID &ID)
 {
@@ -959,7 +941,6 @@ bool CUsbDkControlDevice::WaitForDetachment(const USB_DK_DEVICE_ID &ID)
 
     return res;
 }
-//-------------------------------------------------------------------------------------------------------------
 
 NTSTATUS CUsbDkRedirection::Create(const USB_DK_DEVICE_ID &Id)
 {

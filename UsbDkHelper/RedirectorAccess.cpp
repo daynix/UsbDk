@@ -29,7 +29,6 @@ void UsbDkRedirectorAccess::AbortPipe(ULONG64 PipeAddress)
 {
     IoctlSync(IOCTL_USBDK_DEVICE_ABORT_PIPE, false, &PipeAddress, sizeof(PipeAddress));
 }
-//------------------------------------------------------------------------------------------------
 
 void UsbDkRedirectorAccess::SetAltsetting(ULONG64 InterfaceIdx, ULONG64 AltSettingIdx)
 {
@@ -39,13 +38,11 @@ void UsbDkRedirectorAccess::SetAltsetting(ULONG64 InterfaceIdx, ULONG64 AltSetti
 
     IoctlSync(IOCTL_USBDK_DEVICE_SET_ALTSETTING, false, &AltSetting, sizeof(AltSetting));
 }
-//------------------------------------------------------------------------------------------------
 
 void UsbDkRedirectorAccess::ResetDevice()
 {
     IoctlSync(IOCTL_USBDK_DEVICE_RESET_DEVICE);
 }
-//------------------------------------------------------------------------------------------------
 
 bool UsbDkRedirectorAccess::IoctlSync(DWORD Code,
                                       bool ShortBufferOk,

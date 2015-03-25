@@ -27,7 +27,6 @@
 #include "DriverFile.h"
 #include "UsbDkNames.h"
 
-//-----------------------------------------------------------------------------------
 #define REDIRECTOR_ACCESS_EXCEPTION_STRING TEXT("Redirection operation error. ")
 
 class UsbDkRedirectorAccessException : public UsbDkW32ErrorException
@@ -39,7 +38,6 @@ public:
     UsbDkRedirectorAccessException(tstring errMsg) : UsbDkW32ErrorException(tstring(REDIRECTOR_ACCESS_EXCEPTION_STRING) + errMsg){}
     UsbDkRedirectorAccessException(tstring errMsg, DWORD dwErrorCode) : UsbDkW32ErrorException(tstring(REDIRECTOR_ACCESS_EXCEPTION_STRING) + errMsg, dwErrorCode){}
 };
-//-----------------------------------------------------------------------------------
 class UsbDkRedirectorAccess : public UsbDkDriverFile
 {
 public:
@@ -75,4 +73,3 @@ private:
                    DWORD OutBufferSize = 0,
                    LPDWORD BytesReturned = nullptr);
 };
-//-----------------------------------------------------------------------------------

@@ -26,7 +26,6 @@
 #include <Setupapi.h>
 #include "UsbDkHelper.h"
 
-//-----------------------------------------------------------------------------------
 #define DEVICE_MANAGER_EXCEPTION_STRING TEXT("DeviceMgr exception: ")
 
 class UsbDkDeviceMgrException : public UsbDkW32ErrorException
@@ -38,7 +37,6 @@ public:
     UsbDkDeviceMgrException(tstring errMsg) : UsbDkW32ErrorException(tstring(DEVICE_MANAGER_EXCEPTION_STRING) + errMsg){}
     UsbDkDeviceMgrException(tstring errMsg, DWORD dwErrorCode) : UsbDkW32ErrorException(tstring(DEVICE_MANAGER_EXCEPTION_STRING) + errMsg, dwErrorCode){}
 };
-//-----------------------------------------------------------------------------------
 
 class DeviceMgr
 {
@@ -47,4 +45,3 @@ public:
 private:
     static bool    ResetDevice(HDEVINFO devs, PSP_DEVINFO_DATA devInfo);
 };
-//-----------------------------------------------------------------------------------

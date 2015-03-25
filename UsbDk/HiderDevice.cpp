@@ -146,7 +146,6 @@ void CUsbDkHiderDeviceQueue::DeviceControl(WDFQUEUE Queue,
 
 
 }
-//------------------------------------------------------------------------------------------------------------
 
 void CUsbDkHiderDevice::ContextCleanup(_In_ WDFOBJECT DeviceObject)
 {
@@ -157,7 +156,6 @@ void CUsbDkHiderDevice::ContextCleanup(_In_ WDFOBJECT DeviceObject)
     auto deviceContext = UsbDkHiderGetContext(DeviceObject);
     delete deviceContext->UsbDkHider;
 }
-//------------------------------------------------------------------------------------------------------------
 
 NTSTATUS CUsbDkHiderDevice::Create(WDFDRIVER Driver)
 {
@@ -207,4 +205,3 @@ NTSTATUS CUsbDkHiderDevice::Register()
 
     return status;
 }
-//-----------------------------------------------------------------------------------------------------

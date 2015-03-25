@@ -25,7 +25,6 @@
 
 #include <wdfinstaller.h>
 
-//-----------------------------------------------------------------------------------
 #define WDF_COINSTALLER_EXCEPTION_STRING TEXT("WdfCoinstaller exception: ")
 
 class UsbDkWdfCoinstallerFailedException : public UsbDkW32ErrorException
@@ -37,7 +36,6 @@ public:
     UsbDkWdfCoinstallerFailedException(tstring errMsg) : UsbDkW32ErrorException(tstring(WDF_COINSTALLER_EXCEPTION_STRING) + errMsg){}
     UsbDkWdfCoinstallerFailedException(tstring errMsg, DWORD dwErrorCode) : UsbDkW32ErrorException(tstring(WDF_COINSTALLER_EXCEPTION_STRING) + errMsg, dwErrorCode){}
 };
-//-----------------------------------------------------------------------------------
 class WdfCoinstaller
 {
 public:
@@ -74,4 +72,3 @@ private:
     void loadWdfCoinstaller();
     void freeWdfCoinstallerLibrary();
 };
-//-----------------------------------------------------------------------------------

@@ -26,7 +26,6 @@
 #include "tstrings.h"
 
 using std::exception;
-//----------------------------------------------------------------------------------------------
 
 class UsbDkException : public exception
 {
@@ -47,7 +46,6 @@ private:
     tstring m_Message;
     string  m_MBCSMessage;
 };
-//----------------------------------------------------------------------------------------------
 
 class UsbDkNumErrorException : public UsbDkException
 {
@@ -61,7 +59,6 @@ public:
 protected:
     DWORD m_dwErrorCode;
 };
-//----------------------------------------------------------------------------------------------
 
 class UsbDkCRTErrorException : public UsbDkNumErrorException
 {
@@ -74,7 +71,6 @@ public:
 protected:
     static tstring GetErrorString(DWORD dwErrorCode);
 };
-//----------------------------------------------------------------------------------------------
 
 #ifdef WIN32
 class UsbDkW32ErrorException : public UsbDkNumErrorException
@@ -89,4 +85,3 @@ protected:
     static tstring GetErrorString(DWORD dwErrorCode);
 };
 #endif
-//----------------------------------------------------------------------------------------------

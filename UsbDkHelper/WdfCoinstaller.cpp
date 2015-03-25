@@ -25,7 +25,6 @@
 #include "WdfCoinstaller.h"
 #include "tstrings.h"
 
-//--------------------------------------------------------------------------------
 
 #define WDF_SECTION_NAME    TEXT("UsbDk.NT.Wdf")
 #if !TARGET_OS_WIN_XP
@@ -34,18 +33,15 @@
 #define COINSTALLER_VERSION TEXT("01009")
 #endif
 
-//--------------------------------------------------------------------------------
 WdfCoinstaller::WdfCoinstaller()
 {
     loadWdfCoinstaller();
 }
-//--------------------------------------------------------------------------------
 
 WdfCoinstaller::~WdfCoinstaller()
 {
     freeWdfCoinstallerLibrary();
 }
-//--------------------------------------------------------------------------------
 
 void WdfCoinstaller::loadWdfCoinstaller()
 {
@@ -78,7 +74,6 @@ void WdfCoinstaller::loadWdfCoinstaller()
         throw;
     }
 }
-//--------------------------------------------------------------------------------
 
 bool WdfCoinstaller::PreDeviceInstallEx(const tstring &infFilePath)
 {
@@ -101,7 +96,6 @@ bool WdfCoinstaller::PreDeviceInstallEx(const tstring &infFilePath)
 
     return true;
 }
-//--------------------------------------------------------------------------------
 
 void WdfCoinstaller::PostDeviceInstall(const tstring &infFilePath)
 {
@@ -111,7 +105,6 @@ void WdfCoinstaller::PostDeviceInstall(const tstring &infFilePath)
         throw UsbDkWdfCoinstallerFailedException(TEXT("WdfPostDeviceInstall() failed"), res);
     }
 }
-//--------------------------------------------------------------------------------
 
 void WdfCoinstaller::PreDeviceRemove(const tstring &infFilePath)
 {
@@ -121,7 +114,6 @@ void WdfCoinstaller::PreDeviceRemove(const tstring &infFilePath)
         throw UsbDkWdfCoinstallerFailedException(TEXT("WdfPreDeviceRemove() failed"), res);
     }
 }
-//--------------------------------------------------------------------------------
 
 void WdfCoinstaller::PostDeviceRemove(const tstring &infFilePath)
 {
@@ -131,7 +123,6 @@ void WdfCoinstaller::PostDeviceRemove(const tstring &infFilePath)
         throw  UsbDkWdfCoinstallerFailedException(TEXT("WdfPostDeviceRemove() failed"), res);
     }
 }
-//--------------------------------------------------------------------------------
 
 void WdfCoinstaller::freeWdfCoinstallerLibrary()
 {
@@ -141,4 +132,3 @@ void WdfCoinstaller::freeWdfCoinstallerLibrary()
         m_wdfCoinstallerLibrary = nullptr;
     }
 }
-//--------------------------------------------------------------------------------

@@ -29,7 +29,6 @@
 #include "UsbDkNames.h"
 #include "ControlDevice.h"
 #include "WdfRequest.h"
-//--------------------------------------------------------------------------------------------------
 
 NTSTATUS CUsbDkRedirectorStrategy::MakeAvailable()
 {
@@ -48,7 +47,6 @@ NTSTATUS CUsbDkRedirectorStrategy::MakeAvailable()
 
     return status;
 }
-//--------------------------------------------------------------------------------------------------
 
 NTSTATUS CUsbDkRedirectorStrategy::Create(CUsbDkFilterDevice *Owner)
 {
@@ -86,13 +84,11 @@ NTSTATUS CUsbDkRedirectorStrategy::Create(CUsbDkFilterDevice *Owner)
     }
     return status;
 }
-//--------------------------------------------------------------------------------------------------
 
 void CUsbDkRedirectorStrategy::Delete()
 {
     CUsbDkFilterStrategy::Delete();
 }
-//--------------------------------------------------------------------------------------------------
 
 void CUsbDkRedirectorStrategy::PatchDeviceID(PIRP Irp)
 {
@@ -162,7 +158,6 @@ void CUsbDkRedirectorStrategy::PatchDeviceID(PIRP Irp)
         Irp->IoStatus.Information = reinterpret_cast<ULONG_PTR>(Result);
     }
 }
-//--------------------------------------------------------------------------------------------------
 
 NTSTATUS CUsbDkRedirectorStrategy::PNPPreProcess(PIRP Irp)
 {
@@ -191,7 +186,6 @@ NTSTATUS CUsbDkRedirectorStrategy::PNPPreProcess(PIRP Irp)
         return CUsbDkFilterStrategy::PNPPreProcess(Irp);
     }
 }
-//--------------------------------------------------------------------------------------------------
 
 typedef struct tag_USBDK_REDIRECTOR_REQUEST_CONTEXT
 {
@@ -274,7 +268,6 @@ static NTSTATUS CRedirectorRequest::FetchTransferRequest(USB_DK_TRANSFER_REQUEST
 
     return status;
 }
-//--------------------------------------------------------------------------------------------------
 
 template <typename TRetrieverFunc, typename TLockerFunc>
 NTSTATUS CUsbDkRedirectorStrategy::IoInCallerContextRW(CRedirectorRequest &WdfRequest,
@@ -328,7 +321,6 @@ NTSTATUS CUsbDkRedirectorStrategy::IoInCallerContextRW(CRedirectorRequest &WdfRe
 
     return status;
 }
-//--------------------------------------------------------------------------------------------------
 
 template <typename TLockerFunc>
 NTSTATUS CUsbDkRedirectorStrategy::IoInCallerContextRWIsoTransfer(CRedirectorRequest &WdfRequest, USB_DK_TRANSFER_REQUEST &TransferRequest,
@@ -365,7 +357,6 @@ NTSTATUS CUsbDkRedirectorStrategy::IoInCallerContextRWIsoTransfer(CRedirectorReq
 
     return status;
 }
-//--------------------------------------------------------------------------------------------------
 
 NTSTATUS CUsbDkRedirectorStrategy::IoInCallerContextRWControlTransfer(CRedirectorRequest &WdfRequest, USB_DK_TRANSFER_REQUEST &TransferRequest)
 {
@@ -421,7 +412,6 @@ NTSTATUS CUsbDkRedirectorStrategy::IoInCallerContextRWControlTransfer(CRedirecto
 
     return status;
 }
-//--------------------------------------------------------------------------------------------------
 
 void CUsbDkRedirectorStrategy::IoInCallerContext(WDFDEVICE Device, WDFREQUEST Request)
 {
@@ -466,7 +456,6 @@ void CUsbDkRedirectorStrategy::IoInCallerContext(WDFDEVICE Device, WDFREQUEST Re
         WdfRequest.SetStatus(status);
     }
 }
-//--------------------------------------------------------------------------------------------------
 
 void CUsbDkRedirectorStrategy::DoControlTransfer(CRedirectorRequest &WdfRequest, WDFMEMORY DataBuffer)
 {
@@ -509,7 +498,6 @@ void CUsbDkRedirectorStrategy::DoControlTransfer(CRedirectorRequest &WdfRequest,
 
     WdfRequest.SetStatus(status);
 }
-//--------------------------------------------------------------------------------------------------
 
 void CUsbDkRedirectorStrategy::IoDeviceControl(WDFREQUEST Request,
                                                size_t OutputBufferLength, size_t InputBufferLength,
@@ -552,7 +540,6 @@ void CUsbDkRedirectorStrategy::IoDeviceControl(WDFREQUEST Request,
         }
     }
 }
-//--------------------------------------------------------------------------------------------------
 
 void CUsbDkRedirectorStrategy::WritePipe(WDFREQUEST Request, size_t Length)
 {
@@ -617,7 +604,6 @@ void CUsbDkRedirectorStrategy::WritePipe(WDFREQUEST Request, size_t Length)
         WdfRequest.SetStatus(STATUS_INVALID_PARAMETER);
     }
 }
-//--------------------------------------------------------------------------------------------------
 
 void CUsbDkRedirectorStrategy::ReadPipe(WDFREQUEST Request, size_t Length)
 {
@@ -681,7 +667,6 @@ void CUsbDkRedirectorStrategy::ReadPipe(WDFREQUEST Request, size_t Length)
         WdfRequest.SetStatus(STATUS_INVALID_PARAMETER);
     }
 }
-//--------------------------------------------------------------------------------------------------
 
 void CUsbDkRedirectorStrategy::IsoRWCompletion(WDFREQUEST Request, WDFIOTARGET, PWDF_REQUEST_COMPLETION_PARAMS CompletionParams, WDFCONTEXT)
 {
@@ -716,13 +701,11 @@ void CUsbDkRedirectorStrategy::IsoRWCompletion(WDFREQUEST Request, WDFIOTARGET, 
 
     WdfRequest.SetStatus(status);
 }
-//--------------------------------------------------------------------------------------------------
 
 size_t CUsbDkRedirectorStrategy::GetRequestContextSize()
 {
     return sizeof(USBDK_REDIRECTOR_REQUEST_CONTEXT);
 }
-//--------------------------------------------------------------------------------------------------
 
 void CUsbDkRedirectorStrategy::OnClose()
 {
@@ -735,7 +718,6 @@ void CUsbDkRedirectorStrategy::OnClose()
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! RemoveRedirect failed: %!STATUS!", status);
     }
 }
-//--------------------------------------------------------------------------------------------------
 
 void CUsbDkRedirectorQueueData::SetCallbacks(WDF_IO_QUEUE_CONFIG &QueueConfig)
 {
@@ -744,7 +726,6 @@ void CUsbDkRedirectorQueueData::SetCallbacks(WDF_IO_QUEUE_CONFIG &QueueConfig)
     QueueConfig.EvtIoRead = [](WDFQUEUE Q, WDFREQUEST R, size_t L)
                             { UsbDkFilterGetContext(WdfIoQueueGetDevice(Q))->UsbDkFilter->m_Strategy->ReadPipe(R, L); };
 }
-//--------------------------------------------------------------------------------------------------
 
 NTSTATUS CUsbDkRedirectorQueueData::SetDispatching()
 {
@@ -761,11 +742,9 @@ NTSTATUS CUsbDkRedirectorQueueData::SetDispatching()
     }
     return status;
 }
-//--------------------------------------------------------------------------------------------------
 
 void CUsbDkRedirectorQueueConfig::SetCallbacks(WDF_IO_QUEUE_CONFIG &QueueConfig)
 {
     QueueConfig.EvtIoDeviceControl = [](WDFQUEUE Q, WDFREQUEST R, size_t OL, size_t IL, ULONG CTL)
                                      { UsbDkFilterGetContext(WdfIoQueueGetDevice(Q))->UsbDkFilter->m_Strategy->IoDeviceControl(R, OL, IL, CTL); };;
 }
-//--------------------------------------------------------------------------------------------------

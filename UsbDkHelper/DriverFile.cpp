@@ -24,7 +24,6 @@
 #include "stdafx.h"
 #include "DriverFile.h"
 
-//------------------------------------------------------------------------------------------------
 
 UsbDkDriverFile::UsbDkDriverFile(LPCTSTR lpFileName, bool bOverlapped)
 {
@@ -43,7 +42,6 @@ UsbDkDriverFile::UsbDkDriverFile(LPCTSTR lpFileName, bool bOverlapped)
         throw UsbDkDriverFileException(tstring(TEXT("Failed to open device symlink ")) + lpFileName);
     }
 }
-//------------------------------------------------------------------------------------------------
 
 TransferResult UsbDkDriverFile::Ioctl(DWORD Code,
                             bool ShortBufferOk,

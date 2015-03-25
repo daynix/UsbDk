@@ -26,7 +26,6 @@
 #include "Public.h"
 #include "DeviceMgr.h"
 
-//------------------------------------------------------------------------------------------
 
 #define SYSTEM32_DRIVERS    TEXT("\\System32\\Drivers\\")
 
@@ -34,7 +33,6 @@
 #define UPPER_FILTER_REGISTRY_KEY TEXT("UpperFilters")
 
 using namespace std;
-//------------------------------------------------------------------------------------------
 
 UsbDkInstaller::UsbDkInstaller()
 {
@@ -42,7 +40,6 @@ UsbDkInstaller::UsbDkInstaller()
 
     m_regAccess.SetPrimaryKey(HKEY_LOCAL_MACHINE);
 }
-//--------------------------------------------------------------------------------
 
 bool UsbDkInstaller::Install(bool &NeedRollBack)
 {
@@ -59,7 +56,6 @@ bool UsbDkInstaller::Install(bool &NeedRollBack)
 
     return rebootRequired ? false : DeviceMgr::ResetDeviceByClass(GUID_DEVINTERFACE_USB_HOST_CONTROLLER);
 }
-//--------------------------------------------------------------------------------
 
 void UsbDkInstaller::Uninstall()
 {
@@ -77,7 +73,6 @@ void UsbDkInstaller::Uninstall()
 
     m_wdfCoinstaller.PostDeviceRemove(infFilePath);
 }
-//--------------------------------------------------------------------------------
 
 tstring UsbDkInstaller::CopyDriver()
 {
@@ -98,7 +93,6 @@ tstring UsbDkInstaller::CopyDriver()
 
     return driverDestLocation;
 }
-//-------------------------------------------------------------------------------------------
 
 void UsbDkInstaller::DeleteDriver()
 {
@@ -114,7 +108,6 @@ void UsbDkInstaller::DeleteDriver()
         return;
     }
 }
-//-------------------------------------------------------------------------------------------
 
 tstring UsbDkInstaller::buildDriverPath(const tstring &DriverFileName)
 {
@@ -123,7 +116,6 @@ tstring UsbDkInstaller::buildDriverPath(const tstring &DriverFileName)
 
     return tstring(driverDestPath) + SYSTEM32_DRIVERS + DriverFileName;
 }
-//-------------------------------------------------------------------------------------------
 
 tstring UsbDkInstaller::buildInfFilePath()
 {
@@ -135,7 +127,6 @@ tstring UsbDkInstaller::buildInfFilePath()
 
     return tstring(currDir) + TEXT("\\") + USBDK_DRIVER_INF_NAME;
 }
-//-------------------------------------------------------------------------------------------
 
 void UsbDkInstaller::addUsbDkToRegistry()
 {
@@ -183,7 +174,6 @@ void UsbDkInstaller::addUsbDkToRegistry()
         throw UsbDkInstallerFailedException(TEXT("addUsbDkToRegistry failed in WriteMultiString."));
     }
 }
-//----------------------------------------------------------------------------
 
 void UsbDkInstaller::removeUsbDkFromRegistry()
 {
@@ -236,7 +226,6 @@ void UsbDkInstaller::removeUsbDkFromRegistry()
         }
     }
 }
-//----------------------------------------------------------------------------
 
 void UsbDkInstaller::buildMultiStringVectorFromList(vector<TCHAR> &valVector, tstringlist &newfiltersList)
 {
@@ -251,7 +240,6 @@ void UsbDkInstaller::buildMultiStringVectorFromList(vector<TCHAR> &valVector, ts
     }
     valVector.push_back(TEXT('\0'));
 }
-//----------------------------------------------------------------------------
 
 void UsbDkInstaller::buildStringListFromVector(tstringlist &filtersList, vector<TCHAR> &valVector)
 {
@@ -275,7 +263,6 @@ void UsbDkInstaller::buildStringListFromVector(tstringlist &filtersList, vector<
 
     } while (!currFilter.empty());
 }
-//----------------------------------------------------------------------------
 
 void UsbDkInstaller::buildNewListWithoutEement(tstringlist &newfiltersList, tstringlist &filtersList, tstring element)
 {
@@ -287,7 +274,6 @@ void UsbDkInstaller::buildNewListWithoutEement(tstringlist &newfiltersList, tstr
         }
     }
 }
-//----------------------------------------------------------------------------
 
 void UsbDkInstaller::validatePlatform()
 {
@@ -296,7 +282,6 @@ void UsbDkInstaller::validatePlatform()
         throw UsbDkInstallerFailedException(TEXT("Running 32Bit package on 64Bit OS not supported."));
     }
 }
-//----------------------------------------------------------------------------
 
 bool UsbDkInstaller::isWow64B()
 {
@@ -314,4 +299,3 @@ bool UsbDkInstaller::isWow64B()
     }
     return bIsWow64 ? true : false;
 }
-//----------------------------------------------------------------------------

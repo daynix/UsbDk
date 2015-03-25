@@ -85,7 +85,6 @@ private:
     void ForwardRequest(WDFREQUEST Request);
     TChildrenList m_Children;
 };
-//-----------------------------------------------------------------------------------------
 
 class CUsbDkNullFilterStrategy : public CUsbDkFilterStrategy
 {
@@ -93,7 +92,6 @@ public:
     virtual NTSTATUS MakeAvailable() override
     { return STATUS_SUCCESS; }
 };
-//-----------------------------------------------------------------------------------------
 
 typedef struct _USBDK_FILTER_REQUEST_CONTEXT {
 } USBDK_FILTER_REQUEST_CONTEXT, *PUSBDK_FILTER_REQUEST_CONTEXT;

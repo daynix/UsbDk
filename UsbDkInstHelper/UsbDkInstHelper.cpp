@@ -78,7 +78,6 @@ static bool _ChdirToPackageFolder()
 
     return true;
 }
-//-------------------------------------------------------------------------------
 
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {

@@ -153,7 +153,6 @@ void CWdfUsbPipe::WriteAsync(CWdfRequest &Request, WDFMEMORY Buffer, PFN_WDF_REQ
         }
     }
 }
-//-------------------------------------------------------------------------------------------------------------------
 
 void CWdfUsbPipe::SubmitIsochronousTransfer(CWdfRequest &Request,
                                             CIsochronousUrb::Direction Direction,
@@ -191,7 +190,6 @@ void CWdfUsbPipe::SubmitIsochronousTransfer(CWdfRequest &Request,
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! send failed: %!STATUS!", status);
     }
 }
-//-------------------------------------------------------------------------------------------------------------------
 
 NTSTATUS CWdfUsbPipe::Abort(WDFREQUEST Request)
 {
@@ -341,7 +339,6 @@ void CWdfUsbTarget::ReadPipeAsync(WDFREQUEST Request, ULONG64 EndpointAddress, W
         WdfRequest.SetStatus(STATUS_NOT_FOUND);
     }
 }
-//----------------------------------------------------------------------------------------------------------
 
 void CWdfUsbTarget::ReadIsochronousPipeAsync(WDFREQUEST Request, ULONG64 EndpointAddress, WDFMEMORY Buffer,
                                              PULONG64 PacketSizes, size_t PacketNumber,
@@ -360,7 +357,6 @@ void CWdfUsbTarget::ReadIsochronousPipeAsync(WDFREQUEST Request, ULONG64 Endpoin
         WdfRequest.SetStatus(STATUS_NOT_FOUND);
     }
 }
-//----------------------------------------------------------------------------------------------------------
 
 void CWdfUsbTarget::WriteIsochronousPipeAsync(WDFREQUEST Request, ULONG64 EndpointAddress, WDFMEMORY Buffer,
                                               PULONG64 PacketSizes, size_t PacketNumber,
@@ -379,7 +375,6 @@ void CWdfUsbTarget::WriteIsochronousPipeAsync(WDFREQUEST Request, ULONG64 Endpoi
         WdfRequest.SetStatus(STATUS_NOT_FOUND);
     }
 }
-//----------------------------------------------------------------------------------------------------------
 
 NTSTATUS CWdfUsbTarget::AbortPipe(WDFREQUEST Request, ULONG64 EndpointAddress)
 {

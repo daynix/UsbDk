@@ -27,6 +27,12 @@
       InstallScope="perMachine"
       InstallPrivileges="elevated" />
 
+    <?if $(var.UsbDkPlatform) = x86 ?>
+      <Condition Message="Error: 32-bit version of UsbDk can not be installed on 64-bit Windows.">
+          <![CDATA[Not VersionNT64]]>
+      </Condition>
+    <?endif?>
+
     <Media Id="1" Cabinet="usbdk.1.1.0.0.cab" EmbedCab="yes" />
 
     <Property Id="WHSLogo">1</Property>

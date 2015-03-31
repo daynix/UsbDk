@@ -29,6 +29,9 @@ using namespace std;
 
 static int Controller_InstallDriver()
 {
+    //Clean up any previous versions before reinstalling
+    UsbDk_UninstallDriver();
+
     auto res = UsbDk_InstallDriver();
     switch (res)
     {

@@ -5,11 +5,11 @@
     <?define UsbDkPlatform=x64 ?>
     <?define UsbDkProgramFilesFolder= ProgramFiles64Folder ?>
     <?define UsbDkWin64= yes ?>
-    <?else?>
+  <?else?>
     <?define UsbDkPlatform=x86 ?>
     <?define UsbDkProgramFilesFolder= ProgramFilesFolder ?>
     <?define UsbDkWin64= no ?>
-    <?endif?>
+  <?endif?>
 
   <Product
     Name="UsbDk Runtime Libraries"

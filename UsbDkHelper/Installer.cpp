@@ -279,7 +279,8 @@ void UsbDkInstaller::validatePlatform()
 {
     if (isWow64B())
     {
-        throw UsbDkInstallerFailedException(TEXT("Running 32Bit package on 64Bit OS not supported."));
+        throw UsbDkInstallerFailedException(TEXT("Running 32Bit package on 64Bit OS not supported."),
+                                            ERROR_EXE_MACHINE_TYPE_MISMATCH);
     }
 }
 

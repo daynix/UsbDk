@@ -170,7 +170,7 @@ static int Controller_RedirectDevice(TCHAR *DeviceID, TCHAR *InstanceID)
         return 100;
     }
     tcout << TEXT("USB device was redirected successfully. Redirected device handle = ") << redirectedDevice << endl;
-    tcout << TEXT("Press some key to stop redirection");
+    tcout << TEXT("Press any key to stop redirection");
     getchar();
 
     // STOP redirect

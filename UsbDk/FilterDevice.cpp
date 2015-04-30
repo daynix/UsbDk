@@ -228,10 +228,11 @@ void CUsbDkHubFilterStrategy::WipeHiddenDevices(CDeviceRelations &Relations)
                                      !Child->IsIndicated())
                                  {
                                      Hide = m_ControlDevice->ShouldHide(Child->DeviceDescriptor());
-                                     if (!Hide)
-                                     {
-                                         Child->MarkAsIndicated();
-                                     }
+                                 }
+
+                                 if (!Hide)
+                                 {
+                                     Child->MarkAsIndicated();
                                  }
 
                                  return false;

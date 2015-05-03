@@ -390,6 +390,20 @@ NTSTATUS CWdfUsbTarget::AbortPipe(WDFREQUEST Request, ULONG64 EndpointAddress)
     }
 }
 
+NTSTATUS CWdfUsbTarget::ResetPipe(WDFREQUEST Request, ULONG64 EndpointAddress)
+{
+    auto Pipe = FindPipeByEndpointAddress(EndpointAddress);
+    if (Pipe != nullptr)
+    {
+        return Pipe->Reset(Request);
+    }
+    else
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed: Pipe not found");
+        return STATUS_NOT_FOUND;
+    }
+}
+
 NTSTATUS CWdfUsbTarget::ResetDevice(WDFREQUEST Request)
 {
     NTSTATUS status = STATUS_SUCCESS;

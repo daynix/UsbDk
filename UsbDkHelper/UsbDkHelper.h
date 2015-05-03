@@ -198,6 +198,19 @@ extern "C" {
     */
     DLL BOOL             UsbDk_AbortPipe(HANDLE DeviceHandle, ULONG64 PipeAddress);
 
+    /* Issue an USB reset pipe request
+    *
+    * @params
+    *    IN  - DeviceHandle - handle of target USB device
+    *        - PipeAddress  - address of pipe to be reset
+    *    OUT - None
+    *
+    * @return
+    * TRUE if function succeeds
+    *
+    */
+    DLL BOOL             UsbDk_ResetPipe(HANDLE DeviceHandle, ULONG64 PipeAddress);
+
     /* Set active alternative settings for USB device
     *
     * @params

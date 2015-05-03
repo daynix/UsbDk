@@ -518,6 +518,14 @@ void CUsbDkRedirectorStrategy::IoDeviceControl(WDFREQUEST Request,
                                             {return m_Target.AbortPipe(Request, *endpointAddress); });
             return;
         }
+        case IOCTL_USBDK_DEVICE_RESET_PIPE:
+        {
+            CWdfRequest WdfRequest(Request);
+            UsbDkHandleRequestWithInput<ULONG64>(WdfRequest,
+                                            [this, Request](ULONG64 *endpointAddress, size_t)
+                                            {return m_Target.ResetPipe(Request, *endpointAddress); });
+            return;
+        }
         case IOCTL_USBDK_DEVICE_SET_ALTSETTING:
         {
             ASSERT(m_IncomingRWQueue);

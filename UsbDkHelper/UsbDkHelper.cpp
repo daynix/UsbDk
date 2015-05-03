@@ -213,6 +213,21 @@ BOOL UsbDk_AbortPipe(HANDLE DeviceHandle, ULONG64 PipeAddress)
     }
 }
 
+BOOL UsbDk_ResetPipe(HANDLE DeviceHandle, ULONG64 PipeAddress)
+{
+    try
+    {
+        auto deviceHandle = reinterpret_cast<PREDIRECTED_DEVICE_HANDLE>(DeviceHandle);
+        deviceHandle->RedirectorAccess->ResetPipe(PipeAddress);
+        return TRUE;
+    }
+    catch (const exception &e)
+    {
+        printExceptionString(e.what());
+        return FALSE;
+    }
+}
+
 BOOL UsbDk_SetAltsetting(HANDLE DeviceHandle, ULONG64 InterfaceIdx, ULONG64 AltSettingIdx)
 {
     try

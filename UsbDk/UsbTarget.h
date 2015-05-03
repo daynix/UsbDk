@@ -125,6 +125,7 @@ public:
     NTSTATUS ControlTransferAsync(CWdfRequest &WdfRequest, PWDF_USB_CONTROL_SETUP_PACKET SetupPacket, WDFMEMORY Data,
                                   PWDFMEMORY_OFFSET TransferOffset, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion);
     NTSTATUS AbortPipe(WDFREQUEST Request, ULONG64 EndpointAddress);
+    NTSTATUS ResetPipe(WDFREQUEST Request, ULONG64 EndpointAddress);
     NTSTATUS ResetDevice(WDFREQUEST Request);
 
 private:

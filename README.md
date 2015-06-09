@@ -19,7 +19,7 @@ Library supports all Windows OS versions starting from Windows XP/2003.
 
 **Tools required:**
 
-* Visual Studio 2013/Visual Studio 2013 Express
+* Visual Studio 2013/Visual Studio 2013 Express update 4 or newer
 * WDK 8.1
 * WDK 7.1 (for Windows XP/2003/Vista/2008 builds)
 

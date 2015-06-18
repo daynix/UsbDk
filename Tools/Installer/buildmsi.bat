@@ -1,7 +1,7 @@
 SETLOCAL EnableExtensions EnableDelayedExpansion
 
-IF [%UsbDkVersion%] == [] SET UsbDkVersion=99.99.99
-IF [%UsbDkVersion%] == [".."] SET UsbDkVersion=99.99.99
+IF [%UsbDkVersion%] == [] SET UsbDkVersion=99.99.90
+IF [%UsbDkVersion%] == [".."] SET UsbDkVersion=99.99.90
 
 pushd ..\..\Install_Debug\x86
 

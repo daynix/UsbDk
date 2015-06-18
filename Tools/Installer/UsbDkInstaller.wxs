@@ -43,6 +43,11 @@
         Minimum="0.0.0.0" Maximum="$(var.UsbDkVersion)"
         Property="PREVIOUSVERSIONSINSTALLED"
         IncludeMinimum="yes" IncludeMaximum="no" />
+
+      <UpgradeVersion
+        Minimum="$(var.UsbDkVersion)" Maximum="99.99.99.99"
+        Property="NEWERVERSIONINSTALLED"
+        IncludeMinimum="no" IncludeMaximum="yes" />
     </Upgrade>
 
     <Directory Id="TARGETDIR" Name="SourceDir">
@@ -105,10 +110,15 @@
               Return="ignore">
     </CustomAction>
 
+    <CustomAction Id="PreventDowngrading"
+              Error="Error: Newer version of UsbDk already installed.">
+    </CustomAction>
+
     <InstallExecuteSequence>
-      <RemoveExistingProducts Before="InstallInitialize" />
+      <RemoveExistingProducts After="InstallInitialize">PREVIOUSVERSIONSINSTALLED&lt;&gt;""</RemoveExistingProducts>
       <Custom Action="InstallDriver" After="InstallFiles">NOT Installed</Custom>
-      <Custom Action="UninstallDriver" Before="RemoveFiles">Installed</Custom>
+      <Custom Action="UninstallDriver" Before="RemoveFiles">REMOVE</Custom>
+      <Custom Action="PreventDowngrading" After="FindRelatedProducts">NEWERVERSIONINSTALLED&lt;&gt;"" AND NOT Installed</Custom>
     </InstallExecuteSequence>
 
     <Feature Id="ProductFeature" Title="UsbDk Runtime Libraries" Level="1">

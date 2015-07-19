@@ -95,6 +95,6 @@ typedef enum
 {
     ControlTransferType,
     BulkTransferType,
-    IntertuptTransferType,
+    InterruptTransferType,
     IsochronousTransferType
 } USB_DK_TRANSFER_TYPE;

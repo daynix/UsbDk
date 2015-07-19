@@ -301,7 +301,7 @@ NTSTATUS CUsbDkRedirectorStrategy::IoInCallerContextRW(CRedirectorRequest &WdfRe
         status = IoInCallerContextRWControlTransfer(WdfRequest, TransferRequest);
         break;
     case BulkTransferType:
-    case IntertuptTransferType:
+    case InterruptTransferType:
         status = LockerFunc(WdfRequest, TransferRequest, context->LockedBuffer);
         if (!NT_SUCCESS(status))
         {
@@ -562,7 +562,7 @@ void CUsbDkRedirectorStrategy::WritePipe(WDFREQUEST Request, size_t Length)
         DoControlTransfer(WdfRequest, Context->LockedBuffer);
         break;
     case BulkTransferType:
-    case IntertuptTransferType:
+    case InterruptTransferType:
         if (Context->LockedBuffer != WDF_NO_HANDLE)
         {
             m_Target.WritePipeAsync(WdfRequest.Detach(), Context->EndpointAddress, Context->LockedBuffer,
@@ -625,7 +625,7 @@ void CUsbDkRedirectorStrategy::ReadPipe(WDFREQUEST Request, size_t Length)
         DoControlTransfer(WdfRequest, Context->LockedBuffer);
         break;
     case BulkTransferType:
-    case IntertuptTransferType:
+    case InterruptTransferType:
         if (Context->LockedBuffer != WDF_NO_HANDLE)
         {
             m_Target.ReadPipeAsync(WdfRequest.Detach(), Context->EndpointAddress, Context->LockedBuffer,

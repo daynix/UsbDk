@@ -13,6 +13,7 @@ Library supports all Windows OS versions starting from Windows XP/2003.
 ## Documentation
 
 * See ARCHITECTURE document in the source tree root.
+* See Documentation folder in the source tree root.
 * See UsbDkHelper\UsbDkHelper.h UsbDkHelper\UsbDkHelperHider.h for API documentation
 
 ## Building

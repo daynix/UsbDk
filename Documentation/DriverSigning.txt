@@ -1,0 +1,62 @@
+Windows Driver Signing
+======================================
+
+Windows device installation uses digital signatures to verify the integrity
+of driver packages and to verify the identity of the vendor (software publisher)
+who provides the driver packages. In addition, the kernel-mode code signing policy
+for 64-bit versions of Windows Vista and later versions of Windows specifies that
+a kernel-mode driver must be signed for the driver to load.
+
+Signing Modes
+======================================
+
+There are 2 Windows driver signing modes - production and test signing.
+
+Production signing process requires a Software Publisher Certificate (SPC)
+obtained from a third-party certificate authority (CA) that is authorized by
+Microsoft to issue such certificates.
+
+Test signing process uses a self-generated test signing certificate
+and requires test signing mode enabled on a target computer in order to
+load a test signed driver.
+
+UsbDk Driver Signing
+======================================
+
+All official UsbDk releases are production signed, this means that they will
+load successfully on any Windows PC running supported OS version without additional
+configuration efforts.
+
+As for custom builds of UsbDk drivers they are either unsigned (Release configurations)
+of self-signed (Debug configurations).
+
+Running Custom Builds of UsbDk Drivers
+======================================
+
+On 32-bit systems all custom builds of UsbDk drivers should run with no additional
+configuration efforts.
+
+In order to run a custom UsbDk build make sure that driver is built in Debug
+Configuration and test signing mode is enabled on the target system.
+
+In order to enable test signing mode run (as administrator):
+
+Bcdedit.exe -set TESTSIGNING ON
+
+and reboot the system.
+
+In order to disable test signing mode, run
+
+Bcdedit.exe -set TESTSIGNING OFF
+
+and reboot the system.
+
+More information on driver signing
+======================================
+
+1. Driver Signing
+   https://msdn.microsoft.com/en-us/library/windows/hardware/ff544865(v=vs.85).aspx
+2. Signing Drivers during Development and Test
+   https://msdn.microsoft.com/en-us/library/windows/hardware/ff552275(v=vs.85).aspx
+3. The TESTSIGNING Boot Configuration Option
+   https://msdn.microsoft.com/en-us/library/windows/hardware/ff553484(v=vs.85).aspx

@@ -1,12 +1,24 @@
 Viewing Debug Trace
 ==============================================================================
 
-UsbDk uses Windows WPP facilities to trace code execution.
+There are 2 types of traces produced by UsbDk components - driver and
+user mode.
+
+UsbDk driver uses Windows WPP facilities to trace code execution.
 Both debug and release versions of the driver contain trace points
 that my be activated at run time. In order to activate and view traces
 use tracing scripts from Tools/Trace subfolder of UsbDk source tree.
 
-Getting Text Traces (for debugging, requires UsbDk driver's PDB file)
+UsbDk user mode components output trace logs into Windows debug stream
+that may be watched by DbgView utility.
+
+Getting User Mode Text Traces (for debugging and sharing, no PDB files needed)
+==============================================================================
+
+* Getting Traces of user mode UsbDk components as easy as running DbgView from
+  http://live.sysinternals.com/Dbgview.exe
+
+Getting Driver Text Traces (for debugging, requires UsbDk driver's PDB file)
 ==============================================================================
 
 * Copy Tools/Trace subfolder from the driver source tree to the target machine
@@ -37,7 +49,7 @@ Getting Text Traces (for debugging, requires UsbDk driver's PDB file)
   make sure correct PDB for your build and system was copied to Trace folder
   on the target machine.
 
-Getting Binary Traces (for sending trace logs to developers, no PDB required)
+Getting Driver Binary Traces (for sending trace logs to developers, no PDB required)
 ==============================================================================
 
 * Copy Tools/Trace subfolder from the driver source tree to the target machine
@@ -51,7 +63,7 @@ Getting Binary Traces (for sending trace logs to developers, no PDB required)
 * In case everything configured properly trace log will be saved to UsbDkTrace.etl
   file in the Trace foder
 
-Converting Binary Traces to Text (requires UsbDk driver's PDB file)
+Converting Driver Binary Traces to Text (requires UsbDk driver's PDB file)
 ==============================================================================
 
 * Place the binary trace obtained (UsbDkTrace.etl) to Tools/Trace

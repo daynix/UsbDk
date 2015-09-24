@@ -1,3 +1,5 @@
+@echo off
+
 traceview.exe -start UsbDk -rt -flag 0xFF -level 6 -ft 1 -pdb UsbDk.pdb -guid UsbDk.ctl
 
 mkdir WPP

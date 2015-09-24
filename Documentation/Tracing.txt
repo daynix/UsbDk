@@ -1,0 +1,82 @@
+Viewing Debug Trace
+==============================================================================
+
+UsbDk uses Windows WPP facilities to trace code execution.
+Both debug and release versions of the driver contain trace points
+that my be activated at run time. In order to activate and view traces
+use tracing scripts from Tools/Trace subfolder of UsbDk source tree.
+
+Getting Text Traces (for debugging, requires UsbDk driver's PDB file)
+==============================================================================
+
+* Copy Tools/Trace subfolder from the driver source tree to the target machine
+* Copy UsbDk.pdb from corresponding build tree subfolder to Trace folder on
+  the target machine, this should be done after each driver recompilation
+  (i.e. Install_Debug\x64\Win7Debug\UsbDk.pdb for Windows 7 64-bit Debug build)
+* Download dbgview from http://live.sysinternals.com/Dbgview.exe
+  and put to Trace folder on the target machine
+* Copy traceview.exe from WDK install location on build machine
+  (usually C:\Program Files (x86)\Windows Kits\8.1\Tools\x64\traceview.exe)
+  to Trace folder on the target machine
+* Run UsbDkTrace.bat script from Trace folder on the target machine
+* Keep pressing ENTER until dbgview window appears on the screen
+* Accept dbgview license (shown on the first run only)
+* In case everything configured properly log in DbgView should look like:
+  ...
+  [UsbDk]UsbDkEvtDeviceAdd Entry
+  [UsbDk]CRegText::Dump ID: USB\VID_46F4&PID_0001
+  [UsbDk]UsbDkSendUrbSynchronously Send URB IRP Error 0xc00000bb(STATUS_NOT_SUPPORTED)
+  [UsbDk]UsbDkWdmUsbDeviceIsHub Cannot query device descriptor
+  [UsbDk]UsbDkEvtDeviceAdd Exit 0xc00000bb(STATUS_NOT_SUPPORTED)
+  ...
+* In case trace contains entries without format information, i.e.
+  ...
+  Unknown( 10): GUID=f07e9b42-334e-a0c9-a179-65db113c0bcc (No Format Information found).
+  ...
+
+  make sure correct PDB for your build and system was copied to Trace folder
+  on the target machine.
+
+Getting Binary Traces (for sending trace logs to developers, no PDB required)
+==============================================================================
+
+* Copy Tools/Trace subfolder from the driver source tree to the target machine
+* Copy traceview.exe from WDK install location on build machine
+  (usually C:\Program Files (x86)\Windows Kits\8.1\Tools\x64\traceview.exe)
+  to Trace folder on the target machine
+* Run UsbDkTraceToFile.bat script from Trace folder on the target machine
+* Press ENTER once
+* Perform the scenario being traced
+* Press ENTER a few times in UsbDkTraceToFile.bat console Window until it closes
+* In case everything configured properly trace log will be saved to UsbDkTrace.etl
+  file in the Trace foder
+
+Converting Binary Traces to Text (requires UsbDk driver's PDB file)
+==============================================================================
+
+* Place the binary trace obtained (UsbDkTrace.etl) to Tools/Trace
+  folder of UsbDk source tree
+* Copy tracepdb.exe and tracefmt.exe utilities from WDK binaries location
+  (usually C:\Program Files (x86)\Windows Kits\8.1\bin\x64\)
+  to Tools/Trace folder of UsbDk source tree
+* Copy UsbDk.pdb that corresponds to the binary trace obtained to Tools/Trace 
+  folder of UsbDk source tree
+  (i.e. Install_Debug\x64\Win7Debug\UsbDk.pdb for Windows 7 64-bit Debug build)
+* Run UsbDkTextLog.bat
+* In case everything configured properly output should look like
+  ...
+  [UsbDk]UsbDkEvtDeviceAdd Entry
+  [UsbDk]CRegText::Dump ID: USB\VID_46F4&PID_0001
+  [UsbDk]UsbDkSendUrbSynchronously Send URB IRP Error 0xc00000bb(STATUS_NOT_SUPPORTED)
+  [UsbDk]UsbDkWdmUsbDeviceIsHub Cannot query device descriptor
+  [UsbDk]UsbDkEvtDeviceAdd Exit 0xc00000bb(STATUS_NOT_SUPPORTED)
+  ...
+* In case trace contains entries without format information, i.e.
+  ...
+  Unknown( 15): GUID=f07e9b42-334e-a0c9-a179-65db113c0bcc (No Format Information found).
+  Unknown( 10): GUID=1cd39459-da07-54dd-2d59-4231cc92623c (No Format Information found).
+  Unknown( 27): GUID=7a1906df-695f-0ca8-bad8-f8eac5a401a8 (No Format Information found).
+  Unknown( 23): GUID=7a1906df-695f-0ca8-bad8-f8eac5a401a8 (No Format Information found).
+  Unknown( 17): GUID=f07e9b42-334e-a0c9-a179-65db113c0bcc (No Format Information found).
+  ...
+  make sure correct PDB was provided.

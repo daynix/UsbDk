@@ -60,31 +60,3 @@ NTSTATUS CWdfRequest::SendWithCompletion(WDFIOTARGET Target, PFN_WDF_REQUEST_COM
 
     return status;
 }
-
-NTSTATUS CWdfRequest::FetchSafeInputBuffer(WDFMEMORY &Buffer) const
-{
-    PVOID Ptr;
-    size_t Length;
-
-    auto status = WdfRequestRetrieveUnsafeUserInputBuffer(m_Request, 0, &Ptr, &Length);
-    if (NT_SUCCESS(status))
-    {
-        status = WdfRequestProbeAndLockUserBufferForRead(m_Request, Ptr, Length, &Buffer);
-    }
-
-    return status;
-}
-
-NTSTATUS CWdfRequest::FetchSafeOutputBuffer(WDFMEMORY &Buffer) const
-{
-    PVOID Ptr;
-    size_t Length;
-
-    auto status = WdfRequestRetrieveUnsafeUserOutputBuffer(m_Request, 0, &Ptr, &Length);
-    if (NT_SUCCESS(status))
-    {
-        status = WdfRequestProbeAndLockUserBufferForWrite(m_Request, Ptr, Length, &Buffer);
-    }
-
-    return status;
-}

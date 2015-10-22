@@ -123,9 +123,14 @@ void CUsbDkHubFilterStrategy::Delete()
 class CDeviceRelations
 {
 public:
-    CDeviceRelations(PDEVICE_RELATIONS Relations)
-        : m_Relations(Relations)
+    CDeviceRelations()
     {}
+
+    virtual NTSTATUS Create(PDEVICE_RELATIONS Relations)
+    {
+        m_Relations = Relations;
+        return STATUS_SUCCESS;
+    }
 
     template <typename TPredicate, typename TFunctor>
     bool ForEachIf(TPredicate Predicate, TFunctor Functor) const
@@ -178,6 +183,48 @@ private:
     CDeviceRelations& operator= (const CDeviceRelations&) = delete;
 };
 
+class CNonPagedDeviceRelations : public CDeviceRelations
+{
+public:
+    virtual NTSTATUS Create(PDEVICE_RELATIONS Relations)
+    {
+        PDEVICE_RELATIONS NonPagedRelations = nullptr;
+
+        if (Relations != nullptr)
+        {
+            m_PagedRelations = Relations;
+
+            size_t RelationsSize = sizeof(DEVICE_RELATIONS) +
+                                   sizeof(PDEVICE_OBJECT ) * Relations->Count -
+                                   sizeof(PDEVICE_OBJECT);
+
+            auto status = m_NonPagedCopy.Create(RelationsSize, NonPagedPool);
+            if (!NT_SUCCESS(status))
+            {
+                return status;
+            }
+
+            NonPagedRelations = static_cast<PDEVICE_RELATIONS>(m_NonPagedCopy.Ptr());
+            RtlMoveMemory(NonPagedRelations, Relations, RelationsSize);
+        }
+
+        return CDeviceRelations::Create(NonPagedRelations);
+    }
+
+    ~CNonPagedDeviceRelations()
+    {
+        auto NonPagedRelations = static_cast<PDEVICE_RELATIONS>(m_NonPagedCopy.Ptr());
+
+        if (NonPagedRelations != nullptr)
+        {
+            RtlMoveMemory(m_PagedRelations, NonPagedRelations, m_NonPagedCopy.Size());
+        }
+    }
+private:
+    CWdmMemoryBuffer m_NonPagedCopy;
+    PDEVICE_RELATIONS m_PagedRelations = nullptr;
+};
+
 NTSTATUS CUsbDkHubFilterStrategy::PNPPreProcess(PIRP Irp)
 {
     auto irpStack = IoGetCurrentIrpStackLocation(Irp);
@@ -188,7 +235,15 @@ NTSTATUS CUsbDkHubFilterStrategy::PNPPreProcess(PIRP Irp)
         return PostProcessOnSuccess(Irp,
                                     [this](PIRP Irp)
                                     {
-                                        CDeviceRelations Relations((PDEVICE_RELATIONS)Irp->IoStatus.Information);
+                                        CNonPagedDeviceRelations Relations;
+                                        auto status = Relations.Create((PDEVICE_RELATIONS)Irp->IoStatus.Information);
+
+                                        if (!NT_SUCCESS(status))
+                                        {
+                                            TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Failed to create device relations object: %!STATUS!", status);
+                                            return;
+                                        }
+
                                         DropRemovedDevices(Relations);
                                         AddNewDevices(Relations);
                                         WipeHiddenDevices(Relations);

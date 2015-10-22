@@ -73,6 +73,7 @@ void CUsbDkFilterStrategy::IoInCallerContext(WDFDEVICE Device, WDFREQUEST Reques
     auto status = WdfDeviceEnqueueRequest(Device, Request);
     if (!NT_SUCCESS(status))
     {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERSTRATEGY, "%!FUNC! failed to enqueue request: %!STATUS!", status);
         WdfRequestComplete(Request, status);
     }
 }

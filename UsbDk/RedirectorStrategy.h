@@ -94,10 +94,13 @@ private:
                                         TRetrieverFunc RetrieverFunc,
                                         TLockerFunc LockerFunc);
 
-    static NTSTATUS IoInCallerContextRWControlTransfer(CRedirectorRequest &WdfRequest, USB_DK_TRANSFER_REQUEST &TransferRequest);
+    static NTSTATUS IoInCallerContextRWControlTransfer(CRedirectorRequest &WdfRequest,
+                                                       const USB_DK_TRANSFER_REQUEST &TransferRequest);
 
     template <typename TLockerFunc>
-    static NTSTATUS IoInCallerContextRWIsoTransfer(CRedirectorRequest &WdfRequest, USB_DK_TRANSFER_REQUEST &TransferRequest, TLockerFunc LockerFunc);
+    static NTSTATUS IoInCallerContextRWIsoTransfer(CRedirectorRequest &WdfRequest,
+                                                   const USB_DK_TRANSFER_REQUEST &TransferRequest,
+                                                   TLockerFunc LockerFunc);
 
     static void IsoRWCompletion(WDFREQUEST Request, WDFIOTARGET Target, PWDF_REQUEST_COMPLETION_PARAMS Params, WDFCONTEXT Context);
 

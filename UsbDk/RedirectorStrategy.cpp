@@ -323,7 +323,8 @@ NTSTATUS CUsbDkRedirectorStrategy::IoInCallerContextRW(CRedirectorRequest &WdfRe
 }
 
 template <typename TLockerFunc>
-NTSTATUS CUsbDkRedirectorStrategy::IoInCallerContextRWIsoTransfer(CRedirectorRequest &WdfRequest, USB_DK_TRANSFER_REQUEST &TransferRequest,
+NTSTATUS CUsbDkRedirectorStrategy::IoInCallerContextRWIsoTransfer(CRedirectorRequest &WdfRequest,
+                                                                  const USB_DK_TRANSFER_REQUEST &TransferRequest,
                                                                   TLockerFunc LockerFunc)
 {
     PUSBDK_REDIRECTOR_REQUEST_CONTEXT context = WdfRequest.Context();
@@ -358,7 +359,8 @@ NTSTATUS CUsbDkRedirectorStrategy::IoInCallerContextRWIsoTransfer(CRedirectorReq
     return status;
 }
 
-NTSTATUS CUsbDkRedirectorStrategy::IoInCallerContextRWControlTransfer(CRedirectorRequest &WdfRequest, USB_DK_TRANSFER_REQUEST &TransferRequest)
+NTSTATUS CUsbDkRedirectorStrategy::IoInCallerContextRWControlTransfer(CRedirectorRequest &WdfRequest,
+                                                                      const USB_DK_TRANSFER_REQUEST &TransferRequest)
 {
     NTSTATUS status;
     PUSBDK_REDIRECTOR_REQUEST_CONTEXT context = WdfRequest.Context();

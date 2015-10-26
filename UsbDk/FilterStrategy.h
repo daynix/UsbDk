@@ -42,8 +42,11 @@ public:
     virtual void IoDeviceControl(WDFREQUEST Request,
                                  size_t OutputBufferLength, size_t InputBufferLength,
                                  ULONG IoControlCode);
-    virtual void WritePipe(WDFREQUEST Request, size_t Length);
-    virtual void ReadPipe(WDFREQUEST Request, size_t Length);
+
+    virtual void IoDeviceControlConfig(WDFREQUEST Request,
+                                       size_t OutputBufferLength, size_t InputBufferLength,
+                                       ULONG IoControlCode)
+    { IoDeviceControl(Request, OutputBufferLength, InputBufferLength, IoControlCode); }
 
     virtual NTSTATUS MakeAvailable() = 0;
 

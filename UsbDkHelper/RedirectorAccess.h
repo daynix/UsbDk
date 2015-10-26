@@ -45,18 +45,8 @@ public:
         :UsbDkDriverFile(ObjectHandle, true)
     {}
 
-    TransferResult ReadPipe(USB_DK_TRANSFER_REQUEST &Request, LPOVERLAPPED Overlapped)
-    {
-        DWORD BytesRead;
-        return Read(&Request, sizeof(Request), &BytesRead, Overlapped);
-    }
-
-    TransferResult WritePipe(USB_DK_TRANSFER_REQUEST &Request, LPOVERLAPPED Overlapped)
-    {
-        DWORD BytesWritten;
-        return Write(&Request, sizeof(Request), &BytesWritten, Overlapped);
-    }
-
+    TransferResult ReadPipe(USB_DK_TRANSFER_REQUEST &Request, LPOVERLAPPED Overlapped);
+    TransferResult WritePipe(USB_DK_TRANSFER_REQUEST &Request, LPOVERLAPPED Overlapped);
     void AbortPipe(ULONG64 PipeAddress);
     void ResetPipe(ULONG64 PipeAddress);
     void SetAltsetting(ULONG64 InterfaceIdx, ULONG64 AltSettingIdx);
@@ -66,6 +56,11 @@ public:
     { return m_hDriver; }
 
 private:
+
+    TransferResult TransactPipe(USB_DK_TRANSFER_REQUEST &Request,
+                                DWORD OpCode,
+                                LPOVERLAPPED Overlapped);
+
     bool IoctlSync(DWORD Code,
                    bool ShortBufferOk = false,
                    LPVOID InBuffer = nullptr,

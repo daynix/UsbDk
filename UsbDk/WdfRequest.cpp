@@ -43,6 +43,22 @@ NTSTATUS CWdfRequest::SendAndForget(WDFIOTARGET Target)
     return status;
 }
 
+NTSTATUS CWdfRequest::ForwardToIoQueue(WDFQUEUE Destination)
+{
+    NTSTATUS status = WdfRequestForwardToIoQueue(m_Request, Destination);
+
+    if (NT_SUCCESS(status))
+    {
+        Detach();
+    }
+    else
+    {
+        SetStatus(status);
+    }
+
+    return status;
+}
+
 NTSTATUS CWdfRequest::SendWithCompletion(WDFIOTARGET Target, PFN_WDF_REQUEST_COMPLETION_ROUTINE CompletionFunc, WDFCONTEXT CompletionContext)
 {
     auto status = STATUS_SUCCESS;

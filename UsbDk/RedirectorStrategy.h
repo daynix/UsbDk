@@ -30,25 +30,24 @@
 
 class CRegText;
 
-class CUsbDkRedirectorQueueData : public CWdfSpecificQueue, public CAllocatable<PagedPool, 'PQRH'>
+class CUsbDkRedirectorQueueData : public CWdfDefaultQueue, public CAllocatable<PagedPool, 'PQRH'>
 {
 public:
     CUsbDkRedirectorQueueData(CWdfDevice &Device)
-        : CWdfSpecificQueue(Device, WdfIoQueueDispatchParallel)
+        : CWdfDefaultQueue(Device, WdfIoQueueDispatchParallel)
     {}
 
 private:
     virtual void SetCallbacks(WDF_IO_QUEUE_CONFIG &QueueConfig) override;
-    virtual NTSTATUS SetDispatching() override;
     CUsbDkRedirectorQueueData(const CUsbDkRedirectorQueueData&) = delete;
     CUsbDkRedirectorQueueData& operator= (const CUsbDkRedirectorQueueData&) = delete;
 };
 
-class CUsbDkRedirectorQueueConfig : public CWdfDefaultQueue, public CAllocatable<PagedPool, 'SQRH'>
+class CUsbDkRedirectorQueueConfig : public CWdfSpecificQueue, public CAllocatable<PagedPool, 'SQRH'>
 {
 public:
     CUsbDkRedirectorQueueConfig(CWdfDevice &Device)
-        : CWdfDefaultQueue(Device, WdfIoQueueDispatchSequential)
+        : CWdfSpecificQueue(Device, WdfIoQueueDispatchSequential)
     {}
 
 private:
@@ -73,8 +72,10 @@ public:
                                  size_t InputBufferLength,
                                  ULONG IoControlCode) override;
 
-    virtual void WritePipe(WDFREQUEST Request, size_t Length) override;
-    virtual void ReadPipe(WDFREQUEST Request, size_t Length) override;
+    virtual void IoDeviceControlConfig(WDFREQUEST Request,
+                                       size_t OutputBufferLength,
+                                       size_t InputBufferLength,
+                                       ULONG IoControlCode) override;
 
     virtual void OnClose() override;
 
@@ -88,10 +89,11 @@ public:
 
 private:
     void DoControlTransfer(CRedirectorRequest &WdfRequest, WDFMEMORY DataBuffer);
+    void WritePipe(WDFREQUEST Request);
+    void ReadPipe(WDFREQUEST Request);
 
-    template <typename TRetrieverFunc, typename TLockerFunc>
+    template <typename TLockerFunc>
     static NTSTATUS IoInCallerContextRW(CRedirectorRequest &WdfRequest,
-                                        TRetrieverFunc RetrieverFunc,
                                         TLockerFunc LockerFunc);
 
     static NTSTATUS IoInCallerContextRWControlTransfer(CRedirectorRequest &WdfRequest,
@@ -108,8 +110,8 @@ private:
 
     CWdfUsbTarget m_Target;
 
-    CObjHolder<CUsbDkRedirectorQueueData> m_IncomingRWQueue;
-    CObjHolder<CUsbDkRedirectorQueueConfig> m_IncomingIOCTLQueue;
+    CObjHolder<CUsbDkRedirectorQueueData> m_IncomingDataQueue;
+    CObjHolder<CUsbDkRedirectorQueueConfig> m_IncomingConfigQueue;
 
     CObjHolder<CRegText> m_DeviceID;
     CObjHolder<CRegText> m_InstanceID;

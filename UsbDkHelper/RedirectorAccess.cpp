@@ -25,6 +25,32 @@
 #include "RedirectorAccess.h"
 #include "Public.h"
 
+TransferResult UsbDkRedirectorAccess::TransactPipe(USB_DK_TRANSFER_REQUEST &Request,
+                                                   DWORD OpCode,
+                                                   LPOVERLAPPED Overlapped)
+{
+    static DWORD BytesTransferredDummy;
+
+    auto res = Ioctl(OpCode, false,
+                     &Request, sizeof(Request),
+                     &Request.Result.bytesTransferred, sizeof(Request.Result.bytesTransferred),
+                     &BytesTransferredDummy, Overlapped);
+
+    return res;
+}
+
+TransferResult UsbDkRedirectorAccess::ReadPipe(USB_DK_TRANSFER_REQUEST &Request,
+                                               LPOVERLAPPED Overlapped)
+{
+    return TransactPipe(Request, IOCTL_USBDK_DEVICE_READ_PIPE, Overlapped);
+}
+
+TransferResult UsbDkRedirectorAccess::WritePipe(USB_DK_TRANSFER_REQUEST &Request,
+                                                LPOVERLAPPED Overlapped)
+{
+    return TransactPipe(Request, IOCTL_USBDK_DEVICE_WRITE_PIPE, Overlapped);
+}
+
 void UsbDkRedirectorAccess::AbortPipe(ULONG64 PipeAddress)
 {
     IoctlSync(IOCTL_USBDK_DEVICE_ABORT_PIPE, false, &PipeAddress, sizeof(PipeAddress));

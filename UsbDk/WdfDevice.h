@@ -176,6 +176,9 @@ public:
     void Start()
     {WdfIoQueueStart(m_Queue);}
 
+    operator WDFQUEUE() const
+    { return m_Queue; }
+
 protected:
     virtual void InitConfig(WDF_IO_QUEUE_CONFIG &QueueConfig) = 0;
     virtual void SetCallbacks(WDF_IO_QUEUE_CONFIG &QueueConfig) = 0;
@@ -212,7 +215,8 @@ public:
     virtual NTSTATUS Create() override;
 
 protected:
-    virtual NTSTATUS SetDispatching() = 0;
+    virtual NTSTATUS SetDispatching()
+    { return STATUS_SUCCESS; }
 
 private:
     virtual void InitConfig(WDF_IO_QUEUE_CONFIG &QueueConfig) override;

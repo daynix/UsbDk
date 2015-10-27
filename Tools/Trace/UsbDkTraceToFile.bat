@@ -1,6 +1,6 @@
 @echo off
 
-traceview.exe -start UsbDk -rt -flag 0xFF -level 6 -ft 1 -pdb UsbDk.pdb -guid UsbDk.ctl -f UsbDkTrace.etl
+traceview.exe -start UsbDk -rt -flag 0x7FFFFFFF -level 6 -ft 1 -guid UsbDk.ctl -f UsbDkTrace.etl
 
 echo .
 echo Tracing is in progress. Press ENTER to stop it.

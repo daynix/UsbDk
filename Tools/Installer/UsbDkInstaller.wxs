@@ -5,10 +5,13 @@
     <?define UsbDkPlatform=x64 ?>
     <?define UsbDkProgramFilesFolder= ProgramFiles64Folder ?>
     <?define UsbDkWin64= yes ?>
+    <?define System32Dir= "System64Folder" ?>
+    <?define SystemWOW64Dir= "SystemFolder" ?>
   <?else?>
     <?define UsbDkPlatform=x86 ?>
     <?define UsbDkProgramFilesFolder= ProgramFilesFolder ?>
     <?define UsbDkWin64= no ?>
+    <?define System32Dir= "SystemFolder" ?>
   <?endif?>
 
   <Product

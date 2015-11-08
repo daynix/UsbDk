@@ -1,0 +1,80 @@
+Crash dump types
+==============================================================================
+
+Three types of crash dumps can be saved on Windows:
+1) Mini dumps: These are small (64 - 256KB) files. Due to their size, a lot of
+them can be saved, but they are not particularly useful, especially without
+the executable files that were running at crash time.
+2) Kernel dump: this is a dump of the region in memory which is occupied by
+the kernel. The size of such dump is usually few tenths of MB. These dumps are
+very useful, because their size is small, and they contain the more relevant
+parts of the memory.
+3) Full dump: this is the dump of the entire RAM at the time of the crash.
+While it contains all possible data, its size is equal to that of the RAM,
+which is usually quite large.
+
+
+Crash dump creation
+==============================================================================
+
+The crash dump (and crash handling) options on Windows are accessible at:
+---
+Right click on "My Computer" -> "Properties" -> "Advanced system settings"
+-> "Startup and Recovery" -> "Settings".
+---
+In that menu, you would probably want to:
+* De-select the "Automatically restart" option (so that the PC won't restart
+  automatically after a crash).
+* Choose "Kernel memory dump" from the drop-down menu.
+* You can leave the dump file location at the default value, but may change
+  that if needed.
+* You can choose whether to overwrite the last dump file on the next crash.
+  The default behavior is to overwrite, unless it's a minidump.
+
+On the next crash (blue screen) a crash dump will be saved according to your
+choices.
+
+* The dump files are usually located in:
+  * %windir%\memory.dmp
+  * %windir%\Minidump\Minidump<timestamp>.dmp
+
+* The option to permanently preserve old dumps can be also set by writing a
+  DWORD "AlwaysKeepMemoryDump" with value 1 to the registry key:
+  ---
+  HKLM\System\CurrentControlSet\Control\CrashControl
+  ---
+
+
+Crash dumps on demand
+==============================================================================
+
+Crashes can also be initiated manually, to examine a status of a driver. This
+is done via the registry, by setting a DWORD "CrashOnCtrlScroll" with the
+value of 1 to the following two keys:
+---
+HKLM\System\CurrentControlSet\Services\i8042prt\Parameters
+HKLM\System\CurrentControlSet\Services\kbdhid\Parameters
+---
+After setting these values, you can press Ctrl+ScrollLock+ScrollLock to get
+a MANUALLY_INITIATED_CRASH (0x000000E2).
+
+If a keyboard can not be accessed, a crash can be initiated using the
+Non-Maskable Interrupt (NMI) switch (or NMI signal on a VM).
+To configure that, write a DWORD "NMICrashDump" with the value 1 to the
+following registry key:
+---
+HKLM\System\CurrentControlSet\Control\CrashControl
+---
+
+* Note: On some machines automatic system recovery should be disabled, and NMI
+  should be enabled in the BIOS for this to work.
+
+
+Sharing crash dumps with developers
+==============================================================================
+
+* Because of the large file size, and high compressibility, please compress
+  the dump files before sending them.
+* To analyze a crash that was supposedly caused by UsbDk, please provide the
+  UsbDk binaries you were using, the program database (PDB) files, and the
+  source code - in case of using an unofficial build.

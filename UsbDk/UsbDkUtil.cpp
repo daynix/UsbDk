@@ -159,3 +159,24 @@ PVOID DuplicateStaticBuffer(const void *Buffer, SIZE_T Length, POOL_TYPE PoolTyp
     }
     return Duplicate;
 }
+
+NTSTATUS
+UsbDkCreateCurrentProcessHandle(HANDLE &Handle)
+{
+    PAGED_CODE();
+
+    auto status = ZwDuplicateObject(ZwCurrentProcess(),
+                                    ZwCurrentProcess(),
+                                    ZwCurrentProcess(),
+                                    &Handle,
+                                    PROCESS_DUP_HANDLE,
+                                    OBJ_KERNEL_HANDLE,
+                                    0);
+
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_UTILS, "%!FUNC! failed, error: %!STATUS!", status);
+    }
+
+    return status;
+}

@@ -497,3 +497,6 @@ LONGLONG MillisecondsTo100Nanoseconds(LONGLONG Milliseconds)
 {
     return Milliseconds * 10 * 1000;
 }
+
+NTSTATUS
+UsbDkCreateCurrentProcessHandle(HANDLE &Handle);

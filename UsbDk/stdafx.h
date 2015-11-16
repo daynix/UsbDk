@@ -11,7 +11,7 @@
 
 extern "C"
 {
-#include <ntddk.h>
+#include <ntifs.h>
 #include <wdf.h>
 #include <usb.h>
 

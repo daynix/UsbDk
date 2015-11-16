@@ -24,6 +24,7 @@
 #pragma once
 
 #include "WdfDevice.h"
+#include "WdfRequest.h"
 #include "Alloc.h"
 #include "UsbDkUtil.h"
 #include "FilterDevice.h"
@@ -36,6 +37,25 @@ typedef struct tag_USB_DK_DEVICE_INFO USB_DK_DEVICE_INFO;
 typedef struct tag_USB_DK_CONFIG_DESCRIPTOR_REQUEST USB_DK_CONFIG_DESCRIPTOR_REQUEST;
 class CUsbDkFilterDevice;
 class CWdfRequest;
+
+typedef struct tag_USBDK_CONTROL_REQUEST_CONTEXT
+{
+} USBDK_CONTROL_REQUEST_CONTEXT, *PUSBDK_CONTROL_REQUEST_CONTEXT;
+
+WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(USBDK_CONTROL_REQUEST_CONTEXT, UsbDkControlRequestGetContext);
+
+class CControlRequest : public CWdfRequest
+{
+public:
+    CControlRequest(WDFREQUEST Request)
+        : CWdfRequest(Request)
+    {}
+
+    PUSBDK_CONTROL_REQUEST_CONTEXT Context()
+    {
+        return UsbDkControlRequestGetContext(m_Request);
+    }
+};
 
 class CUsbDkControlDeviceQueue : public CWdfDefaultQueue, public CAllocatable<PagedPool, 'QCHR'>
 {
@@ -52,20 +72,20 @@ private:
                               size_t InputBufferLength,
                               ULONG IoControlCode);
 
-    static void CountDevices(CWdfRequest &Request, WDFQUEUE Queue);
-    static void UpdateRegistryParameters(CWdfRequest &Request, WDFQUEUE Queue);
-    static void EnumerateDevices(CWdfRequest &Request, WDFQUEUE Queue);
-    static void GetConfigurationDescriptor(CWdfRequest &Request, WDFQUEUE Queue);
+    static void CountDevices(CControlRequest &Request, WDFQUEUE Queue);
+    static void UpdateRegistryParameters(CControlRequest &Request, WDFQUEUE Queue);
+    static void EnumerateDevices(CControlRequest &Request, WDFQUEUE Queue);
+    static void GetConfigurationDescriptor(CControlRequest &Request, WDFQUEUE Queue);
 
     typedef NTSTATUS(CUsbDkControlDevice::*USBDevControlMethod)(const USB_DK_DEVICE_ID&);
-    static void DoUSBDeviceOp(CWdfRequest &Request, WDFQUEUE Queue, USBDevControlMethod Method);
+    static void DoUSBDeviceOp(CControlRequest &Request, WDFQUEUE Queue, USBDevControlMethod Method);
 
     template <typename TInputObj, typename TOutputObj>
     using USBDevControlMethodWithOutput = NTSTATUS(CUsbDkControlDevice::*)(const TInputObj& Input,
                                                                            TOutputObj *Output,
                                                                            size_t* OutputBufferLen);
     template <typename TInputObj, typename TOutputObj>
-    static void DoUSBDeviceOp(CWdfRequest &Request,
+    static void DoUSBDeviceOp(CControlRequest &Request,
                               WDFQUEUE Queue,
                               USBDevControlMethodWithOutput<TInputObj, TOutputObj> Method);
 

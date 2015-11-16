@@ -25,7 +25,6 @@
 #include "ControlDevice.h"
 #include "trace.h"
 #include "DeviceAccess.h"
-#include "WdfRequest.h"
 #include "Registry.h"
 #include "ControlDevice.tmh"
 #include "Public.h"
@@ -52,6 +51,13 @@ NTSTATUS CUsbDkControlDeviceInit::Create(WDFDRIVER Driver)
     }
 
     Attach(DeviceInit);
+
+    WDF_OBJECT_ATTRIBUTES requestAttributes;
+    WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&requestAttributes, USBDK_CONTROL_REQUEST_CONTEXT);
+    requestAttributes.ContextSizeOverride = sizeof(USBDK_CONTROL_REQUEST_CONTEXT);
+
+    SetRequestAttributes(requestAttributes);
+
     SetExclusive();
     SetIoBuffered();
 
@@ -75,7 +81,7 @@ void CUsbDkControlDeviceQueue::DeviceControl(WDFQUEUE Queue,
     UNREFERENCED_PARAMETER(OutputBufferLength);
     UNREFERENCED_PARAMETER(InputBufferLength);
 
-    CWdfRequest WdfRequest(Request);
+    CControlRequest WdfRequest(Request);
 
     switch (IoControlCode)
     {
@@ -108,7 +114,7 @@ void CUsbDkControlDeviceQueue::DeviceControl(WDFQUEUE Queue,
     }
 }
 
-void CUsbDkControlDeviceQueue::CountDevices(CWdfRequest &Request, WDFQUEUE Queue)
+void CUsbDkControlDeviceQueue::CountDevices(CControlRequest &Request, WDFQUEUE Queue)
 {
     ULONG *numberDevices;
     auto status = Request.FetchOutputObject(numberDevices);
@@ -123,14 +129,14 @@ void CUsbDkControlDeviceQueue::CountDevices(CWdfRequest &Request, WDFQUEUE Queue
     Request.SetStatus(status);
 }
 
-void CUsbDkControlDeviceQueue::UpdateRegistryParameters(CWdfRequest &Request, WDFQUEUE Queue)
+void CUsbDkControlDeviceQueue::UpdateRegistryParameters(CControlRequest &Request, WDFQUEUE Queue)
 {
     auto devExt = UsbDkControlGetContext(WdfIoQueueGetDevice(Queue));
     auto status = devExt->UsbDkControl->RescanRegistry();
     Request.SetStatus(status);
 }
 
-void CUsbDkControlDeviceQueue::EnumerateDevices(CWdfRequest &Request, WDFQUEUE Queue)
+void CUsbDkControlDeviceQueue::EnumerateDevices(CControlRequest &Request, WDFQUEUE Queue)
 {
     USB_DK_DEVICE_INFO *existingDevices;
     size_t  numberExistingDevices = 0;
@@ -158,7 +164,7 @@ void CUsbDkControlDeviceQueue::EnumerateDevices(CWdfRequest &Request, WDFQUEUE Q
 }
 
 template <typename TInputObj, typename TOutputObj>
-static void CUsbDkControlDeviceQueue::DoUSBDeviceOp(CWdfRequest &Request,
+static void CUsbDkControlDeviceQueue::DoUSBDeviceOp(CControlRequest &Request,
                                                     WDFQUEUE Queue,
                                                     USBDevControlMethodWithOutput<TInputObj, TOutputObj> Method)
 {
@@ -191,7 +197,7 @@ static void CUsbDkControlDeviceQueue::DoUSBDeviceOp(CWdfRequest &Request,
     Request.SetStatus(status);
 }
 
-void CUsbDkControlDeviceQueue::DoUSBDeviceOp(CWdfRequest &Request, WDFQUEUE Queue, USBDevControlMethod Method)
+void CUsbDkControlDeviceQueue::DoUSBDeviceOp(CControlRequest &Request, WDFQUEUE Queue, USBDevControlMethod Method)
 {
     USB_DK_DEVICE_ID *deviceId;
     auto status = Request.FetchInputObject(deviceId);
@@ -209,7 +215,7 @@ void CUsbDkControlDeviceQueue::DoUSBDeviceOp(CWdfRequest &Request, WDFQUEUE Queu
     Request.SetStatus(status);
 }
 
-void CUsbDkControlDeviceQueue::GetConfigurationDescriptor(CWdfRequest &Request, WDFQUEUE Queue)
+void CUsbDkControlDeviceQueue::GetConfigurationDescriptor(CControlRequest &Request, WDFQUEUE Queue)
 {
     DoUSBDeviceOp<USB_DK_CONFIG_DESCRIPTOR_REQUEST, USB_CONFIGURATION_DESCRIPTOR>(Request, Queue, &CUsbDkControlDevice::GetConfigurationDescriptor);
 }
@@ -425,40 +431,40 @@ NTSTATUS CUsbDkControlDevice::Register()
 
 void CUsbDkControlDevice::IoInCallerContext(WDFDEVICE Device, WDFREQUEST Request)
 {
-    CWdfRequest WdfRequest(Request);
+    CControlRequest CtrlRequest(Request);
     WDF_REQUEST_PARAMETERS Params;
-    WdfRequest.GetParameters(Params);
+    CtrlRequest.GetParameters(Params);
 
     if (Params.Type == WdfRequestTypeDeviceControl &&
         Params.Parameters.DeviceIoControl.IoControlCode == IOCTL_USBDK_ADD_REDIRECT)
     {
         PUSB_DK_DEVICE_ID DeviceId;
         PULONG64 RedirectorDevice;
-        if (FetchBuffersForAddRedirectRequest(WdfRequest, DeviceId, RedirectorDevice))
+        if (FetchBuffersForAddRedirectRequest(CtrlRequest, DeviceId, RedirectorDevice))
         {
             auto controlDevice = UsbDkControlGetContext(Device)->UsbDkControl;
             auto status = controlDevice->AddRedirect(*DeviceId, reinterpret_cast<PHANDLE>(RedirectorDevice));
-            WdfRequest.SetOutputDataLen(NT_SUCCESS(status) ? sizeof(*RedirectorDevice) : 0);
-            WdfRequest.SetStatus(status);
+            CtrlRequest.SetOutputDataLen(NT_SUCCESS(status) ? sizeof(*RedirectorDevice) : 0);
+            CtrlRequest.SetStatus(status);
         }
     }
     else
     {
-        auto status = WdfDeviceEnqueueRequest(Device, WdfRequest);
+        auto status = WdfDeviceEnqueueRequest(Device, CtrlRequest);
         if (NT_SUCCESS(status))
         {
-            WdfRequest.Detach();
+            CtrlRequest.Detach();
         }
         else
         {
             TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! WdfDeviceEnqueueRequest failed, %!STATUS!", status);
-            WdfRequest.SetStatus(status);
-            WdfRequest.SetOutputDataLen(0);
+            CtrlRequest.SetStatus(status);
+            CtrlRequest.SetOutputDataLen(0);
         }
     }
 }
 
-bool CUsbDkControlDevice::FetchBuffersForAddRedirectRequest(CWdfRequest &WdfRequest, PUSB_DK_DEVICE_ID &DeviceId, PULONG64 &RedirectorDevice)
+bool CUsbDkControlDeviceQueue::FetchBuffersForAddRedirectRequest(CControlRequest &WdfRequest, PUSB_DK_DEVICE_ID &DeviceId, PULONG64 &RedirectorDevice)
 {
     size_t DeviceIdLen;
     auto status = WdfRequest.FetchInputObject(DeviceId, &DeviceIdLen);

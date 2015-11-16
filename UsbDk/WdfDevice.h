@@ -142,7 +142,7 @@ public:
 
     void Delete() { WdfObjectDelete(m_Device); }
 
-    NTSTATUS CreateUserModeHandle(PHANDLE ObjectHandle);
+    NTSTATUS CreateUserModeHandle(HANDLE RequestorProcess, PHANDLE ObjectHandle);
     void Reference() { WdfObjectReference(m_Device);}
     void Dereference() { WdfObjectDereference(m_Device); }
 

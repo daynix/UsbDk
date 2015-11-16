@@ -172,7 +172,7 @@ NTSTATUS CWdfSpecificQueue::Create()
     return status;
 }
 
-NTSTATUS CWdfDevice::CreateUserModeHandle(PHANDLE ObjectHandle)
+NTSTATUS CWdfDevice::CreateUserModeHandle(HANDLE RequestorProcess, PHANDLE ObjectHandle)
 {
     WDFSTRING deviceName;
     auto status = WdfStringCreate(NULL, WDF_NO_OBJECT_ATTRIBUTES, &deviceName);
@@ -196,12 +196,35 @@ NTSTATUS CWdfDevice::CreateUserModeHandle(PHANDLE ObjectHandle)
     IO_STATUS_BLOCK IoStatusBlock;
 
     OBJECT_ATTRIBUTES ObjectAttributes;
-    InitializeObjectAttributes(&ObjectAttributes, &UnicodeDeviceName, 0, nullptr, nullptr);
+    InitializeObjectAttributes(&ObjectAttributes, &UnicodeDeviceName, OBJ_KERNEL_HANDLE, nullptr, nullptr);
 
-    status = ZwOpenFile(ObjectHandle,
+    HANDLE KernelHandle;
+    status = ZwOpenFile(&KernelHandle,
                         GENERIC_READ | GENERIC_WRITE,
                         &ObjectAttributes, &IoStatusBlock, 0,
                         FILE_NON_DIRECTORY_FILE | FILE_RANDOM_ACCESS);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_WDFDEVICE, "%!FUNC! ZwOpenFile failed. %!STATUS!", status);
+        WdfObjectDelete(deviceName);
+        return status;
+    }
+
+    status = ZwDuplicateObject(ZwCurrentProcess(),
+                               KernelHandle,
+                               RequestorProcess,
+                               ObjectHandle,
+                               0,
+                               0,
+                               DUPLICATE_SAME_ACCESS |
+                               DUPLICATE_SAME_ATTRIBUTES |
+                               DUPLICATE_CLOSE_SOURCE);
+
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_WDFDEVICE, "%!FUNC! ZwDuplicateObject failed. %!STATUS!", status);
+        ZwClose(KernelHandle);
+    }
 
     WdfObjectDelete(deviceName);
     return status;

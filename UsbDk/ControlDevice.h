@@ -40,6 +40,7 @@ class CWdfRequest;
 
 typedef struct tag_USBDK_CONTROL_REQUEST_CONTEXT
 {
+    HANDLE CallerProcessHandle;
 } USBDK_CONTROL_REQUEST_CONTEXT, *PUSBDK_CONTROL_REQUEST_CONTEXT;
 
 WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(USBDK_CONTROL_REQUEST_CONTEXT, UsbDkControlRequestGetContext);
@@ -75,6 +76,7 @@ private:
     static void CountDevices(CControlRequest &Request, WDFQUEUE Queue);
     static void UpdateRegistryParameters(CControlRequest &Request, WDFQUEUE Queue);
     static void EnumerateDevices(CControlRequest &Request, WDFQUEUE Queue);
+    static void AddRedirect(CControlRequest &Request, WDFQUEUE Queue);
     static void GetConfigurationDescriptor(CControlRequest &Request, WDFQUEUE Queue);
 
     typedef NTSTATUS(CUsbDkControlDevice::*USBDevControlMethod)(const USB_DK_DEVICE_ID&);
@@ -88,6 +90,8 @@ private:
     static void DoUSBDeviceOp(CControlRequest &Request,
                               WDFQUEUE Queue,
                               USBDevControlMethodWithOutput<TInputObj, TOutputObj> Method);
+
+    static bool FetchBuffersForAddRedirectRequest(CControlRequest &WdfRequest, PUSB_DK_DEVICE_ID &DeviceId, PULONG64 &RedirectorDevice);
 
     CUsbDkControlDeviceQueue(const CUsbDkControlDeviceQueue&) = delete;
     CUsbDkControlDeviceQueue& operator= (const CUsbDkControlDeviceQueue&) = delete;
@@ -184,7 +188,7 @@ public:
 
     bool WaitForDetachment();
 
-    NTSTATUS CreateRedirectorHandle(PHANDLE ObjectHandle);
+    NTSTATUS CreateRedirectorHandle(HANDLE RequestorProcess, PHANDLE ObjectHandle);
 
 protected:
     virtual void OnLastReferenceGone()
@@ -242,7 +246,7 @@ public:
 
     bool EnumerateDevices(USB_DK_DEVICE_INFO *outBuff, size_t numberAllocatedDevices, size_t &numberExistingDevices);
     NTSTATUS ResetUsbDevice(const USB_DK_DEVICE_ID &DeviceId);
-    NTSTATUS AddRedirect(const USB_DK_DEVICE_ID &DeviceId, PHANDLE ObjectHandle);
+    NTSTATUS AddRedirect(const USB_DK_DEVICE_ID &DeviceId, HANDLE RequestorProcess, PHANDLE ObjectHandle);
 
     NTSTATUS AddHideRule(const USB_DK_HIDE_RULE &UsbDkRule)
     { return AddHideRuleToSet(UsbDkRule, m_HideRules); }
@@ -324,7 +328,6 @@ private:
                                                  size_t Length);
 
     static void IoInCallerContext(WDFDEVICE Device, WDFREQUEST Request);
-    static bool FetchBuffersForAddRedirectRequest(CWdfRequest &WdfRequest, PUSB_DK_DEVICE_ID &DeviceId, PULONG64 &RedirectorDevice);
 
     friend class CUsbDkControlDeviceInit;
 };

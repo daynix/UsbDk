@@ -77,12 +77,6 @@ public:
         return status;
     }
 
-    NTSTATUS FetchUnsafeInputBuffer(PVOID &Ptr, size_t &Length) const
-    { return WdfRequestRetrieveUnsafeUserInputBuffer(m_Request, 0, &Ptr, &Length); }
-
-    NTSTATUS FetchUnsafeOutputBuffer(PVOID &Ptr, size_t &Length) const
-    { return WdfRequestRetrieveUnsafeUserOutputBuffer(m_Request, 0, &Ptr, &Length); }
-
     NTSTATUS LockUserBufferForRead(PVOID Ptr, size_t Length, WDFMEMORY &Buffer) const
     { return WdfRequestProbeAndLockUserBufferForRead(m_Request, Ptr, Length, &Buffer); }
 

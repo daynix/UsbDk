@@ -551,7 +551,7 @@ void CUsbDkRedirectorStrategy::WritePipe(WDFREQUEST Request)
 
                                         if (!NT_SUCCESS(status))
                                         {
-                                            TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Write failed: %!STATUS! UsbdStatus 0x%x\n",
+                                            TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! WritePipeAsync completion: Write failed: %!STATUS! UsbdStatus 0x%x\n",
                                                 status, usbCompletionParams->UsbdStatus);
                                         }
 
@@ -611,7 +611,7 @@ void CUsbDkRedirectorStrategy::ReadPipe(WDFREQUEST Request)
 
                                         if (!NT_SUCCESS(status))
                                         {
-                                            TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Read failed: %!STATUS! UsbdStatus 0x%x\n",
+                                            TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! ReadPipeAsync completion: Read failed: %!STATUS! UsbdStatus 0x%x\n",
                                                 status, usbCompletionParams->UsbdStatus);
                                         }
 

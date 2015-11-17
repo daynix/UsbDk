@@ -31,8 +31,17 @@ class CPreAllocatedWdfMemoryBufferT
 public:
     CPreAllocatedWdfMemoryBufferT(WDFMEMORY MemObj)
         : m_MemObj(MemObj)
-    { m_Ptr = reinterpret_cast<T*>(WdfMemoryGetBuffer(MemObj, &m_Size)); }
-
+    {
+        if (MemObj != WDF_NO_HANDLE)
+        {
+            m_Ptr = reinterpret_cast<T*>(WdfMemoryGetBuffer(MemObj, &m_Size));
+        }
+        else
+        {
+            m_Ptr = nullptr;
+            m_Size = 0;
+        }
+    }
     operator T* () const { return m_Ptr; }
     T *operator ->() { return m_Ptr; }
     T* Ptr() const { return m_Ptr; }

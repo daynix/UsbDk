@@ -189,6 +189,8 @@ NTSTATUS CUsbDkRedirectorStrategy::PNPPreProcess(PIRP Irp)
 
 typedef struct tag_USBDK_REDIRECTOR_REQUEST_CONTEXT
 {
+    bool PreprocessingDone;
+
     WDFMEMORY LockedBuffer;
     ULONG64 EndpointAddress;
     USB_DK_TRANSFER_TYPE TransferType;
@@ -322,37 +324,30 @@ NTSTATUS CUsbDkRedirectorStrategy::IoInCallerContextRWControlTransfer(CRedirecto
     }
 
     size_t bufferLength = static_cast<size_t>(TransferRequest.bufferLength) - sizeof(WDF_USB_CONTROL_SETUP_PACKET);
-    if (bufferLength > 0)
+
+    if (context->SetupPacket.Packet.bm.Request.Dir == BMREQUEST_HOST_TO_DEVICE) // write
     {
-        if (context->SetupPacket.Packet.bm.Request.Dir == BMREQUEST_HOST_TO_DEVICE) // write
-        {
 #pragma warning(push)
 #pragma warning(disable:4244) //Unsafe conversions on 32 bit
-            status = WdfRequest.LockUserBufferForRead(static_cast<PVOID>(static_cast<PWDF_USB_CONTROL_SETUP_PACKET>(TransferRequest.buffer) + 1),
-                                                      bufferLength, context->LockedBuffer);
+        status = WdfRequest.LockUserBufferForRead(static_cast<PVOID>(static_cast<PWDF_USB_CONTROL_SETUP_PACKET>(TransferRequest.buffer) + 1),
+                                                    bufferLength, context->LockedBuffer);
 #pragma warning(pop)
-            if (!NT_SUCCESS(status))
-            {
-                TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! LockUserBufferForRead failed %!STATUS!", status);
-            }
-        }
-        else // read
+        if (!NT_SUCCESS(status))
         {
-#pragma warning(push)
-#pragma warning(disable:4244) //Unsafe conversions on 32 bit
-            status = WdfRequest.LockUserBufferForWrite(static_cast<PVOID>(static_cast<PWDF_USB_CONTROL_SETUP_PACKET>(TransferRequest.buffer) + 1),
-                                                       bufferLength, context->LockedBuffer);
-#pragma warning(pop)
-            if (!NT_SUCCESS(status))
-            {
-                TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! LockUserBufferForWrite failed %!STATUS!", status);
-            }
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! LockUserBufferForRead failed %!STATUS!", status);
         }
     }
-    else
+    else // read
     {
-        context->LockedBuffer = WDF_NO_HANDLE;
-        status = STATUS_SUCCESS;
+#pragma warning(push)
+#pragma warning(disable:4244) //Unsafe conversions on 32 bit
+        status = WdfRequest.LockUserBufferForWrite(static_cast<PVOID>(static_cast<PWDF_USB_CONTROL_SETUP_PACKET>(TransferRequest.buffer) + 1),
+                                                    bufferLength, context->LockedBuffer);
+#pragma warning(pop)
+        if (!NT_SUCCESS(status))
+        {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! LockUserBufferForWrite failed %!STATUS!", status);
+        }
     }
 
     return status;
@@ -390,6 +385,8 @@ void CUsbDkRedirectorStrategy::IoInCallerContext(WDFDEVICE Device, WDFREQUEST Re
             break;
         }
     }
+
+    WdfRequest.Context()->PreprocessingDone = true;
 
     if (NT_SUCCESS(status))
     {
@@ -526,6 +523,14 @@ void CUsbDkRedirectorStrategy::WritePipe(WDFREQUEST Request)
     CRedirectorRequest WdfRequest(Request);
     PUSBDK_REDIRECTOR_REQUEST_CONTEXT Context = WdfRequest.Context();
 
+    if (!Context->PreprocessingDone)
+    {
+        //May happen if EvtioInCallerContext wasn't called due to
+        //lack of memory of other resources
+        WdfRequest.SetStatus(STATUS_INSUFFICIENT_RESOURCES);
+        return;
+    }
+
     switch (Context->TransferType)
     {
     case ControlTransferType:
@@ -533,7 +538,6 @@ void CUsbDkRedirectorStrategy::WritePipe(WDFREQUEST Request)
         break;
     case BulkTransferType:
     case InterruptTransferType:
-        if (Context->LockedBuffer != WDF_NO_HANDLE)
         {
             m_Target.WritePipeAsync(WdfRequest.Detach(), Context->EndpointAddress, Context->LockedBuffer,
                                     [](WDFREQUEST Request, WDFIOTARGET, PWDF_REQUEST_COMPLETION_PARAMS Params, WDFCONTEXT)
@@ -555,13 +559,8 @@ void CUsbDkRedirectorStrategy::WritePipe(WDFREQUEST Request)
                                         WdfRequest.SetStatus(status);
                                     });
         }
-        else
-        {
-            WdfRequest.SetStatus(STATUS_INVALID_PARAMETER);
-        }
         break;
     case IsochronousTransferType:
-        if (Context->LockedBuffer != WDF_NO_HANDLE)
         {
             CPreAllocatedWdfMemoryBufferT<ULONG64> PacketSizesArray(Context->LockedIsochronousPacketsArray);
 
@@ -571,10 +570,6 @@ void CUsbDkRedirectorStrategy::WritePipe(WDFREQUEST Request)
                                                PacketSizesArray,
                                                PacketSizesArray.ArraySize(),
                                                IsoRWCompletion);
-        }
-        else
-        {
-            WdfRequest.SetStatus(STATUS_INVALID_PARAMETER);
         }
         break;
     default:
@@ -587,6 +582,15 @@ void CUsbDkRedirectorStrategy::ReadPipe(WDFREQUEST Request)
 {
     CRedirectorRequest WdfRequest(Request);
     PUSBDK_REDIRECTOR_REQUEST_CONTEXT Context = WdfRequest.Context();
+
+    if (!Context->PreprocessingDone)
+    {
+        //May happen if EvtioInCallerContext wasn't called due to
+        //lack of memory of other resources
+        WdfRequest.SetStatus(STATUS_INSUFFICIENT_RESOURCES);
+        return;
+    }
+
     switch (Context->TransferType)
     {
     case ControlTransferType:
@@ -594,7 +598,6 @@ void CUsbDkRedirectorStrategy::ReadPipe(WDFREQUEST Request)
         break;
     case BulkTransferType:
     case InterruptTransferType:
-        if (Context->LockedBuffer != WDF_NO_HANDLE)
         {
             m_Target.ReadPipeAsync(WdfRequest.Detach(), Context->EndpointAddress, Context->LockedBuffer,
                                    [](WDFREQUEST Request, WDFIOTARGET, PWDF_REQUEST_COMPLETION_PARAMS Params, WDFCONTEXT)
@@ -616,13 +619,8 @@ void CUsbDkRedirectorStrategy::ReadPipe(WDFREQUEST Request)
                                         WdfRequest.SetStatus(status);
                                     });
         }
-        else
-        {
-            WdfRequest.SetStatus(STATUS_INVALID_PARAMETER);
-        }
         break;
     case IsochronousTransferType:
-        if (Context->LockedBuffer != WDF_NO_HANDLE)
         {
             CPreAllocatedWdfMemoryBufferT<ULONG64> PacketSizesArray(Context->LockedIsochronousPacketsArray);
 
@@ -632,10 +630,6 @@ void CUsbDkRedirectorStrategy::ReadPipe(WDFREQUEST Request)
                                               PacketSizesArray,
                                               PacketSizesArray.ArraySize(),
                                               IsoRWCompletion);
-        }
-        else
-        {
-            WdfRequest.SetStatus(STATUS_INVALID_PARAMETER);
         }
         break;
     default:

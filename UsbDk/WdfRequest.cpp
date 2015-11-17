@@ -81,6 +81,12 @@ NTSTATUS CWdfRequest::SendWithCompletion(WDFIOTARGET Target, PFN_WDF_REQUEST_COM
 
 NTSTATUS CWdfRequest::LockUserBufferForRead(PVOID Ptr, size_t Length, WDFMEMORY &Buffer) const
 {
+    if (Length == 0)
+    {
+        Buffer = WDF_NO_HANDLE;
+        return STATUS_SUCCESS;
+    }
+
     auto status = WdfRequestProbeAndLockUserBufferForRead(m_Request, Ptr, Length, &Buffer);
 
     if (!NT_SUCCESS(status))
@@ -95,6 +101,12 @@ NTSTATUS CWdfRequest::LockUserBufferForRead(PVOID Ptr, size_t Length, WDFMEMORY 
 
 NTSTATUS CWdfRequest::LockUserBufferForWrite(PVOID Ptr, size_t Length, WDFMEMORY &Buffer) const
 {
+    if (Length == 0)
+    {
+        Buffer = WDF_NO_HANDLE;
+        return STATUS_SUCCESS;
+    }
+
     auto status = WdfRequestProbeAndLockUserBufferForWrite(m_Request, Ptr, Length, &Buffer);
 
     if (!NT_SUCCESS(status))

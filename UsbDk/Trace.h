@@ -47,6 +47,7 @@
         WPP_DEFINE_BIT(TRACE_FILTERSTRATEGY)                           \
         WPP_DEFINE_BIT(TRACE_URB)                                      \
         WPP_DEFINE_BIT(TRACE_REGISTRY)                                 \
+        WPP_DEFINE_BIT(TRACE_WDFREQUEST)                               \
         )
 
 #define WPP_FLAG_LEVEL_LOGGER(flag, level)                                  \

@@ -21,6 +21,8 @@
 *
 **********************************************************************/
 #include "stdafx.h"
+#include "Trace.h"
+#include "WdfRequest.tmh"
 #include "WdfRequest.h"
 
 NTSTATUS CWdfRequest::SendAndForget(WDFIOTARGET Target)
@@ -72,6 +74,34 @@ NTSTATUS CWdfRequest::SendWithCompletion(WDFIOTARGET Target, PFN_WDF_REQUEST_COM
     {
         status = WdfRequestGetStatus(m_Request);
         SetStatus(status);
+    }
+
+    return status;
+}
+
+NTSTATUS CWdfRequest::LockUserBufferForRead(PVOID Ptr, size_t Length, WDFMEMORY &Buffer) const
+{
+    auto status = WdfRequestProbeAndLockUserBufferForRead(m_Request, Ptr, Length, &Buffer);
+
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_WDFREQUEST,
+                    "%!FUNC! Failed for address %p, %llu bytes. Error %!STATUS!\n",
+                    Ptr, Length, status);
+    }
+
+    return status;
+}
+
+NTSTATUS CWdfRequest::LockUserBufferForWrite(PVOID Ptr, size_t Length, WDFMEMORY &Buffer) const
+{
+    auto status = WdfRequestProbeAndLockUserBufferForWrite(m_Request, Ptr, Length, &Buffer);
+
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_WDFREQUEST,
+                    "%!FUNC! Failed for address %p, %llu bytes. Error %!STATUS!\n",
+                    Ptr, Length, status);
     }
 
     return status;

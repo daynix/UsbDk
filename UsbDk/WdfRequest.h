@@ -77,11 +77,8 @@ public:
         return status;
     }
 
-    NTSTATUS LockUserBufferForRead(PVOID Ptr, size_t Length, WDFMEMORY &Buffer) const
-    { return WdfRequestProbeAndLockUserBufferForRead(m_Request, Ptr, Length, &Buffer); }
-
-    NTSTATUS LockUserBufferForWrite(PVOID Ptr, size_t Length, WDFMEMORY &Buffer) const
-    { return WdfRequestProbeAndLockUserBufferForWrite(m_Request, Ptr, Length, &Buffer); }
+    NTSTATUS LockUserBufferForRead(PVOID Ptr, size_t Length, WDFMEMORY &Buffer) const;
+    NTSTATUS LockUserBufferForWrite(PVOID Ptr, size_t Length, WDFMEMORY &Buffer) const;
 
     void SetStatus(NTSTATUS status)
     { m_Status = status; }

@@ -53,22 +53,22 @@ typedef struct tag_USB_DK_CONFIG_DESCRIPTOR_REQUEST
 
 typedef struct tag_USB_DK_ISO_TRANSFER_RESULT
 {
-    ULONG64 actualLength;
-    ULONG64 transferResult;
+    ULONG64 ActualLength;
+    ULONG64 TransferResult;
 } USB_DK_ISO_TRANSFER_RESULT, *PUSB_DK_ISO_TRANSFER_RESULT;
 
 typedef struct tag_USB_DK_TRANSFER_RESULT
 {
-    ULONG64 bytesTransferred;
-    PVOID64 isochronousResultsArray; // array of USB_DK_ISO_TRANSFER_RESULT
+    ULONG64 BytesTransferred;
+    PVOID64 IsochronousResultsArray; // array of USB_DK_ISO_TRANSFER_RESULT
 } USB_DK_TRANSFER_RESULT, *PUSB_DK_TRANSFER_RESULT;
 
 typedef struct tag_USB_DK_TRANSFER_REQUEST
 {
-    ULONG64 endpointAddress;
-    PVOID64 buffer;
-    ULONG64 bufferLength;
-    ULONG64 transferType;
+    ULONG64 EndpointAddress;
+    PVOID64 Buffer;
+    ULONG64 BufferLength;
+    ULONG64 TransferType;
     ULONG64 IsochronousPacketsArraySize;
     PVOID64 IsochronousPacketsArray;
 

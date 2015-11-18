@@ -51,7 +51,7 @@ typedef struct tag_USB_DK_CONFIG_DESCRIPTOR_REQUEST
     ULONG64 Index;
 } USB_DK_CONFIG_DESCRIPTOR_REQUEST, *PUSB_DK_CONFIG_DESCRIPTOR_REQUEST;
 
-typedef struct tag_USB_DK_ISO_TARNSFER_RESULT
+typedef struct tag_USB_DK_ISO_TRANSFER_RESULT
 {
     ULONG64 actualLength;
     ULONG64 transferResult;

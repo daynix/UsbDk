@@ -193,6 +193,8 @@ void CWdfUsbPipe::SubmitIsochronousTransfer(CWdfRequest &Request,
 
 NTSTATUS CWdfUsbPipe::Abort(WDFREQUEST Request)
 {
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_USBTARGET, "%!FUNC! for pipe %d", EndpointAddress());
+
     auto status = WdfUsbTargetPipeAbortSynchronously(m_Pipe, Request, nullptr);
 
     if (!NT_SUCCESS(status))
@@ -205,6 +207,8 @@ NTSTATUS CWdfUsbPipe::Abort(WDFREQUEST Request)
 
 NTSTATUS CWdfUsbPipe::Reset(WDFREQUEST Request)
 {
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_USBTARGET, "%!FUNC! for pipe %d", EndpointAddress());
+
     auto status = WdfUsbTargetPipeResetSynchronously(m_Pipe, Request, nullptr);
 
     if (!NT_SUCCESS(status))

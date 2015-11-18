@@ -91,6 +91,11 @@ private:
     void WritePipe(WDFREQUEST Request);
     void ReadPipe(WDFREQUEST Request);
 
+    static void CompleteTransferRequest(WDFREQUEST WdfRequest,
+                                        NTSTATUS Status,
+                                        USBD_STATUS UsbdStatus,
+                                        size_t BytesTransferred);
+
     template <typename TLockerFunc>
     static NTSTATUS IoInCallerContextRW(CRedirectorRequest &WdfRequest,
                                         TLockerFunc LockerFunc);

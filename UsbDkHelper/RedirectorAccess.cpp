@@ -33,7 +33,7 @@ TransferResult UsbDkRedirectorAccess::TransactPipe(USB_DK_TRANSFER_REQUEST &Requ
 
     auto res = Ioctl(OpCode, false,
                      &Request, sizeof(Request),
-                     &Request.Result.BytesTransferred, sizeof(Request.Result.BytesTransferred),
+                     &Request.Result.GenResult, sizeof(Request.Result.GenResult),
                      &BytesTransferredDummy, Overlapped);
 
     return res;

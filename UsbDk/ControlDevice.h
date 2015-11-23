@@ -190,11 +190,18 @@ public:
 
     NTSTATUS CreateRedirectorHandle(HANDLE RequestorProcess, PHANDLE ObjectHandle);
 
-protected:
+private:
+    ~CUsbDkRedirection()
+    {
+        if (m_RedirectorDevice != nullptr)
+        {
+            m_RedirectorDevice->Release();
+        }
+    }
+
     virtual void OnLastReferenceGone()
     { delete this; }
 
-private:
     CString m_DeviceID;
     CString m_InstanceID;
 

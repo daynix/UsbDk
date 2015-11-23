@@ -101,6 +101,12 @@ private:
     CWdmRefCountingObject& operator= (const CWdmRefCountingObject&) = delete;
 };
 
+class CRefCountingDeleter
+{
+public:
+    static void destroy(CWdmRefCountingObject *Obj){ if (Obj != nullptr) { Obj->Release(); } }
+};
+
 class CLockedAccess
 {
 public:

@@ -159,18 +159,13 @@ private:
     { return !Children().ForEachIf([PDO](CUsbDkChildDevice *Child){ return Child->Match(PDO); }, ConstFalse); }
 };
 
-class CUsbDkFilterDevice : public CWdfDevice, public CAllocatable<NonPagedPool, 'DFHR'>
+class CUsbDkFilterDevice : public CWdfDevice,
+                           public CWdmRefCountingObject,
+                           public CAllocatable<NonPagedPool, 'DFHR'>
 {
 public:
     CUsbDkFilterDevice()
     {}
-    ~CUsbDkFilterDevice()
-    {
-        if (m_Strategy)
-        {
-            m_Strategy->Delete();
-        }
-    }
 
     NTSTATUS Create(PWDFDEVICE_INIT DevInit);
     NTSTATUS AttachToStack(WDFDRIVER Driver);
@@ -192,6 +187,17 @@ public:
     { return m_InstanceNumber; }
 
 private:
+    ~CUsbDkFilterDevice()
+    {
+        if (m_Strategy)
+        {
+            m_Strategy->Delete();
+        }
+    }
+
+    virtual void OnLastReferenceGone() override
+    { delete this; };
+
     NTSTATUS DefineStrategy();
     static void ContextCleanup(_In_ WDFOBJECT DeviceObject);
 

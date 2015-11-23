@@ -121,7 +121,7 @@ UsbDkEvtDeviceAdd(
     auto status = FilterDevice->Create(DeviceInit);
     if (!NT_SUCCESS(status))
     {
-        delete FilterDevice;
+        FilterDevice->Release();
         return status;
     }
 

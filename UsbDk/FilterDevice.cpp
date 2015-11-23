@@ -522,7 +522,7 @@ void CUsbDkFilterDevice::ContextCleanup(_In_ WDFOBJECT DeviceObject)
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Entry");
 
     auto deviceContext = UsbDkFilterGetContext(DeviceObject);
-    delete deviceContext->UsbDkFilter;
+    deviceContext->UsbDkFilter->Release();
 }
 
 bool CUsbDkFilterDevice::CStrategist::SelectStrategy(PDEVICE_OBJECT DevObj)

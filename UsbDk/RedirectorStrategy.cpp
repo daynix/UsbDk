@@ -85,11 +85,6 @@ NTSTATUS CUsbDkRedirectorStrategy::Create(CUsbDkFilterDevice *Owner)
     return status;
 }
 
-void CUsbDkRedirectorStrategy::Delete()
-{
-    CUsbDkFilterStrategy::Delete();
-}
-
 void CUsbDkRedirectorStrategy::PatchDeviceID(PIRP Irp)
 {
     static const WCHAR RedirectorDeviceId[] = L"USB\\Vid_2B23&Pid_CAFE&Rev_0001";

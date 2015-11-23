@@ -63,7 +63,6 @@ class CUsbDkRedirectorStrategy : public CUsbDkFilterStrategy
 public:
     virtual NTSTATUS Create(CUsbDkFilterDevice *Owner) override;
     virtual NTSTATUS MakeAvailable() override;
-    virtual void Delete() override;
     virtual NTSTATUS PNPPreProcess(PIRP Irp) override;
     virtual void IoInCallerContext(WDFDEVICE Device, WDFREQUEST Request) override;
 

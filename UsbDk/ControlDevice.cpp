@@ -639,7 +639,7 @@ NTSTATUS CUsbDkControlDevice::GetConfigurationDescriptor(const USB_DK_CONFIG_DES
 NTSTATUS CUsbDkControlDevice::AddRedirect(const USB_DK_DEVICE_ID &DeviceId, HANDLE RequestorProcess, PHANDLE RedirectorDevice)
 {
     CUsbDkRedirection *Redirection;
-    auto addRes = AddDeviceToSet(DeviceId, &Redirection);
+    auto addRes = AddRedirectionToSet(DeviceId, &Redirection);
     if (!NT_SUCCESS(addRes))
     {
         return addRes;
@@ -891,7 +891,7 @@ NTSTATUS CUsbDkControlDevice::ReloadPersistentHideRules()
 }
 
 
-NTSTATUS CUsbDkControlDevice::AddDeviceToSet(const USB_DK_DEVICE_ID &DeviceId, CUsbDkRedirection **NewRedirection)
+NTSTATUS CUsbDkControlDevice::AddRedirectionToSet(const USB_DK_DEVICE_ID &DeviceId, CUsbDkRedirection **NewRedirection)
 {
     CObjHolder<CUsbDkRedirection> newRedir(new CUsbDkRedirection());
 

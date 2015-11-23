@@ -319,7 +319,7 @@ private:
     bool UsbDeviceExists(const USB_DK_DEVICE_ID &ID);
 
     static void ContextCleanup(_In_ WDFOBJECT DeviceObject);
-    NTSTATUS AddDeviceToSet(const USB_DK_DEVICE_ID &DeviceId, CUsbDkRedirection **NewRedirection);
+    NTSTATUS AddRedirectionToSet(const USB_DK_DEVICE_ID &DeviceId, CUsbDkRedirection **NewRedirection);
     void AddRedirectRollBack(const USB_DK_DEVICE_ID &DeviceId, bool WithReset);
 
     NTSTATUS GetUsbDeviceConfigurationDescriptor(const USB_DK_DEVICE_ID &DeviceID,

@@ -24,6 +24,7 @@
 #pragma once
 
 #include "Alloc.h"
+#include "UsbDkUtil.h"
 
 class CPreAllocatedDeviceInit : public CAllocatable<PagedPool, 'IDHR'>
 {
@@ -151,6 +152,8 @@ protected:
 
 private:
     NTSTATUS AddQueue(WDF_IO_QUEUE_CONFIG &Config, WDF_OBJECT_ATTRIBUTES &Attributes, WDFQUEUE &Queue);
+    NTSTATUS CacheDeviceName();
+    CString m_CachedName;
 
     friend class CWdfQueue;
 };

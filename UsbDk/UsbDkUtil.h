@@ -231,6 +231,9 @@ public:
         return ForEachPrepareIf(Predicate, [](PLIST_ENTRY){}, Functor);
     }
 
+    CWdmList(const CWdmList&) = delete;
+    CWdmList& operator= (const CWdmList&) = delete;
+
 private:
     template <typename TPredicate, typename TPrepareFunctor, typename TFunctor>
     bool ForEachPrepareIf(TPredicate Predicate, TPrepareFunctor Prepare, TFunctor Functor)

@@ -268,14 +268,6 @@ NTSTATUS CWdfUsbTarget::Create(WDFDEVICE Device)
     return STATUS_SUCCESS;
 }
 
-CWdfUsbTarget::~CWdfUsbTarget()
-{
-    if (m_UsbDevice != WDF_NO_HANDLE)
-    {
-        WdfObjectDelete(m_UsbDevice);
-    }
-}
-
 void CWdfUsbTarget::DeviceDescriptor(USB_DEVICE_DESCRIPTOR &Descriptor)
 {
     WdfUsbTargetDeviceGetDeviceDescriptor(m_UsbDevice, &Descriptor);

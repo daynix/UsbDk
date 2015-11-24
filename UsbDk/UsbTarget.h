@@ -106,7 +106,6 @@ class CWdfUsbTarget
 {
 public:
     CWdfUsbTarget() {}
-    ~CWdfUsbTarget();
 
     NTSTATUS Create(WDFDEVICE Device);
     void DeviceDescriptor(USB_DEVICE_DESCRIPTOR &Descriptor);

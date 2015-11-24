@@ -219,7 +219,6 @@ NTSTATUS CWdfDevice::CreateUserModeHandle(HANDLE RequestorProcess, PHANDLE Objec
                              FILE_NON_DIRECTORY_FILE | FILE_RANDOM_ACCESS);
     if (!NT_SUCCESS(status))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_WDFDEVICE, "%!FUNC! ZwOpenFile failed. %!STATUS!", status);
         return status;
     }
 

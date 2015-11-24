@@ -352,6 +352,9 @@ public:
         TInternalList TempList;
         SwapLists(TempList);
     }
+
+    CWdmSet(const CWdmSet&) = delete;
+    CWdmSet& operator= (const CWdmSet&) = delete;
 private:
     void SwapLists(TInternalList &OtherList)
     {

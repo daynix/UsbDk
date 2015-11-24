@@ -128,7 +128,7 @@ NTSTATUS CWdfDevice::Create(CPreAllocatedDeviceInit &DeviceInit, WDF_OBJECT_ATTR
     return status;
 }
 
-NTSTATUS CWdfQueue::Create()
+NTSTATUS CWdfQueue::Create(CWdfDevice &Device)
 {
     WDF_IO_QUEUE_CONFIG      QueueConfig;
     WDF_OBJECT_ATTRIBUTES    Attributes;
@@ -139,7 +139,7 @@ NTSTATUS CWdfQueue::Create()
     WDF_OBJECT_ATTRIBUTES_INIT(&Attributes);
     Attributes.ExecutionLevel = WdfExecutionLevelPassive;
 
-    auto status = m_OwnerDevice.AddQueue(QueueConfig, Attributes, m_Queue);
+    auto status = Device.AddQueue(QueueConfig, Attributes, m_Queue);
     if (!NT_SUCCESS(status)) {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_WDFDEVICE, "%!FUNC! failed %!STATUS!", status);
     }
@@ -165,18 +165,6 @@ void CWdfDefaultQueue::InitConfig(WDF_IO_QUEUE_CONFIG &QueueConfig)
 void CWdfSpecificQueue::InitConfig(WDF_IO_QUEUE_CONFIG &QueueConfig)
 {
     WDF_IO_QUEUE_CONFIG_INIT(&QueueConfig, m_DispatchType);
-}
-
-NTSTATUS CWdfSpecificQueue::Create()
-{
-    auto status = CWdfQueue::Create();
-    if (!NT_SUCCESS(status))
-    {
-        return status;
-    }
-
-    status = SetDispatching();
-    return status;
 }
 
 NTSTATUS CWdfDevice::CacheDeviceName()

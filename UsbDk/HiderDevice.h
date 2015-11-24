@@ -28,11 +28,11 @@
 
 class CWdfRequest;
 
-class CUsbDkHiderDeviceQueue : public CWdfDefaultQueue, public CAllocatable<PagedPool, 'QHHR'>
+class CUsbDkHiderDeviceQueue : public CWdfDefaultQueue
 {
 public:
-    CUsbDkHiderDeviceQueue(CWdfDevice &Device, WDF_IO_QUEUE_DISPATCH_TYPE DispatchType)
-        : CWdfDefaultQueue(Device, DispatchType)
+    CUsbDkHiderDeviceQueue(WDF_IO_QUEUE_DISPATCH_TYPE DispatchType)
+        : CWdfDefaultQueue(DispatchType)
     {}
 
 private:
@@ -60,7 +60,7 @@ public:
 
 private:
     static void ContextCleanup(_In_ WDFOBJECT DeviceObject);
-    CObjHolder<CUsbDkHiderDeviceQueue> m_DeviceQueue;
+    CUsbDkHiderDeviceQueue m_DeviceQueue{WdfIoQueueDispatchSequential};
     WDFDRIVER m_Driver = nullptr;
 
     friend class CUsbDkHiderDeviceInit;

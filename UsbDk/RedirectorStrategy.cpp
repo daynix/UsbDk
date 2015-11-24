@@ -57,27 +57,13 @@ NTSTATUS CUsbDkRedirectorStrategy::Create(CUsbDkFilterDevice *Owner)
         return status;
     }
 
-    m_IncomingDataQueue = new CUsbDkRedirectorQueueData(*m_Owner);
-    if (!m_IncomingDataQueue)
-    {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! RW Queue allocation failed");
-        return STATUS_INSUFFICIENT_RESOURCES;
-    }
-
-    status = m_IncomingDataQueue->Create();
+    status = m_IncomingDataQueue.Create(*m_Owner);
     if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! RW Queue creation failed");
     }
 
-    m_IncomingConfigQueue = new CUsbDkRedirectorQueueConfig(*m_Owner);
-    if (!m_IncomingConfigQueue)
-    {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! IOCTL Queue allocation failed");
-        return STATUS_INSUFFICIENT_RESOURCES;
-    }
-
-    status = m_IncomingConfigQueue->Create();
+    status = m_IncomingConfigQueue.Create(*m_Owner);
     if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! IOCTL Queue creation failed");
@@ -447,7 +433,7 @@ void CUsbDkRedirectorStrategy::IoDeviceControl(WDFREQUEST Request,
     {
         default:
         {
-            CWdfRequest(Request).ForwardToIoQueue(*m_IncomingConfigQueue);
+            CWdfRequest(Request).ForwardToIoQueue(m_IncomingConfigQueue);
             break;
         }
         case IOCTL_USBDK_DEVICE_READ_PIPE:
@@ -493,14 +479,12 @@ void CUsbDkRedirectorStrategy::IoDeviceControlConfig(WDFREQUEST Request,
         }
         case IOCTL_USBDK_DEVICE_SET_ALTSETTING:
         {
-            ASSERT(m_IncomingDataQueue);
-
-            m_IncomingDataQueue->StopSync();
+            m_IncomingDataQueue.StopSync();
             CWdfRequest WdfRequest(Request);
             UsbDkHandleRequestWithInput<USBDK_ALTSETTINGS_IDXS>(WdfRequest,
                                                 [this, Request](USBDK_ALTSETTINGS_IDXS *altSetting, size_t)
                                                 {return m_Target.SetInterfaceAltSetting(altSetting->InterfaceIdx, altSetting->AltSettingIdx);});
-            m_IncomingDataQueue->Start();
+            m_IncomingDataQueue.Start();
             return;
         }
         case IOCTL_USBDK_DEVICE_RESET_DEVICE:

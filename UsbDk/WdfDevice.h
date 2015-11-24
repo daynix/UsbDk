@@ -26,12 +26,12 @@
 #include "Alloc.h"
 #include "UsbDkUtil.h"
 
-class CPreAllocatedDeviceInit : public CAllocatable<PagedPool, 'IDHR'>
+class CPreAllocatedDeviceInit
 {
 public:
     CPreAllocatedDeviceInit()
     {}
-    virtual ~CPreAllocatedDeviceInit()
+    ~CPreAllocatedDeviceInit()
     {}
 
     virtual void Attach(PWDFDEVICE_INIT DeviceInit);
@@ -100,7 +100,7 @@ class CDeviceInit : public CPreAllocatedDeviceInit
 protected:
     CDeviceInit()
     {}
-    virtual ~CDeviceInit();
+    ~CDeviceInit();
 
     virtual void Attach(PWDFDEVICE_INIT DeviceInit) override;
     virtual PWDFDEVICE_INIT Detach() override;
@@ -168,12 +168,11 @@ public:
 class CWdfQueue
 {
 public:
-    CWdfQueue(CWdfDevice &Device, WDF_IO_QUEUE_DISPATCH_TYPE DispatchType)
-        : m_OwnerDevice(Device)
-        , m_DispatchType(DispatchType)
+    CWdfQueue(WDF_IO_QUEUE_DISPATCH_TYPE DispatchType)
+        : m_DispatchType(DispatchType)
     {}
 
-    virtual NTSTATUS Create();
+    virtual NTSTATUS Create(CWdfDevice &Device);
     void StopSync()
     {WdfIoQueueDrain(m_Queue, nullptr, nullptr); }
     void Start()
@@ -187,7 +186,6 @@ protected:
     virtual void SetCallbacks(WDF_IO_QUEUE_CONFIG &QueueConfig) = 0;
 
     WDFQUEUE m_Queue;
-    CWdfDevice &m_OwnerDevice;
     WDF_IO_QUEUE_DISPATCH_TYPE m_DispatchType;
 
     CWdfQueue(const CWdfQueue&) = delete;
@@ -197,8 +195,8 @@ protected:
 class CWdfDefaultQueue : public CWdfQueue
 {
 public:
-    CWdfDefaultQueue(CWdfDevice &Device, WDF_IO_QUEUE_DISPATCH_TYPE DispatchType)
-        : CWdfQueue(Device, DispatchType)
+    CWdfDefaultQueue(WDF_IO_QUEUE_DISPATCH_TYPE DispatchType)
+        : CWdfQueue(DispatchType)
     {}
 
 private:
@@ -211,15 +209,9 @@ private:
 class CWdfSpecificQueue : public CWdfQueue
 {
 public:
-    CWdfSpecificQueue(CWdfDevice &Device, WDF_IO_QUEUE_DISPATCH_TYPE DispatchType)
-        : CWdfQueue(Device, DispatchType)
+    CWdfSpecificQueue(WDF_IO_QUEUE_DISPATCH_TYPE DispatchType)
+        : CWdfQueue(DispatchType)
     {}
-
-    virtual NTSTATUS Create() override;
-
-protected:
-    virtual NTSTATUS SetDispatching()
-    { return STATUS_SUCCESS; }
 
 private:
     virtual void InitConfig(WDF_IO_QUEUE_CONFIG &QueueConfig) override;

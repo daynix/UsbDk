@@ -450,14 +450,7 @@ NTSTATUS CUsbDkControlDevice::Register()
         return status;
     }
 
-    m_DeviceQueue = new CUsbDkControlDeviceQueue(*this, WdfIoQueueDispatchSequential);
-    if (m_DeviceQueue == nullptr)
-    {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! Device queue allocation failed");
-        return STATUS_INSUFFICIENT_RESOURCES;
-    }
-
-    status = m_DeviceQueue->Create();
+    status = m_DeviceQueue.Create(*this);
     if (NT_SUCCESS(status))
     {
         FinishInitializing();

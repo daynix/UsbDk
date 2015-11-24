@@ -30,11 +30,11 @@
 
 class CRegText;
 
-class CUsbDkRedirectorQueueData : public CWdfDefaultQueue, public CAllocatable<PagedPool, 'PQRH'>
+class CUsbDkRedirectorQueueData : public CWdfDefaultQueue
 {
 public:
-    CUsbDkRedirectorQueueData(CWdfDevice &Device)
-        : CWdfDefaultQueue(Device, WdfIoQueueDispatchParallel)
+    CUsbDkRedirectorQueueData()
+        : CWdfDefaultQueue(WdfIoQueueDispatchParallel)
     {}
 
 private:
@@ -43,11 +43,11 @@ private:
     CUsbDkRedirectorQueueData& operator= (const CUsbDkRedirectorQueueData&) = delete;
 };
 
-class CUsbDkRedirectorQueueConfig : public CWdfSpecificQueue, public CAllocatable<PagedPool, 'SQRH'>
+class CUsbDkRedirectorQueueConfig : public CWdfSpecificQueue
 {
 public:
-    CUsbDkRedirectorQueueConfig(CWdfDevice &Device)
-        : CWdfSpecificQueue(Device, WdfIoQueueDispatchSequential)
+    CUsbDkRedirectorQueueConfig()
+        : CWdfSpecificQueue(WdfIoQueueDispatchSequential)
     {}
 
 private:
@@ -109,8 +109,8 @@ private:
 
     CWdfUsbTarget m_Target;
 
-    CObjHolder<CUsbDkRedirectorQueueData> m_IncomingDataQueue;
-    CObjHolder<CUsbDkRedirectorQueueConfig> m_IncomingConfigQueue;
+    CUsbDkRedirectorQueueData m_IncomingDataQueue;
+    CUsbDkRedirectorQueueConfig m_IncomingConfigQueue;
 
     CObjHolder<CRegText> m_DeviceID;
     CObjHolder<CRegText> m_InstanceID;

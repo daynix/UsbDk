@@ -58,11 +58,11 @@ public:
     }
 };
 
-class CUsbDkControlDeviceQueue : public CWdfDefaultQueue, public CAllocatable<PagedPool, 'QCHR'>
+class CUsbDkControlDeviceQueue : public CWdfDefaultQueue
 {
 public:
-    CUsbDkControlDeviceQueue(CWdfDevice &Device, WDF_IO_QUEUE_DISPATCH_TYPE DispatchType)
-        : CWdfDefaultQueue(Device, DispatchType)
+    CUsbDkControlDeviceQueue(WDF_IO_QUEUE_DISPATCH_TYPE DispatchType)
+        : CWdfDefaultQueue(DispatchType)
     {}
 
 private:
@@ -299,7 +299,7 @@ public:
 private:
     NTSTATUS ReloadPersistentHideRules();
 
-    CObjHolder<CUsbDkControlDeviceQueue> m_DeviceQueue;
+    CUsbDkControlDeviceQueue m_DeviceQueue{WdfIoQueueDispatchSequential};
     static CRefCountingHolder<CUsbDkControlDevice> *m_UsbDkControlDevice;
 
     CObjHolder<CUsbDkHiderDevice, CWdfDeviceDeleter<CUsbDkHiderDevice> > m_HiderDevice;

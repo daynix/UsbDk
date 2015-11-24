@@ -29,14 +29,14 @@
 #include "Public.h"
 
 
-class CWdmDeviceAccess : public CAllocatable<PagedPool, 'ADHR'>
+class CWdmDeviceAccess
 {
 public:
     CWdmDeviceAccess(PDEVICE_OBJECT WdmDevice)
         : m_DevObj(WdmDevice)
     { ObReferenceObjectWithTag(m_DevObj, 'DMHR'); }
 
-    virtual ~CWdmDeviceAccess()
+    ~CWdmDeviceAccess()
     { ObDereferenceObjectWithTag(m_DevObj, 'DMHR'); }
 
     CWdmDeviceAccess(const CWdmDeviceAccess&) = delete;

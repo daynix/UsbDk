@@ -279,6 +279,9 @@ template <typename TEntryType, typename TAccessStrategy, typename TCountingStrat
 class CWdmSet : private TAccessStrategy, public TCountingStrategy
 {
 public:
+    CWdmSet() {}
+    ~CWdmSet() { Clear(); }
+
     bool Add(TEntryType *NewEntry)
     {
         CLockedContext<TAccessStrategy> LockedContext(*this);
@@ -329,6 +332,7 @@ public:
     template <typename TFunctor>
     bool ForEach(TFunctor Functor)
     {
+        CLockedContext<TAccessStrategy> LockedContext(*this);
         return m_Objects.ForEach(Functor);
     }
 

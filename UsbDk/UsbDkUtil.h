@@ -142,20 +142,20 @@ protected:
     ULONG GetCount() { return 0; }
 };
 
-#define DECLARE_CWDMLIST_ENTRY(type)                                                    \
-    private:                                                                            \
-        PLIST_ENTRY GetListEntry()                                                      \
-        { return &m_ListEntry; }                                                        \
-                                                                                        \
-        static type *GetByListEntry(PLIST_ENTRY entry)                                  \
-        { return static_cast<type*>(CONTAINING_RECORD(entry, type, m_ListEntry)); }     \
-                                                                                        \
-        template<typename type, typename AnyAccess, typename AnyStrategy>               \
-        friend class CWdmList;                                                          \
-                                                                                        \
+#define DECLARE_CWDMLIST_ENTRY(type)                                                            \
+    private:                                                                                    \
+        PLIST_ENTRY GetListEntry()                                                              \
+        { return &m_ListEntry; }                                                                \
+                                                                                                \
+        static type *GetByListEntry(PLIST_ENTRY entry)                                          \
+        { return static_cast<type*>(CONTAINING_RECORD(entry, type, m_ListEntry)); }             \
+                                                                                                \
+        template<typename type, typename AnyAccess, typename AnyStrategy, typename AnyDeleter>  \
+        friend class CWdmList;                                                                  \
+                                                                                                \
         LIST_ENTRY m_ListEntry
 
-template <typename TEntryType, typename TAccessStrategy, typename TCountingStrategy>
+template <typename TEntryType, typename TAccessStrategy, typename TCountingStrategy, typename TDeleter = CScalarDeleter<TEntryType>>
 class CWdmList : private TAccessStrategy, public TCountingStrategy
 {
 public:
@@ -166,7 +166,7 @@ public:
     { Clear(); }
 
     void Clear()
-    { ForEachDetached([](TEntryType* Entry) { delete Entry; return true; }); }
+    { ForEachDetached([](TEntryType* Entry) { TDeleter::destroy(Entry); return true; }); }
 
     bool IsEmpty()
     { return IsListEmpty(&m_List) ? true : false; }
@@ -275,7 +275,7 @@ private:
 static inline bool ConstTrue(...) { return true; }
 static inline bool ConstFalse(...) { return false; }
 
-template <typename TEntryType, typename TAccessStrategy, typename TCountingStrategy>
+template <typename TEntryType, typename TAccessStrategy, typename TCountingStrategy, typename TDeleter = CScalarDeleter<TEntryType>>
 class CWdmSet : private TAccessStrategy, public TCountingStrategy
 {
 public:
@@ -301,7 +301,7 @@ public:
         m_Objects.ForEachDetachedIf([Id](TEntryType *ExistingEntry) { return *ExistingEntry == *Id; },
                                     [this, &Removed](TEntryType *ExistingEntry)
                                     {
-                                            ExistingEntry->Release();
+                                            TDeleter::destroy(ExistingEntry);
                                             CounterDecrement();
                                             Removed = true;
                                             return false;
@@ -354,7 +354,7 @@ private:
     }
 
 
-    CWdmList<TEntryType, CRawAccess, CNonCountingObject> m_Objects;
+    CWdmList<TEntryType, CRawAccess, CNonCountingObject, TDeleter> m_Objects;
 };
 
 class CWdmEvent : public CAllocatable<NonPagedPool, 'VEHR'>

@@ -304,9 +304,9 @@ private:
 
     CObjHolder<CUsbDkHiderDevice, CWdfDeviceDeleter<CUsbDkHiderDevice> > m_HiderDevice;
 
-    CWdmList<CUsbDkFilterDevice, CLockedAccess, CNonCountingObject> m_FilterDevices;
+    CWdmList<CUsbDkFilterDevice, CLockedAccess, CNonCountingObject, CRefCountingDeleter> m_FilterDevices;
 
-    typedef CWdmSet<CUsbDkRedirection, CLockedAccess, CNonCountingObject> RedirectionsSet;
+    typedef CWdmSet<CUsbDkRedirection, CLockedAccess, CNonCountingObject, CRefCountingDeleter> RedirectionsSet;
     RedirectionsSet m_Redirections;
 
     typedef CWdmSet<CUsbDkHideRule, CLockedAccess, CNonCountingObject> HideRulesSet;

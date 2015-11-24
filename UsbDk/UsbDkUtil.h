@@ -295,19 +295,14 @@ public:
     template <typename TEntryId>
     bool Delete(TEntryId *Id)
     {
-        auto Removed = false;
-        CLockedContext<TAccessStrategy> LockedContext(*this);
+        //This implementations avoids calling entry destruction
+        //under object's lock for two reasons:
+        // 1. minimize amount of time the object is locked
+        // 2. do not run entry destruction code on DISPATCH_LEVEL
+        TEntryType *ToBeRemoved = DetachById(Id);
+        TDeleter::destroy(ToBeRemoved);
 
-        m_Objects.ForEachDetachedIf([Id](TEntryType *ExistingEntry) { return *ExistingEntry == *Id; },
-                                    [this, &Removed](TEntryType *ExistingEntry)
-                                    {
-                                            TDeleter::destroy(ExistingEntry);
-                                            CounterDecrement();
-                                            Removed = true;
-                                            return false;
-                                    });
-
-        return Removed;
+        return ToBeRemoved != nullptr;
     }
 
     void Dump()
@@ -337,11 +332,32 @@ public:
         return m_Objects.ForEach(Functor);
     }
 
+private:
+    using TInternalList = CWdmList <TEntryType, CRawAccess, CNonCountingObject, TDeleter>;
+
+public:
     void Clear()
     {
-        m_Objects.Clear();
+        //This implementations avoids calling entry destruction
+        //under object's lock for two reasons:
+        // 1. minimize amount of time the object is locked
+        // 2. do not run entry destruction code on DISPATCH_LEVEL
+        TInternalList TempList;
+        SwapLists(TempList);
     }
 private:
+    void SwapLists(TInternalList &OtherList)
+    {
+        CLockedContext<TAccessStrategy> LockedContextThis(*this);
+
+        m_Objects.ForEachDetached([this, &OtherList](TEntryType *ExistingEntry)
+                                  {
+                                      OtherList.PushBack(ExistingEntry);
+                                      CounterDecrement();
+                                      return true;
+                                  });
+    }
+
     template <typename TEntryId>
     bool Contains_LockLess(TEntryId *Id)
     {
@@ -353,8 +369,24 @@ private:
         return MatchFound;
     }
 
+    template <typename TEntryId>
+    TEntryType *DetachById(TEntryId *Id)
+    {
+        TEntryType *DetachedEntry = nullptr;
+        CLockedContext<TAccessStrategy> LockedContext(*this);
 
-    CWdmList<TEntryType, CRawAccess, CNonCountingObject, TDeleter> m_Objects;
+        m_Objects.ForEachDetachedIf([Id](TEntryType *ExistingEntry) { return *ExistingEntry == *Id; },
+                                    [this, &DetachedEntry](TEntryType *ExistingEntry)
+                                    {
+                                        DetachedEntry = ExistingEntry;
+                                        CounterDecrement();
+                                        return false;
+                                    });
+
+        return DetachedEntry;
+    }
+
+    TInternalList m_Objects;
 };
 
 class CWdmEvent : public CAllocatable<NonPagedPool, 'VEHR'>

@@ -315,7 +315,7 @@ void CWdfUsbTarget::WritePipeAsync(WDFREQUEST Request, ULONG64 EndpointAddress, 
     }
     else
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed: Pipe not found");
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed: Pipe 0x%llu not found", EndpointAddress);
         WdfRequest.SetStatus(STATUS_NOT_FOUND);
     }
 }
@@ -331,7 +331,7 @@ void CWdfUsbTarget::ReadPipeAsync(WDFREQUEST Request, ULONG64 EndpointAddress, W
     }
     else
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed: Pipe not found");
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed: Pipe 0x%llu not found", EndpointAddress);
         WdfRequest.SetStatus(STATUS_NOT_FOUND);
     }
 }
@@ -349,7 +349,7 @@ void CWdfUsbTarget::ReadIsochronousPipeAsync(WDFREQUEST Request, ULONG64 Endpoin
     }
     else
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed: Pipe not found");
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed: Pipe 0x%llu not found", EndpointAddress);
         WdfRequest.SetStatus(STATUS_NOT_FOUND);
     }
 }
@@ -367,7 +367,7 @@ void CWdfUsbTarget::WriteIsochronousPipeAsync(WDFREQUEST Request, ULONG64 Endpoi
     }
     else
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed: Pipe not found");
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed: Pipe 0x%llu not found", EndpointAddress);
         WdfRequest.SetStatus(STATUS_NOT_FOUND);
     }
 }
@@ -381,7 +381,7 @@ NTSTATUS CWdfUsbTarget::AbortPipe(WDFREQUEST Request, ULONG64 EndpointAddress)
     }
     else
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed: Pipe not found");
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed: Pipe 0x%llu not found", EndpointAddress);
         return STATUS_NOT_FOUND;
     }
 }
@@ -395,7 +395,7 @@ NTSTATUS CWdfUsbTarget::ResetPipe(WDFREQUEST Request, ULONG64 EndpointAddress)
     }
     else
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed: Pipe not found");
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed: Pipe 0x%llu not found", EndpointAddress);
         return STATUS_NOT_FOUND;
     }
 }

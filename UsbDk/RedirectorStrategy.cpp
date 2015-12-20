@@ -219,25 +219,25 @@ NTSTATUS CUsbDkRedirectorStrategy::IoInCallerContextRW(CRedirectorRequest &WdfRe
         return status;
     }
 
-    PUSBDK_REDIRECTOR_REQUEST_CONTEXT context = WdfRequest.Context();
-    context->EndpointAddress = TransferRequest->EndpointAddress;
-    context->TransferType = static_cast<USB_DK_TRANSFER_TYPE>(TransferRequest->TransferType);
+    PUSBDK_REDIRECTOR_REQUEST_CONTEXT Context = WdfRequest.Context();
+    Context->EndpointAddress = TransferRequest->EndpointAddress;
+    Context->TransferType = static_cast<USB_DK_TRANSFER_TYPE>(TransferRequest->TransferType);
 
-    status = WdfRequest.FetchOutputObject(context->GenResult);
+    status = WdfRequest.FetchOutputObject(Context->GenResult);
     if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! failed to fetch output buffer, %!STATUS!", status);
         return status;
     }
 
-    switch (context->TransferType)
+    switch (Context->TransferType)
     {
     case ControlTransferType:
         status = IoInCallerContextRWControlTransfer(WdfRequest, *TransferRequest);
         break;
     case BulkTransferType:
     case InterruptTransferType:
-        status = LockerFunc(WdfRequest, *TransferRequest, context->LockedBuffer);
+        status = LockerFunc(WdfRequest, *TransferRequest, Context->LockedBuffer);
         if (!NT_SUCCESS(status))
         {
             TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! Failed to lock user buffer, %!STATUS!", status);
@@ -249,7 +249,7 @@ NTSTATUS CUsbDkRedirectorStrategy::IoInCallerContextRW(CRedirectorRequest &WdfRe
         break;
 
     default:
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! Error: Wrong TransferType: %d", context->TransferType);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! Error: Wrong TransferType: %d", Context->TransferType);
         status = STATUS_INVALID_PARAMETER;
         break;
     }
@@ -262,8 +262,8 @@ NTSTATUS CUsbDkRedirectorStrategy::IoInCallerContextRWIsoTransfer(CRedirectorReq
                                                                   const USB_DK_TRANSFER_REQUEST &TransferRequest,
                                                                   TLockerFunc LockerFunc)
 {
-    PUSBDK_REDIRECTOR_REQUEST_CONTEXT context = WdfRequest.Context();
-    auto status = LockerFunc(WdfRequest, TransferRequest, context->LockedBuffer);
+    PUSBDK_REDIRECTOR_REQUEST_CONTEXT Context = WdfRequest.Context();
+    auto status = LockerFunc(WdfRequest, TransferRequest, Context->LockedBuffer);
     if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! Failed to lock user buffer, %!STATUS!", status);
@@ -273,7 +273,7 @@ NTSTATUS CUsbDkRedirectorStrategy::IoInCallerContextRWIsoTransfer(CRedirectorReq
 #pragma warning(push)
 #pragma warning(disable:4244) //Unsafe conversions on 32 bit
     status = WdfRequest.LockUserBufferForRead(reinterpret_cast<PVOID>(TransferRequest.IsochronousPacketsArray),
-        sizeof(ULONG64) * TransferRequest.IsochronousPacketsArraySize, context->LockedIsochronousPacketsArray);
+        sizeof(ULONG64) * TransferRequest.IsochronousPacketsArraySize, Context->LockedIsochronousPacketsArray);
 #pragma warning(pop)
     if (!NT_SUCCESS(status))
     {
@@ -284,7 +284,7 @@ NTSTATUS CUsbDkRedirectorStrategy::IoInCallerContextRWIsoTransfer(CRedirectorReq
 #pragma warning(push)
 #pragma warning(disable:4244) //Unsafe conversions on 32 bit
     status = WdfRequest.LockUserBufferForWrite(reinterpret_cast<PVOID>(TransferRequest.Result.IsochronousResultsArray),
-        sizeof(USB_DK_ISO_TRANSFER_RESULT) * TransferRequest.IsochronousPacketsArraySize, context->LockedIsochronousResultsArray);
+        sizeof(USB_DK_ISO_TRANSFER_RESULT) * TransferRequest.IsochronousPacketsArraySize, Context->LockedIsochronousResultsArray);
 #pragma warning(pop)
     if (!NT_SUCCESS(status))
     {
@@ -298,13 +298,13 @@ NTSTATUS CUsbDkRedirectorStrategy::IoInCallerContextRWControlTransfer(CRedirecto
                                                                       const USB_DK_TRANSFER_REQUEST &TransferRequest)
 {
     NTSTATUS status;
-    PUSBDK_REDIRECTOR_REQUEST_CONTEXT context = WdfRequest.Context();
+    PUSBDK_REDIRECTOR_REQUEST_CONTEXT Context = WdfRequest.Context();
     __try
     {
 #pragma warning(push)
 #pragma warning(disable:4244) //Unsafe conversions on 32 bit
         ProbeForRead(static_cast<PVOID>(TransferRequest.Buffer), sizeof(WDF_USB_CONTROL_SETUP_PACKET), 1);
-        context->SetupPacket = *static_cast<PWDF_USB_CONTROL_SETUP_PACKET>(TransferRequest.Buffer);
+        Context->SetupPacket = *static_cast<PWDF_USB_CONTROL_SETUP_PACKET>(TransferRequest.Buffer);
 #pragma warning(pop)
     }
     __except (EXCEPTION_EXECUTE_HANDLER)
@@ -315,12 +315,12 @@ NTSTATUS CUsbDkRedirectorStrategy::IoInCallerContextRWControlTransfer(CRedirecto
 
     size_t bufferLength = static_cast<size_t>(TransferRequest.BufferLength) - sizeof(WDF_USB_CONTROL_SETUP_PACKET);
 
-    if (context->SetupPacket.Packet.bm.Request.Dir == BMREQUEST_HOST_TO_DEVICE) // write
+    if (Context->SetupPacket.Packet.bm.Request.Dir == BMREQUEST_HOST_TO_DEVICE) // write
     {
 #pragma warning(push)
 #pragma warning(disable:4244) //Unsafe conversions on 32 bit
         status = WdfRequest.LockUserBufferForRead(static_cast<PVOID>(static_cast<PWDF_USB_CONTROL_SETUP_PACKET>(TransferRequest.Buffer) + 1),
-                                                    bufferLength, context->LockedBuffer);
+                                                    bufferLength, Context->LockedBuffer);
 #pragma warning(pop)
         if (!NT_SUCCESS(status))
         {
@@ -332,7 +332,7 @@ NTSTATUS CUsbDkRedirectorStrategy::IoInCallerContextRWControlTransfer(CRedirecto
 #pragma warning(push)
 #pragma warning(disable:4244) //Unsafe conversions on 32 bit
         status = WdfRequest.LockUserBufferForWrite(static_cast<PVOID>(static_cast<PWDF_USB_CONTROL_SETUP_PACKET>(TransferRequest.Buffer) + 1),
-                                                    bufferLength, context->LockedBuffer);
+                                                    bufferLength, Context->LockedBuffer);
 #pragma warning(pop)
         if (!NT_SUCCESS(status))
         {
@@ -404,7 +404,7 @@ void CUsbDkRedirectorStrategy::CompleteTransferRequest(CRedirectorRequest &Reque
 
 void CUsbDkRedirectorStrategy::DoControlTransfer(CRedirectorRequest &WdfRequest, WDFMEMORY DataBuffer)
 {
-    PUSBDK_REDIRECTOR_REQUEST_CONTEXT context = WdfRequest.Context();
+    PUSBDK_REDIRECTOR_REQUEST_CONTEXT Context = WdfRequest.Context();
 
     WDFMEMORY_OFFSET TransferOffset;
     TransferOffset.BufferOffset = 0;
@@ -418,9 +418,9 @@ void CUsbDkRedirectorStrategy::DoControlTransfer(CRedirectorRequest &WdfRequest,
         TransferOffset.BufferLength = 0;
     }
 
-    context->Direction = UsbDkTransferDirection::Unknown;
+    Context->Direction = UsbDkTransferDirection::Unknown;
 
-    auto status = m_Target.ControlTransferAsync(WdfRequest, &context->SetupPacket, DataBuffer, &TransferOffset,
+    auto status = m_Target.ControlTransferAsync(WdfRequest, &Context->SetupPacket, DataBuffer, &TransferOffset,
                                   [](WDFREQUEST Request, WDFIOTARGET, PWDF_REQUEST_COMPLETION_PARAMS Params, WDFCONTEXT)
                                   {
                                          auto status = Params->IoStatus.Status;

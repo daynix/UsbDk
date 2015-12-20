@@ -883,7 +883,6 @@ NTSTATUS CUsbDkControlDevice::ReloadPersistentHideRules()
     return status;
 }
 
-
 NTSTATUS CUsbDkControlDevice::AddRedirectionToSet(const USB_DK_DEVICE_ID &DeviceId, CUsbDkRedirection **NewRedirection)
 {
     CObjHolder<CUsbDkRedirection, CRefCountingDeleter> newRedir(new CUsbDkRedirection());

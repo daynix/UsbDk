@@ -43,6 +43,10 @@ NTSTATUS CWdfUsbInterface::SetAltSetting(ULONG64 AltSettingIdx)
     m_Pipes.reset();
 
     m_NumPipes = WdfUsbInterfaceGetNumConfiguredPipes(m_Interface);
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_USBTARGET, "%!FUNC! index %d, %d pipes",
+                                         static_cast<UCHAR>(AltSettingIdx), m_NumPipes);
+
     if (m_NumPipes == 0)
     {
         return STATUS_SUCCESS;
@@ -51,7 +55,7 @@ NTSTATUS CWdfUsbInterface::SetAltSetting(ULONG64 AltSettingIdx)
     m_Pipes = new CWdfUsbPipe[m_NumPipes];
     if (!m_Pipes)
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed to allocate pipes array");
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed to allocate pipes array for %d pipes", m_NumPipes);
         return STATUS_INSUFFICIENT_RESOURCES;
     }
 
@@ -103,6 +107,8 @@ NTSTATUS CWdfUsbInterface::Create(WDFUSBDEVICE Device, UCHAR InterfaceIdx)
     m_Interface = WdfUsbTargetDeviceGetInterface(Device, InterfaceIdx);
     ASSERT(m_Interface != nullptr);
 
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_USBTARGET, "%!FUNC! created interface #%d", InterfaceIdx);
+
     return SetAltSetting(0);
 }
 
@@ -116,6 +122,22 @@ void CWdfUsbPipe::Create(WDFUSBDEVICE Device, WDFUSBINTERFACE Interface, UCHAR P
     m_Pipe = WdfUsbInterfaceGetConfiguredPipe(m_Interface, PipeIndex, &m_Info);
     ASSERT(m_Pipe != nullptr);
     WdfUsbTargetPipeSetNoMaximumPacketSizeCheck(m_Pipe);
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_USBTARGET,
+                "%!FUNC! Created pipe #%d, "
+                "Endpoint address %d, "
+                "Setting index %d, "
+                "Pipe type %!pipetype!, "
+                "Maximum packet size %lu, "
+                "Maximum transfer size %lu, "
+                "Polling interval %d",
+                PipeIndex,
+                m_Info.EndpointAddress,
+                m_Info.SettingIndex,
+                m_Info.PipeType,
+                m_Info.MaximumPacketSize,
+                m_Info.MaximumTransferSize,
+                m_Info.Interval);
 }
 
 void CWdfUsbPipe::ReadAsync(CWdfRequest &Request, WDFMEMORY Buffer, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion)
@@ -255,9 +277,11 @@ NTSTATUS CWdfUsbTarget::Create(WDFDEVICE Device)
     m_Interfaces = new CWdfUsbInterface[m_NumInterfaces];
     if (!m_Interfaces)
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed to allocate interfaces array");
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed to allocate array for %d interface(s)", m_NumInterfaces);
         return STATUS_INSUFFICIENT_RESOURCES;
     }
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_USBTARGET, "%!FUNC! with %d interface(s)", m_NumInterfaces);
 
     for (UCHAR i = 0; i < m_NumInterfaces; i++)
     {
@@ -283,6 +307,9 @@ NTSTATUS CWdfUsbTarget::SetInterfaceAltSetting(ULONG64 InterfaceIdx, ULONG64 Alt
     {
         return STATUS_INVALID_PARAMETER_1;
     }
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_USBTARGET, "%!FUNC! setting #%d for interface #%d",
+                static_cast<UCHAR>(AltSettingIdx), static_cast<UCHAR>(InterfaceIdx));
 
     //TODO: Stop read/write queue before interface reconfiguration
     return m_Interfaces[InterfaceIdx].SetAltSetting(AltSettingIdx);

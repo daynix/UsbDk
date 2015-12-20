@@ -72,5 +72,6 @@
 // FUNC TraceEvents(LEVEL, FLAGS, MSG, ...);
 // CUSTOM_TYPE(devprop, ItemEnum(DEVICE_REGISTRY_PROPERTY));
 // CUSTOM_TYPE(devid, ItemEnum(BUS_QUERY_ID_TYPE));
+// CUSTOM_TYPE(pipetype, ItemEnum(_WDF_USB_PIPE_TYPE));
 // end_wpp
 //

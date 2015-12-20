@@ -91,7 +91,7 @@ private:
     void WritePipe(WDFREQUEST Request);
     void ReadPipe(WDFREQUEST Request);
 
-    static void CompleteTransferRequest(WDFREQUEST WdfRequest,
+    static void CompleteTransferRequest(CRedirectorRequest &Request,
                                         NTSTATUS Status,
                                         USBD_STATUS UsbdStatus,
                                         size_t BytesTransferred);
@@ -111,6 +111,10 @@ private:
     static void IsoRWCompletion(WDFREQUEST Request, WDFIOTARGET Target, PWDF_REQUEST_COMPLETION_PARAMS Params, WDFCONTEXT Context);
 
     void PatchDeviceID(PIRP Irp);
+
+    static void TraceTransferError(const CRedirectorRequest &WdfRequest,
+                                   NTSTATUS Status,
+                                   USBD_STATUS UsbdStatus);
 
     CWdfUsbTarget m_Target;
 

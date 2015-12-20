@@ -73,5 +73,7 @@
 // CUSTOM_TYPE(devprop, ItemEnum(DEVICE_REGISTRY_PROPERTY));
 // CUSTOM_TYPE(devid, ItemEnum(BUS_QUERY_ID_TYPE));
 // CUSTOM_TYPE(pipetype, ItemEnum(_WDF_USB_PIPE_TYPE));
+// CUSTOM_TYPE(usbdktransfertype, ItemEnum(USB_DK_TRANSFER_TYPE));
+// CUSTOM_TYPE(usbdktransferdirection, ItemEnum(UsbDkTransferDirection));
 // end_wpp
 //

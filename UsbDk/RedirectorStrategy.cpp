@@ -22,6 +22,14 @@
 **********************************************************************/
 
 #include "stdafx.h"
+
+enum UsbDkTransferDirection
+{
+    Unknown,
+    Read,
+    Write
+};
+
 #include "RedirectorStrategy.h"
 #include "trace.h"
 #include "RedirectorStrategy.tmh"
@@ -177,6 +185,7 @@ typedef struct tag_USBDK_REDIRECTOR_REQUEST_CONTEXT
     USB_DK_TRANSFER_TYPE TransferType;
     PUSB_DK_GEN_TRANSFER_RESULT GenResult;
     WDF_USB_CONTROL_SETUP_PACKET SetupPacket;
+    UsbDkTransferDirection Direction;
 
     WDFMEMORY LockedIsochronousPacketsArray;
     WDFMEMORY LockedIsochronousResultsArray;
@@ -189,7 +198,7 @@ public:
         : CWdfRequest(Request)
     {}
 
-    PUSBDK_REDIRECTOR_REQUEST_CONTEXT Context()
+    PUSBDK_REDIRECTOR_REQUEST_CONTEXT Context() const
     { return reinterpret_cast<PUSBDK_REDIRECTOR_REQUEST_CONTEXT>(UsbDkFilterRequestGetContext(m_Request)); }
 
 private:
@@ -379,12 +388,11 @@ void CUsbDkRedirectorStrategy::IoInCallerContext(WDFDEVICE Device, WDFREQUEST Re
     }
 }
 
-void CUsbDkRedirectorStrategy::CompleteTransferRequest(WDFREQUEST WdfRequest,
+void CUsbDkRedirectorStrategy::CompleteTransferRequest(CRedirectorRequest &Request,
                                                        NTSTATUS Status,
                                                        USBD_STATUS UsbdStatus,
                                                        size_t BytesTransferred)
 {
-    CRedirectorRequest Request(WdfRequest);
     auto RequestContext = Request.Context();
 
     RequestContext->GenResult->BytesTransferred = BytesTransferred;
@@ -410,19 +418,21 @@ void CUsbDkRedirectorStrategy::DoControlTransfer(CRedirectorRequest &WdfRequest,
         TransferOffset.BufferLength = 0;
     }
 
+    context->Direction = UsbDkTransferDirection::Unknown;
+
     auto status = m_Target.ControlTransferAsync(WdfRequest, &context->SetupPacket, DataBuffer, &TransferOffset,
                                   [](WDFREQUEST Request, WDFIOTARGET, PWDF_REQUEST_COMPLETION_PARAMS Params, WDFCONTEXT)
                                   {
                                          auto status = Params->IoStatus.Status;
                                          auto usbCompletionParams = Params->Parameters.Usb.Completion;
+                                         CRedirectorRequest WdfRequest(Request);
 
                                          if (!NT_SUCCESS(status) || !USBD_SUCCESS(usbCompletionParams->UsbdStatus))
                                          {
-                                             TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! Control transfer failed: %!STATUS! UsbdStatus 0x%x\n",
-                                                 status, usbCompletionParams->UsbdStatus);
+                                             TraceTransferError(WdfRequest, status, usbCompletionParams->UsbdStatus);
                                          }
 
-                                         CompleteTransferRequest(Request, status,
+                                         CompleteTransferRequest(WdfRequest, status,
                                                                  usbCompletionParams->UsbdStatus,
                                                                  usbCompletionParams->Parameters.DeviceControlTransfer.Length);
                                   });
@@ -519,6 +529,8 @@ void CUsbDkRedirectorStrategy::WritePipe(WDFREQUEST Request)
         return;
     }
 
+    Context->Direction = UsbDkTransferDirection::Write;
+
     switch (Context->TransferType)
     {
     case ControlTransferType:
@@ -532,14 +544,14 @@ void CUsbDkRedirectorStrategy::WritePipe(WDFREQUEST Request)
                                     {
                                         auto status = Params->IoStatus.Status;
                                         auto usbCompletionParams = Params->Parameters.Usb.Completion;
+                                        CRedirectorRequest WdfRequest(Request);
 
                                         if (!NT_SUCCESS(status) || !USBD_SUCCESS(usbCompletionParams->UsbdStatus))
                                         {
-                                            TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! WritePipeAsync completion: Write failed: %!STATUS! UsbdStatus 0x%x\n",
-                                                status, usbCompletionParams->UsbdStatus);
+                                            TraceTransferError(WdfRequest, status, usbCompletionParams->UsbdStatus);
                                         }
 
-                                        CompleteTransferRequest(Request, status,
+                                        CompleteTransferRequest(WdfRequest, status,
                                                                 usbCompletionParams->UsbdStatus,
                                                                 usbCompletionParams->Parameters.PipeWrite.Length);
 
@@ -564,6 +576,38 @@ void CUsbDkRedirectorStrategy::WritePipe(WDFREQUEST Request)
     }
 }
 
+void CUsbDkRedirectorStrategy::TraceTransferError(const CRedirectorRequest &WdfRequest,
+                                                  NTSTATUS Status,
+                                                  USBD_STATUS UsbdStatus)
+{
+    auto Context = WdfRequest.Context();
+    CPreAllocatedWdfMemoryBuffer DataBuffer(Context->LockedBuffer);
+
+    if (Context->TransferType == ControlTransferType)
+    {
+        ASSERT(Context->Direction == UsbDkTransferDirection::Unknown);
+
+        Context->Direction =
+            (Context->SetupPacket.Packet.bm.Request.Dir == BMREQUEST_HOST_TO_DEVICE) ? UsbDkTransferDirection::Write
+                                                                                     : UsbDkTransferDirection::Read;
+    }
+    else
+    {
+        ASSERT(Context->Direction != UsbDkTransferDirection::Unknown);
+    }
+
+    TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR,
+                "%!FUNC! %!usbdktransferdirection! transfer failed: %!STATUS! UsbdStatus 0x%x, "
+                "Endpoint address %llu, "
+                "Transfer type %!usbdktransfertype!, "
+                "Length %llu",
+                Context->Direction,
+                Status, UsbdStatus,
+                Context->EndpointAddress,
+                Context->TransferType,
+                DataBuffer.Size());
+}
+
 void CUsbDkRedirectorStrategy::ReadPipe(WDFREQUEST Request)
 {
     CRedirectorRequest WdfRequest(Request);
@@ -576,6 +620,8 @@ void CUsbDkRedirectorStrategy::ReadPipe(WDFREQUEST Request)
         WdfRequest.SetStatus(STATUS_INSUFFICIENT_RESOURCES);
         return;
     }
+
+    Context->Direction = UsbDkTransferDirection::Read;
 
     switch (Context->TransferType)
     {
@@ -590,14 +636,14 @@ void CUsbDkRedirectorStrategy::ReadPipe(WDFREQUEST Request)
                                    {
                                         auto status = Params->IoStatus.Status;
                                         auto usbCompletionParams = Params->Parameters.Usb.Completion;
+                                        CRedirectorRequest WdfRequest(Request);
 
                                         if (!NT_SUCCESS(status) || !USBD_SUCCESS(usbCompletionParams->UsbdStatus))
                                         {
-                                            TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! ReadPipeAsync completion: Read failed: %!STATUS! UsbdStatus 0x%x\n",
-                                                status, usbCompletionParams->UsbdStatus);
+                                            TraceTransferError(WdfRequest, status, usbCompletionParams->UsbdStatus);
                                         }
 
-                                        CompleteTransferRequest(Request, status,
+                                        CompleteTransferRequest(WdfRequest, status,
                                                                 usbCompletionParams->UsbdStatus,
                                                                 usbCompletionParams->Parameters.PipeRead.Length);
 
@@ -646,8 +692,7 @@ void CUsbDkRedirectorStrategy::IsoRWCompletion(WDFREQUEST Request, WDFIOTARGET, 
 
     if (!NT_SUCCESS(status) || !USBD_SUCCESS(urb->UrbHeader.Status))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! Isochronous request failed: %!STATUS! UsbdStatus 0x%x\n",
-            status, urb->UrbHeader.Status);
+        TraceTransferError(WdfRequest, status, urb->UrbHeader.Status);
     }
 
     WdfRequest.SetOutputDataLen(sizeof(*Context->GenResult));

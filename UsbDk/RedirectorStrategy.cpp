@@ -185,7 +185,7 @@ typedef struct tag_USBDK_REDIRECTOR_REQUEST_CONTEXT
 class CRedirectorRequest : public CWdfRequest
 {
 public:
-    CRedirectorRequest(WDFREQUEST Request)
+    explicit CRedirectorRequest(WDFREQUEST Request)
         : CWdfRequest(Request)
     {}
 

@@ -24,6 +24,7 @@
 #pragma once
 
 #include "Alloc.h"
+#include "UsbDkUtil.h"
 #include "Urb.h"
 
 class CWdfRequest;
@@ -88,13 +89,44 @@ public:
     NTSTATUS Create(WDFUSBDEVICE Device, UCHAR InterfaceIdx);
     NTSTATUS SetAltSetting(ULONG64 AltSettingIdx);
 
-    CWdfUsbPipe *FindPipeByEndpointAddress(ULONG64 EndpointAddress);
+    template<typename TLockingStrategy, typename TFunctor>
+    bool DoPipeOperation(ULONG64 EndpointAddress, TFunctor Functor)
+    {
+        TLockingStrategy m_LockedContext(m_PipesLock);
+
+        for (UCHAR i = 0; i < m_NumPipes; i++)
+        {
+            if (m_Pipes[i].EndpointAddress() == EndpointAddress)
+            {
+                Functor(m_Pipes[i]);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     NTSTATUS Reset(WDFREQUEST Request);
+
+    class Lock : public CWdmExSpinLock
+    {
+    public:
+        void NoLock() {};
+        void LockShared() { CWdmExSpinLock::LockShared(); }
+        void UnlockShared() { CWdmExSpinLock::UnlockShared(); }
+        void LockExclusive() { CWdmExSpinLock::LockExclusive(); }
+        void UnlockExclusive() { CWdmExSpinLock::UnlockExclusive(); }
+    };
+
+    using SharedLock = CBaseLockedContext < Lock, &Lock::LockShared, &Lock::UnlockShared >;
+    using ExclusiveLock = CBaseLockedContext < Lock, &Lock::LockExclusive, &Lock::UnlockExclusive > ;
+    using NeitherLock = CBaseLockedContext < Lock, &Lock::NoLock, &Lock::NoLock >;
 
 private:
     WDFUSBDEVICE m_UsbDevice;
     WDFUSBINTERFACE m_Interface;
 
+    Lock m_PipesLock;
     CObjHolder<CWdfUsbPipe, CVectorDeleter<CWdfUsbPipe> > m_Pipes;
     BYTE m_NumPipes = 0;
 
@@ -128,7 +160,22 @@ public:
     NTSTATUS ResetDevice(WDFREQUEST Request);
 
 private:
-    CWdfUsbPipe *FindPipeByEndpointAddress(ULONG64 EndpointAddress);
+    void TracePipeNotFoundError(ULONG64 EndpointAddress);
+
+    template<typename TLockingStrategy, typename TFunctor>
+    bool DoPipeOperation(ULONG64 EndpointAddress, TFunctor Functor)
+    {
+        for (UCHAR i = 0; i < m_NumInterfaces; i++)
+        {
+            if (m_Interfaces[i].DoPipeOperation<TLockingStrategy, TFunctor>(EndpointAddress, Functor))
+            {
+                return true;
+            }
+        }
+
+        TracePipeNotFoundError(EndpointAddress);
+        return false;
+    }
 
     WDFDEVICE m_Device = WDF_NO_HANDLE;
     WDFUSBDEVICE m_UsbDevice = WDF_NO_HANDLE;

@@ -40,6 +40,8 @@ NTSTATUS CWdfUsbInterface::SetAltSetting(ULONG64 AltSettingIdx)
         return status;
     }
 
+    ExclusiveLock m_LockedContext(m_PipesLock);
+
     m_Pipes.reset();
 
     m_NumPipes = WdfUsbInterfaceGetNumConfiguredPipes(m_Interface);
@@ -65,19 +67,6 @@ NTSTATUS CWdfUsbInterface::SetAltSetting(ULONG64 AltSettingIdx)
     }
 
     return STATUS_SUCCESS;
-}
-
-CWdfUsbPipe *CWdfUsbInterface::FindPipeByEndpointAddress(ULONG64 EndpointAddress)
-{
-    for (UCHAR i = 0; i < m_NumPipes; i++)
-    {
-        if (m_Pipes[i].EndpointAddress() == EndpointAddress)
-        {
-            return &m_Pipes[i];
-        }
-    }
-
-    return nullptr;
 }
 
 NTSTATUS CWdfUsbInterface::Reset(WDFREQUEST Request)
@@ -311,38 +300,20 @@ NTSTATUS CWdfUsbTarget::SetInterfaceAltSetting(ULONG64 InterfaceIdx, ULONG64 Alt
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_USBTARGET, "%!FUNC! setting #%d for interface #%d",
                 static_cast<UCHAR>(AltSettingIdx), static_cast<UCHAR>(InterfaceIdx));
 
-    //TODO: Stop read/write queue before interface reconfiguration
     return m_Interfaces[InterfaceIdx].SetAltSetting(AltSettingIdx);
-}
-
-CWdfUsbPipe *CWdfUsbTarget::FindPipeByEndpointAddress(ULONG64 EndpointAddress)
-{
-    CWdfUsbPipe *Pipe = nullptr;
-
-    for (UCHAR i = 0; i < m_NumInterfaces; i++)
-    {
-        Pipe = m_Interfaces[i].FindPipeByEndpointAddress(EndpointAddress);
-        if (Pipe != nullptr)
-        {
-            break;
-        }
-    }
-
-    return Pipe;
 }
 
 void CWdfUsbTarget::WritePipeAsync(WDFREQUEST Request, ULONG64 EndpointAddress, WDFMEMORY Buffer, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion)
 {
     CWdfRequest WdfRequest(Request);
 
-    CWdfUsbPipe *Pipe = FindPipeByEndpointAddress(EndpointAddress);
-    if (Pipe != nullptr)
+    if (!DoPipeOperation<CWdfUsbInterface::SharedLock>(EndpointAddress,
+                                                       [&WdfRequest, Buffer, Completion](CWdfUsbPipe &Pipe)
+                                                       {
+                                                           Pipe.WriteAsync(WdfRequest, Buffer, Completion);
+                                                       }))
     {
-        Pipe->WriteAsync(WdfRequest, Buffer, Completion);
-    }
-    else
-    {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed: Pipe 0x%llu not found", EndpointAddress);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed because pipe was not found");
         WdfRequest.SetStatus(STATUS_NOT_FOUND);
     }
 }
@@ -351,14 +322,13 @@ void CWdfUsbTarget::ReadPipeAsync(WDFREQUEST Request, ULONG64 EndpointAddress, W
 {
     CWdfRequest WdfRequest(Request);
 
-    CWdfUsbPipe *Pipe = FindPipeByEndpointAddress(EndpointAddress);
-    if (Pipe != nullptr)
+    if (!DoPipeOperation<CWdfUsbInterface::SharedLock>(EndpointAddress,
+                                                       [&WdfRequest, Buffer, Completion](CWdfUsbPipe &Pipe)
+                                                       {
+                                                           Pipe.ReadAsync(WdfRequest, Buffer, Completion);
+                                                       }))
     {
-        Pipe->ReadAsync(WdfRequest, Buffer, Completion);
-    }
-    else
-    {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed: Pipe 0x%llu not found", EndpointAddress);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed because pipe was not found");
         WdfRequest.SetStatus(STATUS_NOT_FOUND);
     }
 }
@@ -369,14 +339,13 @@ void CWdfUsbTarget::ReadIsochronousPipeAsync(WDFREQUEST Request, ULONG64 Endpoin
 {
     CWdfRequest WdfRequest(Request);
 
-    CWdfUsbPipe *Pipe = FindPipeByEndpointAddress(EndpointAddress);
-    if (Pipe != nullptr)
+    if (!DoPipeOperation<CWdfUsbInterface::SharedLock>(EndpointAddress,
+                                                       [&WdfRequest, Buffer, PacketSizes, PacketNumber, Completion](CWdfUsbPipe &Pipe)
+                                                       {
+                                                           Pipe.ReadIsochronousAsync(WdfRequest, Buffer, PacketSizes, PacketNumber, Completion);
+                                                       }))
     {
-        Pipe->ReadIsochronousAsync(WdfRequest, Buffer, PacketSizes, PacketNumber, Completion);
-    }
-    else
-    {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed: Pipe 0x%llu not found", EndpointAddress);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed because pipe was not found");
         WdfRequest.SetStatus(STATUS_NOT_FOUND);
     }
 }
@@ -387,49 +356,71 @@ void CWdfUsbTarget::WriteIsochronousPipeAsync(WDFREQUEST Request, ULONG64 Endpoi
 {
     CWdfRequest WdfRequest(Request);
 
-    CWdfUsbPipe *Pipe = FindPipeByEndpointAddress(EndpointAddress);
-    if (Pipe != nullptr)
+    if (!DoPipeOperation<CWdfUsbInterface::SharedLock>(EndpointAddress,
+                                                       [&WdfRequest, Buffer, PacketSizes, PacketNumber, Completion](CWdfUsbPipe &Pipe)
+                                                       {
+                                                           Pipe.WriteIsochronousAsync(WdfRequest, Buffer, PacketSizes, PacketNumber, Completion);
+                                                       }))
     {
-        Pipe->WriteIsochronousAsync(WdfRequest, Buffer, PacketSizes, PacketNumber, Completion);
-    }
-    else
-    {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed: Pipe 0x%llu not found", EndpointAddress);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed because pipe was not found");
         WdfRequest.SetStatus(STATUS_NOT_FOUND);
     }
 }
 
 NTSTATUS CWdfUsbTarget::AbortPipe(WDFREQUEST Request, ULONG64 EndpointAddress)
 {
-    auto Pipe = FindPipeByEndpointAddress(EndpointAddress);
-    if (Pipe != nullptr)
+    NTSTATUS status;
+
+    //AbortPipe does not require locking because is scheduled sequentially
+    //with SetAltSettings which is only operation that changes pipes array
+
+    if (!DoPipeOperation<CWdfUsbInterface::NeitherLock>(EndpointAddress,
+                                                        [&status, &Request](CWdfUsbPipe &Pipe)
+                                                        {
+                                                            status = Pipe.Abort(Request);
+                                                        }))
     {
-        return Pipe->Abort(Request);
+        status = STATUS_NOT_FOUND;
     }
-    else
+
+    if (!NT_SUCCESS(status))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed: Pipe 0x%llu not found", EndpointAddress);
-        return STATUS_NOT_FOUND;
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed: %!STATUS!", status);
     }
+
+    return status;
 }
 
 NTSTATUS CWdfUsbTarget::ResetPipe(WDFREQUEST Request, ULONG64 EndpointAddress)
 {
-    auto Pipe = FindPipeByEndpointAddress(EndpointAddress);
-    if (Pipe != nullptr)
+    NTSTATUS status;
+
+    //AbortPipe does not require locking because is scheduled sequentially
+    //with SetAltSettings which is only operation that changes pipes array
+
+    if (!DoPipeOperation<CWdfUsbInterface::NeitherLock>(EndpointAddress,
+                                                        [&status, &Request](CWdfUsbPipe &Pipe)
+                                                        {
+                                                            status = Pipe.Reset(Request);
+                                                        }))
     {
-        return Pipe->Reset(Request);
+        status = STATUS_NOT_FOUND;
     }
-    else
+
+    if (!NT_SUCCESS(status))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed: Pipe 0x%llu not found", EndpointAddress);
-        return STATUS_NOT_FOUND;
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed: %!STATUS!", status);
     }
+
+    return status;
 }
 
 NTSTATUS CWdfUsbTarget::ResetDevice(WDFREQUEST Request)
 {
     NTSTATUS status = STATUS_SUCCESS;
+
+    //ResetDevice does not require locking because is scheduled sequentially
+    //with SetAltSettings which is only operation that changes pipes array
 
     for (UCHAR i = 0; i < m_NumInterfaces; i++)
     {
@@ -467,4 +458,9 @@ NTSTATUS CWdfUsbTarget::ControlTransferAsync(CWdfRequest &WdfRequest, PWDF_USB_C
     }
 
     return status;
+}
+
+void CWdfUsbTarget::TracePipeNotFoundError(ULONG64 EndpointAddress)
+{
+    TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "Pipe %llu not found", EndpointAddress);
 }

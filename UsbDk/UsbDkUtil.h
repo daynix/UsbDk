@@ -43,25 +43,29 @@ private:
     CWdmSpinLock& operator= (const CWdmSpinLock&) = delete;
 };
 
-template <typename T>
-class CLockedContext
+template <typename T, void (T::*LockFunc)(), void (T::*UnlockFunc)()>
+class CBaseLockedContext
 {
 public:
-    CLockedContext(T &LockObject)
+    CBaseLockedContext(T &LockObject)
         : m_LockObject(LockObject)
-    { m_LockObject.Lock(); }
+    {
+        (m_LockObject.*LockFunc)();
+    }
 
-    ~CLockedContext()
-    { m_LockObject.Unlock(); }
+    ~CBaseLockedContext()
+    {
+        (m_LockObject.*UnlockFunc)();
+    }
 
-private:
+protected:
     T &m_LockObject;
-
-    CLockedContext(const CLockedContext&) = delete;
-    CLockedContext& operator= (const CLockedContext&) = delete;
+    CBaseLockedContext(const CBaseLockedContext&) = delete;
+    CBaseLockedContext& operator= (const CBaseLockedContext&) = delete;
 };
 
-typedef CLockedContext<CWdmSpinLock> TSpinLocker;
+template <typename T>
+using CLockedContext = CBaseLockedContext <T, &T::Lock, &T::Unlock>;
 
 class CWdmRefCounter
 {

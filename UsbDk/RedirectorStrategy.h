@@ -57,6 +57,7 @@ private:
 };
 
 class CRedirectorRequest;
+typedef struct tag_USBDK_REDIRECTOR_REQUEST_CONTEXT *PUSBDK_REDIRECTOR_REQUEST_CONTEXT;
 
 class CUsbDkRedirectorStrategy : public CUsbDkFilterStrategy
 {
@@ -115,6 +116,10 @@ private:
     static void TraceTransferError(const CRedirectorRequest &WdfRequest,
                                    NTSTATUS Status,
                                    USBD_STATUS UsbdStatus);
+
+    bool SupplyMaxPacketSizeShadowBuffer(CRedirectorRequest &WdfRequest,
+                                         PUSBDK_REDIRECTOR_REQUEST_CONTEXT RequestContext);
+    static void RetireMaxPacketSizeShadowBuffer(PUSBDK_REDIRECTOR_REQUEST_CONTEXT RequestContext);
 
     CWdfUsbTarget m_Target;
 

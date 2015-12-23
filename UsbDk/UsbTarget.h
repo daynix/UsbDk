@@ -64,6 +64,11 @@ public:
         return m_Info.EndpointAddress;
     }
 
+    size_t MaxPacketSize() const
+    {
+        return m_Info.MaximumPacketSize;
+    }
+
 private:
     WDFUSBINTERFACE m_Interface = WDF_NO_HANDLE;
     WDFUSBDEVICE m_Device = WDF_NO_HANDLE;
@@ -76,6 +81,7 @@ private:
         PULONG64 PacketSizes,
         size_t PacketNumber,
         PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion);
+
     CWdfUsbPipe(const CWdfUsbPipe&) = delete;
     CWdfUsbPipe& operator= (const CWdfUsbPipe&) = delete;
 };
@@ -158,7 +164,7 @@ public:
     NTSTATUS AbortPipe(WDFREQUEST Request, ULONG64 EndpointAddress);
     NTSTATUS ResetPipe(WDFREQUEST Request, ULONG64 EndpointAddress);
     NTSTATUS ResetDevice(WDFREQUEST Request);
-
+    size_t GetPipeMaxPacketSize(ULONG64 EndpointAddress);
 private:
     void TracePipeNotFoundError(ULONG64 EndpointAddress);
 

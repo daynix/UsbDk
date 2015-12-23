@@ -189,6 +189,9 @@ typedef struct tag_USBDK_REDIRECTOR_REQUEST_CONTEXT
 
     WDFMEMORY LockedIsochronousPacketsArray;
     WDFMEMORY LockedIsochronousResultsArray;
+
+    WDFMEMORY ShadowBuffer;
+    PVOID     ShadowBufferPtr;
 } USBDK_REDIRECTOR_REQUEST_CONTEXT, *PUSBDK_REDIRECTOR_REQUEST_CONTEXT;
 
 class CRedirectorRequest : public CWdfRequest
@@ -608,6 +611,52 @@ void CUsbDkRedirectorStrategy::TraceTransferError(const CRedirectorRequest &WdfR
                 DataBuffer.Size());
 }
 
+bool CUsbDkRedirectorStrategy::SupplyMaxPacketSizeShadowBuffer(CRedirectorRequest &WdfRequest,
+                                                               PUSBDK_REDIRECTOR_REQUEST_CONTEXT RequestContext)
+{
+    CPreAllocatedWdfMemoryBuffer OrigBuffer(RequestContext->LockedBuffer);
+    auto MaxPacketSize = m_Target.GetPipeMaxPacketSize(RequestContext->EndpointAddress);
+
+    if (OrigBuffer.Size() < MaxPacketSize)
+    {
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_REDIRECTOR,
+                    "%!FUNC! Going to allocate shadow buffer of %llu bytes intead of %llu bytes for pipe %llu",
+                    MaxPacketSize, OrigBuffer.Size(), RequestContext->EndpointAddress);
+
+        auto status = WdfMemoryCreate(WDF_NO_OBJECT_ATTRIBUTES,
+                                      NonPagedPool,
+                                      'MBSU',
+                                      MaxPacketSize,
+                                      &RequestContext->ShadowBuffer,
+                                      &RequestContext->ShadowBufferPtr);
+        if (!NT_SUCCESS(status))
+        {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR,
+                        "%!FUNC! Failed to allocate shadow buffer of %llu bytes: %!STATUS!", MaxPacketSize, status);
+
+            WdfRequest.SetStatus(status);
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void CUsbDkRedirectorStrategy::RetireMaxPacketSizeShadowBuffer(PUSBDK_REDIRECTOR_REQUEST_CONTEXT RequestContext)
+{
+    if (RequestContext->ShadowBufferPtr != nullptr)
+    {
+        ASSERT(RequestContext->Direction == UsbDkTransferDirection::Read);
+
+        ASSERT((RequestContext->TransferType == BulkTransferType) ||
+               (RequestContext->TransferType == InterruptTransferType));
+
+        CPreAllocatedWdfMemoryBuffer OrigBuffer(RequestContext->LockedBuffer);
+        RtlCopyMemory(OrigBuffer.Ptr(), RequestContext->ShadowBufferPtr, OrigBuffer.Size());
+        WdfObjectDelete(RequestContext->ShadowBuffer);
+    }
+}
+
 void CUsbDkRedirectorStrategy::ReadPipe(WDFREQUEST Request)
 {
     CRedirectorRequest WdfRequest(Request);
@@ -631,7 +680,14 @@ void CUsbDkRedirectorStrategy::ReadPipe(WDFREQUEST Request)
     case BulkTransferType:
     case InterruptTransferType:
         {
-            m_Target.ReadPipeAsync(WdfRequest.Detach(), Context->EndpointAddress, Context->LockedBuffer,
+            if (!SupplyMaxPacketSizeShadowBuffer(WdfRequest, Context))
+            {
+                break;
+            }
+
+            auto DataBuffer = (Context->ShadowBufferPtr != nullptr) ? Context->ShadowBuffer : Context->LockedBuffer;
+
+            m_Target.ReadPipeAsync(WdfRequest.Detach(), Context->EndpointAddress, DataBuffer,
                                    [](WDFREQUEST Request, WDFIOTARGET, PWDF_REQUEST_COMPLETION_PARAMS Params, WDFCONTEXT)
                                    {
                                         auto status = Params->IoStatus.Status;
@@ -643,10 +699,11 @@ void CUsbDkRedirectorStrategy::ReadPipe(WDFREQUEST Request)
                                             TraceTransferError(WdfRequest, status, usbCompletionParams->UsbdStatus);
                                         }
 
+                                        RetireMaxPacketSizeShadowBuffer(WdfRequest.Context());
+
                                         CompleteTransferRequest(WdfRequest, status,
                                                                 usbCompletionParams->UsbdStatus,
                                                                 usbCompletionParams->Parameters.PipeRead.Length);
-
                                     });
         }
         break;

@@ -61,8 +61,8 @@ public:
 class CUsbDkControlDeviceQueue : public CWdfDefaultQueue
 {
 public:
-    CUsbDkControlDeviceQueue(WDF_IO_QUEUE_DISPATCH_TYPE DispatchType)
-        : CWdfDefaultQueue(DispatchType, WdfExecutionLevelPassive)
+    CUsbDkControlDeviceQueue()
+        : CWdfDefaultQueue(WdfIoQueueDispatchSequential, WdfExecutionLevelPassive)
     {}
 
 private:
@@ -299,7 +299,7 @@ public:
 private:
     NTSTATUS ReloadPersistentHideRules();
 
-    CUsbDkControlDeviceQueue m_DeviceQueue{WdfIoQueueDispatchSequential};
+    CUsbDkControlDeviceQueue m_DeviceQueue;
     static CRefCountingHolder<CUsbDkControlDevice> *m_UsbDkControlDevice;
 
     CObjHolder<CUsbDkHiderDevice, CWdfDeviceDeleter<CUsbDkHiderDevice> > m_HiderDevice;

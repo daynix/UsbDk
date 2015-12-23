@@ -31,8 +31,8 @@ class CWdfRequest;
 class CUsbDkHiderDeviceQueue : public CWdfDefaultQueue
 {
 public:
-    CUsbDkHiderDeviceQueue(WDF_IO_QUEUE_DISPATCH_TYPE DispatchType)
-        : CWdfDefaultQueue(DispatchType, WdfExecutionLevelPassive)
+    CUsbDkHiderDeviceQueue()
+        : CWdfDefaultQueue(WdfIoQueueDispatchSequential, WdfExecutionLevelPassive)
     {}
 
 private:
@@ -60,7 +60,7 @@ public:
 
 private:
     static void ContextCleanup(_In_ WDFOBJECT DeviceObject);
-    CUsbDkHiderDeviceQueue m_DeviceQueue{WdfIoQueueDispatchSequential};
+    CUsbDkHiderDeviceQueue m_DeviceQueue;
     WDFDRIVER m_Driver = nullptr;
 
     friend class CUsbDkHiderDeviceInit;

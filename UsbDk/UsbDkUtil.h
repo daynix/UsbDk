@@ -107,15 +107,7 @@ public:
     static void destroy(CWdmRefCountingObject *Obj){ if (Obj != nullptr) { Obj->Release(); } }
 };
 
-class CLockedAccess
-{
-public:
-    void Lock() { m_Lock.Lock(); }
-    void Unlock() { m_Lock.Unlock(); }
-private:
-    CWdmSpinLock m_Lock;
-};
-
+using CLockedAccess = CWdmSpinLock;
 class CRawAccess
 {
 public:

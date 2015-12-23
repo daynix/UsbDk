@@ -67,6 +67,79 @@ protected:
 template <typename T>
 using CLockedContext = CBaseLockedContext <T, &T::Lock, &T::Unlock>;
 
+#if !TARGET_OS_WIN_XP
+
+class CWdmExSpinLock
+{
+public:
+    CWdmExSpinLock()
+    {}
+
+    void LockShared()
+    {
+        m_OldIrql = ExAcquireSpinLockShared(&m_Lock);
+    }
+
+    void UnlockShared()
+    {
+        ExReleaseSpinLockShared(&m_Lock, m_OldIrql);
+    }
+
+    void LockExclusive()
+    {
+        m_OldIrql = ExAcquireSpinLockExclusive(&m_Lock);
+    }
+
+    void UnlockExclusive()
+    {
+        ExReleaseSpinLockExclusive(&m_Lock, m_OldIrql);
+    }
+
+private:
+    EX_SPIN_LOCK m_Lock = {};
+    KIRQL m_OldIrql;
+
+    CWdmExSpinLock(const CWdmExSpinLock&) = delete;
+    CWdmExSpinLock& operator= (const CWdmExSpinLock&) = delete;
+};
+
+#else //!TARGET_OS_WIN_XP
+
+//EX_SPIN_LOCK is not supported on Windows XP so we simulate
+//it with usual spinlock.
+
+class CWdmExSpinLock : public CWdmSpinLock
+{
+public:
+    void LockShared()
+    {
+        Lock();
+    }
+
+    void UnlockShared()
+    {
+        Unlock();
+    }
+
+    void LockExclusive()
+    {
+        Lock();
+    }
+
+    void UnlockExclusive()
+    {
+        Unlock();
+    }
+};
+
+#endif //TARGET_OS_WIN_XP
+
+template <typename T = CWdmExSpinLock>
+using CSharedLockedContext = CBaseLockedContext <T, &T::LockShared, &T::UnlockShared>;
+
+template <typename T = CWdmExSpinLock>
+using CExclusiveLockedContext = CBaseLockedContext <T, &T::LockExclusive, &T::UnlockExclusive>;
+
 class CWdmRefCounter
 {
 public:

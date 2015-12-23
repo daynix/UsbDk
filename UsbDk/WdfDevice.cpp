@@ -137,7 +137,7 @@ NTSTATUS CWdfQueue::Create(CWdfDevice &Device)
     SetCallbacks(QueueConfig);
 
     WDF_OBJECT_ATTRIBUTES_INIT(&Attributes);
-    Attributes.ExecutionLevel = WdfExecutionLevelPassive;
+    Attributes.ExecutionLevel = m_ExecutionLevel;
 
     auto status = Device.AddQueue(QueueConfig, Attributes, m_Queue);
     if (!NT_SUCCESS(status)) {

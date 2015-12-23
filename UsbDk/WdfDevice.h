@@ -168,8 +168,9 @@ public:
 class CWdfQueue
 {
 public:
-    CWdfQueue(WDF_IO_QUEUE_DISPATCH_TYPE DispatchType)
+    CWdfQueue(WDF_IO_QUEUE_DISPATCH_TYPE DispatchType, WDF_EXECUTION_LEVEL ExecutionLevel)
         : m_DispatchType(DispatchType)
+        , m_ExecutionLevel(ExecutionLevel)
     {}
 
     virtual NTSTATUS Create(CWdfDevice &Device);
@@ -187,6 +188,7 @@ protected:
 
     WDFQUEUE m_Queue;
     WDF_IO_QUEUE_DISPATCH_TYPE m_DispatchType;
+    WDF_EXECUTION_LEVEL m_ExecutionLevel;
 
     CWdfQueue(const CWdfQueue&) = delete;
     CWdfQueue& operator= (const CWdfQueue&) = delete;
@@ -195,8 +197,8 @@ protected:
 class CWdfDefaultQueue : public CWdfQueue
 {
 public:
-    CWdfDefaultQueue(WDF_IO_QUEUE_DISPATCH_TYPE DispatchType)
-        : CWdfQueue(DispatchType)
+    CWdfDefaultQueue(WDF_IO_QUEUE_DISPATCH_TYPE DispatchType, WDF_EXECUTION_LEVEL Executionlevel)
+        : CWdfQueue(DispatchType, Executionlevel)
     {}
 
 private:
@@ -209,8 +211,8 @@ private:
 class CWdfSpecificQueue : public CWdfQueue
 {
 public:
-    CWdfSpecificQueue(WDF_IO_QUEUE_DISPATCH_TYPE DispatchType)
-        : CWdfQueue(DispatchType)
+    CWdfSpecificQueue(WDF_IO_QUEUE_DISPATCH_TYPE DispatchType, WDF_EXECUTION_LEVEL Executionlevel)
+        : CWdfQueue(DispatchType, Executionlevel)
     {}
 
 private:

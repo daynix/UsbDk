@@ -34,7 +34,7 @@ class CUsbDkRedirectorQueueData : public CWdfDefaultQueue
 {
 public:
     CUsbDkRedirectorQueueData()
-        : CWdfDefaultQueue(WdfIoQueueDispatchParallel)
+        : CWdfDefaultQueue(WdfIoQueueDispatchParallel, WdfExecutionLevelDispatch)
     {}
 
 private:
@@ -47,7 +47,7 @@ class CUsbDkRedirectorQueueConfig : public CWdfSpecificQueue
 {
 public:
     CUsbDkRedirectorQueueConfig()
-        : CWdfSpecificQueue(WdfIoQueueDispatchSequential)
+        : CWdfSpecificQueue(WdfIoQueueDispatchSequential, WdfExecutionLevelPassive)
     {}
 
 private:

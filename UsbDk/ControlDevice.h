@@ -62,7 +62,7 @@ class CUsbDkControlDeviceQueue : public CWdfDefaultQueue
 {
 public:
     CUsbDkControlDeviceQueue(WDF_IO_QUEUE_DISPATCH_TYPE DispatchType)
-        : CWdfDefaultQueue(DispatchType)
+        : CWdfDefaultQueue(DispatchType, WdfExecutionLevelPassive)
     {}
 
 private:

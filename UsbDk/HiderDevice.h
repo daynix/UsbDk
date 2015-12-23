@@ -32,7 +32,7 @@ class CUsbDkHiderDeviceQueue : public CWdfDefaultQueue
 {
 public:
     CUsbDkHiderDeviceQueue(WDF_IO_QUEUE_DISPATCH_TYPE DispatchType)
-        : CWdfDefaultQueue(DispatchType)
+        : CWdfDefaultQueue(DispatchType, WdfExecutionLevelPassive)
     {}
 
 private:

@@ -38,6 +38,9 @@ public:
 private:
     KSPIN_LOCK m_Lock;
     KIRQL m_OldIrql;
+
+    CWdmSpinLock(const CWdmSpinLock&) = delete;
+    CWdmSpinLock& operator= (const CWdmSpinLock&) = delete;
 };
 
 template <typename T>

@@ -434,6 +434,8 @@ NTSTATUS CWdfUsbTarget::ResetDevice(WDFREQUEST Request)
     //ResetDevice does not require locking because is scheduled sequentially
     //with SetAltSettings which is only operation that changes pipes array
 
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_USBTARGET, "%!FUNC! processing started");
+
     for (UCHAR i = 0; i < m_NumInterfaces; i++)
     {
         auto currentStatus = m_Interfaces[i].Reset(Request);
@@ -443,6 +445,8 @@ NTSTATUS CWdfUsbTarget::ResetDevice(WDFREQUEST Request)
             status = currentStatus;
         }
     }
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_USBTARGET, "%!FUNC! processing finished: %!STATUS!", status);
 
     return status;
 }

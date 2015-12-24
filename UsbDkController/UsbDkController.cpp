@@ -38,7 +38,10 @@ static void ShowUsage()
     tcout << TEXT("        UsbDkController -i         - install UsbDk driver") << endl;
     tcout << TEXT("        UsbDkController -u         - uninstall UsbDk driver") << endl;
     tcout << TEXT("        UsbDkController -n         - enumerate USB devices") << endl;
-    tcout << TEXT("        UsbDkController -r ID SN   - redirect device by ID and serial number") << endl;
+    tcout << TEXT("        UsbDkController -r ID SN   - redirect device by ID and serial number.") << endl;
+    tcout << TEXT("                                     ID should be formatted the same way as") << endl;
+    tcout << TEXT("                                     it appears in device enumeration output") << endl;
+    tcout << TEXT("                                     and with quotes, i.e. \"USB\\VID_XXXX&PID_XXXX\"") << endl;
     tcout << endl;
     tcout << TEXT("    Hider API:") << endl;
     tcout << endl;

@@ -40,13 +40,14 @@ public:
     virtual void IoInCallerContext(WDFDEVICE Device, WDFREQUEST Request);
 
     virtual void IoDeviceControl(WDFREQUEST Request,
-                                 size_t OutputBufferLength, size_t InputBufferLength,
-                                 ULONG IoControlCode);
+                                 size_t /*OutputBufferLength*/, size_t /*InputBufferLength*/,
+                                 ULONG /*IoControlCode*/)
+    { ForwardRequest(Request); }
 
     virtual void IoDeviceControlConfig(WDFREQUEST Request,
-                                       size_t OutputBufferLength, size_t InputBufferLength,
-                                       ULONG IoControlCode)
-    { IoDeviceControl(Request, OutputBufferLength, InputBufferLength, IoControlCode); }
+                                       size_t /*OutputBufferLength*/, size_t /*InputBufferLength*/,
+                                       ULONG /*IoControlCode*/)
+    { ForwardRequest(Request); }
 
     virtual NTSTATUS MakeAvailable() = 0;
 

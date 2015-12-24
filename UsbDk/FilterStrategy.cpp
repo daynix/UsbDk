@@ -46,16 +46,6 @@ void CUsbDkFilterStrategy::ForwardRequest(WDFREQUEST Request)
     }
 }
 
-void CUsbDkFilterStrategy::IoDeviceControl(WDFREQUEST Request,
-                                           size_t OutputBufferLength, size_t InputBufferLength,
-                                           ULONG IoControlCode)
-{
-    UNREFERENCED_PARAMETER(OutputBufferLength);
-    UNREFERENCED_PARAMETER(InputBufferLength);
-    UNREFERENCED_PARAMETER(IoControlCode);
-    ForwardRequest(Request);
-}
-
 void CUsbDkFilterStrategy::IoInCallerContext(WDFDEVICE Device, WDFREQUEST Request)
 {
     auto status = WdfDeviceEnqueueRequest(Device, Request);

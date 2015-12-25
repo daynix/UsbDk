@@ -110,6 +110,7 @@ void CWdfUsbPipe::Create(WDFUSBDEVICE Device, WDFUSBINTERFACE Interface, UCHAR P
 
     m_Pipe = WdfUsbInterfaceGetConfiguredPipe(m_Interface, PipeIndex, &m_Info);
     ASSERT(m_Pipe != nullptr);
+    WdfUsbTargetPipeSetNoMaximumPacketSizeCheck(m_Pipe);
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_USBTARGET,
                 "%!FUNC! Created pipe #%d, "
@@ -330,19 +331,6 @@ void CWdfUsbTarget::ReadPipeAsync(WDFREQUEST Request, ULONG64 EndpointAddress, W
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed because pipe was not found");
         WdfRequest.SetStatus(STATUS_NOT_FOUND);
     }
-}
-
-size_t CWdfUsbTarget::GetPipeMaxPacketSize(ULONG64 EndpointAddress)
-{
-    size_t res;
-
-    if (!DoPipeOperation<CWdfUsbInterface::SharedLock>(EndpointAddress, [&res](CWdfUsbPipe &Pipe) { res = Pipe.MaxPacketSize(); }))
-    {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! Failed because pipe was not found");
-        return 0;
-    }
-
-    return res;
 }
 
 void CWdfUsbTarget::ReadIsochronousPipeAsync(WDFREQUEST Request, ULONG64 EndpointAddress, WDFMEMORY Buffer,

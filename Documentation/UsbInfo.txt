@@ -1,0 +1,15 @@
+Collecting Full USB Stack Information
+==============================================================================
+
+1. Dumping USB tree
+
+  - Obtain the latest USBView tool from Microsoft:
+
+    https://msdn.microsoft.com/en-us/library/windows/hardware/ff560019%28v=vs.85%29.aspx
+
+  - Run it as following:
+
+    usbview /q /f /saveall:MyUsbTree.txt
+    usbview /q /f /savexml:MyUsbTree.xml
+
+  - USB tree dump will be stored in MyUsbTree.txt and MyUsbTree.xml files.

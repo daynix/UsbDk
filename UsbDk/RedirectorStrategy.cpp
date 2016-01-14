@@ -425,15 +425,27 @@ void CUsbDkRedirectorStrategy::DoControlTransfer(CRedirectorRequest &WdfRequest,
                                   {
                                          auto status = Params->IoStatus.Status;
                                          auto usbCompletionParams = Params->Parameters.Usb.Completion;
+                                         auto UsbdStatus = usbCompletionParams->UsbdStatus;
                                          CRedirectorRequest WdfRequest(Request);
 
-                                         if (!NT_SUCCESS(status) || !USBD_SUCCESS(usbCompletionParams->UsbdStatus))
+                                         // Do not report STALL conditions on control pipe.
+                                         //
+                                         // STALL condition on control pipe cleared automatically
+                                         // by underlying infrastructure. Do not report it to client
+                                         // otherwise it may decide to clear it via ResetPipe and
+                                         // reset of control pipe is not supported by WDF.
+                                         if (UsbdStatus == USBD_STATUS_STALL_PID)
                                          {
-                                             TraceTransferError(WdfRequest, status, usbCompletionParams->UsbdStatus);
+                                             status = STATUS_SUCCESS;
+                                             UsbdStatus = USBD_STATUS_INTERNAL_HC_ERROR;
                                          }
 
-                                         CompleteTransferRequest(WdfRequest, status,
-                                                                 usbCompletionParams->UsbdStatus,
+                                         if (!NT_SUCCESS(status) || !USBD_SUCCESS(UsbdStatus))
+                                         {
+                                             TraceTransferError(WdfRequest, status, UsbdStatus);
+                                         }
+
+                                         CompleteTransferRequest(WdfRequest, status, UsbdStatus,
                                                                  usbCompletionParams->Parameters.DeviceControlTransfer.Length);
                                   });
 

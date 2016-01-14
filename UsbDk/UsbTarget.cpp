@@ -395,7 +395,7 @@ NTSTATUS CWdfUsbTarget::ResetPipe(WDFREQUEST Request, ULONG64 EndpointAddress)
 {
     NTSTATUS status;
 
-    //AbortPipe does not require locking because is scheduled sequentially
+    //ResetPipe does not require locking because is scheduled sequentially
     //with SetAltSettings which is only operation that changes pipes array
 
     if (!DoPipeOperation<CWdfUsbInterface::NeitherLock>(EndpointAddress,

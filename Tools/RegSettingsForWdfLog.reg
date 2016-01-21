@@ -1,0 +1,8 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\UsbDk\Parameters\Wdf]
+"VerifierOn"=dword:00000001
+"VerboseOn"=dword:00000001
+"LogPages"=dword:00000010
+"VerifyDownLevel"=dword:00000001
+"EnhancedVerifierOptions"=dword:00000001

@@ -1,0 +1,59 @@
+1) Download and install the latest version of UsbDk, if you haven't done so
+   already. It is available from:
+
+   https://github.com/daynix/UsbDk/releases
+
+2) Download the latest WDK from here:
+
+   https://msdn.microsoft.com/en-us/windows/hardware/hh852365.aspx
+
+   Look for the link named "Download WDK 8.1 Update", or whatever the latest
+   version is. It is advised to use the latest version always.
+
+3) Enable local kernel-mode debugging:
+
+   a) Open a Command Prompt window as the Administrator.
+   b) Enter "bcdedit /debug on".
+   c) Enter "bcdedit /dbgsettings local".
+   d) Reboot the computer.
+
+4) Set logging parameters for UsbDk: run the "Tools/RegSettingsForWdfLog.reg"
+   file from UsbDk source tree on the intended machine.
+
+   * ALTERNATIVELY, these, and other settings can be set using a GUI:
+
+     a) Launch WdfVerifier. Its default path should look like that:
+        "C:\Program Files (x86)\Windows Kits\8.1\Tools\x64\wdfverifier.exe"
+     b) Under the "WDF Drivers" tab look for "UsbDk.sys" and click the plus sign
+        near it. Change the following settings (right-click to change):
+
+        i)   Set VerifierOn to "ON"
+        ii)  Set VerboseOn to "ON"
+        iii) Set LogPages to "16"
+        iv)  Set VerifyDownLevel to "ON"
+
+     c) Click "Apply", and reboot the machine if prompted.
+
+5) Start the WinDbg debugger, that was installed as a part of WDK:
+
+   a) Open a Command Prompt window as the Administrator.
+   b) Change directory to where WinDbg is installed. FOR EXAMPLE:
+      'cd "C:\Program Files (x86)\Windows Kits\8.1\Debuggers\x64"'
+   c) Run WinDbg connected to the local machine: "windbg -kl"
+   d) Load the WDF debugger extension:
+      "!load wdfkd.dll"
+   e) Load the system symbols:
+      ".symfix+"
+      ".reload"
+   f) Specify the WDF .tmf file. FOR EXAMPLE:
+      "!wdftmffile C:\temp\Wudf01011.tmf"
+
+      * The default path to this file looks like:
+        "C:\Program Files (x86)\Windows Kits\8.1\Tools\x64\Tracing",
+        but it is necessary to copy it to some folder with no spaces in its
+        name, such as "C:\temp\", in the example above.
+      * Please make sure to choose the file for the correct WDF version, it is
+        1.11 in the example above.
+
+6) Dump the log with "!wdflogdump <driver_name>.sys". FOR EXAMPLE:
+   "!wdflogdump usbdk.sys"

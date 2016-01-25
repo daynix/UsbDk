@@ -154,9 +154,7 @@ private:
     void ApplyRedirectionPolicy(CUsbDkChildDevice &Device);
     bool FetchConfigurationDescriptors(CWdmUsbDeviceAccess &devAccess,
                                        CUsbDkChildDevice::TDescriptorsCache &DescriptorsHolder);
-
-    bool IsChildRegistered(PDEVICE_OBJECT PDO)
-    { return !Children().ForEachIf([PDO](CUsbDkChildDevice *Child){ return Child->Match(PDO); }, ConstFalse); }
+    bool IsChildRegistered(PDEVICE_OBJECT PDO);
 };
 
 class CUsbDkFilterDevice : public CWdfDevice,

@@ -176,6 +176,17 @@ public:
     bool Contains(const CUsbDkChildDevice &Dev) const
     { return !ForEach([&Dev](PDEVICE_OBJECT Relation) { return !Dev.Match(Relation); }); }
 
+    void Dump() const
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Array size: %lu (ptr: %p)", m_Relations->Count, m_Relations);
+
+        ULONG Index = 0;
+        ForEach([&Index](PDEVICE_OBJECT PDO) -> bool
+                {
+                    TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! #%lu: %p", Index++, PDO);
+                    return true;
+                });
+    }
 private:
     PDEVICE_RELATIONS m_Relations;
 
@@ -244,9 +255,13 @@ NTSTATUS CUsbDkHubFilterStrategy::PNPPreProcess(PIRP Irp)
                                             return;
                                         }
 
+                                        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Starting relations array processing:");
+                                        Relations.Dump();
+
                                         DropRemovedDevices(Relations);
                                         AddNewDevices(Relations);
                                         WipeHiddenDevices(Relations);
+                                        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Finished relations array processing");
                                     });
     }
 
@@ -259,7 +274,28 @@ void CUsbDkHubFilterStrategy::DropRemovedDevices(const CDeviceRelations &Relatio
     //So we put those to non-locked list and let its destructor do the job
     CWdmList<CUsbDkChildDevice, CRawAccess, CNonCountingObject> ToBeDeleted;
     Children().ForEachDetachedIf([&Relations](CUsbDkChildDevice *Child) { return !Relations.Contains(*Child); },
-                                 [&ToBeDeleted](CUsbDkChildDevice *Child) -> bool { ToBeDeleted.PushBack(Child); return true; });
+                                 [&ToBeDeleted](CUsbDkChildDevice *Child) -> bool
+                                 {
+                                     TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Deleting child object:");
+                                     Child->Dump();
+                                     ToBeDeleted.PushBack(Child);
+                                     return true;
+                                 });
+}
+
+bool CUsbDkHubFilterStrategy::IsChildRegistered(PDEVICE_OBJECT PDO)
+{
+    return !Children().ForEachIf([PDO](CUsbDkChildDevice *Child)
+                                 {
+                                     if (Child->Match(PDO))
+                                     {
+                                         TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! PDO %p already registered:", PDO);
+                                         Child->Dump();
+                                         return true;
+                                     }
+                                     return false;
+                                 },
+                                 ConstFalse);
 }
 
 void CUsbDkHubFilterStrategy::AddNewDevices(const CDeviceRelations &Relations)
@@ -288,6 +324,11 @@ void CUsbDkHubFilterStrategy::WipeHiddenDevices(CDeviceRelations &Relations)
                                  if (!Hide)
                                  {
                                      Child->MarkAsIndicated();
+                                 }
+                                 else
+                                 {
+                                     TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Hiding child object:");
+                                     Child->Dump();
                                  }
 
                                  return false;
@@ -332,7 +373,7 @@ void CUsbDkHubFilterStrategy::RegisterNewChild(PDEVICE_OBJECT PDO)
         return;
     }
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Registering new child");
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Registering new child (PDO: %p):", PDO);
     DevID->Dump();
     InstanceID->Dump();
 

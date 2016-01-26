@@ -1,41 +1,41 @@
 1) Download and install the latest version of UsbDk, if you haven't done so
    already. It is available from:
 
-   https://github.com/daynix/UsbDk/releases
+   http://www.spice-space.org/download.html
 
-2) Download the latest WDK from here:
+2) Download WDK suitable for your system:
 
-   https://msdn.microsoft.com/en-us/windows/hardware/hh852365.aspx
+   Windows 7 and newer versions:
 
-   Look for the link named "Download WDK 8.1 Update", or whatever the latest
-   version is. It is advised to use the latest version always.
+     https://msdn.microsoft.com/en-us/windows/hardware/hh852365.aspx
+
+     Look for the link named "Download WDK 8.1 Update", or whatever the latest
+     version is. It is advised to use the latest version always.
+
+   Windows XP/Server 2003:
+
+     https://www.microsoft.com/en-us/download/details.aspx?id=11800
+
+     Download Windows Driver Kit Version 7.1.0, newer versions will not work.
 
 3) Enable local kernel-mode debugging:
 
-   a) Open a Command Prompt window as the Administrator.
-   b) Run "bcdedit /debug on".
-   c) On Windows 8 and later, run "bcdedit /dbgsettings local".
-   d) Reboot the computer.
+   * On Windows Vista/Server 2008 and later:
+
+     a) Open a Command Prompt window as the Administrator.
+     b) Run "bcdedit /debug on".
+     c) On Windows 8 and later, run "bcdedit /dbgsettings local".
+     d) Reboot the computer.
+
+   * On Windows 2000/XP/Server 2003:
+
+     a) Open the Command Prompt.
+     b) Run "bootcfg", and note the ID of the targeted operating system.
+     c) Run "bootcfg /debug ON /ID X" (REPLACE X WITH ID NOTED BEFORE).
+     d) Reboot the computer.
 
 4) Set logging parameters for UsbDk: run the "Tools/RegSettingsForWdfLog.reg"
    file from UsbDk source tree on the intended machine.
-
-   * ALTERNATIVELY, these, and other settings can be set using a GUI:
-
-     a) Launch WdfVerifier. Its default path should look like that:
-        For 64-bit systems:
-          "C:\Program Files (x86)\Windows Kits\8.1\Tools\x64\wdfverifier.exe"
-        For 32-bit systems:
-          "C:\Program Files (x86)\Windows Kits\8.1\Tools\x86\wdfverifier.exe"
-     b) Under the "WDF Drivers" tab look for "UsbDk.sys" and click the plus sign
-        near it. Change the following settings (right-click to change):
-
-        i)   Set VerifierOn to "ON"
-        ii)  Set VerboseOn to "ON"
-        iii) Set LogPages to "16"
-        iv)  Set VerifyDownLevel to "ON"
-
-     c) Click "Apply"
 
 5) Reboot the machine.
 
@@ -44,6 +44,7 @@
    a) Open a Command Prompt window as the Administrator.
    b) Change directory to where WinDbg is installed. FOR EXAMPLE:
       'cd "C:\Program Files (x86)\Windows Kits\8.1\Debuggers\x64"'
+      (or 'cd C:\WinDDK\7600.16385.1\Debuggers' on Windows XP)
    c) Run WinDbg connected to the local machine: "windbg -kl"
    d) Load the WDF debugger extension:
       "!load wdfkd.dll"
@@ -54,9 +55,9 @@
       Windows 7 and later:
         "!wdftmffile C:\temp\Wudf01011.tmf"
       Windows XP:
-        "!wdftmffile C:\temp\Wudf01009.tmf"
+        "!wdftmffile C:\WinDDK\7600.16385.1\Tools\tracing\i386\Wudf01009.tmf"
 
-      * The default path to this file looks like:
+      * The default path to this file on later versions than XP/2003 looks like:
         For 64-bit systems:
           "C:\Program Files (x86)\Windows Kits\8.1\Tools\x64\Tracing",
         For 32-bit systems:

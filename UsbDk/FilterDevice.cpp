@@ -600,16 +600,7 @@ bool CUsbDkFilterDevice::CStrategist::SelectStrategy(PDEVICE_OBJECT DevObj)
         return false;
     }
 
-    // 4. Device class is HUB -> Hub strategy
-    if (UsbDkWdmUsbDeviceIsHub(DevObj))
-    {
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Device class in HUB, assigning hub strategy");
-        m_Strategy->Delete();
-        m_Strategy = &m_HubStrategy;
-        return true;
-    }
-
-    // 5. Get instance ID
+    // 4. Get instance ID
     CObjHolder<CRegText> InstanceID;
     if (!UsbDkGetWdmDeviceIdentity(DevObj, nullptr, &InstanceID))
     {
@@ -617,17 +608,34 @@ bool CUsbDkFilterDevice::CStrategist::SelectStrategy(PDEVICE_OBJECT DevObj)
         return false;
     }
 
-    // 6. Configuration doesn't tell to redirect or device already redirected -> no strategy
     USB_DK_DEVICE_ID ID;
     UsbDkFillIDStruct(&ID, *DevID->begin(), *InstanceID->begin());
 
+    // 5. Get device descriptor
+    USB_DEVICE_DESCRIPTOR DevDescr;
+    if (!m_Strategy->GetControlDevice()->GetDeviceDescriptor(ID, DevDescr))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Cannot query cached device descriptor");
+        return false;
+    }
+
+    // 6. Device class is HUB -> Hub strategy
+    if (DevDescr.bDeviceClass == USB_DEVICE_CLASS_HUB)
+    {
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Device class is HUB, assigning hub strategy");
+        m_Strategy->Delete();
+        m_Strategy = &m_HubStrategy;
+        return true;
+    }
+
+    // 7. Configuration doesn't tell to redirect or device already redirected -> no strategy
     if (!m_Strategy->GetControlDevice()->ShouldRedirect(ID))
     {
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Do not redirect or already redirected device, no strategy assigned");
         return false;
     }
 
-    // 7. Redirector strategy
+    // 8. Redirector strategy
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Assigning redirected USB device strategy");
     m_DevStrategy.SetDeviceID(DevID.detach());
     m_DevStrategy.SetInstanceID(InstanceID.detach());

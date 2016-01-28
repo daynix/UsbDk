@@ -267,6 +267,9 @@ public:
                                         PUSB_CONFIGURATION_DESCRIPTOR Descriptor,
                                         size_t *OutputBuffLen);
 
+    bool GetDeviceDescriptor(const USB_DK_DEVICE_ID &DeviceID,
+                             USB_DEVICE_DESCRIPTOR &Descriptor);
+
     static bool Allocate();
     static void Deallocate()
     { delete m_UsbDkControlDevice; }

@@ -337,6 +337,17 @@ bool CUsbDkControlDevice::UsbDeviceExists(const USB_DK_DEVICE_ID &ID)
     return !EnumUsbDevicesByID(ID, ConstFalse);
 }
 
+bool CUsbDkControlDevice::GetDeviceDescriptor(const USB_DK_DEVICE_ID &DeviceID,
+                                              USB_DEVICE_DESCRIPTOR &Descriptor)
+{
+    return !EnumUsbDevicesByID(DeviceID,
+                               [&Descriptor](CUsbDkChildDevice *Child) -> bool
+                               {
+                                   Descriptor = Child->DeviceDescriptor();
+                                   return false;
+                               });
+}
+
 PDEVICE_OBJECT CUsbDkControlDevice::GetPDOByDeviceID(const USB_DK_DEVICE_ID &DeviceID)
 {
     PDEVICE_OBJECT PDO = nullptr;

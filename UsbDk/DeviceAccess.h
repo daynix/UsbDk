@@ -120,7 +120,6 @@ bool UsbDkGetWdmDeviceIdentity(const PDEVICE_OBJECT PDO,
                                CObjHolder<CRegText> *DeviceID,
                                CObjHolder<CRegText> *InstanceID = nullptr);
 
-bool UsbDkWdmUsbDeviceIsHub(PDEVICE_OBJECT PDO);
 USB_DK_DEVICE_SPEED UsbDkWdmUsbDeviceGetSpeed(PDEVICE_OBJECT PDO, PDRIVER_OBJECT DriverObject);
 
 template <typename TBuffer>

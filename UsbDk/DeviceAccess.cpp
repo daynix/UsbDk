@@ -311,20 +311,6 @@ USB_DK_DEVICE_SPEED UsbDkWdmUsbDeviceGetSpeed(PDEVICE_OBJECT DevObj, PDRIVER_OBJ
 #endif //TARGET_OS_WIN_XP
 }
 
-bool UsbDkWdmUsbDeviceIsHub(PDEVICE_OBJECT PDO)
-{
-    CWdmUsbDeviceAccess pdoAccess(PDO);
-
-    USB_DEVICE_DESCRIPTOR DevDescr;
-    if (!NT_SUCCESS(pdoAccess.GetDeviceDescriptor(DevDescr)))
-    {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVACCESS, "%!FUNC! Cannot query device descriptor");
-        return false;
-    }
-
-    return (DevDescr.bDeviceClass == USB_DEVICE_CLASS_HUB);
-}
-
 bool UsbDkGetWdmDeviceIdentity(const PDEVICE_OBJECT PDO,
                                CObjHolder<CRegText> *DeviceID,
                                CObjHolder<CRegText> *InstanceID)

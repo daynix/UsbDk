@@ -199,7 +199,7 @@ public:
     {}
 
     PUSBDK_REDIRECTOR_REQUEST_CONTEXT Context() const
-    { return reinterpret_cast<PUSBDK_REDIRECTOR_REQUEST_CONTEXT>(UsbDkFilterRequestGetContext(m_Request)); }
+    { return reinterpret_cast<PUSBDK_REDIRECTOR_REQUEST_CONTEXT>(CWdfRequest::Context()); }
 
 private:
     void SetBytesWritten(size_t numBytes);

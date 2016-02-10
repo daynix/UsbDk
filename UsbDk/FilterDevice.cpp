@@ -56,7 +56,7 @@ NTSTATUS CUsbDkFilterDeviceInit::Configure(ULONG InstanceNumber)
     PAGED_CODE();
 
     WDF_OBJECT_ATTRIBUTES requestAttributes;
-    WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&requestAttributes, USBDK_FILTER_REQUEST_CONTEXT);
+    WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&requestAttributes, WDF_REQUEST_CONTEXT);
     requestAttributes.ContextSizeOverride = CUsbDkFilterDevice::CStrategist::GetRequestContextSize();
 
     SetRequestAttributes(requestAttributes);

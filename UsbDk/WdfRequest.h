@@ -23,6 +23,11 @@
 
 #pragma once
 
+using WDF_REQUEST_CONTEXT = struct {};
+using PWDF_REQUEST_CONTEXT = WDF_REQUEST_CONTEXT*;
+
+WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(WDF_REQUEST_CONTEXT, WdfRequestGetContext);
+
 class CWdfRequest
 {
 public:
@@ -108,6 +113,9 @@ public:
         m_Request = WDF_NO_HANDLE;
         return Request;
     }
+
+    PWDF_REQUEST_CONTEXT Context() const
+    { return WdfRequestGetContext(m_Request); }
 
     operator WDFREQUEST() const
     { return m_Request; }

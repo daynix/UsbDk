@@ -219,7 +219,7 @@ NTSTATUS CUsbDkRedirectorStrategy::IoInCallerContextRW(CRedirectorRequest &WdfRe
         return status;
     }
 
-    PUSBDK_REDIRECTOR_REQUEST_CONTEXT Context = WdfRequest.Context();
+    auto Context = WdfRequest.Context();
     Context->EndpointAddress = TransferRequest->EndpointAddress;
     Context->TransferType = static_cast<USB_DK_TRANSFER_TYPE>(TransferRequest->TransferType);
 
@@ -262,7 +262,7 @@ NTSTATUS CUsbDkRedirectorStrategy::IoInCallerContextRWIsoTransfer(CRedirectorReq
                                                                   const USB_DK_TRANSFER_REQUEST &TransferRequest,
                                                                   TLockerFunc LockerFunc)
 {
-    PUSBDK_REDIRECTOR_REQUEST_CONTEXT Context = WdfRequest.Context();
+    auto Context = WdfRequest.Context();
     auto status = LockerFunc(WdfRequest, TransferRequest, Context->LockedBuffer);
     if (!NT_SUCCESS(status))
     {
@@ -298,7 +298,7 @@ NTSTATUS CUsbDkRedirectorStrategy::IoInCallerContextRWControlTransfer(CRedirecto
                                                                       const USB_DK_TRANSFER_REQUEST &TransferRequest)
 {
     NTSTATUS status;
-    PUSBDK_REDIRECTOR_REQUEST_CONTEXT Context = WdfRequest.Context();
+    auto Context = WdfRequest.Context();
     __try
     {
 #pragma warning(push)
@@ -404,7 +404,7 @@ void CUsbDkRedirectorStrategy::CompleteTransferRequest(CRedirectorRequest &Reque
 
 void CUsbDkRedirectorStrategy::DoControlTransfer(CRedirectorRequest &WdfRequest, WDFMEMORY DataBuffer)
 {
-    PUSBDK_REDIRECTOR_REQUEST_CONTEXT Context = WdfRequest.Context();
+    auto Context = WdfRequest.Context();
 
     WDFMEMORY_OFFSET TransferOffset;
     TransferOffset.BufferOffset = 0;
@@ -531,7 +531,7 @@ void CUsbDkRedirectorStrategy::IoDeviceControlConfig(WDFREQUEST Request,
 void CUsbDkRedirectorStrategy::WritePipe(WDFREQUEST Request)
 {
     CRedirectorRequest WdfRequest(Request);
-    PUSBDK_REDIRECTOR_REQUEST_CONTEXT Context = WdfRequest.Context();
+    auto Context = WdfRequest.Context();
 
     if (!Context->PreprocessingDone)
     {
@@ -623,7 +623,7 @@ void CUsbDkRedirectorStrategy::TraceTransferError(const CRedirectorRequest &WdfR
 void CUsbDkRedirectorStrategy::ReadPipe(WDFREQUEST Request)
 {
     CRedirectorRequest WdfRequest(Request);
-    PUSBDK_REDIRECTOR_REQUEST_CONTEXT Context = WdfRequest.Context();
+    auto Context = WdfRequest.Context();
 
     if (!Context->PreprocessingDone)
     {

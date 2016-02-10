@@ -176,7 +176,7 @@ NTSTATUS CUsbDkRedirectorStrategy::PNPPreProcess(PIRP Irp)
     }
 }
 
-typedef struct tag_USBDK_REDIRECTOR_REQUEST_CONTEXT
+using USBDK_REDIRECTOR_REQUEST_CONTEXT = struct : public USBDK_TARGET_REQUEST_CONTEXT
 {
     bool PreprocessingDone;
 
@@ -189,17 +189,18 @@ typedef struct tag_USBDK_REDIRECTOR_REQUEST_CONTEXT
 
     WDFMEMORY LockedIsochronousPacketsArray;
     WDFMEMORY LockedIsochronousResultsArray;
-} USBDK_REDIRECTOR_REQUEST_CONTEXT, *PUSBDK_REDIRECTOR_REQUEST_CONTEXT;
+};
+using PUSBDK_REDIRECTOR_REQUEST_CONTEXT = USBDK_REDIRECTOR_REQUEST_CONTEXT*;
 
-class CRedirectorRequest : public CWdfRequest
+class CRedirectorRequest : public CTargetRequest
 {
 public:
     explicit CRedirectorRequest(WDFREQUEST Request)
-        : CWdfRequest(Request)
+        : CTargetRequest(Request)
     {}
 
     PUSBDK_REDIRECTOR_REQUEST_CONTEXT Context() const
-    { return reinterpret_cast<PUSBDK_REDIRECTOR_REQUEST_CONTEXT>(CWdfRequest::Context()); }
+    { return static_cast<PUSBDK_REDIRECTOR_REQUEST_CONTEXT>(CTargetRequest::Context()); }
 
 private:
     void SetBytesWritten(size_t numBytes);

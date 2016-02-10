@@ -26,8 +26,24 @@
 #include "Alloc.h"
 #include "UsbDkUtil.h"
 #include "Urb.h"
+#include "WdfRequest.h"
 
-class CWdfRequest;
+using USBDK_TARGET_REQUEST_CONTEXT = struct : public WDF_REQUEST_CONTEXT
+{
+    ULONG64 RequestId;
+};
+using PUSBDK_TARGET_REQUEST_CONTEXT = USBDK_TARGET_REQUEST_CONTEXT*;
+
+class CTargetRequest : public CWdfRequest
+{
+public:
+    explicit CTargetRequest(WDFREQUEST Request)
+        : CWdfRequest(Request)
+    {}
+
+    PUSBDK_TARGET_REQUEST_CONTEXT Context() const
+    { return static_cast<PUSBDK_TARGET_REQUEST_CONTEXT>(CWdfRequest::Context()); }
+};
 
 class CWdfUsbPipe : public CAllocatable<NonPagedPool, 'PUHR'>
 {
@@ -36,10 +52,10 @@ public:
     {}
 
     void Create(WDFUSBDEVICE Device, WDFUSBINTERFACE Interface, UCHAR PipeIndex);
-    void ReadAsync(CWdfRequest &Request, WDFMEMORY Buffer, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion);
-    void WriteAsync(CWdfRequest &Request, WDFMEMORY Buffer, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion);
+    void ReadAsync(CTargetRequest &Request, WDFMEMORY Buffer, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion);
+    void WriteAsync(CTargetRequest &Request, WDFMEMORY Buffer, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion);
 
-    void ReadIsochronousAsync(CWdfRequest &Request,
+    void ReadIsochronousAsync(CTargetRequest &Request,
         WDFMEMORY Buffer,
         PULONG64 PacketSizes,
         size_t PacketNumber,
@@ -48,7 +64,7 @@ public:
         SubmitIsochronousTransfer(Request, CIsochronousUrb::URB_DIRECTION_IN, Buffer, PacketSizes, PacketNumber, Completion);
     }
 
-    void WriteIsochronousAsync(CWdfRequest &Request,
+    void WriteIsochronousAsync(CTargetRequest &Request,
         WDFMEMORY Buffer,
         PULONG64 PacketSizes,
         size_t PacketNumber,
@@ -70,7 +86,7 @@ private:
     WDFUSBPIPE m_Pipe = WDF_NO_HANDLE;
     WDF_USB_PIPE_INFORMATION m_Info;
 
-    void SubmitIsochronousTransfer(CWdfRequest &Request,
+    void SubmitIsochronousTransfer(CTargetRequest &Request,
         CIsochronousUrb::Direction Direction,
         WDFMEMORY Buffer,
         PULONG64 PacketSizes,
@@ -153,7 +169,7 @@ public:
                                    PULONG64 PacketSizes, size_t PacketNumber,
                                    PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion);
 
-    NTSTATUS ControlTransferAsync(CWdfRequest &WdfRequest, PWDF_USB_CONTROL_SETUP_PACKET SetupPacket, WDFMEMORY Data,
+    NTSTATUS ControlTransferAsync(CTargetRequest &WdfRequest, PWDF_USB_CONTROL_SETUP_PACKET SetupPacket, WDFMEMORY Data,
                                   PWDFMEMORY_OFFSET TransferOffset, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion);
     NTSTATUS AbortPipe(WDFREQUEST Request, ULONG64 EndpointAddress);
     NTSTATUS ResetPipe(WDFREQUEST Request, ULONG64 EndpointAddress);

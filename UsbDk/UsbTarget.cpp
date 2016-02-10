@@ -129,7 +129,7 @@ void CWdfUsbPipe::Create(WDFUSBDEVICE Device, WDFUSBINTERFACE Interface, UCHAR P
                 m_Info.Interval);
 }
 
-void CWdfUsbPipe::ReadAsync(CWdfRequest &Request, WDFMEMORY Buffer, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion)
+void CWdfUsbPipe::ReadAsync(CTargetRequest &Request, WDFMEMORY Buffer, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion)
 {
     auto status = WdfUsbTargetPipeFormatRequestForRead(m_Pipe, Request, Buffer, nullptr);
     if (!NT_SUCCESS(status))
@@ -147,7 +147,7 @@ void CWdfUsbPipe::ReadAsync(CWdfRequest &Request, WDFMEMORY Buffer, PFN_WDF_REQU
     }
 }
 
-void CWdfUsbPipe::WriteAsync(CWdfRequest &Request, WDFMEMORY Buffer, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion)
+void CWdfUsbPipe::WriteAsync(CTargetRequest &Request, WDFMEMORY Buffer, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion)
 {
     auto status = WdfUsbTargetPipeFormatRequestForWrite(m_Pipe, Request, Buffer, nullptr);
     if (!NT_SUCCESS(status))
@@ -165,7 +165,7 @@ void CWdfUsbPipe::WriteAsync(CWdfRequest &Request, WDFMEMORY Buffer, PFN_WDF_REQ
     }
 }
 
-void CWdfUsbPipe::SubmitIsochronousTransfer(CWdfRequest &Request,
+void CWdfUsbPipe::SubmitIsochronousTransfer(CTargetRequest &Request,
                                             CIsochronousUrb::Direction Direction,
                                             WDFMEMORY Buffer,
                                             PULONG64 PacketSizes,
@@ -305,7 +305,7 @@ NTSTATUS CWdfUsbTarget::SetInterfaceAltSetting(ULONG64 InterfaceIdx, ULONG64 Alt
 
 void CWdfUsbTarget::WritePipeAsync(WDFREQUEST Request, ULONG64 EndpointAddress, WDFMEMORY Buffer, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion)
 {
-    CWdfRequest WdfRequest(Request);
+    CTargetRequest WdfRequest(Request);
 
     if (!DoPipeOperation<CWdfUsbInterface::SharedLock>(EndpointAddress,
                                                        [&WdfRequest, Buffer, Completion](CWdfUsbPipe &Pipe)
@@ -320,7 +320,7 @@ void CWdfUsbTarget::WritePipeAsync(WDFREQUEST Request, ULONG64 EndpointAddress, 
 
 void CWdfUsbTarget::ReadPipeAsync(WDFREQUEST Request, ULONG64 EndpointAddress, WDFMEMORY Buffer, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion)
 {
-    CWdfRequest WdfRequest(Request);
+    CTargetRequest WdfRequest(Request);
 
     if (!DoPipeOperation<CWdfUsbInterface::SharedLock>(EndpointAddress,
                                                        [&WdfRequest, Buffer, Completion](CWdfUsbPipe &Pipe)
@@ -337,7 +337,7 @@ void CWdfUsbTarget::ReadIsochronousPipeAsync(WDFREQUEST Request, ULONG64 Endpoin
                                              PULONG64 PacketSizes, size_t PacketNumber,
                                              PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion)
 {
-    CWdfRequest WdfRequest(Request);
+    CTargetRequest WdfRequest(Request);
 
     if (!DoPipeOperation<CWdfUsbInterface::SharedLock>(EndpointAddress,
                                                        [&WdfRequest, Buffer, PacketSizes, PacketNumber, Completion](CWdfUsbPipe &Pipe)
@@ -354,7 +354,7 @@ void CWdfUsbTarget::WriteIsochronousPipeAsync(WDFREQUEST Request, ULONG64 Endpoi
                                               PULONG64 PacketSizes, size_t PacketNumber,
                                               PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion)
 {
-    CWdfRequest WdfRequest(Request);
+    CTargetRequest WdfRequest(Request);
 
     if (!DoPipeOperation<CWdfUsbInterface::SharedLock>(EndpointAddress,
                                                        [&WdfRequest, Buffer, PacketSizes, PacketNumber, Completion](CWdfUsbPipe &Pipe)
@@ -439,7 +439,7 @@ NTSTATUS CWdfUsbTarget::ResetDevice(WDFREQUEST Request)
     return status;
 }
 
-NTSTATUS CWdfUsbTarget::ControlTransferAsync(CWdfRequest &WdfRequest, PWDF_USB_CONTROL_SETUP_PACKET SetupPacket, WDFMEMORY Data,
+NTSTATUS CWdfUsbTarget::ControlTransferAsync(CTargetRequest &WdfRequest, PWDF_USB_CONTROL_SETUP_PACKET SetupPacket, WDFMEMORY Data,
                                          PWDFMEMORY_OFFSET TransferOffset, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion)
 {
     auto status = WdfUsbTargetDeviceFormatRequestForControlTransfer(m_UsbDevice, WdfRequest, SetupPacket, Data, TransferOffset);

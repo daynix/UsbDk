@@ -464,7 +464,7 @@ void CUsbDkRedirectorStrategy::IoDeviceControl(WDFREQUEST Request,
     {
         default:
         {
-            CWdfRequest(Request).ForwardToIoQueue(m_IncomingConfigQueue);
+            CRedirectorRequest(Request).ForwardToIoQueue(m_IncomingConfigQueue);
             break;
         }
         case IOCTL_USBDK_DEVICE_READ_PIPE:
@@ -494,7 +494,7 @@ void CUsbDkRedirectorStrategy::IoDeviceControlConfig(WDFREQUEST Request,
         }
         case IOCTL_USBDK_DEVICE_ABORT_PIPE:
         {
-            CWdfRequest WdfRequest(Request);
+            CRedirectorRequest WdfRequest(Request);
             UsbDkHandleRequestWithInput<ULONG64>(WdfRequest,
                                             [this, Request](ULONG64 *endpointAddress, size_t)
                                             {return m_Target.AbortPipe(Request, *endpointAddress); });
@@ -502,7 +502,7 @@ void CUsbDkRedirectorStrategy::IoDeviceControlConfig(WDFREQUEST Request,
         }
         case IOCTL_USBDK_DEVICE_RESET_PIPE:
         {
-            CWdfRequest WdfRequest(Request);
+            CRedirectorRequest WdfRequest(Request);
             UsbDkHandleRequestWithInput<ULONG64>(WdfRequest,
                                             [this, Request](ULONG64 *endpointAddress, size_t)
                                             {return m_Target.ResetPipe(Request, *endpointAddress); });
@@ -511,7 +511,7 @@ void CUsbDkRedirectorStrategy::IoDeviceControlConfig(WDFREQUEST Request,
         case IOCTL_USBDK_DEVICE_SET_ALTSETTING:
         {
             m_IncomingDataQueue.StopSync();
-            CWdfRequest WdfRequest(Request);
+            CRedirectorRequest WdfRequest(Request);
             UsbDkHandleRequestWithInput<USBDK_ALTSETTINGS_IDXS>(WdfRequest,
                                                 [this, Request](USBDK_ALTSETTINGS_IDXS *altSetting, size_t)
                                                 {return m_Target.SetInterfaceAltSetting(altSetting->InterfaceIdx, altSetting->AltSettingIdx);});
@@ -520,7 +520,7 @@ void CUsbDkRedirectorStrategy::IoDeviceControlConfig(WDFREQUEST Request,
         }
         case IOCTL_USBDK_DEVICE_RESET_DEVICE:
         {
-            CWdfRequest WdfRequest(Request);
+            CRedirectorRequest WdfRequest(Request);
             auto status = m_Target.ResetDevice(Request);
             WdfRequest.SetStatus(status);
             return;

@@ -140,6 +140,20 @@ using CSharedLockedContext = CBaseLockedContext <T, &T::LockShared, &T::UnlockSh
 template <typename T = CWdmExSpinLock>
 using CExclusiveLockedContext = CBaseLockedContext <T, &T::LockExclusive, &T::UnlockExclusive>;
 
+class CAtomicCounter
+{
+public:
+    LONGLONG operator++()
+    { return InterlockedIncrement64(&m_Counter); }
+
+    LONGLONG operator++(int)
+    { return operator++() - 1; }
+
+    operator LONGLONG() { return m_Counter; }
+private:
+    volatile LONGLONG m_Counter = 0;
+};
+
 class CWdmRefCounter
 {
 public:

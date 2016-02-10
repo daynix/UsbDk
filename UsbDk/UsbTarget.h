@@ -43,6 +43,12 @@ public:
 
     PUSBDK_TARGET_REQUEST_CONTEXT Context() const
     { return static_cast<PUSBDK_TARGET_REQUEST_CONTEXT>(CWdfRequest::Context()); }
+
+    void SetId(ULONG64 Id) const
+    { Context()->RequestId = Id; }
+
+    ULONG64 GetId() const
+    { return Context()->RequestId; }
 };
 
 class CWdfUsbPipe : public CAllocatable<NonPagedPool, 'PUHR'>
@@ -81,10 +87,12 @@ public:
     }
 
 private:
+
     WDFUSBINTERFACE m_Interface = WDF_NO_HANDLE;
     WDFUSBDEVICE m_Device = WDF_NO_HANDLE;
     WDFUSBPIPE m_Pipe = WDF_NO_HANDLE;
     WDF_USB_PIPE_INFORMATION m_Info;
+    CAtomicCounter m_RequestConter;
 
     void SubmitIsochronousTransfer(CTargetRequest &Request,
         CIsochronousUrb::Direction Direction,
@@ -92,6 +100,7 @@ private:
         PULONG64 PacketSizes,
         size_t PacketNumber,
         PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion);
+
     CWdfUsbPipe(const CWdfUsbPipe&) = delete;
     CWdfUsbPipe& operator= (const CWdfUsbPipe&) = delete;
 };
@@ -198,6 +207,8 @@ private:
 
     CObjHolder<CWdfUsbInterface, CVectorDeleter<CWdfUsbInterface> > m_Interfaces;
     UCHAR m_NumInterfaces = 0;
+
+    CAtomicCounter m_ControlTransferCouter;
 
     CWdfUsbTarget(const CWdfUsbTarget&) = delete;
     CWdfUsbTarget& operator= (const CWdfUsbTarget&) = delete;

@@ -613,12 +613,14 @@ void CUsbDkRedirectorStrategy::TraceTransferError(const CRedirectorRequest &WdfR
                 "%!FUNC! %!usbdktransferdirection! transfer failed: %!STATUS! UsbdStatus 0x%x, "
                 "Endpoint address %llu, "
                 "Transfer type %!usbdktransfertype!, "
-                "Length %llu",
+                "Length %llu "
+                " (Request ID: %lld)",
                 Context->Direction,
                 Status, UsbdStatus,
                 Context->EndpointAddress,
                 Context->TransferType,
-                DataBuffer.Size());
+                DataBuffer.Size(),
+                WdfRequest.GetId());
 }
 
 void CUsbDkRedirectorStrategy::ReadPipe(WDFREQUEST Request)

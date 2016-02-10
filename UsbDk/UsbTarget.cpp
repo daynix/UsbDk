@@ -131,6 +131,8 @@ void CWdfUsbPipe::Create(WDFUSBDEVICE Device, WDFUSBINTERFACE Interface, UCHAR P
 
 void CWdfUsbPipe::ReadAsync(CTargetRequest &Request, WDFMEMORY Buffer, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion)
 {
+    Request.SetId(m_RequestConter++);
+
     auto status = WdfUsbTargetPipeFormatRequestForRead(m_Pipe, Request, Buffer, nullptr);
     if (!NT_SUCCESS(status))
     {
@@ -149,6 +151,8 @@ void CWdfUsbPipe::ReadAsync(CTargetRequest &Request, WDFMEMORY Buffer, PFN_WDF_R
 
 void CWdfUsbPipe::WriteAsync(CTargetRequest &Request, WDFMEMORY Buffer, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion)
 {
+    Request.SetId(m_RequestConter++);
+
     auto status = WdfUsbTargetPipeFormatRequestForWrite(m_Pipe, Request, Buffer, nullptr);
     if (!NT_SUCCESS(status))
     {
@@ -172,6 +176,8 @@ void CWdfUsbPipe::SubmitIsochronousTransfer(CTargetRequest &Request,
                                             size_t PacketNumber,
                                             PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion)
 {
+    Request.SetId(m_RequestConter++);
+
     CIsochronousUrb Urb(m_Device, m_Pipe, Request);
     CPreAllocatedWdfMemoryBuffer DataBuffer(Buffer);
 
@@ -204,13 +210,19 @@ void CWdfUsbPipe::SubmitIsochronousTransfer(CTargetRequest &Request,
 
 NTSTATUS CWdfUsbPipe::Abort(WDFREQUEST Request)
 {
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_USBTARGET, "%!FUNC! for pipe %d", EndpointAddress());
+    auto RequestId = m_RequestConter++;
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_USBTARGET,
+                "%!FUNC! for pipe %d (Request ID: %lld)",
+                EndpointAddress(), RequestId);
 
     auto status = WdfUsbTargetPipeAbortSynchronously(m_Pipe, Request, nullptr);
 
     if (!NT_SUCCESS(status))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! WdfUsbTargetPipeAbortSynchronously failed: %!STATUS!", status);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET,
+                    "%!FUNC! for pipe %d failed: %!STATUS! (Request ID: %lld)",
+                    EndpointAddress(), status, RequestId);
     }
 
     return status;
@@ -218,13 +230,19 @@ NTSTATUS CWdfUsbPipe::Abort(WDFREQUEST Request)
 
 NTSTATUS CWdfUsbPipe::Reset(WDFREQUEST Request)
 {
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_USBTARGET, "%!FUNC! for pipe %d", EndpointAddress());
+    auto RequestId = m_RequestConter++;
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_USBTARGET,
+                "%!FUNC! for pipe %d (Request ID: %lld)",
+                EndpointAddress(), RequestId);
 
     auto status = WdfUsbTargetPipeResetSynchronously(m_Pipe, Request, nullptr);
 
     if (!NT_SUCCESS(status))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET, "%!FUNC! WdfUsbTargetPipeResetSynchronously failed: %!STATUS!", status);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_USBTARGET,
+                    "%!FUNC! for pipe %d failed: %!STATUS! (Request ID: %lld)",
+                    EndpointAddress(), status, RequestId);
     }
 
     return status;
@@ -442,6 +460,8 @@ NTSTATUS CWdfUsbTarget::ResetDevice(WDFREQUEST Request)
 NTSTATUS CWdfUsbTarget::ControlTransferAsync(CTargetRequest &WdfRequest, PWDF_USB_CONTROL_SETUP_PACKET SetupPacket, WDFMEMORY Data,
                                          PWDFMEMORY_OFFSET TransferOffset, PFN_WDF_REQUEST_COMPLETION_ROUTINE Completion)
 {
+    WdfRequest.SetId(m_ControlTransferCouter++);
+
     auto status = WdfUsbTargetDeviceFormatRequestForControlTransfer(m_UsbDevice, WdfRequest, SetupPacket, Data, TransferOffset);
 
     if (!NT_SUCCESS(status))

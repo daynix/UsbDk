@@ -117,7 +117,7 @@ public:
     template<typename TLockingStrategy, typename TFunctor>
     bool DoPipeOperation(ULONG64 EndpointAddress, TFunctor Functor)
     {
-        TLockingStrategy m_LockedContext(m_PipesLock);
+        TLockingStrategy LockedContext(m_PipesLock);
 
         for (UCHAR i = 0; i < m_NumPipes; i++)
         {

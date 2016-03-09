@@ -40,7 +40,7 @@ NTSTATUS CWdfUsbInterface::SetAltSetting(ULONG64 AltSettingIdx)
         return status;
     }
 
-    ExclusiveLock m_LockedContext(m_PipesLock);
+    ExclusiveLock LockedContext(m_PipesLock);
 
     m_Pipes.reset();
 

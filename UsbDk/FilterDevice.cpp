@@ -570,7 +570,7 @@ bool CUsbDkFilterDevice::CStrategist::SelectStrategy(PDEVICE_OBJECT DevObj)
 {
     PAGED_CODE();
 
-    // 1. Get device ID
+    // Get device ID
     CObjHolder<CRegText> DevID;
     if (!UsbDkGetWdmDeviceIdentity(DevObj, &DevID, nullptr))
     {
@@ -580,7 +580,7 @@ bool CUsbDkFilterDevice::CStrategist::SelectStrategy(PDEVICE_OBJECT DevObj)
 
     DevID->Dump();
 
-    // 2. Root hubs -> Hub strategy
+    // Root hubs -> Hub strategy
     if ((DevID->Match(L"USB\\ROOT_HUB")         ||
          DevID->Match(L"USB\\ROOT_HUB20")       ||
          DevID->Match(L"USB\\ROOT_HUB30")       ||
@@ -593,14 +593,14 @@ bool CUsbDkFilterDevice::CStrategist::SelectStrategy(PDEVICE_OBJECT DevObj)
         return true;
     }
 
-    // 3. Not a USB device -> do not filter
+    // Not a USB device -> do not filter
     if (!DevID->MatchPrefix(L"USB\\"))
     {
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Not a usb device, no strategy assigned");
         return false;
     }
 
-    // 4. Get instance ID
+    // Get instance ID
     CObjHolder<CRegText> InstanceID;
     if (!UsbDkGetWdmDeviceIdentity(DevObj, nullptr, &InstanceID))
     {
@@ -611,7 +611,7 @@ bool CUsbDkFilterDevice::CStrategist::SelectStrategy(PDEVICE_OBJECT DevObj)
     USB_DK_DEVICE_ID ID;
     UsbDkFillIDStruct(&ID, *DevID->begin(), *InstanceID->begin());
 
-    // 5. Get device descriptor
+    // Get device descriptor
     USB_DEVICE_DESCRIPTOR DevDescr;
     if (!m_Strategy->GetControlDevice()->GetDeviceDescriptor(ID, DevDescr))
     {
@@ -619,7 +619,7 @@ bool CUsbDkFilterDevice::CStrategist::SelectStrategy(PDEVICE_OBJECT DevObj)
         return false;
     }
 
-    // 6. Device class is HUB -> Hub strategy
+    // Device class is HUB -> Hub strategy
     if (DevDescr.bDeviceClass == USB_DEVICE_CLASS_HUB)
     {
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Device class is HUB, assigning hub strategy");
@@ -628,14 +628,14 @@ bool CUsbDkFilterDevice::CStrategist::SelectStrategy(PDEVICE_OBJECT DevObj)
         return true;
     }
 
-    // 7. Configuration doesn't tell to redirect or device already redirected -> no strategy
+    // Configuration doesn't tell to redirect or device already redirected -> no strategy
     if (!m_Strategy->GetControlDevice()->ShouldRedirect(ID))
     {
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Do not redirect or already redirected device, no strategy assigned");
         return false;
     }
 
-    // 8. Redirector strategy
+    // Redirector strategy
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Assigning redirected USB device strategy");
     m_DevStrategy.SetDeviceID(DevID.detach());
     m_DevStrategy.SetInstanceID(InstanceID.detach());

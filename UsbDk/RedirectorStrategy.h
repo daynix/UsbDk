@@ -23,7 +23,7 @@
 
 #pragma once
 
-#include "FilterStrategy.h"
+#include "HiderStrategy.h"
 #include "UsbTarget.h"
 #include "WdfDevice.h"
 #include "Public.h"
@@ -58,12 +58,11 @@ private:
 
 class CRedirectorRequest;
 
-class CUsbDkRedirectorStrategy : public CUsbDkFilterStrategy
+class CUsbDkRedirectorStrategy : public CUsbDkHiderStrategy
 {
 public:
     virtual NTSTATUS Create(CUsbDkFilterDevice *Owner) override;
     virtual NTSTATUS MakeAvailable() override;
-    virtual NTSTATUS PNPPreProcess(PIRP Irp) override;
     virtual void IoInCallerContext(WDFDEVICE Device, WDFREQUEST Request) override;
 
     virtual void IoDeviceControl(WDFREQUEST Request,
@@ -109,8 +108,6 @@ private:
                                                    TLockerFunc LockerFunc);
 
     static void IsoRWCompletion(WDFREQUEST Request, WDFIOTARGET Target, PWDF_REQUEST_COMPLETION_PARAMS Params, WDFCONTEXT Context);
-
-    void PatchDeviceID(PIRP Irp);
 
     static void TraceTransferError(const CRedirectorRequest &WdfRequest,
                                    NTSTATUS Status,

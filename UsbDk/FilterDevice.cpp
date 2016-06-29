@@ -444,7 +444,8 @@ bool CUsbDkHubFilterStrategy::FetchConfigurationDescriptors(CWdmUsbDeviceAccess 
 
 void CUsbDkHubFilterStrategy::ApplyRedirectionPolicy(CUsbDkChildDevice &Device)
 {
-    if (m_ControlDevice->ShouldRedirect(Device))
+    if (m_ControlDevice->ShouldRedirect(Device) ||
+        m_ControlDevice->ShouldHide(Device.DeviceDescriptor()))
     {
         if (Device.MakeRedirected())
         {
@@ -628,21 +629,30 @@ bool CUsbDkFilterDevice::CStrategist::SelectStrategy(PDEVICE_OBJECT DevObj)
         return true;
     }
 
-    // Configuration doesn't tell to redirect or device already redirected -> no strategy
-    if (!m_Strategy->GetControlDevice()->ShouldRedirect(ID))
+    // Configuration tells to redirect -> redirector strategy
+    if (m_Strategy->GetControlDevice()->ShouldRedirect(ID))
     {
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Do not redirect or already redirected device, no strategy assigned");
-        return false;
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Assigning redirected USB device strategy");
+        m_DevStrategy.SetDeviceID(DevID.detach());
+        m_DevStrategy.SetInstanceID(InstanceID.detach());
+        m_Strategy->Delete();
+        m_Strategy = &m_DevStrategy;
+        return true;
     }
 
-    // Redirector strategy
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Assigning redirected USB device strategy");
-    m_DevStrategy.SetDeviceID(DevID.detach());
-    m_DevStrategy.SetInstanceID(InstanceID.detach());
-    m_Strategy->Delete();
-    m_Strategy = &m_DevStrategy;
+    // Should be hidden -> hider strategy
+    if (m_Strategy->GetControlDevice()->ShouldHide(DevDescr))
+    {
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Assigning hidden USB device strategy");
+        m_Strategy->Delete();
+        m_Strategy = &m_HiderStrategy;
+        return true;
+    }
 
-    return true;
+    // No strategy
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Do not redirect or already redirected device, no strategy assigned");
+
+    return false;
 }
 
 size_t CUsbDkFilterDevice::CStrategist::GetRequestContextSize()

@@ -213,6 +213,7 @@ private:
         CUsbDkFilterStrategy *m_Strategy = nullptr;
         CUsbDkNullFilterStrategy m_NullStrategy;
         CUsbDkHubFilterStrategy m_HubStrategy;
+        CUsbDkHiderStrategy m_HiderStrategy;
         CUsbDkRedirectorStrategy m_DevStrategy;
     } m_Strategy;
 

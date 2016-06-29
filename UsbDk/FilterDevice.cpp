@@ -260,7 +260,6 @@ NTSTATUS CUsbDkHubFilterStrategy::PNPPreProcess(PIRP Irp)
 
                                         DropRemovedDevices(Relations);
                                         AddNewDevices(Relations);
-                                        WipeHiddenDevices(Relations);
                                         TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Finished relations array processing");
                                     });
     }
@@ -302,40 +301,6 @@ void CUsbDkHubFilterStrategy::AddNewDevices(const CDeviceRelations &Relations)
 {
     Relations.ForEachIf([this](PDEVICE_OBJECT PDO){ return !IsChildRegistered(PDO); },
                         [this](PDEVICE_OBJECT PDO){ RegisterNewChild(PDO); return true; });
-}
-
-void CUsbDkHubFilterStrategy::WipeHiddenDevices(CDeviceRelations &Relations)
-{
-    Relations.WipeIf([this](PDEVICE_OBJECT PDO)
-    {
-        bool Hide = false;
-
-        Children().ForEachIf([PDO](CUsbDkChildDevice *Child){ return Child->Match(PDO); },
-                             [this, &Hide](CUsbDkChildDevice *Child)
-                             {
-                                 Hide = false;
-
-                                 if (!Child->IsRedirected() &&
-                                     !Child->IsIndicated())
-                                 {
-                                     Hide = m_ControlDevice->ShouldHide(Child->DeviceDescriptor());
-                                 }
-
-                                 if (!Hide)
-                                 {
-                                     Child->MarkAsIndicated();
-                                 }
-                                 else
-                                 {
-                                     TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Hiding child object:");
-                                     Child->Dump();
-                                 }
-
-                                 return false;
-                             });
-
-        return Hide;
-    });
 }
 
 void CUsbDkHubFilterStrategy::RegisterNewChild(PDEVICE_OBJECT PDO)

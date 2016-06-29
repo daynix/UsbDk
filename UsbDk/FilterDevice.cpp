@@ -412,19 +412,19 @@ void CUsbDkHubFilterStrategy::ApplyRedirectionPolicy(CUsbDkChildDevice &Device)
     if (m_ControlDevice->ShouldRedirect(Device) ||
         m_ControlDevice->ShouldHide(Device.DeviceDescriptor()))
     {
-        if (Device.MakeRedirected())
+        if (Device.AttachToDeviceStack())
         {
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Adding new PDO 0x%p as redirected initially", Device.PDO());
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Attached to device stack for 0x%p", Device.PDO());
         }
         else
         {
-            TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Failed to create redirector PDO for 0x%p", Device.PDO());
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Failed to attach to device stack for 0x%p", Device.PDO());
         }
     }
     else
     {
         m_ControlDevice->NotifyRedirectionRemoved(Device);
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Adding new PDO 0x%p as non-redirected initially", Device.PDO());
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Not attaching to device stack for 0x%p", Device.PDO());
     }
 }
 
@@ -433,21 +433,18 @@ ULONG CUsbDkChildDevice::ParentID() const
     return m_ParentDevice.GetInstanceNumber();
 }
 
-bool CUsbDkChildDevice::MakeRedirected()
-{
-    m_Redirected = CreateRedirectorDevice();
-    if (!m_Redirected)
-    {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Failed to create redirector for child");
-    }
-
-    return m_Redirected;
-}
-
-bool CUsbDkChildDevice::CreateRedirectorDevice()
+bool CUsbDkChildDevice::AttachToDeviceStack()
 {
     auto DriverObj = m_ParentDevice.GetDriverObject();
-    return NT_SUCCESS(DriverObj->DriverExtension->AddDevice(DriverObj, m_PDO));
+
+    auto Status = DriverObj->DriverExtension->AddDevice(DriverObj, m_PDO);
+    if (!NT_SUCCESS(Status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Failed to attach to device stack");
+        return false;
+    }
+
+    return true;
 }
 
 NTSTATUS CUsbDkFilterDevice::AttachToStack(WDFDRIVER Driver)

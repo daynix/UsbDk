@@ -71,16 +71,28 @@ protected:
     template<typename PostProcessFuncT>
     NTSTATUS PostProcessOnSuccess(PIRP Irp, PostProcessFuncT PostProcessFunc)
     {
+        return PostProcess(Irp, [PostProcessFunc](PIRP Irp, NTSTATUS Status) -> NTSTATUS
+                                { return NT_SUCCESS(Status) ? PostProcessFunc(Irp) : Status; });
+    }
+
+    template<typename PostProcessFuncT>
+    NTSTATUS PostProcessOnFailure(PIRP Irp, PostProcessFuncT PostProcessFunc)
+    {
+        return PostProcess(Irp, [PostProcessFunc](PIRP Irp, NTSTATUS Status) -> NTSTATUS
+                                { return !NT_SUCCESS(Status) ? PostProcessFunc(Irp, Status) : Status; });
+    }
+
+    template<typename PostProcessFuncT>
+    NTSTATUS PostProcess(PIRP Irp, PostProcessFuncT PostProcessFunc)
+    {
         IoCopyCurrentIrpStackLocationToNext(Irp);
 
         auto status = CIrp::ForwardAndWait(Irp, [this, Irp]()
-                                           { return WdfDeviceWdmDispatchPreprocessedIrp(m_Owner->WdfObject(), Irp); });
+                                                { return WdfDeviceWdmDispatchPreprocessedIrp(m_Owner->WdfObject(), Irp); });
 
-        if (NT_SUCCESS(status))
-        {
-            PostProcessFunc(Irp);
-        }
+        status = PostProcessFunc(Irp, status);
 
+        Irp->IoStatus.Status = status;
         IoCompleteRequest(Irp, IO_NO_INCREMENT);
         return status;
     }

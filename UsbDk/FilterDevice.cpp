@@ -244,7 +244,7 @@ NTSTATUS CUsbDkHubFilterStrategy::PNPPreProcess(PIRP Irp)
         (BusRelations == irpStack->Parameters.QueryDeviceRelations.Type))
     {
         return PostProcessOnSuccess(Irp,
-                                    [this](PIRP Irp)
+                                    [this](PIRP Irp) -> NTSTATUS
                                     {
                                         CNonPagedDeviceRelations Relations;
                                         auto status = Relations.Create((PDEVICE_RELATIONS)Irp->IoStatus.Information);
@@ -252,7 +252,7 @@ NTSTATUS CUsbDkHubFilterStrategy::PNPPreProcess(PIRP Irp)
                                         if (!NT_SUCCESS(status))
                                         {
                                             TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Failed to create device relations object: %!STATUS!", status);
-                                            return;
+                                            return STATUS_SUCCESS;
                                         }
 
                                         TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Starting relations array processing:");
@@ -261,6 +261,7 @@ NTSTATUS CUsbDkHubFilterStrategy::PNPPreProcess(PIRP Irp)
                                         DropRemovedDevices(Relations);
                                         AddNewDevices(Relations);
                                         TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Finished relations array processing");
+                                        return STATUS_SUCCESS;
                                     });
     }
 

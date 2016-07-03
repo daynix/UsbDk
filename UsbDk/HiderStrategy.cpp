@@ -105,14 +105,15 @@ NTSTATUS CUsbDkHiderStrategy::PNPPreProcess(PIRP Irp)
     {
     case IRP_MN_QUERY_ID:
         return PostProcessOnSuccess(Irp,
-                                    [this](PIRP Irp)
+                                    [this](PIRP Irp) -> NTSTATUS
                                     {
                                         PatchDeviceID(Irp);
+                                        return STATUS_SUCCESS;
                                     });
 
     case IRP_MN_QUERY_CAPABILITIES:
         return PostProcessOnSuccess(Irp,
-                                    [](PIRP Irp)
+                                    [](PIRP Irp) -> NTSTATUS
                                     {
                                         auto irpStack = IoGetCurrentIrpStackLocation(Irp);
                                         irpStack->Parameters.DeviceCapabilities.Capabilities->RawDeviceOK = 1;
@@ -120,7 +121,8 @@ NTSTATUS CUsbDkHiderStrategy::PNPPreProcess(PIRP Irp)
                                         irpStack->Parameters.DeviceCapabilities.Capabilities->Removable = 0;
                                         irpStack->Parameters.DeviceCapabilities.Capabilities->EjectSupported = 0;
                                         irpStack->Parameters.DeviceCapabilities.Capabilities->SilentInstall = 1;
-                                    });
+                                        return STATUS_SUCCESS;
+        });
     default:
         return CUsbDkNullFilterStrategy::PNPPreProcess(Irp);
     }

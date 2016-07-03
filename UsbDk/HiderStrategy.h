@@ -31,4 +31,5 @@ public:
 
 private:
     void PatchDeviceID(PIRP Irp);
+    NTSTATUS PatchDeviceText(PIRP Irp);
 };

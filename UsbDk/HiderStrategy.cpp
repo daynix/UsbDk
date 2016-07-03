@@ -98,6 +98,44 @@ void CUsbDkHiderStrategy::PatchDeviceID(PIRP Irp)
     }
 }
 
+NTSTATUS CUsbDkHiderStrategy::PatchDeviceText(PIRP Irp)
+{
+    static const WCHAR UsbDkDeviceText[] = USBDK_DRIVER_NAME L" device";
+
+    const WCHAR *Buffer = nullptr;
+    SIZE_T Size = 0;
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_HIDER, "%!FUNC! Entry");
+
+    PIO_STACK_LOCATION  irpStack = IoGetCurrentIrpStackLocation(Irp);
+    switch (irpStack->Parameters.QueryDeviceText.DeviceTextType)
+    {
+    case DeviceTextDescription:
+        Buffer = &UsbDkDeviceText[0];
+        Size = sizeof(UsbDkDeviceText);
+        break;
+    default:
+        break;
+    }
+
+    if (Buffer != nullptr)
+    {
+        auto Result = DuplicateStaticBuffer(Buffer, Size);
+        if (Result != nullptr)
+        {
+            if (Irp->IoStatus.Information != 0)
+            {
+                ExFreePool(reinterpret_cast<PVOID>(Irp->IoStatus.Information));
+            }
+
+            Irp->IoStatus.Information = reinterpret_cast<ULONG_PTR>(Result);
+            Irp->IoStatus.Status = STATUS_SUCCESS;
+        }
+    }
+    return Irp->IoStatus.Status;
+}
+
+
 NTSTATUS CUsbDkHiderStrategy::PNPPreProcess(PIRP Irp)
 {
     PIO_STACK_LOCATION irpStack = IoGetCurrentIrpStackLocation(Irp);
@@ -123,6 +161,13 @@ NTSTATUS CUsbDkHiderStrategy::PNPPreProcess(PIRP Irp)
                                         irpStack->Parameters.DeviceCapabilities.Capabilities->SilentInstall = 1;
                                         return STATUS_SUCCESS;
         });
+    case IRP_MN_QUERY_DEVICE_TEXT:
+        return PostProcess(Irp,
+                           [this](PIRP Irp, NTSTATUS Status) -> NTSTATUS
+                           {
+                               UNREFERENCED_PARAMETER(Status);
+                               return PatchDeviceText(Irp);
+                           });
     default:
         return CUsbDkNullFilterStrategy::PNPPreProcess(Irp);
     }

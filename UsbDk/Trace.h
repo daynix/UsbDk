@@ -42,6 +42,7 @@
         WPP_DEFINE_BIT(TRACE_FILTERDEVICE)                             \
         WPP_DEFINE_BIT(TRACE_WDFDEVICE)                                \
         WPP_DEFINE_BIT(TRACE_REDIRECTOR)                               \
+        WPP_DEFINE_BIT(TRACE_HIDER)                                    \
         WPP_DEFINE_BIT(TRACE_UTILS)                                    \
         WPP_DEFINE_BIT(TRACE_USBTARGET)                                \
         WPP_DEFINE_BIT(TRACE_FILTERSTRATEGY)                           \

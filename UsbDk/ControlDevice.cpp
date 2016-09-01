@@ -373,7 +373,7 @@ NTSTATUS CUsbDkControlDevice::ResetUsbDevice(const USB_DK_DEVICE_ID &DeviceID)
     PDEVICE_OBJECT PDO = GetPDOByDeviceID(DeviceID);
     if (PDO == nullptr)
     {
-        return STATUS_NOT_FOUND;
+        return STATUS_NO_SUCH_DEVICE;
     }
 
     CWdmUsbDeviceAccess pdoAccess(PDO);
@@ -941,7 +941,7 @@ NTSTATUS CUsbDkControlDevice::RemoveRedirect(const USB_DK_DEVICE_ID &DeviceId)
                 return STATUS_DEVICE_NOT_CONNECTED;
             }
         }
-        else if (res != STATUS_NOT_FOUND)
+        else if (res != STATUS_NO_SUCH_DEVICE)
         {
             TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! Usb device reset failed.");
             return res;

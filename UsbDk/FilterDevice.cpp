@@ -178,7 +178,8 @@ public:
 
     void Dump() const
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Array size: %lu (ptr: %p)", m_Relations->Count, m_Relations);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Array size: %lu (ptr: %p)",
+                    (m_Relations != nullptr) ? m_Relations->Count : 0, m_Relations);
 
         ULONG Index = 0;
         ForEach([&Index](PDEVICE_OBJECT PDO) -> bool

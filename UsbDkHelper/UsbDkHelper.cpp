@@ -45,6 +45,17 @@ void printExceptionString(const char *errorStr)
     OutputDebugString(tString.c_str());
     tcout << tString;
 }
+
+template<typename T>
+static T* unpackHandle(HANDLE handle)
+{
+    if (!handle || handle == INVALID_HANDLE_VALUE)
+    {
+        throw UsbDkDriverFileException(TEXT("Invalid handle value"));
+    }
+    return reinterpret_cast<T*>(handle);
+}
+
 InstallResult UsbDk_InstallDriver(void)
 {
     bool NeedRollBack = false;
@@ -159,7 +170,7 @@ BOOL UsbDk_StopRedirect(HANDLE DeviceHandle)
     try
     {
         UsbDkDriverAccess driverAccess;
-        unique_ptr<REDIRECTED_DEVICE_HANDLE> deviceHandle(reinterpret_cast<PREDIRECTED_DEVICE_HANDLE>(DeviceHandle));
+        unique_ptr<REDIRECTED_DEVICE_HANDLE> deviceHandle(unpackHandle<REDIRECTED_DEVICE_HANDLE>(DeviceHandle));
         deviceHandle->RedirectorAccess.reset();
         return TRUE;
     }
@@ -174,7 +185,7 @@ TransferResult UsbDk_WritePipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Req
 {
     try
     {
-        auto deviceHandle = reinterpret_cast<PREDIRECTED_DEVICE_HANDLE>(DeviceHandle);
+        auto deviceHandle = unpackHandle<REDIRECTED_DEVICE_HANDLE>(DeviceHandle);
         return deviceHandle->RedirectorAccess->WritePipe(*Request, Overlapped);
     }
     catch (const exception &e)
@@ -188,7 +199,7 @@ TransferResult UsbDk_ReadPipe(HANDLE DeviceHandle, PUSB_DK_TRANSFER_REQUEST Requ
 {
     try
     {
-        auto deviceHandle= reinterpret_cast<PREDIRECTED_DEVICE_HANDLE>(DeviceHandle);
+        auto deviceHandle= unpackHandle<REDIRECTED_DEVICE_HANDLE>(DeviceHandle);
         return deviceHandle->RedirectorAccess->ReadPipe(*Request, Overlapped);
     }
     catch (const exception &e)
@@ -202,7 +213,7 @@ BOOL UsbDk_AbortPipe(HANDLE DeviceHandle, ULONG64 PipeAddress)
 {
     try
     {
-        auto deviceHandle = reinterpret_cast<PREDIRECTED_DEVICE_HANDLE>(DeviceHandle);
+        auto deviceHandle = unpackHandle<REDIRECTED_DEVICE_HANDLE>(DeviceHandle);
         deviceHandle->RedirectorAccess->AbortPipe(PipeAddress);
         return TRUE;
     }
@@ -217,7 +228,7 @@ BOOL UsbDk_ResetPipe(HANDLE DeviceHandle, ULONG64 PipeAddress)
 {
     try
     {
-        auto deviceHandle = reinterpret_cast<PREDIRECTED_DEVICE_HANDLE>(DeviceHandle);
+        auto deviceHandle = unpackHandle<REDIRECTED_DEVICE_HANDLE>(DeviceHandle);
         deviceHandle->RedirectorAccess->ResetPipe(PipeAddress);
         return TRUE;
     }
@@ -232,7 +243,7 @@ BOOL UsbDk_SetAltsetting(HANDLE DeviceHandle, ULONG64 InterfaceIdx, ULONG64 AltS
 {
     try
     {
-        auto deviceHandle = reinterpret_cast<PREDIRECTED_DEVICE_HANDLE>(DeviceHandle);
+        auto deviceHandle = unpackHandle<REDIRECTED_DEVICE_HANDLE>(DeviceHandle);
         deviceHandle->RedirectorAccess->SetAltsetting(InterfaceIdx, AltSettingIdx);
         return TRUE;
     }
@@ -247,7 +258,7 @@ DLL BOOL UsbDk_ResetDevice(HANDLE DeviceHandle)
 {
     try
     {
-        auto deviceHandle = reinterpret_cast<PREDIRECTED_DEVICE_HANDLE>(DeviceHandle);
+        auto deviceHandle = unpackHandle<REDIRECTED_DEVICE_HANDLE>(DeviceHandle);
         deviceHandle->RedirectorAccess->ResetDevice();
         return TRUE;
     }
@@ -260,8 +271,16 @@ DLL BOOL UsbDk_ResetDevice(HANDLE DeviceHandle)
 
 HANDLE UsbDk_GetRedirectorSystemHandle(HANDLE DeviceHandle)
 {
-    auto deviceHandle = reinterpret_cast<PREDIRECTED_DEVICE_HANDLE>(DeviceHandle);
-    return deviceHandle->RedirectorAccess->GetSystemHandle();
+    try
+    {
+        auto deviceHandle = unpackHandle<REDIRECTED_DEVICE_HANDLE>(DeviceHandle);
+        return deviceHandle->RedirectorAccess->GetSystemHandle();
+    }
+    catch (const exception &e)
+    {
+        printExceptionString(e.what());
+        return INVALID_HANDLE_VALUE;
+    }
 }
 
 HANDLE UsbDk_CreateHiderHandle()
@@ -280,10 +299,9 @@ HANDLE UsbDk_CreateHiderHandle()
 
 BOOL UsbDk_AddHideRule(HANDLE HiderHandle, PUSB_DK_HIDE_RULE Rule)
 {
-    auto HiderAccess = reinterpret_cast<UsbDkHiderAccess *>(HiderHandle);
-
     try
     {
+        auto HiderAccess = unpackHandle<UsbDkHiderAccess>(HiderHandle);
         HiderAccess->AddHideRule(*Rule);
         return TRUE;
     }
@@ -296,10 +314,9 @@ BOOL UsbDk_AddHideRule(HANDLE HiderHandle, PUSB_DK_HIDE_RULE Rule)
 
 BOOL UsbDk_ClearHideRules(HANDLE HiderHandle)
 {
-    auto HiderAccess = reinterpret_cast<UsbDkHiderAccess *>(HiderHandle);
-
     try
     {
+        auto HiderAccess = unpackHandle<UsbDkHiderAccess>(HiderHandle);
         HiderAccess->ClearHideRules();
         return TRUE;
     }
@@ -312,7 +329,15 @@ BOOL UsbDk_ClearHideRules(HANDLE HiderHandle)
 
 void UsbDk_CloseHiderHandle(HANDLE HiderHandle)
 {
-    delete reinterpret_cast<UsbDkHiderAccess *>(HiderHandle);
+    try
+    {
+        auto HiderAccess = unpackHandle<UsbDkHiderAccess>(HiderHandle);
+        delete HiderAccess;
+    }
+    catch (const exception &e)
+    {
+        printExceptionString(e.what());
+    }
 }
 
 static inline

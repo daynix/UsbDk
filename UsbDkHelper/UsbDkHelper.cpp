@@ -39,7 +39,7 @@ typedef struct tag_REDIRECTED_DEVICE_HANDLE
     unique_ptr<UsbDkRedirectorAccess> RedirectorAccess;
 } REDIRECTED_DEVICE_HANDLE, *PREDIRECTED_DEVICE_HANDLE;
 
-void printExceptionString(const char *errorStr)
+static void printExceptionString(const char *errorStr)
 {
     auto tString = string2tstring(string(errorStr));
     OutputDebugString(tString.c_str());

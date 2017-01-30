@@ -1013,7 +1013,9 @@ void CUsbDkRedirection::Dump() const
 
 void CUsbDkRedirection::NotifyRedirectorCreated(CUsbDkFilterDevice *RedirectorDevice)
 {
-    TraceEvents(TRACE_LEVEL_ERROR, TRACE_WDFDEVICE, "%!FUNC! Redirector created for %wZ", m_DeviceID);
+    TraceEvents(TRACE_LEVEL_ERROR, TRACE_WDFDEVICE, "%!FUNC! Redirector created for");
+    Dump();
+
     m_RedirectorDevice = RedirectorDevice;
     m_RedirectorDevice->AddRef();
     m_RedirectionCreated.Set();
@@ -1021,7 +1023,9 @@ void CUsbDkRedirection::NotifyRedirectorCreated(CUsbDkFilterDevice *RedirectorDe
 
 void CUsbDkRedirection::NotifyRedirectionRemovalStarted()
 {
-    TraceEvents(TRACE_LEVEL_ERROR, TRACE_WDFDEVICE, "%!FUNC! Redirector removal started for %wZ", m_DeviceID);
+    TraceEvents(TRACE_LEVEL_ERROR, TRACE_WDFDEVICE, "%!FUNC! Redirector removal started for");
+    Dump();
+
     m_RemovalInProgress = true;
     m_RedirectorDevice->Release();
     m_RedirectorDevice = nullptr;

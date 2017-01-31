@@ -911,6 +911,9 @@ NTSTATUS CUsbDkControlDevice::AddRedirectionToSet(const USB_DK_DEVICE_ID &Device
         return status;
     }
 
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "%!FUNC! Adding new redirection");
+    newRedir->Dump();
+
     if (!UsbDeviceExists(DeviceId))
     {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! failed. Cannot redirect unknown device.");
@@ -935,11 +938,19 @@ NTSTATUS CUsbDkControlDevice::RemoveRedirect(const USB_DK_DEVICE_ID &DeviceId)
         auto res = ResetUsbDevice(DeviceId);
         if (NT_SUCCESS(res))
         {
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE,
+                        "%!FUNC! Waiting for detachment from %S:%S",
+                        DeviceId.DeviceID, DeviceId.InstanceID);
+
             if (!WaitForDetachment(DeviceId))
             {
                 TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! Wait for redirector detachment failed.");
                 return STATUS_DEVICE_NOT_CONNECTED;
             }
+
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE,
+                        "%!FUNC! Detached from %S:%S",
+                        DeviceId.DeviceID, DeviceId.InstanceID);
         }
         else if (res != STATUS_NO_SUCH_DEVICE)
         {
@@ -959,7 +970,10 @@ NTSTATUS CUsbDkControlDevice::RemoveRedirect(const USB_DK_DEVICE_ID &DeviceId)
         return STATUS_SUCCESS;
     }
 
-    TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! failed.");
+    TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE,
+                "%!FUNC! failed for %S:%S",
+                DeviceId.DeviceID, DeviceId.InstanceID);
+
     return STATUS_OBJECT_NAME_NOT_FOUND;
 }
 

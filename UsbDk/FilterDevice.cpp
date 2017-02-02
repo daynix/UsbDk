@@ -580,8 +580,18 @@ bool CUsbDkFilterDevice::CStrategist::SelectStrategy(PDEVICE_OBJECT DevObj)
     USB_DEVICE_DESCRIPTOR DevDescr;
     if (!m_Strategy->GetControlDevice()->GetDeviceDescriptor(ID, DevDescr))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Cannot query cached device descriptor");
-        return false;
+        // If there is no cached device descriptor then we did not
+        // attach to this device stack during parent bus enumeration
+        // (see CUsbDkHubFilterStrategy::RegisterNewChild).
+        // In this case, the fact that WDF called our
+        // EVT_WDF_DRIVER_DEVICE_ADD callback for this device means that
+        // we are dealing with USB hub and WDF attached us to its stack
+        // automatically because UsbDk is registered in PNP manager as
+        // USB hubs filter
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! No cached device descriptor, assigning hub strategy");
+        m_Strategy->Delete();
+        m_Strategy = &m_HubStrategy;
+        return true;
     }
 
     // Device class is HUB -> Hub strategy

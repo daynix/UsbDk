@@ -43,7 +43,6 @@ static void printExceptionString(const char *errorStr)
 {
     auto tString = string2tstring(string(errorStr));
     OutputDebugString(tString.c_str());
-    tcout << tString;
 }
 
 template<typename T>

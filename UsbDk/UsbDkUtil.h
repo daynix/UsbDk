@@ -488,7 +488,7 @@ private:
 class CWdmEvent : public CAllocatable<NonPagedPool, 'VEHR'>
 {
 public:
-    CWdmEvent(EVENT_TYPE Type = SynchronizationEvent, BOOLEAN InitialState = FALSE)
+    CWdmEvent(EVENT_TYPE Type = NotificationEvent, BOOLEAN InitialState = FALSE)
     { KeInitializeEvent(&m_Event, Type, InitialState); };
 
     NTSTATUS Wait(bool WithTimeout = false, LONGLONG Timeout = 0, bool Alertable = false);

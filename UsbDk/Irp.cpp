@@ -119,6 +119,8 @@ NTSTATUS CIoControlIrp::Create(PDEVICE_OBJECT TargetDevice,
 
 NTSTATUS CIoControlIrp::SendSynchronously()
 {
+    m_Event.Clear();
+
     auto res = IoCallDriver(m_TargetDevice, m_Irp);
     if (res == STATUS_PENDING)
     {

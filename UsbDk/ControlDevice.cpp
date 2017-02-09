@@ -1035,6 +1035,17 @@ void CUsbDkRedirection::NotifyRedirectorCreated(CUsbDkFilterDevice *RedirectorDe
     m_RedirectionCreated.Set();
 }
 
+void CUsbDkRedirection::NotifyRedirectionRemoved()
+{
+    if (IsPreparedForRemove())
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_WDFDEVICE, "%!FUNC! Raising redirection removal event for");
+        Dump();
+
+        m_RedirectionRemoved.Set();
+    }
+}
+
 void CUsbDkRedirection::NotifyRedirectionRemovalStarted()
 {
     TraceEvents(TRACE_LEVEL_ERROR, TRACE_WDFDEVICE, "%!FUNC! Redirector removal started for");

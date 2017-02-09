@@ -282,6 +282,11 @@ void CUsbDkHubFilterStrategy::DropRemovedDevices(const CDeviceRelations &Relatio
                                      ToBeDeleted.PushBack(Child);
                                      return true;
                                  });
+    ToBeDeleted.ForEach([this](CUsbDkChildDevice *Device) -> bool
+                        {
+                          m_ControlDevice->NotifyRedirectionRemoved(*Device);
+                          return true;
+                        });
 }
 
 bool CUsbDkHubFilterStrategy::IsChildRegistered(PDEVICE_OBJECT PDO)
@@ -425,7 +430,6 @@ void CUsbDkHubFilterStrategy::ApplyRedirectionPolicy(CUsbDkChildDevice &Device)
     }
     else
     {
-        m_ControlDevice->NotifyRedirectionRemoved(Device);
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Not attaching to device stack for 0x%p", Device.PDO());
     }
 }

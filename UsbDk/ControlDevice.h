@@ -173,8 +173,7 @@ public:
     void Dump() const;
 
     void NotifyRedirectorCreated(CUsbDkFilterDevice *RedirectorDevice);
-    void NotifyRedirectionRemoved()
-    { m_RedirectionRemoved.Set(); }
+    void NotifyRedirectionRemoved();
     void NotifyRedirectionRemovalStarted();
 
     bool IsRedirected() const

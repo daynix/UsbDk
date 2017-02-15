@@ -167,6 +167,11 @@ void CWdfSpecificQueue::InitConfig(WDF_IO_QUEUE_CONFIG &QueueConfig)
     WDF_IO_QUEUE_CONFIG_INIT(&QueueConfig, m_DispatchType);
 }
 
+CWdfDevice::~CWdfDevice()
+{
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WDFDEVICE, "%!FUNC! Deleting device %wZ", m_CachedName);
+}
+
 NTSTATUS CWdfDevice::CacheDeviceName()
 {
     WDFSTRING deviceName;

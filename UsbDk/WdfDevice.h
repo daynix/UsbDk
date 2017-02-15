@@ -129,6 +129,7 @@ class CWdfDevice
 {
 public:
     CWdfDevice() {}
+    ~CWdfDevice();
 
     NTSTATUS CreateSymLink(const UNICODE_STRING &Name);
     NTSTATUS Create(CPreAllocatedDeviceInit &DeviceInit, WDF_OBJECT_ATTRIBUTES &DeviceAttr);

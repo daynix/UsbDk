@@ -43,6 +43,8 @@ void CUsbDkHiderStrategy::PatchDeviceID(PIRP Irp)
 
     PIO_STACK_LOCATION  irpStack = IoGetCurrentIrpStackLocation(Irp);
 
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_HIDER, "%!FUNC! for %!devid!", irpStack->Parameters.QueryId.IdType);
+
     switch (irpStack->Parameters.QueryId.IdType)
     {
         case BusQueryDeviceID:

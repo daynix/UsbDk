@@ -196,7 +196,7 @@ NTSTATUS CWdfDevice::CacheDeviceName()
         return status;
     }
 
-    TraceEvents(TRACE_LEVEL_ERROR, TRACE_WDFDEVICE, "%!FUNC! Newly created device name is %wZ", &UnicodeDeviceName);
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WDFDEVICE, "%!FUNC! Newly created device name is %wZ", &UnicodeDeviceName);
     WdfObjectDelete(deviceName);
     return STATUS_SUCCESS;
 }

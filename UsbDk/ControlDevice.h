@@ -246,6 +246,9 @@ public:
     void UnregisterFilter(CUsbDkFilterDevice &FilterDevice)
     { m_FilterDevices.Remove(&FilterDevice); }
 
+    void RegisterHiddenDevice(CUsbDkFilterDevice &FilterDevice);
+    void UnregisterHiddenDevice(CUsbDkFilterDevice &FilterDevice);
+
     ULONG CountDevices();
     NTSTATUS RescanRegistry()
     { return ReloadPersistentHideRules(); }
@@ -307,6 +310,9 @@ private:
     CObjHolder<CUsbDkHiderDevice, CWdfDeviceDeleter<CUsbDkHiderDevice> > m_HiderDevice;
 
     CWdmList<CUsbDkFilterDevice, CLockedAccess, CNonCountingObject, CRefCountingDeleter> m_FilterDevices;
+
+    CWdmList<CUsbDkFilterDevice, CRawAccess, CNonCountingObject, CRefCountingDeleter> m_HiddenDevices;
+    CWdmSpinLock m_HiddenDevicesLock;
 
     typedef CWdmSet<CUsbDkRedirection, CLockedAccess, CNonCountingObject, CRefCountingDeleter> RedirectionsSet;
     RedirectionsSet m_Redirections;

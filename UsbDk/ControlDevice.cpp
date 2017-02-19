@@ -271,6 +271,49 @@ ULONG CUsbDkControlDevice::CountDevices()
     return numberDevices;
 }
 
+void CUsbDkControlDevice::RegisterHiddenDevice(CUsbDkFilterDevice &FilterDevice)
+{
+    // Windows recognizes USB devices by PID/VID/SN combination,
+    // for each new USB device plugged in it generates a new
+    // cached driver information entry in the registry.
+    //
+    // When UsbDk hides or redirects a device it creates a virtual
+    // device with UsbDk VID / PID and a generated serial number.
+    //
+    // On one hand, this serial number should be unique because
+    // there should be no multiple devices with the same PID/VID/SN
+    // combination at any given moment of time. On the other hand,
+    // UsbDk should re-use serial numbers of unplugged devices,
+    // because we don't want Windows to cache one more driver
+    // information entry each time we redirect of hide a device.
+    //
+    // This function implements a simple but efficient mechanism
+    // for serial number generation for virtual UsbDk devices
+
+    CLockedContext<CWdmSpinLock> Ctx(m_HiddenDevicesLock);
+
+    bool NoSuchSN = false;
+
+    for (ULONG MinSN = 0; !NoSuchSN; MinSN++)
+    {
+        NoSuchSN = m_HiddenDevices.ForEach([MinSN](CUsbDkFilterDevice *Filter)
+                   { return (Filter->GetSerialNumber() != MinSN); });
+
+        if (NoSuchSN)
+        {
+            FilterDevice.SetSerialNumber(MinSN);
+        }
+    }
+
+    m_HiddenDevices.PushBack(&FilterDevice);
+}
+
+void CUsbDkControlDevice::UnregisterHiddenDevice(CUsbDkFilterDevice &FilterDevice)
+{
+    CLockedContext<CWdmSpinLock> Ctx(m_HiddenDevicesLock);
+    m_HiddenDevices.Remove(&FilterDevice);
+}
+
 bool CUsbDkControlDevice::ShouldHide(const USB_DEVICE_DESCRIPTOR &DevDescriptor) const
 {
     auto Hide = false;

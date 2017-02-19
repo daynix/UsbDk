@@ -27,7 +27,31 @@
 #include "trace.h"
 #include "HiderStrategy.tmh"
 #include "FilterDevice.h"
+#include "ControlDevice.h"
 #include "UsbDkNames.h"
+
+NTSTATUS CUsbDkHiderStrategy::Create(CUsbDkFilterDevice *Owner)
+{
+    auto status = CUsbDkNullFilterStrategy::Create(Owner);
+    if (NT_SUCCESS(status))
+    {
+        m_ControlDevice->RegisterHiddenDevice(*Owner);
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_HIDER, "%!FUNC! Serial number for this device is %lu", Owner->GetSerialNumber());
+
+    }
+
+    return status;
+}
+
+void CUsbDkHiderStrategy::Delete()
+{
+    if (m_ControlDevice != nullptr)
+    {
+        m_ControlDevice->UnregisterHiddenDevice(*m_Owner);
+    }
+
+    CUsbDkNullFilterStrategy::Delete();
+}
 
 void CUsbDkHiderStrategy::PatchDeviceID(PIRP Irp)
 {
@@ -55,7 +79,7 @@ void CUsbDkHiderStrategy::PatchDeviceID(PIRP Irp)
         case BusQueryInstanceID:
         {
             CString InstanceID;
-            auto status = InstanceID.Create(USBDK_DRIVER_NAME, m_Owner->GetInstanceNumber());
+            auto status = InstanceID.Create(USBDK_DRIVER_NAME, m_Owner->GetSerialNumber());
             if (!NT_SUCCESS(status))
             {
                 TraceEvents(TRACE_LEVEL_ERROR, TRACE_HIDER, "%!FUNC! Failed to create instance ID string %!STATUS!", status);

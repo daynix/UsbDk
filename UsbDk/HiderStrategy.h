@@ -27,6 +27,9 @@
 class CUsbDkHiderStrategy : public CUsbDkNullFilterStrategy
 {
 public:
+    virtual NTSTATUS Create(CUsbDkFilterDevice *Owner) override;
+    virtual void Delete() override;
+
     virtual NTSTATUS PNPPreProcess(PIRP Irp) override;
     virtual NTSTATUS MakeAvailable() override
     {

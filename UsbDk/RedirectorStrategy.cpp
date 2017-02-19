@@ -38,7 +38,13 @@ enum UsbDkTransferDirection
 
 NTSTATUS CUsbDkRedirectorStrategy::MakeAvailable()
 {
-    auto status = m_Target.Create(m_Owner->WdfObject());
+    auto status = CUsbDkHiderStrategy::MakeAvailable();
+    if (!NT_SUCCESS(status))
+    {
+        return status;
+    }
+
+    status = m_Target.Create(m_Owner->WdfObject());
     if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! Cannot create USB target");

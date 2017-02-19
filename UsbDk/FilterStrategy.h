@@ -97,6 +97,13 @@ protected:
         return status;
     }
 
+    NTSTATUS CompleteWithStatus(PIRP Irp, NTSTATUS Status)
+    {
+        Irp->IoStatus.Status = Status;
+        IoCompleteRequest(Irp, IO_NO_INCREMENT);
+        return Status;
+    }
+
 private:
     void ForwardRequest(WDFREQUEST Request);
     TChildrenList m_Children;

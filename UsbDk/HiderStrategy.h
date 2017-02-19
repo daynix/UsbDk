@@ -28,8 +28,16 @@ class CUsbDkHiderStrategy : public CUsbDkNullFilterStrategy
 {
 public:
     virtual NTSTATUS PNPPreProcess(PIRP Irp) override;
+    virtual NTSTATUS MakeAvailable() override
+    {
+        m_RemovalStopWatch.Start();
+        return STATUS_SUCCESS;
+    }
 
 private:
     void PatchDeviceID(PIRP Irp);
     NTSTATUS PatchDeviceText(PIRP Irp);
+    bool ShouldDenyRemoval() const;
+
+    CStopWatch m_RemovalStopWatch;
 };

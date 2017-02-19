@@ -137,6 +137,54 @@ NTSTATUS CUsbDkHiderStrategy::PatchDeviceText(PIRP Irp)
     return Irp->IoStatus.Status;
 }
 
+bool CUsbDkHiderStrategy::ShouldDenyRemoval() const
+{
+    // There is a phenomena reported for Windows 7 32/64 bits related
+    // to hidden UsbDk devices that do not have cached driver information.
+    //
+    // Upon such a device appearance Windows correctly decides to assign
+    // the NULL driver to this device, creates correct cached driver information
+    // and right after that, for some reason, destructs driver stack for this
+    // device PDO and UsbDk filter gets removed.
+    //
+    // Having driver stack destroyed, Windows, apparently, queries device IDs
+    // again without UsbDk filter attached and gets unmodified information
+    // as supplied by bus driver.
+    //
+    // After that Windows builds driver stack again, including attachment of
+    // UsbDk filter and loads device driver according to IDs obtained on
+    // previous step when UsbDk filter was not loaded.
+    //
+    // This sequence effectively cancels all UsbDk efforts
+    // and renders the device visible.
+    //
+    // Our experiments show, that in case hidden device turns down Windows
+    // request for unload right after driver stack creation, Windows gives up
+    // do not try to rebuild driver stack for this device.
+    //
+    // Experiments also show that Windows may request device unload more than
+    // once, so just failing the first request is not enough, therefore this
+    // function implements a timer-based logic for turning down early
+    // unload requests.
+
+    static const ULONG REMOVAL_DENIAL_TIMEOUT_MS = 3000;
+    auto TimePassedSinceCreation = m_RemovalStopWatch.TimeMs();
+
+    if (TimePassedSinceCreation <= REMOVAL_DENIAL_TIMEOUT_MS)
+    {
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_HIDER,
+                    "%!FUNC! Denying removal because %llu ms only passed since creation",
+                    TimePassedSinceCreation);
+        return true;
+    }
+    else
+    {
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_HIDER,
+                    "%!FUNC! Allowing removal because %llu ms already passed since creation",
+                    TimePassedSinceCreation);
+        return false;
+    }
+}
 
 NTSTATUS CUsbDkHiderStrategy::PNPPreProcess(PIRP Irp)
 {
@@ -170,6 +218,11 @@ NTSTATUS CUsbDkHiderStrategy::PNPPreProcess(PIRP Irp)
                                UNREFERENCED_PARAMETER(Status);
                                return PatchDeviceText(Irp);
                            });
+
+     case IRP_MN_QUERY_REMOVE_DEVICE:
+         return ShouldDenyRemoval() ? CompleteWithStatus(Irp, STATUS_DEVICE_BUSY)
+                                    : CUsbDkNullFilterStrategy::PNPPreProcess(Irp);
+
     default:
         return CUsbDkNullFilterStrategy::PNPPreProcess(Irp);
     }

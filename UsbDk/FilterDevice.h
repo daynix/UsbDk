@@ -163,6 +163,12 @@ public:
     ULONG GetInstanceNumber() const
     { return m_InstanceNumber; }
 
+    ULONG GetSerialNumber() const
+    { return m_SerialNumber; }
+
+    void SetSerialNumber(ULONG Number)
+    { m_SerialNumber = Number; }
+
 private:
     ~CUsbDkFilterDevice()
     {
@@ -200,6 +206,7 @@ private:
     CUsbDkFilterDevice& operator= (const CUsbDkFilterDevice&) = delete;
 
     CInstanceCounter<CUsbDkFilterDevice> m_InstanceNumber;
+    ULONG m_SerialNumber;
 
     friend class CUsbDkFilterDeviceInit;
     friend class CUsbDkRedirectorQueueData;

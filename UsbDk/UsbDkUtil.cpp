@@ -180,3 +180,16 @@ UsbDkCreateCurrentProcessHandle(HANDLE &Handle)
 
     return status;
 }
+
+CStopWatch& CStopWatch::operator= (const CStopWatch& Other)
+{
+    m_StartTime = Other.m_StartTime;
+    return *this;
+}
+
+LONGLONG CStopWatch::Time100Ns() const
+{
+    LARGE_INTEGER Now;
+    KeQueryTickCount(&Now);
+    return (Now.QuadPart - m_StartTime.QuadPart) * m_TimeIncrement;
+}

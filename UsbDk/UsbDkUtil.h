@@ -632,5 +632,26 @@ LONGLONG MillisecondsTo100Nanoseconds(LONGLONG Milliseconds)
     return Milliseconds * 10 * 1000;
 }
 
+static inline
+LONGLONG HundredNsToMilliseconds(LONGLONG HundredNs)
+{
+    return HundredNs / (10 * 1000);
+}
+
+class CStopWatch
+{
+public:
+    CStopWatch() {}
+    CStopWatch(const CStopWatch& Other) : CStopWatch() { *this = Other; }
+    CStopWatch& operator= (const CStopWatch& Other);
+
+    void Start() { KeQueryTickCount(&m_StartTime); }
+    LONGLONG Time100Ns() const;
+    LONGLONG TimeMs() const { return HundredNsToMilliseconds(Time100Ns()); }
+private:
+    const ULONG m_TimeIncrement = KeQueryTimeIncrement();
+    LARGE_INTEGER m_StartTime = {};
+};
+
 NTSTATUS
 UsbDkCreateCurrentProcessHandle(HANDLE &Handle);

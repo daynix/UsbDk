@@ -4,7 +4,6 @@ Win*Debug
 Win*Release
 *.opensdf
 *.ipch
-*.vcxproj.user
 build*.log
 resource.h
 Resource.aps

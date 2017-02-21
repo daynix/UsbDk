@@ -2,11 +2,11 @@ Dim strCmdLine, strTemp
 Set WshShell = Wscript.CreateObject("Wscript.Shell")
 
 On Error Resume Next
-strCmdLine = WshShell.RegRead("HKLM\SOFTWARE\Microsoft\VisualStudio\12.0\InstallDir")
+strCmdLine = WshShell.RegRead("HKLM\SOFTWARE\Microsoft\VisualStudio\14.0\InstallDir")
 ' In case of error assume WoW64 case
 If Err <> 0 Then
   On Error Goto 0
-  strCmdLine = WshShell.RegRead("HKLM\SOFTWARE\Wow6432Node\Microsoft\VisualStudio\12.0\InstallDir")
+  strCmdLine = WshShell.RegRead("HKLM\SOFTWARE\Wow6432Node\Microsoft\VisualStudio\14.0\InstallDir")
 End If
 
 On Error Goto 0

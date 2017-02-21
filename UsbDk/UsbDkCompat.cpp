@@ -38,4 +38,25 @@ NTSTATUS WdfUsbTargetDeviceCreateIsochUrb(WDFUSBDEVICE UsbDevice, PWDF_OBJECT_AT
 
     return status;
 }
+
+extern "C"
+{
+
+#ifdef _WIN64
+    NTSTATUS __guard_check_icall_fptr(...)
+    {
+        return STATUS_SUCCESS;
+    }
+
+    NTSTATUS __guard_dispatch_icall_fptr(...)
+    {
+        return STATUS_SUCCESS;
+    }
+#else
+    NTSTATUS _cdecl __guard_check_icall_fptr(...)
+    {
+        return STATUS_SUCCESS;
+    }
+#endif
+}
 #endif

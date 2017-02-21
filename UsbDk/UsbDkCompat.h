@@ -54,4 +54,6 @@ typedef struct _WDF_USB_DEVICE_CREATE_CONFIG
 NTSTATUS WdfUsbTargetDeviceCreateIsochUrb(WDFUSBDEVICE UsbDevice, PWDF_OBJECT_ATTRIBUTES Attributes, ULONG NumberOfIsochPackets,
                                           WDFMEMORY* UrbMemory, PURB *Urb);
 
+#define _When_(expr, annotes)    __allowed(on_parameter_or_return)
+
 #endif

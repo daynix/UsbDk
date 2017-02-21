@@ -25,6 +25,7 @@
 #include "Installer.h"
 #include "Public.h"
 #include "DeviceMgr.h"
+#include <iterator>
 
 
 #define SYSTEM32_DRIVERS    TEXT("\\System32\\Drivers\\")

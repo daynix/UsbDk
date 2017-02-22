@@ -28,7 +28,7 @@ Getting Driver Text Traces (for debugging, requires UsbDk driver's PDB file)
 * Download dbgview from http://live.sysinternals.com/Dbgview.exe
   and put to Trace folder on the target machine
 * Copy traceview.exe from WDK install location on build machine
-  (usually C:\Program Files (x86)\Windows Kits\8.1\Tools\x64\traceview.exe)
+  (usually C:\Program Files (x86)\Windows Kits\10\Tools\x64\traceview.exe)
   to Trace folder on the target machine
 * Run UsbDkTrace.bat script from Trace folder on the target machine
 * Keep pressing ENTER until dbgview window appears on the screen
@@ -86,7 +86,7 @@ Converting Driver Binary Traces to Text (requires UsbDk driver's PDB file)
 * Place the binary trace obtained (UsbDkTrace.etl) to Tools/Trace
   folder of UsbDk source tree
 * Copy tracepdb.exe and tracefmt.exe utilities from WDK binaries location
-  (usually C:\Program Files (x86)\Windows Kits\8.1\bin\x64\)
+  (usually C:\Program Files (x86)\Windows Kits\10\bin\x64\)
   to Tools/Trace folder of UsbDk source tree
 * Copy UsbDk.pdb that corresponds to the binary trace obtained to Tools/Trace 
   folder of UsbDk source tree

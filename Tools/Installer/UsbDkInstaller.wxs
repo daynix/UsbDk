@@ -53,6 +53,12 @@
         IncludeMinimum="no" IncludeMaximum="yes" />
     </Upgrade>
 
+    <Property Id="WIN10FOUND" Secure="yes">
+      <DirectorySearch Id="searchSystem" Path="[SystemFolder]" Depth="0">
+        <FileSearch Id="searchFile" Name="advapi32.dll" MinVersion="6.3.10000.0"/>
+      </DirectorySearch>
+    </Property>
+
     <Directory Id="TARGETDIR" Name="SourceDir">
       <Directory Id="$(var.UsbDkProgramFilesFolder)" Name="UsbDk Runtime Library">
         <Directory Id="UsbDk_Directory" Name="UsbDk Runtime Library">
@@ -86,9 +92,18 @@
           </Component>
 
           <Component Id="UsbDk_81" Guid="{3C24F894-3604-41D0-9FC2-D6A3B3676A20}" Win64="$(var.UsbDkWin64)">
-            <Condition>VersionNT &gt;= 603</Condition>
+            <Condition>VersionNT = 603 AND NOT WIN10FOUND</Condition>
             <?define SourceSubPath= "Win8.1$(var.Config)" ?>
             <?define OsName= "81" ?>
+            <?include UsbDkFiles.wxi ?>
+            <?undef SourceSubPath ?>
+            <?undef OsName ?>
+          </Component>
+
+          <Component Id="UsbDk_10" Guid="{34AB6305-4379-4E32-A070-8B0612521AC8}" Win64="$(var.UsbDkWin64)">
+            <Condition>VersionNT &gt;= 603 AND WIN10FOUND</Condition>
+            <?define SourceSubPath= "Win10$(var.Config)" ?>
+            <?define OsName= "10" ?>
             <?include UsbDkFiles.wxi ?>
             <?undef SourceSubPath ?>
             <?undef OsName ?>
@@ -129,6 +144,7 @@
       <ComponentRef Id="UsbDk_7" />
       <ComponentRef Id="UsbDk_8" />
       <ComponentRef Id="UsbDk_81" />
+      <ComponentRef Id="UsbDk_10" />
     </Feature>
   </Product>
 </Wix>

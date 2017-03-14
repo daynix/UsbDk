@@ -49,7 +49,7 @@ bool CRegText::Match(PCWSTR String) const
 {
     for (auto idData : *this)
     {
-        if (!_wcsicmp(idData, String))
+        if (!wcscmp(idData, String))
         {
             return true;
         }

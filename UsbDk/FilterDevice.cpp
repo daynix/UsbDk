@@ -349,6 +349,13 @@ void CUsbDkHubFilterStrategy::RegisterNewChild(PDEVICE_OBJECT PDO)
     DevID->Dump();
     InstanceID->Dump();
 
+    // Not a USB device -> do not register
+    if (!DevID->MatchPrefix(L"USB\\"))
+    {
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Not a usb device, skip child registration");
+        return;
+    }
+
     CUsbDkChildDevice::TDescriptorsCache CfgDescriptors(DevDescriptor.bNumConfigurations);
 
     if (!CfgDescriptors.Create())

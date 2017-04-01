@@ -26,7 +26,7 @@
 #include "Alloc.h"
 #include "MemoryBuffer.h"
 
-class CRegText : public CAllocatable<NonPagedPool, 'TRHR'>
+class CRegText : public CAllocatable<USBDK_NON_PAGED_POOL, 'TRHR'>
 {
 public:
     class iterator

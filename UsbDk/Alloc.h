@@ -181,7 +181,7 @@ private:
 };
 
 template<typename T>
-class CRefCountingHolder : public CAllocatable < NonPagedPool, 'CRHR'>
+class CRefCountingHolder : public CAllocatable < USBDK_NON_PAGED_POOL, 'CRHR'>
 {
 public:
     typedef void(*TDeleteFunc)(T *Obj);

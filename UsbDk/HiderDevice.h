@@ -47,7 +47,7 @@ private:
     CUsbDkHiderDeviceQueue& operator= (const CUsbDkHiderDeviceQueue&) = delete;
 };
 
-class CUsbDkHiderDevice : private CWdfControlDevice, public CAllocatable <NonPagedPool, 'DHHR'>
+class CUsbDkHiderDevice : private CWdfControlDevice, public CAllocatable <USBDK_NON_PAGED_POOL, 'DHHR'>
 {
 public:
     CUsbDkHiderDevice() {}

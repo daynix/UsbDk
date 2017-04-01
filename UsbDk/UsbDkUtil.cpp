@@ -41,7 +41,7 @@ NTSTATUS CWdmEvent::Wait(bool WithTimeout, LONGLONG Timeout, bool Alertable)
 
 NTSTATUS CString::Resize(USHORT NewLenBytes)
 {
-    auto NewBuff = static_cast<PWCH>(ExAllocatePoolWithTag(NonPagedPool,
+    auto NewBuff = static_cast<PWCH>(ExAllocatePoolWithTag(USBDK_NON_PAGED_POOL,
                                                            NewLenBytes,
                                                            'SUHR'));
     if (NewBuff == nullptr)
@@ -78,7 +78,7 @@ NTSTATUS CString::Create(NTSTRSAFE_PCWSTR String)
 NTSTATUS CString::Create(PCUNICODE_STRING String)
 {
     m_String.MaximumLength = String->MaximumLength;
-    m_String.Buffer = static_cast<PWCH>(ExAllocatePoolWithTag(NonPagedPool,
+    m_String.Buffer = static_cast<PWCH>(ExAllocatePoolWithTag(USBDK_NON_PAGED_POOL,
         String->MaximumLength,
         'SUHR'));
 

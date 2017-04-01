@@ -25,7 +25,7 @@
 
 #include "Alloc.h"
 
-class CWdfWorkitem : public CAllocatable<NonPagedPool, 'IWHR'>
+class CWdfWorkitem : public CAllocatable<USBDK_NON_PAGED_POOL, 'IWHR'>
 {
 private:
     typedef VOID(*PayloadFunc)(PVOID Ctx);

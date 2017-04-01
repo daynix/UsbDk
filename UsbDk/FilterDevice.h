@@ -43,11 +43,11 @@ typedef struct _USBDK_FILTER_DEVICE_EXTENSION {
 } USBDK_FILTER_DEVICE_EXTENSION, *PUSBDK_FILTER_DEVICE_EXTENSION;
 WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(USBDK_FILTER_DEVICE_EXTENSION, UsbDkFilterGetContext);
 
-class CUsbDkChildDevice : public CAllocatable<NonPagedPool, 'DCHR'>
+class CUsbDkChildDevice : public CAllocatable<USBDK_NON_PAGED_POOL, 'DCHR'>
 {
 public:
 
-    typedef CBufferSet<NonPagedPool, 'CCHR', UCHAR> TDescriptorsCache;
+    typedef CBufferSet<USBDK_NON_PAGED_POOL, 'CCHR', UCHAR> TDescriptorsCache;
 
     CUsbDkChildDevice(CRegText *DeviceID,
                       CRegText *InstanceID,
@@ -138,7 +138,7 @@ private:
 
 class CUsbDkFilterDevice : public CWdfDevice,
                            public CWdmRefCountingObject,
-                           public CAllocatable<NonPagedPool, 'DFHR'>
+                           public CAllocatable<USBDK_NON_PAGED_POOL, 'DFHR'>
 {
 public:
     CUsbDkFilterDevice()

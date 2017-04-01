@@ -51,7 +51,7 @@ public:
     { return Context()->RequestId; }
 };
 
-class CWdfUsbPipe : public CAllocatable<NonPagedPool, 'PUHR'>
+class CWdfUsbPipe : public CAllocatable<USBDK_NON_PAGED_POOL, 'PUHR'>
 {
 public:
     CWdfUsbPipe()
@@ -105,7 +105,7 @@ private:
     CWdfUsbPipe& operator= (const CWdfUsbPipe&) = delete;
 };
 
-class CWdfUsbInterface : public CAllocatable<NonPagedPool, 'IUHR'>
+class CWdfUsbInterface : public CAllocatable<USBDK_NON_PAGED_POOL, 'IUHR'>
 {
 public:
     CWdfUsbInterface()

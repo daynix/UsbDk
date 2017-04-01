@@ -59,7 +59,7 @@ private:
 
 typedef CPreAllocatedWdfMemoryBufferT<void> CPreAllocatedWdfMemoryBuffer;
 
-class CWdmMemoryBuffer final : public CAllocatable<NonPagedPool, 'BMHR'>
+class CWdmMemoryBuffer final : public CAllocatable<USBDK_NON_PAGED_POOL, 'BMHR'>
 {
 public:
     CWdmMemoryBuffer(PVOID Buffer = nullptr, SIZE_T Size = 0)

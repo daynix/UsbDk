@@ -210,7 +210,7 @@ public:
                                    sizeof(PDEVICE_OBJECT ) * Relations->Count -
                                    sizeof(PDEVICE_OBJECT);
 
-            auto status = m_NonPagedCopy.Create(RelationsSize, NonPagedPool);
+            auto status = m_NonPagedCopy.Create(RelationsSize, USBDK_NON_PAGED_POOL);
             if (!NT_SUCCESS(status))
             {
                 return status;

@@ -29,4 +29,10 @@ extern "C"
 #pragma warning(pop)
 #endif
 
+#if !TARGET_OS_WIN_XP && (NTDDI_VERSION >= NTDDI_WIN8)
+#define USBDK_NON_PAGED_POOL    NonPagedPoolNx
+#else
+#define USBDK_NON_PAGED_POOL    NonPagedPool
+#endif
+
 #include "UsbDkCompat.h"

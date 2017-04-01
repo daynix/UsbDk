@@ -485,7 +485,7 @@ private:
     TInternalList m_Objects;
 };
 
-class CWdmEvent : public CAllocatable<NonPagedPool, 'VEHR'>
+class CWdmEvent : public CAllocatable<USBDK_NON_PAGED_POOL, 'VEHR'>
 {
 public:
     CWdmEvent(EVENT_TYPE Type = NotificationEvent, BOOLEAN InitialState = FALSE)

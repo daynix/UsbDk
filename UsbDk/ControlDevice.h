@@ -97,7 +97,7 @@ private:
     CUsbDkControlDeviceQueue& operator= (const CUsbDkControlDeviceQueue&) = delete;
 };
 
-class CUsbDkHideRule : public CAllocatable < NonPagedPool, 'RHHR' >
+class CUsbDkHideRule : public CAllocatable < USBDK_NON_PAGED_POOL, 'RHHR' >
 {
 public:
 
@@ -156,7 +156,7 @@ private:
     DECLARE_CWDMLIST_ENTRY(CUsbDkHideRule);
 };
 
-class CUsbDkRedirection : public CAllocatable<NonPagedPool, 'NRHR'>, public CWdmRefCountingObject
+class CUsbDkRedirection : public CAllocatable<USBDK_NON_PAGED_POOL, 'NRHR'>, public CWdmRefCountingObject
 {
 public:
     enum : ULONG
@@ -233,7 +233,7 @@ private:
     friend VOID DriverUnload(IN WDFDRIVER Driver);
 };
 
-class CUsbDkControlDevice : private CWdfControlDevice, public CAllocatable<NonPagedPool, 'DCHR'>
+class CUsbDkControlDevice : private CWdfControlDevice, public CAllocatable<USBDK_NON_PAGED_POOL, 'DCHR'>
 {
 public:
     CUsbDkControlDevice() {}

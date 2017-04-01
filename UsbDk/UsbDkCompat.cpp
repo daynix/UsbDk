@@ -30,7 +30,7 @@ NTSTATUS WdfUsbTargetDeviceCreateIsochUrb(WDFUSBDEVICE UsbDevice, PWDF_OBJECT_AT
     UNREFERENCED_PARAMETER(UsbDevice);
 
     size_t size = GET_ISO_URB_SIZE(NumberOfIsochPackets);
-    auto status = WdfMemoryCreate(Attributes, NonPagedPool, 'SBSU', size, UrbMemory, (PVOID*)Urb);
+    auto status = WdfMemoryCreate(Attributes, USBDK_NON_PAGED_POOL, 'SBSU', size, UrbMemory, (PVOID*)Urb);
     if (NT_SUCCESS(status))
     {
         RtlZeroMemory(*Urb, size);

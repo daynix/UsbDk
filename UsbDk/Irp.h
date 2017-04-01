@@ -26,7 +26,7 @@
 #include "Alloc.h"
 #include "UsbDkUtil.h"
 
-class CIrpBase : public CAllocatable<NonPagedPool, 'RIHR'>
+class CIrpBase : public CAllocatable<USBDK_NON_PAGED_POOL, 'RIHR'>
 {
 public:
     template<typename ConfiguratorT>

@@ -1,0 +1,11 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\WMI\Autologger\UsbDk]
+"Start"=dword:00000001
+"Guid"="{88e1661f-48b6-410f-b096-ba84e9f0656f}"
+"FlushTimer"=dword:00000001
+
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\WMI\Autologger\UsbDk\{88e1661f-48b6-410f-b096-ba84e9f0656f}]
+"Enabled"=dword:00000001
+"EnableFlags"=dword:7fffffff
+"EnableLevel"=dword:00000006

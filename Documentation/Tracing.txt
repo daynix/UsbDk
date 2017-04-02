@@ -63,6 +63,23 @@ Getting Driver Binary Traces (for sending trace logs to developers, no PDB requi
 * In case everything configured properly trace log will be saved to UsbDkTrace.etl
   file in the Trace foder
 
+Recording permanent Driver Binary trace (from system start until turned off and the system rebooted)
+====================================================================================================
+
+To Enable:
+
+* Copy Tools/Trace subfolder from the driver source tree to the target machine
+* Right mouse button click on UsbDk-Autologger-On.reg -> Merge
+* Restart the system
+* The system will write binary log file automatically to %windir%\System32\LogFiles\WMI\UsbDk.etl
+* Note that the system overwrites the file after each reboot
+* Collect the log file at any time (data is flushed to the disk automatically with possible delay of 2-4 seconds)
+
+To Disable:
+
+* Right mouse button click on UsbDk-Autologger-Off.reg -> Merge
+* Restart the system
+
 Converting Driver Binary Traces to Text (requires UsbDk driver's PDB file)
 ==============================================================================
 

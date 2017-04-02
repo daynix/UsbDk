@@ -33,3 +33,10 @@ desired configuration.
 
 Use UsbDkController.exe to install/uninstall and verify basic operation.
 Run UsbDkController.exe without parameters for command line options.
+
+## Known issues
+
+* Installation on 64-bit versions of Windows 7 fails if security update
+  [3033929](https://technet.microsoft.com/en-us/library/security/3033929)
+  is not installed. Reason: UsbDk driver is signed by SHA-256 certificate. Without this update
+  Windows 7 does not recognize the signature properly and fails to load the driver.

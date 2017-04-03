@@ -1,6 +1,7 @@
 *.suo
 *.sdf
 Win*Debug
+Win*Debug_NoSign
 Win*Release
 *.opensdf
 *.ipch
@@ -10,7 +11,9 @@ Resource.aps
 Install
 Install_debug
 XP Debug
+XP Debug_NoSign
 XP Release
 XPDebug
+XPDebug_NoSign
 XPRelease
 x64

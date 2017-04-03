@@ -1,6 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Win10 Debug_NoSign|Win32">
+      <Configuration>Win10 Debug_NoSign</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Win10 Debug_NoSign|x64">
+      <Configuration>Win10 Debug_NoSign</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Win10 Debug|Win32">
       <Configuration>Win10 Debug</Configuration>
       <Platform>Win32</Platform>
@@ -15,6 +23,30 @@
     </ProjectConfiguration>
     <ProjectConfiguration Include="Win10 Release|x64">
       <Configuration>Win10 Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Win7 Debug_NoSign|Win32">
+      <Configuration>Win7 Debug_NoSign</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Win7 Debug_NoSign|x64">
+      <Configuration>Win7 Debug_NoSign</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Win8 Debug_NoSign|Win32">
+      <Configuration>Win8 Debug_NoSign</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Win8 Debug_NoSign|x64">
+      <Configuration>Win8 Debug_NoSign</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Win8.1 Debug_NoSign|Win32">
+      <Configuration>Win8.1 Debug_NoSign</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Win8.1 Debug_NoSign|x64">
+      <Configuration>Win8.1 Debug_NoSign</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Win8.1 Debug|Win32">
@@ -65,6 +97,14 @@
       <Configuration>Win7 Release</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="XP Debug_NoSign|Win32">
+      <Configuration>XP Debug_NoSign</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="XP Debug_NoSign|x64">
+      <Configuration>XP Debug_NoSign</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="XP Debug|Win32">
       <Configuration>XP Debug</Configuration>
       <Platform>Win32</Platform>
@@ -102,9 +142,25 @@
     <DriverType>Package</DriverType>
     <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug_NoSign|Win32'" Label="Configuration">
+    <TargetVersion>WindowsV6.3</TargetVersion>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+    <ConfigurationType>Utility</ConfigurationType>
+    <DriverType>Package</DriverType>
+    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Win10 Debug|Win32'" Label="Configuration">
     <TargetVersion>
     </TargetVersion>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+    <ConfigurationType>Utility</ConfigurationType>
+    <DriverType>Package</DriverType>
+    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Win10 Debug_NoSign|Win32'" Label="Configuration">
+    <TargetVersion />
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
     <ConfigurationType>Utility</ConfigurationType>
@@ -136,6 +192,14 @@
     <DriverType>Package</DriverType>
     <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Win8 Debug_NoSign|Win32'" Label="Configuration">
+    <TargetVersion>Windows8</TargetVersion>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+    <ConfigurationType>Utility</ConfigurationType>
+    <DriverType>Package</DriverType>
+    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Win8 Release|Win32'" Label="Configuration">
     <TargetVersion>Windows8</TargetVersion>
     <UseDebugLibraries>false</UseDebugLibraries>
@@ -152,7 +216,23 @@
     <DriverType>Package</DriverType>
     <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Win7 Debug_NoSign|Win32'" Label="Configuration">
+    <TargetVersion>Windows7</TargetVersion>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+    <ConfigurationType>Utility</ConfigurationType>
+    <DriverType>Package</DriverType>
+    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='XP Debug|Win32'" Label="Configuration">
+    <TargetVersion>Windows7</TargetVersion>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+    <ConfigurationType>Utility</ConfigurationType>
+    <DriverType>Package</DriverType>
+    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='XP Debug_NoSign|Win32'" Label="Configuration">
     <TargetVersion>Windows7</TargetVersion>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
@@ -184,9 +264,26 @@
     <DriverType>Package</DriverType>
     <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug_NoSign|x64'" Label="Configuration">
+    <TargetVersion>WindowsV6.3</TargetVersion>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+    <ConfigurationType>Utility</ConfigurationType>
+    <DriverType>Package</DriverType>
+    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Win10 Debug|x64'" Label="Configuration">
     <TargetVersion>
     </TargetVersion>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+    <ConfigurationType>Utility</ConfigurationType>
+    <DriverType>Package</DriverType>
+    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
+    <DriverTargetPlatform>Desktop</DriverTargetPlatform>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Win10 Debug_NoSign|x64'" Label="Configuration">
+    <TargetVersion />
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
     <ConfigurationType>Utility</ConfigurationType>
@@ -220,6 +317,14 @@
     <DriverType>Package</DriverType>
     <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Win8 Debug_NoSign|x64'" Label="Configuration">
+    <TargetVersion>Windows8</TargetVersion>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+    <ConfigurationType>Utility</ConfigurationType>
+    <DriverType>Package</DriverType>
+    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Win8 Release|x64'" Label="Configuration">
     <TargetVersion>Windows8</TargetVersion>
     <UseDebugLibraries>false</UseDebugLibraries>
@@ -236,7 +341,23 @@
     <DriverType>Package</DriverType>
     <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Win7 Debug_NoSign|x64'" Label="Configuration">
+    <TargetVersion>Windows7</TargetVersion>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+    <ConfigurationType>Utility</ConfigurationType>
+    <DriverType>Package</DriverType>
+    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='XP Debug|x64'" Label="Configuration">
+    <TargetVersion>Windows7</TargetVersion>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+    <ConfigurationType>Utility</ConfigurationType>
+    <DriverType>Package</DriverType>
+    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='XP Debug_NoSign|x64'" Label="Configuration">
     <TargetVersion>Windows7</TargetVersion>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
@@ -283,7 +404,37 @@
     <OutDir>$(SolutionDir)Install_Debug\x86\$(ConfigurationName)\</OutDir>
     <EnableInf2cat>false</EnableInf2cat>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug_NoSign|Win32'">
+    <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+    <EnableDeployment>False</EnableDeployment>
+    <RemoveDriver>True</RemoveDriver>
+    <HardwareIdString />
+    <CommandLine />
+    <DeployFiles />
+    <EnableVerifier>False</EnableVerifier>
+    <AllDrivers>False</AllDrivers>
+    <VerifyProjectOutput>True</VerifyProjectOutput>
+    <VerifyDrivers />
+    <VerifyFlags>133563</VerifyFlags>
+    <OutDir>$(SolutionDir)Install_Debug\x86\$(ConfigurationName)\</OutDir>
+    <EnableInf2cat>false</EnableInf2cat>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Win10 Debug|Win32'">
+    <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+    <EnableDeployment>False</EnableDeployment>
+    <RemoveDriver>True</RemoveDriver>
+    <HardwareIdString />
+    <CommandLine />
+    <DeployFiles />
+    <EnableVerifier>False</EnableVerifier>
+    <AllDrivers>False</AllDrivers>
+    <VerifyProjectOutput>True</VerifyProjectOutput>
+    <VerifyDrivers />
+    <VerifyFlags>133563</VerifyFlags>
+    <OutDir>$(SolutionDir)Install_Debug\x86\$(ConfigurationName)\</OutDir>
+    <EnableInf2cat>false</EnableInf2cat>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Win10 Debug_NoSign|Win32'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
     <EnableDeployment>False</EnableDeployment>
     <RemoveDriver>True</RemoveDriver>
@@ -343,6 +494,21 @@
     <OutDir>$(SolutionDir)Install_Debug\x86\$(ConfigurationName)\</OutDir>
     <EnableInf2cat>false</EnableInf2cat>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Win8 Debug_NoSign|Win32'">
+    <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+    <EnableDeployment>False</EnableDeployment>
+    <RemoveDriver>True</RemoveDriver>
+    <HardwareIdString />
+    <CommandLine />
+    <DeployFiles />
+    <EnableVerifier>False</EnableVerifier>
+    <AllDrivers>False</AllDrivers>
+    <VerifyProjectOutput>True</VerifyProjectOutput>
+    <VerifyDrivers />
+    <VerifyFlags>133563</VerifyFlags>
+    <OutDir>$(SolutionDir)Install_Debug\x86\$(ConfigurationName)\</OutDir>
+    <EnableInf2cat>false</EnableInf2cat>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Win8 Release|Win32'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
     <EnableDeployment>False</EnableDeployment>
@@ -373,6 +539,21 @@
     <OutDir>$(SolutionDir)Install_Debug\x86\$(ConfigurationName)\</OutDir>
     <EnableInf2cat>false</EnableInf2cat>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Win7 Debug_NoSign|Win32'">
+    <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+    <EnableDeployment>False</EnableDeployment>
+    <RemoveDriver>True</RemoveDriver>
+    <HardwareIdString />
+    <CommandLine />
+    <DeployFiles />
+    <EnableVerifier>False</EnableVerifier>
+    <AllDrivers>False</AllDrivers>
+    <VerifyProjectOutput>True</VerifyProjectOutput>
+    <VerifyDrivers />
+    <VerifyFlags>133563</VerifyFlags>
+    <OutDir>$(SolutionDir)Install_Debug\x86\$(ConfigurationName)\</OutDir>
+    <EnableInf2cat>false</EnableInf2cat>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='XP Debug|Win32'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
     <EnableDeployment>False</EnableDeployment>
@@ -386,6 +567,21 @@
     <VerifyDrivers />
     <VerifyFlags>133563</VerifyFlags>
     <OutDir>$(SolutionDir)Install_Debug\x86\XPDebug\</OutDir>
+    <EnableInf2cat>false</EnableInf2cat>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='XP Debug_NoSign|Win32'">
+    <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+    <EnableDeployment>False</EnableDeployment>
+    <RemoveDriver>True</RemoveDriver>
+    <HardwareIdString />
+    <CommandLine />
+    <DeployFiles />
+    <EnableVerifier>False</EnableVerifier>
+    <AllDrivers>False</AllDrivers>
+    <VerifyProjectOutput>True</VerifyProjectOutput>
+    <VerifyDrivers />
+    <VerifyFlags>133563</VerifyFlags>
+    <OutDir>$(SolutionDir)Install_Debug\x86\XPDebug_NoSign\</OutDir>
     <EnableInf2cat>false</EnableInf2cat>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Win7 Release|Win32'">
@@ -433,7 +629,37 @@
     <OutDir>$(SolutionDir)Install_Debug\$(Platform)\$(ConfigurationName)\</OutDir>
     <EnableInf2cat>false</EnableInf2cat>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug_NoSign|x64'">
+    <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+    <EnableDeployment>False</EnableDeployment>
+    <RemoveDriver>True</RemoveDriver>
+    <HardwareIdString />
+    <CommandLine />
+    <DeployFiles />
+    <EnableVerifier>False</EnableVerifier>
+    <AllDrivers>False</AllDrivers>
+    <VerifyProjectOutput>True</VerifyProjectOutput>
+    <VerifyDrivers />
+    <VerifyFlags>133563</VerifyFlags>
+    <OutDir>$(SolutionDir)Install_Debug\$(Platform)\$(ConfigurationName)\</OutDir>
+    <EnableInf2cat>false</EnableInf2cat>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Win10 Debug|x64'">
+    <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+    <EnableDeployment>False</EnableDeployment>
+    <RemoveDriver>True</RemoveDriver>
+    <HardwareIdString />
+    <CommandLine />
+    <DeployFiles />
+    <EnableVerifier>False</EnableVerifier>
+    <AllDrivers>False</AllDrivers>
+    <VerifyProjectOutput>True</VerifyProjectOutput>
+    <VerifyDrivers />
+    <VerifyFlags>133563</VerifyFlags>
+    <OutDir>$(SolutionDir)Install_Debug\$(Platform)\$(ConfigurationName)\</OutDir>
+    <EnableInf2cat>false</EnableInf2cat>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Win10 Debug_NoSign|x64'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
     <EnableDeployment>False</EnableDeployment>
     <RemoveDriver>True</RemoveDriver>
@@ -493,6 +719,21 @@
     <OutDir>$(SolutionDir)Install_Debug\$(Platform)\$(ConfigurationName)\</OutDir>
     <EnableInf2cat>false</EnableInf2cat>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Win8 Debug_NoSign|x64'">
+    <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+    <EnableDeployment>False</EnableDeployment>
+    <RemoveDriver>True</RemoveDriver>
+    <HardwareIdString />
+    <CommandLine />
+    <DeployFiles />
+    <EnableVerifier>False</EnableVerifier>
+    <AllDrivers>False</AllDrivers>
+    <VerifyProjectOutput>True</VerifyProjectOutput>
+    <VerifyDrivers />
+    <VerifyFlags>133563</VerifyFlags>
+    <OutDir>$(SolutionDir)Install_Debug\$(Platform)\$(ConfigurationName)\</OutDir>
+    <EnableInf2cat>false</EnableInf2cat>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Win8 Release|x64'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
     <EnableDeployment>False</EnableDeployment>
@@ -523,6 +764,21 @@
     <OutDir>$(SolutionDir)Install_Debug\$(Platform)\$(ConfigurationName)\</OutDir>
     <EnableInf2cat>false</EnableInf2cat>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Win7 Debug_NoSign|x64'">
+    <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+    <EnableDeployment>False</EnableDeployment>
+    <RemoveDriver>True</RemoveDriver>
+    <HardwareIdString />
+    <CommandLine />
+    <DeployFiles />
+    <EnableVerifier>False</EnableVerifier>
+    <AllDrivers>False</AllDrivers>
+    <VerifyProjectOutput>True</VerifyProjectOutput>
+    <VerifyDrivers />
+    <VerifyFlags>133563</VerifyFlags>
+    <OutDir>$(SolutionDir)Install_Debug\$(Platform)\$(ConfigurationName)\</OutDir>
+    <EnableInf2cat>false</EnableInf2cat>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='XP Debug|x64'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
     <EnableDeployment>False</EnableDeployment>
@@ -536,6 +792,21 @@
     <VerifyDrivers />
     <VerifyFlags>133563</VerifyFlags>
     <OutDir>$(SolutionDir)Install_Debug\$(Platform)\XPDebug\</OutDir>
+    <EnableInf2cat>false</EnableInf2cat>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='XP Debug_NoSign|x64'">
+    <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+    <EnableDeployment>False</EnableDeployment>
+    <RemoveDriver>True</RemoveDriver>
+    <HardwareIdString />
+    <CommandLine />
+    <DeployFiles />
+    <EnableVerifier>False</EnableVerifier>
+    <AllDrivers>False</AllDrivers>
+    <VerifyProjectOutput>True</VerifyProjectOutput>
+    <VerifyDrivers />
+    <VerifyFlags>133563</VerifyFlags>
+    <OutDir>$(SolutionDir)Install_Debug\$(Platform)\XPDebug_NoSign\</OutDir>
     <EnableInf2cat>false</EnableInf2cat>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Win7 Release|x64'">
@@ -577,6 +848,15 @@ copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
       <Command>IF EXIST "$(OutDir)UsbDk_Package\UsbDk.inf" del "$(OutDir)UsbDk_Package\UsbDk.inf"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win8 Debug_NoSign|Win32'">
+    <PostBuildEvent>
+      <Command>mkdir "$(OutDir)UsbDk_Package"
+copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>IF EXIST "$(OutDir)UsbDk_Package\UsbDk.inf" del "$(OutDir)UsbDk_Package\UsbDk.inf"</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|Win32'">
     <PostBuildEvent>
       <Command>mkdir "$(OutDir)UsbDk_Package"
@@ -586,7 +866,33 @@ copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
       <Command>IF EXIST "$(OutDir)UsbDk_Package\UsbDk.inf" del "$(OutDir)UsbDk_Package\UsbDk.inf"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win7 Debug_NoSign|Win32'">
+    <PostBuildEvent>
+      <Command>mkdir "$(OutDir)UsbDk_Package"
+copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>IF EXIST "$(OutDir)UsbDk_Package\UsbDk.inf" del "$(OutDir)UsbDk_Package\UsbDk.inf"</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='XP Debug|Win32'">
+    <PostBuildEvent>
+      <Command>mkdir "$(OutDir)UsbDk_Package"
+copy "$(ProjectDir)\..\UsbDkHelper\UsbDk_XP.inf" "$(OutDir)UsbDk_Package\UsbDk.inf"
+copy "$(OutDir)UsbDk.sys" "$(OutDir)UsbDk_Package"
+copy "$(OutDir)UsbDkController.exe" "$(OutDir)UsbDk_Package"
+copy "$(OutDir)UsbDkInstHelper.exe" "$(OutDir)UsbDk_Package"
+copy "$(OutDir)UsbDkHelper.dll" "$(OutDir)UsbDk_Package"
+copy C:\WinDDK\7600.16385.1\redist\wdf\x86\WdfCoInstaller01009.dll "$(OutDir)UsbDk_Package"
+mkdir "$(OutDir)UsbDk_Package\include"
+copy "$(ProjectDir)\..\UsbDk\UsbDkData.h" "$(OutDir)UsbDk_Package\include"
+copy "$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" "$(OutDir)UsbDk_Package\include"</Command>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>IF EXIST "$(OutDir)UsbDk_Package\UsbDk.inf" del "$(OutDir)UsbDk_Package\UsbDk.inf"</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='XP Debug_NoSign|Win32'">
     <PostBuildEvent>
       <Command>mkdir "$(OutDir)UsbDk_Package"
 copy "$(ProjectDir)\..\UsbDkHelper\UsbDk_XP.inf" "$(OutDir)UsbDk_Package\UsbDk.inf"
@@ -638,7 +944,25 @@ copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
       <Command>IF EXIST "$(OutDir)UsbDk_Package\UsbDk.inf" del "$(OutDir)UsbDk_Package\UsbDk.inf"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug_NoSign|Win32'">
+    <PostBuildEvent>
+      <Command>mkdir "$(OutDir)UsbDk_Package"
+copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>IF EXIST "$(OutDir)UsbDk_Package\UsbDk.inf" del "$(OutDir)UsbDk_Package\UsbDk.inf"</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win10 Debug|Win32'">
+    <PostBuildEvent>
+      <Command>mkdir "$(OutDir)UsbDk_Package"
+copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>IF EXIST "$(OutDir)UsbDk_Package\UsbDk.inf" del "$(OutDir)UsbDk_Package\UsbDk.inf"</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win10 Debug_NoSign|Win32'">
     <PostBuildEvent>
       <Command>mkdir "$(OutDir)UsbDk_Package"
 copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
@@ -683,6 +1007,15 @@ copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
       <Command>IF EXIST "$(OutDir)UsbDk_Package\UsbDk.inf" del "$(OutDir)UsbDk_Package\UsbDk.inf"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win8 Debug_NoSign|x64'">
+    <PostBuildEvent>
+      <Command>mkdir "$(OutDir)UsbDk_Package"
+copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>IF EXIST "$(OutDir)UsbDk_Package\UsbDk.inf" del "$(OutDir)UsbDk_Package\UsbDk.inf"</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
     <PostBuildEvent>
       <Command>mkdir "$(OutDir)UsbDk_Package"
@@ -692,7 +1025,33 @@ copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
       <Command>IF EXIST "$(OutDir)UsbDk_Package\UsbDk.inf" del "$(OutDir)UsbDk_Package\UsbDk.inf"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win7 Debug_NoSign|x64'">
+    <PostBuildEvent>
+      <Command>mkdir "$(OutDir)UsbDk_Package"
+copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>IF EXIST "$(OutDir)UsbDk_Package\UsbDk.inf" del "$(OutDir)UsbDk_Package\UsbDk.inf"</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='XP Debug|x64'">
+    <PostBuildEvent>
+      <Command>mkdir "$(OutDir)UsbDk_Package"
+copy "$(ProjectDir)\..\UsbDkHelper\UsbDk_XP.inf" "$(OutDir)UsbDk_Package\UsbDk.inf"
+copy "$(OutDir)UsbDk.sys" "$(OutDir)UsbDk_Package"
+copy "$(OutDir)UsbDkController.exe" "$(OutDir)UsbDk_Package"
+copy "$(OutDir)UsbDkInstHelper.exe" "$(OutDir)UsbDk_Package"
+copy "$(OutDir)UsbDkHelper.dll" "$(OutDir)UsbDk_Package"
+copy C:\WinDDK\7600.16385.1\redist\wdf\amd64\WdfCoInstaller01009.dll "$(OutDir)UsbDk_Package"
+mkdir "$(OutDir)UsbDk_Package\include"
+copy "$(ProjectDir)\..\UsbDk\UsbDkData.h" "$(OutDir)UsbDk_Package\include"
+copy "$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" "$(OutDir)UsbDk_Package\include"</Command>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>IF EXIST "$(OutDir)UsbDk_Package\UsbDk.inf" del "$(OutDir)UsbDk_Package\UsbDk.inf"</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='XP Debug_NoSign|x64'">
     <PostBuildEvent>
       <Command>mkdir "$(OutDir)UsbDk_Package"
 copy "$(ProjectDir)\..\UsbDkHelper\UsbDk_XP.inf" "$(OutDir)UsbDk_Package\UsbDk.inf"
@@ -745,7 +1104,25 @@ copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
       <Command>IF EXIST "$(OutDir)UsbDk_Package\UsbDk.inf" del "$(OutDir)UsbDk_Package\UsbDk.inf"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug_NoSign|x64'">
+    <PostBuildEvent>
+      <Command>mkdir "$(OutDir)UsbDk_Package"
+copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>IF EXIST "$(OutDir)UsbDk_Package\UsbDk.inf" del "$(OutDir)UsbDk_Package\UsbDk.inf"</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win10 Debug|x64'">
+    <PostBuildEvent>
+      <Command>mkdir "$(OutDir)UsbDk_Package"
+copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>IF EXIST "$(OutDir)UsbDk_Package\UsbDk.inf" del "$(OutDir)UsbDk_Package\UsbDk.inf"</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win10 Debug_NoSign|x64'">
     <PostBuildEvent>
       <Command>mkdir "$(OutDir)UsbDk_Package"
 copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
@@ -786,7 +1163,15 @@ copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
       <PackageRelativeDirectory>
       </PackageRelativeDirectory>
     </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkController.exe" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug_NoSign|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
     <FilesToPackage Include="$(OutDir)UsbDkController.exe" Condition="'$(Configuration)|$(Platform)'=='XP Debug|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkController.exe" Condition="'$(Configuration)|$(Platform)'=='XP Debug_NoSign|x64'">
       <PackageRelativeDirectory>
       </PackageRelativeDirectory>
     </FilesToPackage>
@@ -802,6 +1187,10 @@ copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
       <PackageRelativeDirectory>
       </PackageRelativeDirectory>
     </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkController.exe" Condition="'$(Configuration)|$(Platform)'=='Win8 Debug_NoSign|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
     <FilesToPackage Include="$(OutDir)UsbDkController.exe" Condition="'$(Configuration)|$(Platform)'=='Win8 Release|x64'">
       <PackageRelativeDirectory>
       </PackageRelativeDirectory>
@@ -810,7 +1199,15 @@ copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
       <PackageRelativeDirectory>
       </PackageRelativeDirectory>
     </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkController.exe" Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug_NoSign|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
     <FilesToPackage Include="$(OutDir)UsbDkController.exe" Condition="'$(Configuration)|$(Platform)'=='Win10 Debug|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkController.exe" Condition="'$(Configuration)|$(Platform)'=='Win10 Debug_NoSign|x64'">
       <PackageRelativeDirectory>
       </PackageRelativeDirectory>
     </FilesToPackage>
@@ -818,7 +1215,15 @@ copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
       <PackageRelativeDirectory>
       </PackageRelativeDirectory>
     </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkController.exe" Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug_NoSign|Win32'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
     <FilesToPackage Include="$(OutDir)UsbDkController.exe" Condition="'$(Configuration)|$(Platform)'=='Win10 Debug|Win32'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkController.exe" Condition="'$(Configuration)|$(Platform)'=='Win10 Debug_NoSign|Win32'">
       <PackageRelativeDirectory>
       </PackageRelativeDirectory>
     </FilesToPackage>
@@ -826,7 +1231,15 @@ copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
       <PackageRelativeDirectory>
       </PackageRelativeDirectory>
     </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkController.exe" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug_NoSign|Win32'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
     <FilesToPackage Include="$(OutDir)UsbDkController.exe" Condition="'$(Configuration)|$(Platform)'=='XP Debug|Win32'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkController.exe" Condition="'$(Configuration)|$(Platform)'=='XP Debug_NoSign|Win32'">
       <PackageRelativeDirectory>
       </PackageRelativeDirectory>
     </FilesToPackage>
@@ -839,6 +1252,10 @@ copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
       </PackageRelativeDirectory>
     </FilesToPackage>
     <FilesToPackage Include="$(OutDir)UsbDkController.exe" Condition="'$(Configuration)|$(Platform)'=='Win8 Debug|Win32'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkController.exe" Condition="'$(Configuration)|$(Platform)'=='Win8 Debug_NoSign|Win32'">
       <PackageRelativeDirectory>
       </PackageRelativeDirectory>
     </FilesToPackage>
@@ -866,7 +1283,15 @@ copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
       <PackageRelativeDirectory>
       </PackageRelativeDirectory>
     </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkInstHelper.exe" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug_NoSign|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
     <FilesToPackage Include="$(OutDir)UsbDkInstHelper.exe" Condition="'$(Configuration)|$(Platform)'=='XP Debug|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkInstHelper.exe" Condition="'$(Configuration)|$(Platform)'=='XP Debug_NoSign|x64'">
       <PackageRelativeDirectory>
       </PackageRelativeDirectory>
     </FilesToPackage>
@@ -882,6 +1307,10 @@ copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
       <PackageRelativeDirectory>
       </PackageRelativeDirectory>
     </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkInstHelper.exe" Condition="'$(Configuration)|$(Platform)'=='Win8 Debug_NoSign|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
     <FilesToPackage Include="$(OutDir)UsbDkInstHelper.exe" Condition="'$(Configuration)|$(Platform)'=='Win8 Release|x64'">
       <PackageRelativeDirectory>
       </PackageRelativeDirectory>
@@ -890,7 +1319,15 @@ copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
       <PackageRelativeDirectory>
       </PackageRelativeDirectory>
     </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkInstHelper.exe" Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug_NoSign|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
     <FilesToPackage Include="$(OutDir)UsbDkInstHelper.exe" Condition="'$(Configuration)|$(Platform)'=='Win10 Debug|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkInstHelper.exe" Condition="'$(Configuration)|$(Platform)'=='Win10 Debug_NoSign|x64'">
       <PackageRelativeDirectory>
       </PackageRelativeDirectory>
     </FilesToPackage>
@@ -898,7 +1335,15 @@ copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
       <PackageRelativeDirectory>
       </PackageRelativeDirectory>
     </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkInstHelper.exe" Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug_NoSign|Win32'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
     <FilesToPackage Include="$(OutDir)UsbDkInstHelper.exe" Condition="'$(Configuration)|$(Platform)'=='Win10 Debug|Win32'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkInstHelper.exe" Condition="'$(Configuration)|$(Platform)'=='Win10 Debug_NoSign|Win32'">
       <PackageRelativeDirectory>
       </PackageRelativeDirectory>
     </FilesToPackage>
@@ -906,7 +1351,15 @@ copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
       <PackageRelativeDirectory>
       </PackageRelativeDirectory>
     </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkInstHelper.exe" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug_NoSign|Win32'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
     <FilesToPackage Include="$(OutDir)UsbDkInstHelper.exe" Condition="'$(Configuration)|$(Platform)'=='XP Debug|Win32'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkInstHelper.exe" Condition="'$(Configuration)|$(Platform)'=='XP Debug_NoSign|Win32'">
       <PackageRelativeDirectory>
       </PackageRelativeDirectory>
     </FilesToPackage>
@@ -919,6 +1372,10 @@ copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
       </PackageRelativeDirectory>
     </FilesToPackage>
     <FilesToPackage Include="$(OutDir)UsbDkInstHelper.exe" Condition="'$(Configuration)|$(Platform)'=='Win8 Debug|Win32'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkInstHelper.exe" Condition="'$(Configuration)|$(Platform)'=='Win8 Debug_NoSign|Win32'">
       <PackageRelativeDirectory>
       </PackageRelativeDirectory>
     </FilesToPackage>
@@ -946,7 +1403,15 @@ copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
       <PackageRelativeDirectory>
       </PackageRelativeDirectory>
     </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkHelper.dll" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug_NoSign|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
     <FilesToPackage Include="$(OutDir)UsbDkHelper.dll" Condition="'$(Configuration)|$(Platform)'=='XP Debug|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkHelper.dll" Condition="'$(Configuration)|$(Platform)'=='XP Debug_NoSign|x64'">
       <PackageRelativeDirectory>
       </PackageRelativeDirectory>
     </FilesToPackage>
@@ -954,7 +1419,15 @@ copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
       <PackageRelativeDirectory>
       </PackageRelativeDirectory>
     </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkHelper.dll" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug_NoSign|Win32'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
     <FilesToPackage Include="$(OutDir)UsbDkHelper.dll" Condition="'$(Configuration)|$(Platform)'=='XP Debug|Win32'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkHelper.dll" Condition="'$(Configuration)|$(Platform)'=='XP Debug_NoSign|Win32'">
       <PackageRelativeDirectory>
       </PackageRelativeDirectory>
     </FilesToPackage>
@@ -978,7 +1451,15 @@ copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
       <PackageRelativeDirectory>
       </PackageRelativeDirectory>
     </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkHelper.dll" Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug_NoSign|Win32'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
     <FilesToPackage Include="$(OutDir)UsbDkHelper.dll" Condition="'$(Configuration)|$(Platform)'=='Win10 Debug|Win32'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkHelper.dll" Condition="'$(Configuration)|$(Platform)'=='Win10 Debug_NoSign|Win32'">
       <PackageRelativeDirectory>
       </PackageRelativeDirectory>
     </FilesToPackage>
@@ -998,7 +1479,15 @@ copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
       <PackageRelativeDirectory>
       </PackageRelativeDirectory>
     </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkHelper.dll" Condition="'$(Configuration)|$(Platform)'=='Win8 Debug_NoSign|Win32'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
     <FilesToPackage Include="$(OutDir)UsbDkHelper.dll" Condition="'$(Configuration)|$(Platform)'=='Win8 Debug|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkHelper.dll" Condition="'$(Configuration)|$(Platform)'=='Win8 Debug_NoSign|x64'">
       <PackageRelativeDirectory>
       </PackageRelativeDirectory>
     </FilesToPackage>
@@ -1010,7 +1499,15 @@ copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
       <PackageRelativeDirectory>
       </PackageRelativeDirectory>
     </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkHelper.dll" Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug_NoSign|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
     <FilesToPackage Include="$(OutDir)UsbDkHelper.dll" Condition="'$(Configuration)|$(Platform)'=='Win10 Debug|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(OutDir)UsbDkHelper.dll" Condition="'$(Configuration)|$(Platform)'=='Win10 Debug_NoSign|x64'">
       <PackageRelativeDirectory>
       </PackageRelativeDirectory>
     </FilesToPackage>
@@ -1049,25 +1546,49 @@ copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
     <FilesToPackage Include="$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|Win32'">
       <PackageRelativeDirectory>include</PackageRelativeDirectory>
     </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug_NoSign|Win32'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
     <FilesToPackage Include="$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" Condition="'$(Configuration)|$(Platform)'=='XP Debug|Win32'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" Condition="'$(Configuration)|$(Platform)'=='XP Debug_NoSign|Win32'">
       <PackageRelativeDirectory>include</PackageRelativeDirectory>
     </FilesToPackage>
     <FilesToPackage Include="$(ProjectDir)\..\UsbDk\UsbDkData.h" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|Win32'">
       <PackageRelativeDirectory>include</PackageRelativeDirectory>
     </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDk\UsbDkData.h" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug_NoSign|Win32'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
     <FilesToPackage Include="$(ProjectDir)\..\UsbDk\UsbDkData.h" Condition="'$(Configuration)|$(Platform)'=='XP Debug|Win32'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDk\UsbDkData.h" Condition="'$(Configuration)|$(Platform)'=='XP Debug_NoSign|Win32'">
       <PackageRelativeDirectory>include</PackageRelativeDirectory>
     </FilesToPackage>
     <FilesToPackage Include="$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
       <PackageRelativeDirectory>include</PackageRelativeDirectory>
     </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug_NoSign|x64'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
     <FilesToPackage Include="$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" Condition="'$(Configuration)|$(Platform)'=='XP Debug|x64'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" Condition="'$(Configuration)|$(Platform)'=='XP Debug_NoSign|x64'">
       <PackageRelativeDirectory>include</PackageRelativeDirectory>
     </FilesToPackage>
     <FilesToPackage Include="$(ProjectDir)\..\UsbDk\UsbDkData.h" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
       <PackageRelativeDirectory>include</PackageRelativeDirectory>
     </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDk\UsbDkData.h" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug_NoSign|x64'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
     <FilesToPackage Include="$(ProjectDir)\..\UsbDk\UsbDkData.h" Condition="'$(Configuration)|$(Platform)'=='XP Debug|x64'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDk\UsbDkData.h" Condition="'$(Configuration)|$(Platform)'=='XP Debug_NoSign|x64'">
       <PackageRelativeDirectory>include</PackageRelativeDirectory>
     </FilesToPackage>
     <FilesToPackage Include="$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" Condition="'$(Configuration)|$(Platform)'=='Win8 Release|Win32'">
@@ -1085,13 +1606,25 @@ copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
     <FilesToPackage Include="$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" Condition="'$(Configuration)|$(Platform)'=='Win8 Debug|Win32'">
       <PackageRelativeDirectory>include</PackageRelativeDirectory>
     </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" Condition="'$(Configuration)|$(Platform)'=='Win8 Debug_NoSign|Win32'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
     <FilesToPackage Include="$(ProjectDir)\..\UsbDk\UsbDkData.h" Condition="'$(Configuration)|$(Platform)'=='Win8 Debug|Win32'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDk\UsbDkData.h" Condition="'$(Configuration)|$(Platform)'=='Win8 Debug_NoSign|Win32'">
       <PackageRelativeDirectory>include</PackageRelativeDirectory>
     </FilesToPackage>
     <FilesToPackage Include="$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" Condition="'$(Configuration)|$(Platform)'=='Win8 Debug|x64'">
       <PackageRelativeDirectory>include</PackageRelativeDirectory>
     </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" Condition="'$(Configuration)|$(Platform)'=='Win8 Debug_NoSign|x64'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
     <FilesToPackage Include="$(ProjectDir)\..\UsbDk\UsbDkData.h" Condition="'$(Configuration)|$(Platform)'=='Win8 Debug|x64'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDk\UsbDkData.h" Condition="'$(Configuration)|$(Platform)'=='Win8 Debug_NoSign|x64'">
       <PackageRelativeDirectory>include</PackageRelativeDirectory>
     </FilesToPackage>
     <FilesToPackage Include="$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" Condition="'$(Configuration)|$(Platform)'=='Win8.1 Release|Win32'">
@@ -1121,25 +1654,49 @@ copy "$(ProjectDir)\..\UsbDkHelper\UsbDk.inf" "$(OutDir)UsbDk_Package"</Command>
     <FilesToPackage Include="$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug|Win32'">
       <PackageRelativeDirectory>include</PackageRelativeDirectory>
     </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug_NoSign|Win32'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
     <FilesToPackage Include="$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" Condition="'$(Configuration)|$(Platform)'=='Win10 Debug|Win32'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" Condition="'$(Configuration)|$(Platform)'=='Win10 Debug_NoSign|Win32'">
       <PackageRelativeDirectory>include</PackageRelativeDirectory>
     </FilesToPackage>
     <FilesToPackage Include="$(ProjectDir)\..\UsbDk\UsbDkData.h" Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug|Win32'">
       <PackageRelativeDirectory>include</PackageRelativeDirectory>
     </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDk\UsbDkData.h" Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug_NoSign|Win32'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
     <FilesToPackage Include="$(ProjectDir)\..\UsbDk\UsbDkData.h" Condition="'$(Configuration)|$(Platform)'=='Win10 Debug|Win32'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDk\UsbDkData.h" Condition="'$(Configuration)|$(Platform)'=='Win10 Debug_NoSign|Win32'">
       <PackageRelativeDirectory>include</PackageRelativeDirectory>
     </FilesToPackage>
     <FilesToPackage Include="$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug|x64'">
       <PackageRelativeDirectory>include</PackageRelativeDirectory>
     </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug_NoSign|x64'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
     <FilesToPackage Include="$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" Condition="'$(Configuration)|$(Platform)'=='Win10 Debug|x64'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDkHelper\UsbDkHelper.h" Condition="'$(Configuration)|$(Platform)'=='Win10 Debug_NoSign|x64'">
       <PackageRelativeDirectory>include</PackageRelativeDirectory>
     </FilesToPackage>
     <FilesToPackage Include="$(ProjectDir)\..\UsbDk\UsbDkData.h" Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug|x64'">
       <PackageRelativeDirectory>include</PackageRelativeDirectory>
     </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDk\UsbDkData.h" Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug_NoSign|x64'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
     <FilesToPackage Include="$(ProjectDir)\..\UsbDk\UsbDkData.h" Condition="'$(Configuration)|$(Platform)'=='Win10 Debug|x64'">
+      <PackageRelativeDirectory>include</PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="$(ProjectDir)\..\UsbDk\UsbDkData.h" Condition="'$(Configuration)|$(Platform)'=='Win10 Debug_NoSign|x64'">
       <PackageRelativeDirectory>include</PackageRelativeDirectory>
     </FilesToPackage>
     <FilesToPackage Include="@(Inf->'%(CopyOutput)')" Condition="'@(Inf)'!=''" />

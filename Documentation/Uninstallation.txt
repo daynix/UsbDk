@@ -1,0 +1,40 @@
+UsbDk Uninstallation:
+
+1.UsbDk can be easily uninstalled from programs and features as follows:
+1.1. Go to control panel
+1.2. Go to Programs
+1.3. Open Programs and features
+1.4. Select UsbDk Runtime Libraries
+1.5. Click on the Uninstall button
+1.6. A window should prompt stating "are you sure you want to uninstall this UsbDk Runtime Libraries", select yes
+
+2.Another way to Uninstall UsbDk is using UsbDkController as follows:
+2.1. Locate UsbDkController.exe, it should reside in "c:\Program Files\UsbDk Runtime Library\".
+2.2. Run UsbDkController.exe with -u flag.
+
+UsbDk uninstallation when keyboard and mouse are stuck:
+
+UsbDk driver can cause the mouse and keyboard to get stuck, this occurs due to installing an unsigned UsbDk
+version and can be resolved by booting Windows in "disable driver signature enforcement" mode from the
+"Advanced Boot Options" menu and then uninstalling UsbDk as documented above.
+
+How to get into "Advanced Boot Options" menu:
+
+There are multiple ways for different Windows OSes:
+
+Windows 8, 8.1 & 10:
+1. Boot to "Advanced Startup Options" Using Command Prompt
+1.1. Open command Prompt as an Administrator
+1.2. Run the following command: shutdown /r /t 0 /o
+
+Windows 7:
+2. Boot to "Advanced Startup Options" During boot:
+2.1. Reboot the PC
+2.2. During the early boot process start pressing F8
+
+All Oses:
+3. Boot to "Advanced Startup Options" from a Hard Reboot (useful if both mouse and keyboard are stuck):
+3.1. Press and hold the power button until it powers off
+3.2. Press the power button to turn it on
+3.3 Repeat the steps above until the "Windows logo screen" or "Please wait" during boot show on. Note that this it may take up to 3 attempts.
+3.4 When displayed, click on "See advanced repair options".

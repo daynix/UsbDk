@@ -108,6 +108,11 @@
             <?undef SourceSubPath ?>
             <?undef OsName ?>
           </Component>
+
+          <Component Id="UsbDk_TMF" Guid="{2A06187F-4B67-4DBD-86DA-E6FB081CD1B6}" Win64="$(var.UsbDkWin64)">
+            <File Id="UsbDk_TMF" Name="UsbDk.tmf" Source="..\UsbDk.tmf" Vital="yes" KeyPath="no" DiskId="1" ProcessorArchitecture="x64" />
+          </Component>
+
         </Directory>
       </Directory>
     </Directory>
@@ -145,6 +150,7 @@
       <ComponentRef Id="UsbDk_8" />
       <ComponentRef Id="UsbDk_81" />
       <ComponentRef Id="UsbDk_10" />
+      <ComponentRef Id="UsbDk_TMF" />
     </Feature>
   </Product>
 </Wix>

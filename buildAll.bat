@@ -16,6 +16,16 @@ for %%x in (Win7, Win8, Win8.1, Win10, XP) do (
   )
 )
 
+pushd Install
+"C:\Program Files (x86)\Windows Kits\10\bin\x86\tracepdb.exe" -s -o .\UsbDk.tmf
+if !ERRORLEVEL! NEQ 0 exit /B 1
+popd
+
+pushd Install_Debug
+"C:\Program Files (x86)\Windows Kits\10\bin\x86\tracepdb.exe" -s -o .\UsbDk.tmf
+if !ERRORLEVEL! NEQ 0 exit /B 1
+popd
+
 if [%1] EQU [NOMSI] goto NOMSI
 
 :BUILD_MSI

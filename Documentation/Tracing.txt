@@ -49,7 +49,21 @@ Getting Driver Text Traces (for debugging, requires UsbDk driver's PDB file)
   make sure correct PDB for your build and system was copied to Trace folder
   on the target machine.
 
-Getting Driver Binary Traces (for sending trace logs to developers, no PDB required)
+Getting Driver Binary Traces using Logman (for sending trace logs to developers)
+==============================================================================
+* Copy Tools/Trace subfolder from the driver source tree to the target machine
+* Run UsbDkLogman.bat as administrator
+* Follow instructions
+
+Converting binary trace file to text using UsbDk.tmf file from UsbDk release
+==============================================================================
+* Copy tracefmt.exe from WDK install location on build machine
+  (usually C:\Program Files (x86)\Windows Kits\8.1\bin\x64\tracefmt.exe)
+  to Trace folder on the target machine
+* Do the conversion, for example:
+  tracefmt.exe usbdk.etl -o usbdk.txt -nosummary -tmf "c:\Program Files\UsbDk Runtime Library\UsbDk.tmf"
+
+Getting Driver Binary Traces using TraceView (for sending trace logs to developers, no PDB required)
 ==============================================================================
 
 * Copy Tools/Trace subfolder from the driver source tree to the target machine
@@ -80,7 +94,7 @@ To Disable:
 * Right mouse button click on UsbDk-Autologger-Off.reg -> Merge
 * Restart the system
 
-Converting Driver Binary Traces to Text (requires UsbDk driver's PDB file)
+Converting Driver Binary Traces to Text (using driver's PDB file from private build)
 ==============================================================================
 
 * Place the binary trace obtained (UsbDkTrace.etl) to Tools/Trace

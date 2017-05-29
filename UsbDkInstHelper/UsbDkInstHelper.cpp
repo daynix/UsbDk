@@ -39,6 +39,11 @@ static int Controller_InstallDriver()
         return 0;
     case InstallFailure:
         return 1;
+    case InstallAborted:
+        MessageBox(NULL,
+            TEXT("Failed to start the driver on the system, installation aborted!\nPlease make sure you are installing a signed version of UsbDk or else try to disable \"driver signature enforcement\" on the system"),
+            TEXT("UsbDk Runtime Libraries Installer"), MB_OK | MB_ICONEXCLAMATION | MB_SETFOREGROUND | MB_SYSTEMMODAL);
+        return 4;
     case InstallSuccessNeedReboot:
         MessageBox(NULL,
                    TEXT("Please restart your computer to complete the installation"),

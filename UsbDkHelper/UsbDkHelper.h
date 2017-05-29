@@ -41,7 +41,8 @@ typedef enum
 {
     InstallFailure,
     InstallSuccessNeedReboot,
-    InstallSuccess
+    InstallSuccess,
+    InstallAborted
 } InstallResult;
 
 #ifdef __cplusplus

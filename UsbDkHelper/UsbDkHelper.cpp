@@ -63,6 +63,11 @@ InstallResult UsbDk_InstallDriver(void)
         UsbDkInstaller installer;
         return installer.Install(NeedRollBack) ? InstallSuccess : InstallSuccessNeedReboot;
     }
+    catch (const UsbDkInstallerAbortedException &e)
+    {
+        printExceptionString(e.what());
+        return InstallAborted;
+    }
     catch (const exception &e)
     {
         printExceptionString(e.what());

@@ -52,6 +52,9 @@ bool UsbDkInstaller::Install(bool &NeedRollBack)
     auto rebootRequired = !m_wdfCoinstaller.PreDeviceInstallEx(infFilePath);
 
     m_scManager.CreateServiceObject(USBDK_DRIVER_NAME, driverLocation.c_str());
+
+    verifyDriverCanStart();
+
     m_wdfCoinstaller.PostDeviceInstall(infFilePath);
     addUsbDkToRegistry();
 
@@ -300,4 +303,32 @@ bool UsbDkInstaller::isWow64B()
         }
     }
     return bIsWow64 ? true : false;
+}
+
+void UsbDkInstaller::verifyDriverCanStart()
+{
+    try
+    {
+        m_scManager.StartServiceObject(USBDK_DRIVER_NAME);
+        m_scManager.StopServiceObject(USBDK_DRIVER_NAME);
+    }
+    catch (const UsbDkServiceManagerFailedException &e)
+    {
+        auto err = e.GetErrorCode();
+       /* ERROR_SERVICE_DISABLED occurs in case we are attempting to start the
+        * driver without associating it with a device.
+        */
+        if (err != ERROR_SERVICE_DISABLED)
+        {
+            try
+            {
+                m_scManager.DeleteServiceObject(USBDK_DRIVER_NAME);
+            }
+            catch (const exception &e)
+            {
+                UNREFERENCED_PARAMETER(e);
+            }
+            throw UsbDkInstallerAbortedException();
+        }
+    }
 }

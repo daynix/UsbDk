@@ -40,6 +40,12 @@ public:
     UsbDkInstallerFailedException(tstring errMsg, DWORD dwErrorCode) : UsbDkW32ErrorException(tstring(INSTALLER_EXCEPTION_STRING) + errMsg, dwErrorCode){}
 };
 
+class UsbDkInstallerAbortedException : public UsbDkInstallerFailedException
+{
+public:
+    UsbDkInstallerAbortedException() : UsbDkInstallerFailedException() {}
+};
+
 class UsbDkInstaller
 {
 public:
@@ -68,5 +74,6 @@ private:
     void    buildMultiStringVectorFromList(vector<TCHAR> &valVector, tstringlist &newfiltersList);
     void    validatePlatform();
     bool    isWow64B();
+    void    verifyDriverCanStart();
 
 };

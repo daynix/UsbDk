@@ -47,24 +47,29 @@ void ServiceManager::CreateServiceObject(const tstring &ServiceName, const tstri
 
 void ServiceManager::DeleteServiceObject(const tstring &ServiceName)
 {
-    assert(m_schSCManager);
-
-    SCMHandleHolder schService(OpenService(m_schSCManager, ServiceName.c_str(), SERVICE_ALL_ACCESS));
-    if (!schService)
-    {
-        auto  err = GetLastError();
-        if (err != ERROR_SERVICE_DOES_NOT_EXIST)
-        {
-            throw UsbDkServiceManagerFailedException(TEXT("OpenService failed with error "), err);
-        }
-        return;
-    }
-
+    SCMHandleHolder schService(OpenServiceObject(ServiceName));
     WaitForServiceStop(schService);
     if (!DeleteService(schService))
     {
         throw UsbDkServiceManagerFailedException(TEXT("DeleteService failed"));
     }
+}
+
+void ServiceManager::StartServiceObject(const tstring &ServiceName)
+{
+    SCMHandleHolder schService(OpenServiceObject(ServiceName));
+
+    if (!StartService(SC_HANDLE(schService), 0, NULL))
+    {
+        throw UsbDkServiceManagerFailedException(TEXT("StartService failed"));
+    }
+    return;
+}
+
+void ServiceManager::StopServiceObject(const tstring & ServiceName)
+{
+    SCMHandleHolder schService(OpenServiceObject(ServiceName));
+    WaitForServiceStop(schService);
 }
 
 void ServiceManager::WaitForServiceStop(const SCMHandleHolder &schService)
@@ -85,4 +90,17 @@ void ServiceManager::WaitForServiceStop(const SCMHandleHolder &schService)
             throw UsbDkServiceManagerFailedException(TEXT("QueryServiceStatusEx failed"));
         }
     } while ((ssp.dwCurrentState != SERVICE_STOPPED) && (iterationNumber++ < SERVICE_STOP_ITERATIONS));
+}
+
+SC_HANDLE  ServiceManager::OpenServiceObject(const tstring & ServiceName)
+{
+    assert(m_schSCManager);
+
+    SC_HANDLE sch = OpenService(m_schSCManager, ServiceName.c_str(), SERVICE_ALL_ACCESS);
+    if (!sch)
+    {
+        auto  err = GetLastError();
+        throw UsbDkServiceManagerFailedException(TEXT("OpenService failed"), err);
+    }
+    return sch;
 }

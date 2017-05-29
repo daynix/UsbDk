@@ -42,11 +42,14 @@ public:
 
     void    CreateServiceObject(const tstring &ServiceName, const tstring &ServicePath);
     void    DeleteServiceObject(const tstring &ServiceName);
+    void    StartServiceObject(const tstring &ServiceName);
+    void    StopServiceObject(const tstring &ServiceName);
 
 private:
     typedef UsbDkHandleHolder<SC_HANDLE> SCMHandleHolder;
 
     static void WaitForServiceStop(const SCMHandleHolder &schService);
+    SC_HANDLE OpenServiceObject(const tstring & ServiceName);
 
     SCMHandleHolder m_schSCManager;
 };

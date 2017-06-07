@@ -1,3 +1,5 @@
+[![Build Status](https://ci.appveyor.com/api/projects/status/github/daynix/usbdk?branch=master&svg=true)](https://ci.appveyor.com/project/daynix/usbdk)
+
 # UsbDk
 
 UsbDk (USB Development Kit) is a open-source library for Windows meant

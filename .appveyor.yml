@@ -1,0 +1,19 @@
+image: Visual Studio 2015
+
+version: build-{build}-{branch}
+
+before_build:
+  - ren "C:\Program Files (x86)\Windows Kits\10\include\00wdf" "wdf"
+  - ren "C:\Program Files (x86)\WiX Toolset v3.11" "WiX Toolset v3.8"
+
+build_script: buildAll.bat
+
+skip_commits:
+  message: /\[ci skip\]/
+
+notifications:
+  - provider: Email
+    to: devel@daynix.com
+    on_build_success: false
+    on_build_failure: false
+    on_build_status_changed: true

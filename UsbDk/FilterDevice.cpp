@@ -486,7 +486,7 @@ NTSTATUS CUsbDkFilterDevice::DefineStrategy()
         return status;
     }
 
-    if (!m_Strategy.SelectStrategy(WdmObject()))
+    if (!m_Strategy.SelectStrategy(LowerDeviceObject()))
     {
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Not attached");
         return STATUS_NOT_SUPPORTED;
@@ -524,6 +524,11 @@ NTSTATUS CUsbDkFilterDevice::Create(PWDFDEVICE_INIT DevInit)
     {
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Failed to create device");
         return status;
+    }
+    if (!LowerDeviceObject())
+    {
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! No lower device, skip");
+        return STATUS_INVALID_DEVICE_STATE;
     }
 
     auto deviceContext = UsbDkFilterGetContext(m_Device);

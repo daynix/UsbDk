@@ -139,6 +139,7 @@ public:
 
     WDFDEVICE WdfObject() const { return m_Device; }
     PDEVICE_OBJECT WdmObject() const { return WdfDeviceWdmGetDeviceObject(m_Device); };
+    PDEVICE_OBJECT LowerDeviceObject() const { return m_LowerDeviceObj; }
     WDFIOTARGET IOTarget() const
     { return WdfDeviceGetIoTarget(m_Device); }
 
@@ -155,6 +156,7 @@ private:
     NTSTATUS AddQueue(WDF_IO_QUEUE_CONFIG &Config, WDF_OBJECT_ATTRIBUTES &Attributes, WDFQUEUE &Queue);
     NTSTATUS CacheDeviceName();
     CString m_CachedName;
+    PDEVICE_OBJECT m_LowerDeviceObj = nullptr;
 
     friend class CWdfQueue;
 };

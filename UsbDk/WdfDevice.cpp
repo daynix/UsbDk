@@ -125,6 +125,8 @@ NTSTATUS CWdfDevice::Create(CPreAllocatedDeviceInit &DeviceInit, WDF_OBJECT_ATTR
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_WDFDEVICE, "%!FUNC! Device name caching failed %!STATUS!", status);
     }
 
+    m_LowerDeviceObj = IoGetLowerDeviceObject(WdmObject());
+
     return status;
 }
 
@@ -170,6 +172,10 @@ void CWdfSpecificQueue::InitConfig(WDF_IO_QUEUE_CONFIG &QueueConfig)
 CWdfDevice::~CWdfDevice()
 {
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WDFDEVICE, "%!FUNC! Deleting device %wZ", m_CachedName);
+    if (m_LowerDeviceObj)
+    {
+        ObDereferenceObject(m_LowerDeviceObj);
+    }
 }
 
 NTSTATUS CWdfDevice::CacheDeviceName()

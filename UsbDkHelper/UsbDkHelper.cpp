@@ -173,7 +173,6 @@ BOOL UsbDk_StopRedirect(HANDLE DeviceHandle)
 {
     try
     {
-        UsbDkDriverAccess driverAccess;
         unique_ptr<REDIRECTED_DEVICE_HANDLE> deviceHandle(unpackHandle<REDIRECTED_DEVICE_HANDLE>(DeviceHandle));
         deviceHandle->RedirectorAccess.reset();
         return TRUE;

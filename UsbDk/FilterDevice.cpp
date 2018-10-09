@@ -314,8 +314,33 @@ void CUsbDkHubFilterStrategy::RegisterNewChild(PDEVICE_OBJECT PDO)
 {
     CWdmUsbDeviceAccess pdoAccess(PDO);
 
-    auto Port = pdoAccess.GetAddress();
+    // in case when the device is composite and one of interfaces installed
+    // under USB class and creates child device (example is composite USB with
+    // more than one interface and one of them is CD) the PDO can be non-USB
+    // device. Sending USB requests to it may be problematic as sending URB
+    // is just internal device control with trivial IOCTL code.
+    // Before trying to initialize it as USB device we check it is really one.
 
+    CObjHolder<CRegText> DevID;
+    CObjHolder<CRegText> InstanceID;
+    if (!UsbDkGetWdmDeviceIdentity(PDO, &DevID, &InstanceID))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Cannot query device identity");
+        return;
+    }
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Registering new child (PDO: %p):", PDO);
+    DevID->Dump();
+    InstanceID->Dump();
+
+    // Not a USB device -> do not register
+    if (!DevID->MatchPrefix(L"USB\\"))
+    {
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Not a usb device, skip child registration");
+        return;
+    }
+
+    auto Port = pdoAccess.GetAddress();
     if (Port == CWdmDeviceAccess::NO_ADDRESS)
     {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Cannot read device port number");
@@ -334,25 +359,6 @@ void CUsbDkHubFilterStrategy::RegisterNewChild(PDEVICE_OBJECT PDO)
     if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Cannot query device descriptor");
-        return;
-    }
-
-    CObjHolder<CRegText> DevID;
-    CObjHolder<CRegText> InstanceID;
-    if (!UsbDkGetWdmDeviceIdentity(PDO, &DevID, &InstanceID))
-    {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_FILTERDEVICE, "%!FUNC! Cannot query device identity");
-        return;
-    }
-
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Registering new child (PDO: %p):", PDO);
-    DevID->Dump();
-    InstanceID->Dump();
-
-    // Not a USB device -> do not register
-    if (!DevID->MatchPrefix(L"USB\\"))
-    {
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Not a usb device, skip child registration");
         return;
     }
 

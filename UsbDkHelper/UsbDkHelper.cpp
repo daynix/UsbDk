@@ -173,6 +173,11 @@ BOOL UsbDk_StopRedirect(HANDLE DeviceHandle)
 {
     try
     {
+        // if the driver is unaccessible the constructor raises exception
+        // there is a question whether this check is required and whether this is correct thing to do
+        // for now we leave it as is with TODO to investigate it in corner case flow
+        // (for example UsbDk uninstall when there is active redirection)
+        UsbDkDriverAccess checkDriverAccess;
         unique_ptr<REDIRECTED_DEVICE_HANDLE> deviceHandle(unpackHandle<REDIRECTED_DEVICE_HANDLE>(DeviceHandle));
         deviceHandle->RedirectorAccess.reset();
         return TRUE;

@@ -362,6 +362,15 @@ void CUsbDkHubFilterStrategy::RegisterNewChild(PDEVICE_OBJECT PDO)
         return;
     }
 
+#if (NTDDI_VERSION == NTDDI_WIN7)
+    // recheck on Win7, superspeed indication as on Win8 might be not available
+    if (Speed == HighSpeed && DevDescriptor.bcdUSB >= 0x300)
+    {
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! superspeed assigned according to BCD field");
+        Speed = SuperSpeed;
+    }
+#endif
+
     CUsbDkChildDevice::TDescriptorsCache CfgDescriptors(DevDescriptor.bNumConfigurations);
 
     if (!CfgDescriptors.Create())

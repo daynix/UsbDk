@@ -71,5 +71,16 @@ NTSTATUS CIsochronousUrb::Create(Direction TransferDirection, PVOID TransferBuff
 
     m_Urb->UrbIsochronousTransfer.TransferBuffer = TransferBuffer;
     m_Urb->UrbIsochronousTransfer.NumberOfPackets = static_cast<ULONG>(NumberOfPackets);
+
+    if (TransferDirection == URB_DIRECTION_OUT)
+    {
+        // initialize Length with initial packet length
+        // USB controller driver may override it (Win7)
+        for (size_t i = 0; i < NumberOfPackets; i++)
+        {
+            m_Urb->UrbIsochronousTransfer.IsoPacket[i].Length = static_cast<ULONG>(PacketSizes[i]);
+        }
+    }
+
     return FillOffsetsArray(NumberOfPackets, PacketSizes, TransferBufferSize);
 }

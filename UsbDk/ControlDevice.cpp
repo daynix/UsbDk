@@ -911,6 +911,7 @@ private:
 NTSTATUS CUsbDkControlDevice::ReloadPersistentHideRules()
 {
     m_PersistentHideRules.Clear();
+    m_PersistentExtHideRules.Clear();
 
     CHideRulesRegKey RulesKey;
     auto status = RulesKey.Open();

@@ -138,7 +138,7 @@ public:
 
     }
 
-    void Dump() const;
+    void Dump(LONG traceLevel = m_defaultDumpLevel) const;
 
 private:
     bool MatchCharacteristic(ULONG CharacteristicFilter, ULONG CharacteristicValue) const
@@ -152,7 +152,7 @@ private:
     ULONG   m_VID;
     ULONG   m_PID;
     ULONG   m_BCD;
-
+    static  LONG m_defaultDumpLevel;
     DECLARE_CWDMLIST_ENTRY(CUsbDkHideRule);
 };
 

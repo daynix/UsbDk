@@ -1162,9 +1162,10 @@ NTSTATUS CUsbDkRedirection::CreateRedirectorHandle(HANDLE RequestorProcess, PHAN
     return status;
 }
 
-void CUsbDkHideRule::Dump() const
+LONG CUsbDkHideRule::m_defaultDumpLevel = TRACE_LEVEL_INFORMATION;
+void CUsbDkHideRule::Dump(LONG traceLevel) const
 {
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "%!FUNC! Hide: %!bool!, C: %08X, V: %08X, P: %08X, BCD: %08X",
+    TraceEvents(traceLevel, TRACE_CONTROLDEVICE, "%!FUNC! Hide: %!bool!, C: %08X, V: %08X, P: %08X, BCD: %08X",
                 m_Hide, m_Class, m_VID, m_PID, m_BCD);
 }
 

@@ -1,0 +1,83 @@
+Short description of Device Hider feature:
+The interface is described in UsbDkHelperHider.h
+It includes basic and extended interfaces:
+
+1. Basic interface:
+UsbDk_AddPersistentHideRule
+UsbDk_DeletePersistentHideRule
+UsbDk_AddHideRule
+UsbDk_ClearHideRules
+
+Rule structure includes:
+Class
+BCD
+Vendor ID
+Product ID
+Hide specifier (0 or 1), 0 is terminal, 1 continues for next rule
+
+Class describes device class as specified in device descriptor.
+Checkers for these rules do not check classes of interfaces in multifunction devices,
+i.e.
+class match = (device class == rule class) or (rule class == -1)
+
+2. Extended interface
+UsbDk_AddExtendedHideRule
+UsbDk_AddExtendedPersistentHideRule
+UsbDk_DeleteExtendedPersistentHideRule
+
+These API calls receive the same rule structure as basic API and
+an additional parameter 'Rule Type', which can be
+0 (USBDK_HIDER_RULE_DEFAULT) or 1 (USBDK_HIDER_RULE_DETERMINATIVE_TYPES)
+
+Using extended API with USBDK_HIDER_RULE_DEFAULT produces exactly the
+same result as using basic API.
+
+Using USBDK_HIDER_RULE_DETERMINATIVE_TYPES forces different processing
+of hiding rules:
+
+Rule structure includes the same fields:
+Class (bitmask of device types to match)
+BCD
+Vendor ID
+Product ID
+Hide specifier (0 or 1), 0 is terminal, 1 continues for next rule
+
+Device type for each specific device is determined from device class as specified
+in device descriptor and 'class' field in all the interface descriptors of all
+device's configurations.
+
+Supported classes are:
+USB_DEVICE_CLASS_AUDIO (0x1) -> USB_DEVICE_CLASS_AUDIO
+
+USB_DEVICE_CLASS_COMMUNICATIONS(0x2)
+USB_DEVICE_CLASS_CDC_DATA(0xA)
+USB_DEVICE_CLASS_WIRELESS_CONTROLLER(0xE0) -> USB_DEVICE_CLASS_COMMUNICATIONS
+
+USB_DEVICE_CLASS_PRINTER(0x7) -> USB_DEVICE_CLASS_PRINTER
+USB_DEVICE_CLASS_STORAGE(0x8) -> USB_DEVICE_CLASS_STORAGE
+USB_DEVICE_CLASS_VIDEO(0xE) -> USB_DEVICE_CLASS_VIDEO
+USB_DEVICE_CLASS_AUDIO_VIDEO(0x10) -> USB_DEVICE_CLASS_AUDIO, USB_DEVICE_CLASS_VIDEO
+USB_DEVICE_CLASS_HUMAN_INTERFACE(0x3) -> USB_DEVICE_CLASS_HUMAN_INTERFACE
+
+All other classes -> OTHER (31)
+
+Following classes are determinative (if the device belongs to one
+of determinative types, all device types except of
+determinative one are removed from device type bitmask):
+The order of determinative types is:
+USB_DEVICE_CLASS_PRINTER
+USB_DEVICE_CLASS_COMMUNICATIONS
+USB_DEVICE_CLASS_AUDIO
+USB_DEVICE_CLASS_VIDEO
+
+Checkers for these rules check resulting set of device type and
+device types of interfaces in multifunction devices, i.e.
+Class match = (device type bitmask) & (rule class bitmask) != 0
+
+Example of usage:
+Rule.BCD = Rule.VID = Rule.PID = -1;
+Rule.Hide = 1;
+Rule.Class = (1 << USB_DEVICE_CLASS_STORAGE) | (1 << USB_DEVICE_CLASS_PRINTER);
+UsbDk_AddExtendedPersistentHideRule(&Rule, USBDK_HIDER_RULE_DETERMINATIVE_TYPES);
+This call will Hide all the device that determined as being mass storage
+devices or printer devices.

@@ -143,7 +143,7 @@ extern "C" {
     *
     * @note
     * 1. Persistent rule stays until explicitly deleted by
-    *    UsbDk_DeletePersistentHideRule()
+    *    UsbDk_DeletePersistentHideRule or UsbDk_DeleteAllPersistentRules
     * 2. This API requires administrative privileges
     * 3. For already attached devices the rule will be applied after
     *    device re-plug or system reboot.
@@ -167,7 +167,7 @@ extern "C" {
     *
     * @note
     * 1. Persistent rule stays until explicitly deleted by
-    *    UsbDk_DeletePersistentHideRule()
+    *    UsbDk_DeleteExtendedPersistentHideRule() or UsbDk_DeleteAllPersistentRules
     * 2. This API requires administrative privileges
     * 3. For already attached devices the rule will be applied after
     *    device re-plug or system reboot.
@@ -210,6 +210,24 @@ extern "C" {
     *
     */
     DLL InstallResult    UsbDk_DeleteExtendedPersistentHideRule(PUSB_DK_HIDE_RULE_PUBLIC Rule, ULONG Type);
+
+    /* Delete all persistent hide rules
+    *
+    * @params
+    *    IN  - None
+    *    OUT - PULONG pDeleted    - number of deleted rules
+    *          PULONG pNotDeleted - number of not deleted rules
+    *
+    * @return
+    *  Rule removal status
+    *
+    * @note
+    * 1. This API requires administrative privileges
+    * 2. For already attached devices the rules become inactive after
+    *    device re-plug or system reboot.
+    *
+    */
+    DLL InstallResult    UsbDk_DeleteAllPersistentRules(OUT PULONG pDeleted, OUT PULONG pNotDeleted);
 
 #ifdef __cplusplus
 }

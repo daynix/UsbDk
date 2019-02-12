@@ -48,6 +48,7 @@ static void ShowUsage()
     tcout << TEXT("        UsbDkController -H TYPE VID PID BCD Class Hide   - add dynamic hide rule") << endl;
     tcout << TEXT("        UsbDkController -P TYPE VID PID BCD Class Hide   - add persistent hide rule") << endl;
     tcout << TEXT("        UsbDkController -D TYPE VID PID BCD Class Hide   - delete persistent hide rule") << endl;
+    tcout << TEXT("        UsbDkController -Z                               - delete all persistent hide rules") << endl;
     tcout << endl;
     tcout << TEXT("            <VID PID BCD Class> May be specific value or -1 to match all") << endl;
     tcout << TEXT("            <Hide>              Should be 0 or 1, if 0, the rule is terminal") << endl;
@@ -319,6 +320,15 @@ static void Controller_HideDevice(TCHAR *Type, TCHAR *VID, TCHAR *PID, TCHAR *BC
     UsbDk_CloseHiderHandle(hiderHandle);
 }
 
+static int Controller_DeleteAllPersistentHideRules()
+{
+    ULONG done = 0, notDone = 0;
+    auto res = UsbDk_DeleteAllPersistentRules(&done, &notDone);
+    tcout << TEXT("Cleaning persistent rules: done ") << dec << done
+        << TEXT(", not done ") << notDone << endl;
+    return Controller_AnalyzeInstallResult(res, TEXT("Clean persistent hide rules"));
+}
+
 static bool Controller_ChdirToPackageFolder()
 {
     TCHAR PackagePath[MAX_PATH];
@@ -409,6 +419,10 @@ int __cdecl _tmain(int argc, TCHAR* argv[])
                 return -5;
             }
             return Controller_DeletePersistentHideRule(argv[2], argv[3], argv[4], argv[5], argv[6], argv[7]);
+        }
+        else if (_tcscmp(L"-Z", argv[1]) == 0)
+        {
+            return Controller_DeleteAllPersistentHideRules();
         }
         else
         {

@@ -128,3 +128,20 @@ void CRulesManager::DeleteRule(const USB_DK_HIDE_RULE &Rule)
         }
     }
 }
+
+ULONG CRulesManager::DeleteAllRules(ULONG& notDeleted)
+{
+    ULONG deleted = 0;
+    notDeleted = 0;
+    vector<wstring> subkeys;
+
+    for (const auto &SubKey : m_RegAccess)
+        subkeys.push_back(SubKey);
+
+    while (subkeys.size())
+    {
+        m_RegAccess.DeleteKey(subkeys.front().c_str()) ? deleted++ : notDeleted++;
+        subkeys.erase(subkeys.begin());
+    }
+    return deleted;
+}

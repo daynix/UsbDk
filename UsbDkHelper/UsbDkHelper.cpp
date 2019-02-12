@@ -401,3 +401,29 @@ DLL InstallResult UsbDk_DeletePersistentHideRule(PUSB_DK_HIDE_RULE_PUBLIC Public
 {
     return UsbDk_DeleteExtendedPersistentHideRule(PublicRule, USBDK_HIDER_RULE_DEFAULT);
 }
+
+DLL InstallResult UsbDk_DeleteAllPersistentRules(OUT PULONG pDeleted, OUT PULONG pNotDeleted)
+{
+    try
+    {
+        CRulesManager Manager;
+
+        *pDeleted = *pNotDeleted = 0;
+        *pDeleted = Manager.DeleteAllRules(*pNotDeleted);
+
+        UsbDkDriverAccess driver;
+        driver.UpdateRegistryParameters();
+
+        return *pNotDeleted ? InstallFailure : InstallSuccess;
+    }
+    catch (const UsbDkDriverFileException &e)
+    {
+        printExceptionString(e.what());
+        return InstallSuccessNeedReboot;
+    }
+    catch (const exception &e)
+    {
+        printExceptionString(e.what());
+        return InstallFailure;
+    }
+}

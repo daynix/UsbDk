@@ -320,6 +320,8 @@ private:
     typedef CWdmSet<CUsbDkHideRule, CLockedAccess, CNonCountingObject> HideRulesSet;
     HideRulesSet m_HideRules;
     HideRulesSet m_PersistentHideRules;
+    HideRulesSet m_ExtHideRules;
+    HideRulesSet m_PersistentExtHideRules;
 
     NTSTATUS AddHideRuleToSet(const USB_DK_HIDE_RULE &UsbDkRule, HideRulesSet &Set);
 

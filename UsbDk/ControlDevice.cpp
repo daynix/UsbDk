@@ -314,15 +314,35 @@ void CUsbDkControlDevice::UnregisterHiddenDevice(CUsbDkFilterDevice &FilterDevic
     m_HiddenDevices.Remove(&FilterDevice);
 }
 
-bool CUsbDkControlDevice::ShouldHide(const USB_DEVICE_DESCRIPTOR &DevDescriptor) const
+bool CUsbDkControlDevice::ShouldHideDevice(CUsbDkChildDevice &Device) const
 {
+    const USB_DEVICE_DESCRIPTOR &DevDescriptor = Device.DeviceDescriptor();
     auto Hide = false;
-
+    ULONG classes = Device.ClassesBitMask();
     const auto &HideVisitor = [&DevDescriptor, &Hide](CUsbDkHideRule *Entry) -> bool
     {
+        Entry->Dump(TRACE_LEVEL_VERBOSE);
+        TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_FILTERDEVICE,
+            "checking old hide rules %X:%X", DevDescriptor.idVendor, DevDescriptor.idProduct);
         if (Entry->Match(DevDescriptor))
         {
             Hide = Entry->ShouldHide();
+            TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_FILTERDEVICE, "Match: hide = %d", Hide);
+            return !Entry->ForceDecision();
+        }
+
+        return true;
+    };
+
+    const auto &HideVisitorExt = [&DevDescriptor, &Hide, classes](CUsbDkHideRule *Entry) -> bool
+    {
+        Entry->Dump(TRACE_LEVEL_VERBOSE);
+        TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_FILTERDEVICE,
+            "checking ext hide rules %X:%X", DevDescriptor.idVendor, DevDescriptor.idProduct);
+        if (Entry->Match(classes, DevDescriptor))
+        {
+            Hide = Entry->ShouldHide();
+            TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_FILTERDEVICE, "Match: hide = %d", Hide);
             return !Entry->ForceDecision();
         }
 
@@ -332,7 +352,27 @@ bool CUsbDkControlDevice::ShouldHide(const USB_DEVICE_DESCRIPTOR &DevDescriptor)
     const_cast<HideRulesSet*>(&m_HideRules)->ForEach(HideVisitor);
     const_cast<HideRulesSet*>(&m_PersistentHideRules)->ForEach(HideVisitor);
 
+    if (!Hide)
+    {
+        const_cast<HideRulesSet*>(&m_ExtHideRules)->ForEach(HideVisitorExt);
+        const_cast<HideRulesSet*>(&m_PersistentExtHideRules)->ForEach(HideVisitorExt);
+    }
+
     return Hide;
+}
+
+bool CUsbDkControlDevice::ShouldHide(const USB_DK_DEVICE_ID &DevId)
+{
+    bool b = false;
+
+    EnumUsbDevicesByID(DevId,
+        [&b, this](CUsbDkChildDevice *Child) -> bool
+    {
+        b = ShouldHideDevice(*Child);
+        return false;
+    });
+
+    return b;
 }
 
 bool CUsbDkControlDevice::EnumerateDevices(USB_DK_DEVICE_INFO *outBuff, size_t numberAllocatedDevices, size_t &numberExistingDevices)

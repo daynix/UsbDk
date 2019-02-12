@@ -18,6 +18,7 @@ public:
 
     void AddRule(const USB_DK_HIDE_RULE &Rule);
     void DeleteRule(const USB_DK_HIDE_RULE &Rule);
+    ULONG DeleteAllRules(ULONG& notDeleted);
 private:
     template <typename TFunctor>
     bool FindRule(const USB_DK_HIDE_RULE &Rule, TFunctor Functor);

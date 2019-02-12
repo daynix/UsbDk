@@ -117,6 +117,14 @@ public:
                MatchCharacteristic(m_BCD, Descriptor.bcdDevice);
     }
 
+    bool Match(ULONG UsbClassesBitmask, const USB_DEVICE_DESCRIPTOR &Descriptor) const
+    {
+        return (UsbClassesBitmask & m_Class) &&
+            MatchCharacteristic(m_VID, Descriptor.idVendor) &&
+            MatchCharacteristic(m_PID, Descriptor.idProduct) &&
+            MatchCharacteristic(m_BCD, Descriptor.bcdDevice);
+    }
+
     bool ShouldHide() const
     {
         return m_Hide;
@@ -286,7 +294,8 @@ public:
         return !DontRedirect;
     }
 
-    bool ShouldHide(const USB_DEVICE_DESCRIPTOR &DevDescriptor) const;
+    bool ShouldHideDevice(CUsbDkChildDevice &Device) const;
+    bool ShouldHide(const USB_DK_DEVICE_ID &DevId);
 
     template <typename TDevID>
     void NotifyRedirectionRemoved(const TDevID &Dev) const

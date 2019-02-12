@@ -439,7 +439,7 @@ bool CUsbDkHubFilterStrategy::FetchConfigurationDescriptors(CWdmUsbDeviceAccess 
 void CUsbDkHubFilterStrategy::ApplyRedirectionPolicy(CUsbDkChildDevice &Device)
 {
     if (m_ControlDevice->ShouldRedirect(Device) ||
-        m_ControlDevice->ShouldHide(Device.DeviceDescriptor()))
+        m_ControlDevice->ShouldHideDevice(Device))
     {
         if (Device.AttachToDeviceStack())
         {
@@ -646,7 +646,7 @@ bool CUsbDkFilterDevice::CStrategist::SelectStrategy(PDEVICE_OBJECT DevObj)
     }
 
     // Should be hidden -> hider strategy
-    if (m_Strategy->GetControlDevice()->ShouldHide(DevDescr))
+    if (m_Strategy->GetControlDevice()->ShouldHide(ID))
     {
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC! Assigning hidden USB device strategy");
         m_Strategy->Delete();

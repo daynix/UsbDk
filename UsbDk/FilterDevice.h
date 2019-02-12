@@ -65,8 +65,10 @@ public:
         , m_CfgDescriptors(CfgDescriptors)
         , m_ParentDevice(ParentDevice)
         , m_PDO(PDO)
-    {}
-
+        , m_ClassMaskForExtHider(0)
+    {
+        DetermineDeviceClasses();
+    }
     ULONG ParentID() const;
     PCWCHAR DeviceID() const { return *m_DeviceID->begin(); }
     PCWCHAR InstanceID() const { return *m_InstanceID->begin(); }
@@ -77,6 +79,8 @@ public:
     const USB_DEVICE_DESCRIPTOR &DeviceDescriptor() const
     { return m_DevDescriptor; }
     PDEVICE_OBJECT PDO() const { return m_PDO; }
+    ULONG ClassesBitMask() const
+    { return m_ClassMaskForExtHider; }
 
     bool ConfigurationDescriptor(UCHAR Index, USB_CONFIGURATION_DESCRIPTOR &Buffer, size_t BufferLength)
     {
@@ -107,9 +111,11 @@ private:
     TDescriptorsCache m_CfgDescriptors;
     PDEVICE_OBJECT m_PDO;
     const CUsbDkFilterDevice &m_ParentDevice;
-
+    ULONG m_ClassMaskForExtHider;
     CUsbDkChildDevice(const CUsbDkChildDevice&) = delete;
     CUsbDkChildDevice& operator= (const CUsbDkChildDevice&) = delete;
+
+    void DetermineDeviceClasses();
 
     DECLARE_CWDMLIST_ENTRY(CUsbDkChildDevice);
 };

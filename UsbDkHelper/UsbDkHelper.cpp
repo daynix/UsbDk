@@ -305,12 +305,13 @@ HANDLE UsbDk_CreateHiderHandle()
     }
 }
 
-BOOL UsbDk_AddHideRule(HANDLE HiderHandle, PUSB_DK_HIDE_RULE Rule)
+DLL BOOL UsbDk_AddExtendedHideRule(HANDLE HiderHandle, PUSB_DK_HIDE_RULE_PUBLIC PublicRule, ULONG Type)
 {
+    USB_DK_HIDE_RULE Rule(PublicRule, Type);
     try
     {
         auto HiderAccess = unpackHandle<UsbDkHiderAccess>(HiderHandle);
-        HiderAccess->AddHideRule(*Rule);
+        HiderAccess->AddHideRule(Rule);
         return TRUE;
     }
     catch (const exception &e)
@@ -318,6 +319,11 @@ BOOL UsbDk_AddHideRule(HANDLE HiderHandle, PUSB_DK_HIDE_RULE Rule)
         printExceptionString(e.what());
         return FALSE;
     }
+}
+
+BOOL UsbDk_AddHideRule(HANDLE HiderHandle, PUSB_DK_HIDE_RULE_PUBLIC PublicRule)
+{
+    return UsbDk_AddExtendedHideRule(HiderHandle, PublicRule, USBDK_HIDER_RULE_DEFAULT);
 }
 
 BOOL UsbDk_ClearHideRules(HANDLE HiderHandle)
@@ -374,12 +380,14 @@ InstallResult ModifyPersistentHideRules(const USB_DK_HIDE_RULE &Rule,
     }
 }
 
-DLL InstallResult UsbDk_AddPersistentHideRule(PUSB_DK_HIDE_RULE Rule)
+DLL InstallResult UsbDk_AddPersistentHideRule(PUSB_DK_HIDE_RULE_PUBLIC PublicRule)
 {
-    return ModifyPersistentHideRules(*Rule, &CRulesManager::AddRule);
+    USB_DK_HIDE_RULE Rule(PublicRule);
+    return ModifyPersistentHideRules(Rule, &CRulesManager::AddRule);
 }
 
-DLL InstallResult UsbDk_DeletePersistentHideRule(PUSB_DK_HIDE_RULE Rule)
+DLL InstallResult UsbDk_DeletePersistentHideRule(PUSB_DK_HIDE_RULE_PUBLIC PublicRule)
 {
-    return ModifyPersistentHideRules(*Rule, &CRulesManager::DeleteRule);
+    USB_DK_HIDE_RULE Rule(PublicRule);
+    return ModifyPersistentHideRules(Rule, &CRulesManager::DeleteRule);
 }

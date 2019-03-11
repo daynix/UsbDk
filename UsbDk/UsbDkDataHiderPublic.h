@@ -23,26 +23,16 @@
 
 #pragma once
 
-#include "UsbDkDataHiderPublic.h"
+#define USB_DK_HIDE_RULE_MATCH_ALL ((ULONG64)(-1))
 
-#ifdef __cplusplus
-class USB_DK_HIDE_RULE : public USB_DK_HIDE_RULE_PUBLIC
+typedef struct tag_USB_DK_HIDE_RULE_PUBLIC
 {
-public:
-    USB_DK_HIDE_RULE(PUSB_DK_HIDE_RULE_PUBLIC PublicRule = NULL, ULONG RuleType = USBDK_HIDER_RULE_DEFAULT) :
-        Type(RuleType)
-    {
-        if (PublicRule)
-        {
-            Hide  = PublicRule->Hide;
-            Class = PublicRule->Class;
-            VID   = PublicRule->VID;
-            PID   =  PublicRule->PID;
-            BCD   = PublicRule->BCD;
-        }
-    }
-    ULONG64 Type;
-};
+    ULONG64 Hide;
+    ULONG64 Class;
+    ULONG64 VID;
+    ULONG64 PID;
+    ULONG64 BCD;
+} USB_DK_HIDE_RULE_PUBLIC, *PUSB_DK_HIDE_RULE_PUBLIC;
 
-typedef USB_DK_HIDE_RULE *PUSB_DK_HIDE_RULE;
-#endif
+#define USBDK_HIDER_RULE_DEFAULT                  0
+#define USBDK_HIDER_RULE_DETERMINATIVE_TYPES      1

@@ -35,7 +35,7 @@
 #endif
 #endif
 
-#include "UsbDkDataHider.h"
+#include "UsbDkDataHiderPublic.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -79,7 +79,7 @@ extern "C" {
     * UsbDk_ClearHideRules() called
     *
     */
-    DLL BOOL             UsbDk_AddHideRule(HANDLE HiderHandle, PUSB_DK_HIDE_RULE Rule);
+    DLL BOOL             UsbDk_AddHideRule(HANDLE HiderHandle, PUSB_DK_HIDE_RULE_PUBLIC Rule);
 
     /* Clear all hider rules
     *
@@ -127,12 +127,13 @@ extern "C" {
     *    device re-plug or system reboot.
     *
     */
-    DLL InstallResult    UsbDk_AddPersistentHideRule(PUSB_DK_HIDE_RULE Rule);
+    DLL InstallResult    UsbDk_AddPersistentHideRule(PUSB_DK_HIDE_RULE_PUBLIC Rule);
 
     /* Delete specific persistent hide rule
     *
     * @params
     *    IN  - Rule - pointer to hide rule
+    *        - Type - type of the rule
     *    OUT - None
     *
     * @return
@@ -144,7 +145,7 @@ extern "C" {
     *    device re-plug or system reboot.
     *
     */
-    DLL InstallResult    UsbDk_DeletePersistentHideRule(PUSB_DK_HIDE_RULE Rule);
+    DLL InstallResult    UsbDk_DeletePersistentHideRule(PUSB_DK_HIDE_RULE_PUBLIC Rule);
 #ifdef __cplusplus
 }
 #endif

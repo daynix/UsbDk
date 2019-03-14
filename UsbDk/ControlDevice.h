@@ -257,10 +257,8 @@ public:
     NTSTATUS ResetUsbDevice(const USB_DK_DEVICE_ID &DeviceId);
     NTSTATUS AddRedirect(const USB_DK_DEVICE_ID &DeviceId, HANDLE RequestorProcess, PHANDLE ObjectHandle);
 
-    NTSTATUS AddHideRule(const USB_DK_HIDE_RULE &UsbDkRule)
-    { return AddHideRuleToSet(UsbDkRule, m_HideRules); }
-    NTSTATUS AddPersistentHideRule(const USB_DK_HIDE_RULE &UsbDkRule)
-    { return AddHideRuleToSet(UsbDkRule, m_PersistentHideRules); }
+    NTSTATUS AddHideRule(const USB_DK_HIDE_RULE &UsbDkRule);
+    NTSTATUS AddPersistentHideRule(const USB_DK_HIDE_RULE &UsbDkRule);
 
     void ClearHideRules();
 

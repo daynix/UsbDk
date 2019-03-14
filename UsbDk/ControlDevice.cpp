@@ -815,6 +815,14 @@ public:
             return status;
         }
 
+        DWORD32 val;
+        status = ReadDwordValue(USBDK_HIDE_RULE_TYPE, val);
+        if (!NT_SUCCESS(status))
+        {
+            return status;
+        }
+        Rule.Type = val;
+
         status = ReadDwordMaskValue(USBDK_HIDE_RULE_VID, Rule.VID);
         if (!NT_SUCCESS(status))
         {
@@ -1200,3 +1208,29 @@ void CDriverParamsRegistryPath::Destroy()
 }
 
 CDriverParamsRegistryPath::CAllocatablePath *CDriverParamsRegistryPath::m_Path = nullptr;
+
+NTSTATUS CUsbDkControlDevice::AddHideRule(const USB_DK_HIDE_RULE &UsbDkRule)
+{
+    if (UsbDkRule.Type == USBDK_HIDER_RULE_DEFAULT)
+    {
+        return AddHideRuleToSet(UsbDkRule, m_HideRules);
+    }
+    else if (UsbDkRule.Type == USBDK_HIDER_RULE_DETERMINATIVE_TYPES)
+    {
+        return AddHideRuleToSet(UsbDkRule, m_ExtHideRules);
+    }
+    return STATUS_INVALID_PARAMETER;
+}
+
+NTSTATUS CUsbDkControlDevice::AddPersistentHideRule(const USB_DK_HIDE_RULE &UsbDkRule)
+{
+    if (UsbDkRule.Type == USBDK_HIDER_RULE_DEFAULT)
+    {
+        return AddHideRuleToSet(UsbDkRule, m_PersistentHideRules);
+    }
+    else if (UsbDkRule.Type == USBDK_HIDER_RULE_DETERMINATIVE_TYPES)
+    {
+        return AddHideRuleToSet(UsbDkRule, m_PersistentExtHideRules);
+    }
+    return STATUS_INVALID_PARAMETER;
+}

@@ -16,7 +16,8 @@ static bool operator == (const USB_DK_HIDE_RULE& r1, const USB_DK_HIDE_RULE& r2)
            (r1.PID == r2.PID)     &&
            (r1.BCD == r2.BCD)     &&
            (r1.Class == r2.Class) &&
-           (r1.Hide == r2.Hide);
+           (r1.Hide == r2.Hide)   &&
+           (r1.Type == r2.Type);
 }
 
 DWORD CRulesManager::ReadDword(LPCTSTR RuleName, LPCTSTR ValueName) const
@@ -53,6 +54,7 @@ ULONG64 CRulesManager::ReadBool(LPCTSTR RuleName, LPCTSTR ValueName) const
 
 void CRulesManager::ReadRule(LPCTSTR RuleName, USB_DK_HIDE_RULE &Rule) const
 {
+    Rule.Type  = ReadDword(RuleName, USBDK_HIDE_RULE_TYPE);
     Rule.Hide  = ReadBool(RuleName, USBDK_HIDE_RULE_SHOULD_HIDE);
     Rule.VID   = ReadDwordMask(RuleName, USBDK_HIDE_RULE_VID);
     Rule.PID   = ReadDwordMask(RuleName, USBDK_HIDE_RULE_PID);
@@ -106,6 +108,7 @@ void CRulesManager::AddRule(const USB_DK_HIDE_RULE &Rule)
         throw UsbDkRuleManagerException(TEXT("Failed to create rule key"), ERROR_FUNCTION_FAILED);
     }
 
+    WriteDword(RuleName, USBDK_HIDE_RULE_TYPE, static_cast<ULONG>(Rule.Type));
     WriteDword(RuleName, USBDK_HIDE_RULE_SHOULD_HIDE, static_cast<ULONG>(Rule.Hide));
     WriteDword(RuleName, USBDK_HIDE_RULE_VID, static_cast<ULONG>(Rule.VID));
     WriteDword(RuleName, USBDK_HIDE_RULE_PID, static_cast<ULONG>(Rule.PID));

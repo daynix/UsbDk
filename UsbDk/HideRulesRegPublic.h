@@ -31,6 +31,7 @@
 #define USBDK_HIDE_RULE_PID             TEXT("PID")
 #define USBDK_HIDE_RULE_BCD             TEXT("BCD")
 #define USBDK_HIDE_RULE_CLASS           TEXT("Class")
+#define USBDK_HIDE_RULE_TYPE            TEXT("Type")
 
 #define USBDK_HIDE_RULES_PATH    TEXT("SYSTEM\\CurrentControlSet\\Services\\") \
                                  USBDK_DRIVER_NAME TEXT("\\")                  \

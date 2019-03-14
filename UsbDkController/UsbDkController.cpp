@@ -45,12 +45,14 @@ static void ShowUsage()
     tcout << endl;
     tcout << TEXT("    Hider API:") << endl;
     tcout << endl;
-    tcout << TEXT("        UsbDkController -H VID PID BCD Class Hide   - add dynamic hide rule") << endl;
-    tcout << TEXT("        UsbDkController -P VID PID BCD Class Hide   - add persistent hide rule") << endl;
-    tcout << TEXT("        UsbDkController -D VID PID BCD Class Hide   - delete persistent hide rule") << endl;
+    tcout << TEXT("        UsbDkController -H TYPE VID PID BCD Class Hide   - add dynamic hide rule") << endl;
+    tcout << TEXT("        UsbDkController -P TYPE VID PID BCD Class Hide   - add persistent hide rule") << endl;
+    tcout << TEXT("        UsbDkController -D TYPE VID PID BCD Class Hide   - delete persistent hide rule") << endl;
     tcout << endl;
     tcout << TEXT("            <VID PID BCD Class> May be specific value or -1 to match all") << endl;
     tcout << TEXT("            <Hide>              Should be 0 or 1, if 0, the rule is terminal") << endl;
+    tcout << TEXT("            <TYPE>              Should be 0 for backward-compatible hide") << endl;
+    tcout << TEXT("                                          1 for hide by determinative type") << endl;
     tcout << endl;
 }
 
@@ -229,48 +231,53 @@ static bool Controller_ParseBoolRuleField(const TCHAR *Name, const TCHAR * Str, 
     return true;
 }
 
-static bool Controller_ParseRule(TCHAR *VID, TCHAR *PID, TCHAR *BCD, TCHAR *UsbClass, TCHAR *Hide, USB_DK_HIDE_RULE &Rule)
+static bool Controller_ParseRule(TCHAR *Type, TCHAR *VID, TCHAR *PID, TCHAR *BCD, TCHAR *UsbClass, TCHAR *Hide, USB_DK_HIDE_RULE &Rule)
 {
     return Controller_ParseIntRuleField(TEXT("VID"), VID, Rule.VID) &&
            Controller_ParseIntRuleField(TEXT("PID"), PID, Rule.PID) &&
            Controller_ParseIntRuleField(TEXT("BCD"), BCD, Rule.BCD) &&
            Controller_ParseIntRuleField(TEXT("Class"), UsbClass, Rule.Class) &&
-           Controller_ParseBoolRuleField(TEXT("Hide"), Hide, Rule.Hide);
+           Controller_ParseBoolRuleField(TEXT("Hide"), Hide, Rule.Hide) &&
+           Controller_ParseIntRuleField(TEXT("Type"), Type, Rule.Type);
 }
 
-static int Controller_AddPersistentHideRule(TCHAR *VID, TCHAR *PID, TCHAR *BCD, TCHAR *UsbClass, TCHAR *Hide)
+static int Controller_AddPersistentHideRule(TCHAR *Type, TCHAR *VID, TCHAR *PID, TCHAR *BCD, TCHAR *UsbClass, TCHAR *Hide)
 {
     USB_DK_HIDE_RULE Rule;
 
-    if (!Controller_ParseRule(VID, PID, BCD, UsbClass, Hide, Rule))
+    if (!Controller_ParseRule(Type, VID, PID, BCD, UsbClass, Hide, Rule))
     {
         tcout << TEXT("Persistent hide rule parsing failed") << endl;
         return false;
     }
 
-    auto res = UsbDk_AddPersistentHideRule(&Rule);
+    auto res = Type == USBDK_HIDER_RULE_DEFAULT ?
+        UsbDk_AddPersistentHideRule(&Rule) :
+        UsbDk_AddExtendedPersistentHideRule(&Rule, (ULONG)Rule.Type);
     return Controller_AnalyzeInstallResult(res, TEXT("Persistent hide rule creation"));
 }
 
-static int Controller_DeletePersistentHideRule(TCHAR *VID, TCHAR *PID, TCHAR *BCD, TCHAR *UsbClass, TCHAR *Hide)
+static int Controller_DeletePersistentHideRule(TCHAR *Type, TCHAR *VID, TCHAR *PID, TCHAR *BCD, TCHAR *UsbClass, TCHAR *Hide)
 {
     USB_DK_HIDE_RULE Rule;
 
-    if (!Controller_ParseRule(VID, PID, BCD, UsbClass, Hide, Rule))
+    if (!Controller_ParseRule(Type, VID, PID, BCD, UsbClass, Hide, Rule))
     {
         tcout << TEXT("Persistent hide rule parsing failed") << endl;
         return false;
     }
 
-    auto res = UsbDk_DeletePersistentHideRule(&Rule);
+    auto res = Type == USBDK_HIDER_RULE_DEFAULT ?
+        UsbDk_DeletePersistentHideRule(&Rule) :
+        UsbDk_DeleteExtendedPersistentHideRule(&Rule, (ULONG)Rule.Type);
     return Controller_AnalyzeInstallResult(res, TEXT("Persistent hide rule removal"));
 }
 
-static void Controller_HideDevice(TCHAR *VID, TCHAR *PID, TCHAR *BCD, TCHAR *UsbClass, TCHAR *Hide)
+static void Controller_HideDevice(TCHAR *Type, TCHAR *VID, TCHAR *PID, TCHAR *BCD, TCHAR *UsbClass, TCHAR *Hide)
 {
     USB_DK_HIDE_RULE Rule;
 
-    if (!Controller_ParseRule(VID, PID, BCD, UsbClass, Hide, Rule))
+    if (!Controller_ParseRule(Type, VID, PID, BCD, UsbClass, Hide, Rule))
     {
         tcout << TEXT("Hide rule parsing failed") << endl;
         return;
@@ -283,7 +290,11 @@ static void Controller_HideDevice(TCHAR *VID, TCHAR *PID, TCHAR *BCD, TCHAR *Usb
         return;
     }
 
-    if (UsbDk_AddHideRule(hiderHandle, &Rule))
+    BOOL bResult = Rule.Type == USBDK_HIDER_RULE_DEFAULT ?
+        UsbDk_AddHideRule(hiderHandle, &Rule) :
+        UsbDk_AddExtendedHideRule(hiderHandle, &Rule, (ULONG)Rule.Type);
+
+    if (bResult)
     {
         tcout << endl
               << TEXT("Hide rule loaded succesfully. ")
@@ -374,30 +385,30 @@ int __cdecl _tmain(int argc, TCHAR* argv[])
         }
         else if (_tcscmp(L"-H", argv[1]) == 0)
         {
-            if (argc < 7)
+            if (argc < 8)
             {
                 ShowUsage();
                 return -3;
             }
-            Controller_HideDevice(argv[2], argv[3], argv[4], argv[5], argv[6]);
+            Controller_HideDevice(argv[2], argv[3], argv[4], argv[5], argv[6], argv[7]);
         }
         else if (_tcscmp(L"-P", argv[1]) == 0)
         {
-            if (argc < 7)
+            if (argc < 8)
             {
                 ShowUsage();
                 return -4;
             }
-            return Controller_AddPersistentHideRule(argv[2], argv[3], argv[4], argv[5], argv[6]);
+            return Controller_AddPersistentHideRule(argv[2], argv[3], argv[4], argv[5], argv[6], argv[7]);
         }
         else if (_tcscmp(L"-D", argv[1]) == 0)
         {
-            if (argc < 7)
+            if (argc < 8)
             {
                 ShowUsage();
                 return -5;
             }
-            return Controller_DeletePersistentHideRule(argv[2], argv[3], argv[4], argv[5], argv[6]);
+            return Controller_DeletePersistentHideRule(argv[2], argv[3], argv[4], argv[5], argv[6], argv[7]);
         }
         else
         {

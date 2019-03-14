@@ -380,14 +380,24 @@ InstallResult ModifyPersistentHideRules(const USB_DK_HIDE_RULE &Rule,
     }
 }
 
+DLL InstallResult UsbDk_AddExtendedPersistentHideRule(PUSB_DK_HIDE_RULE_PUBLIC PublicRule, ULONG Type)
+{
+    USB_DK_HIDE_RULE Rule(PublicRule, Type);
+    return ModifyPersistentHideRules(Rule, &CRulesManager::AddRule);
+}
+
 DLL InstallResult UsbDk_AddPersistentHideRule(PUSB_DK_HIDE_RULE_PUBLIC PublicRule)
 {
-    USB_DK_HIDE_RULE Rule(PublicRule);
-    return ModifyPersistentHideRules(Rule, &CRulesManager::AddRule);
+    return UsbDk_AddExtendedPersistentHideRule(PublicRule, USBDK_HIDER_RULE_DEFAULT);
+}
+
+DLL InstallResult UsbDk_DeleteExtendedPersistentHideRule(PUSB_DK_HIDE_RULE_PUBLIC PublicRule, ULONG Type)
+{
+    USB_DK_HIDE_RULE Rule(PublicRule, Type);
+    return ModifyPersistentHideRules(Rule, &CRulesManager::DeleteRule);
 }
 
 DLL InstallResult UsbDk_DeletePersistentHideRule(PUSB_DK_HIDE_RULE_PUBLIC PublicRule)
 {
-    USB_DK_HIDE_RULE Rule(PublicRule);
-    return ModifyPersistentHideRules(Rule, &CRulesManager::DeleteRule);
+    return UsbDk_DeleteExtendedPersistentHideRule(PublicRule, USBDK_HIDER_RULE_DEFAULT);
 }

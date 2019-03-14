@@ -81,6 +81,28 @@ extern "C" {
     */
     DLL BOOL             UsbDk_AddHideRule(HANDLE HiderHandle, PUSB_DK_HIDE_RULE_PUBLIC Rule);
 
+    /* Add extended rule for detaching USB devices from OS stack.
+    *  The rule definition is the same as for UsbDk_AddHideRule
+    *
+    *  Processing of the rule depend on exact Type parameter
+    *  For existing extended rules see Documentation/Hider.txt
+    *
+    * @params
+    *    IN  - HiderHandle  Handle to UsbDk driver
+    *        - Rule - pointer to hide rule
+    *        - Type - type of the rule
+    *    OUT - None
+    *
+    * @return
+    *  TRUE if function succeeds
+    *
+    * @note
+    * Hide rule stays until HiderHandle is closed, client process exits or
+    * UsbDk_ClearHideRules() called
+    *
+    */
+    DLL BOOL             UsbDk_AddExtendedHideRule(HANDLE HiderHandle, PUSB_DK_HIDE_RULE_PUBLIC Rule, ULONG Type);
+
     /* Clear all hider rules
     *
     * @params
@@ -129,7 +151,31 @@ extern "C" {
     */
     DLL InstallResult    UsbDk_AddPersistentHideRule(PUSB_DK_HIDE_RULE_PUBLIC Rule);
 
-    /* Delete specific persistent hide rule
+    /* Add extended rule for detaching USB devices from OS stack persistently.
+    *  The rule definition is the same as for UsbDk_AddPersistentHideRule
+    *
+    *  Processing of the rule depend on exact Type parameter
+    *  For existing extended rules see Documentation/Hider.txt
+    *
+    * @params
+    *    IN  - Rule - pointer to hide rule
+    *        - Type - type of the rule
+    *    OUT - None
+    *
+    * @return
+    *  Rule installation status
+    *
+    * @note
+    * 1. Persistent rule stays until explicitly deleted by
+    *    UsbDk_DeletePersistentHideRule()
+    * 2. This API requires administrative privileges
+    * 3. For already attached devices the rule will be applied after
+    *    device re-plug or system reboot.
+    *
+    */
+    DLL InstallResult    UsbDk_AddExtendedPersistentHideRule(PUSB_DK_HIDE_RULE_PUBLIC Rule, ULONG Type);
+
+    /* Delete specific persistent hide rule (rule type is default)
     *
     * @params
     *    IN  - Rule - pointer to hide rule
@@ -146,6 +192,25 @@ extern "C" {
     *
     */
     DLL InstallResult    UsbDk_DeletePersistentHideRule(PUSB_DK_HIDE_RULE_PUBLIC Rule);
+
+    /* Delete specific persistent hide rule
+    *
+    * @params
+    *    IN  - Rule - pointer to hide rule
+    *        - Type - type of the rule
+    *    OUT - None
+    *
+    * @return
+    *  Rule removal status
+    *
+    * @note
+    * 1. This API requires administrative privileges
+    * 2. For already attached devices the rule will be applied after
+    *    device re-plug or system reboot.
+    *
+    */
+    DLL InstallResult    UsbDk_DeleteExtendedPersistentHideRule(PUSB_DK_HIDE_RULE_PUBLIC Rule, ULONG Type);
+
 #ifdef __cplusplus
 }
 #endif

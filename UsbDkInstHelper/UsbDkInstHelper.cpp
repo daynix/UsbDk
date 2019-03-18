@@ -27,6 +27,8 @@
 
 using namespace std;
 
+static BOOL suppressInstallMessageBox = FALSE;
+
 static int Controller_InstallDriver()
 {
     //Clean up any previous versions before reinstalling
@@ -40,14 +42,28 @@ static int Controller_InstallDriver()
     case InstallFailure:
         return 1;
     case InstallAborted:
-        MessageBox(NULL,
-            TEXT("Failed to start the driver on the system, installation aborted!\nPlease make sure you are installing a signed version of UsbDk or else try to disable \"driver signature enforcement\" on the system"),
-            TEXT("UsbDk Runtime Libraries Installer"), MB_OK | MB_ICONEXCLAMATION | MB_SETFOREGROUND | MB_SYSTEMMODAL);
+        if (!suppressInstallMessageBox)
+        {
+            MessageBox(NULL,
+                TEXT("Failed to start the driver on the system, installation aborted!\nPlease make sure you are installing a signed version of UsbDk or else try to disable \"driver signature enforcement\" on the system"),
+                TEXT("UsbDk Runtime Libraries Installer"), MB_OK | MB_ICONEXCLAMATION | MB_SETFOREGROUND | MB_SYSTEMMODAL);
+        }
+        else
+        {
+            OutputDebugString(TEXT("UsbDkInstHelper: Installation aborted"));
+        }
         return 4;
     case InstallSuccessNeedReboot:
-        MessageBox(NULL,
-                   TEXT("Please restart your computer to complete the installation"),
-                   TEXT("UsbDk Runtime Libraries Installer"), MB_OK | MB_ICONEXCLAMATION | MB_SETFOREGROUND | MB_SYSTEMMODAL);
+        if (!suppressInstallMessageBox)
+        {
+            MessageBox(NULL,
+                TEXT("Please restart your computer to complete the installation"),
+                TEXT("UsbDk Runtime Libraries Installer"), MB_OK | MB_ICONEXCLAMATION | MB_SETFOREGROUND | MB_SYSTEMMODAL);
+        }
+        else
+        {
+            OutputDebugString(TEXT("UsbDkInstHelper: reboot required to complete the installation"));
+        }
         return 0;
     default:
         assert(0);
@@ -101,6 +117,10 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
     if (lpCmdLine[0] == 'i')
     {
+        if (lpCmdLine[1] == 'n' || lpCmdLine[1] == 'N')
+        {
+            suppressInstallMessageBox = TRUE;
+        }
         OutputDebugString(TEXT("UsbDkInstHelper: Install"));
         return Controller_InstallDriver();
     }

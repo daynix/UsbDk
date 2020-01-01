@@ -200,6 +200,7 @@ public:
 private:
     ~CUsbDkRedirection()
     {
+        Dump("Deleting ");
         if (m_RedirectorDevice != nullptr)
         {
             m_RedirectorDevice->Release();

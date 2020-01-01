@@ -1110,10 +1110,11 @@ NTSTATUS CUsbDkRedirection::Create(const USB_DK_DEVICE_ID &Id)
     return m_InstanceID.Create(Id.InstanceID);
 }
 
-void CUsbDkRedirection::Dump() const
+void CUsbDkRedirection::Dump(LPCSTR message) const
 {
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE,
-                "%!FUNC! Redirect: DevID: %wZ, InstanceID: %wZ",
+                "%!FUNC! %s DevID: %wZ, InstanceID: %wZ",
+                message,
                 m_DeviceID, m_InstanceID);
 }
 

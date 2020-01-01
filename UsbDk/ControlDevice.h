@@ -178,7 +178,7 @@ public:
     bool operator==(const CUsbDkChildDevice &Dev) const;
     bool operator==(const CUsbDkRedirection &Other) const;
 
-    void Dump() const;
+    void Dump(LPCSTR message = " ") const;
 
     void NotifyRedirectorCreated(CUsbDkFilterDevice *RedirectorDevice);
     void NotifyRedirectionRemoved();

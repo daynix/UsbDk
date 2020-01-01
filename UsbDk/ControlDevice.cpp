@@ -731,6 +731,8 @@ NTSTATUS CUsbDkControlDevice::AddRedirect(const USB_DK_DEVICE_ID &DeviceId, HAND
     {
         return addRes;
     }
+    Redirection->AddRef();
+    CObjHolder<CUsbDkRedirection, CRefCountingDeleter> dereferencer(Redirection);
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "%!FUNC! Success. New redirections list:");
     m_Redirections.Dump();
@@ -1198,6 +1200,12 @@ NTSTATUS CUsbDkRedirection::CreateRedirectorHandle(HANDLE RequestorProcess, PHAN
 
     do
     {
+        if (IsPreparedForRemove())
+        {
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WDFDEVICE, "%!FUNC!: device already marked for removal");
+            status = STATUS_DEVICE_REMOVED;
+            break;
+        }
         status = m_RedirectorDevice->CreateUserModeHandle(RequestorProcess, ObjectHandle);
         if (NT_SUCCESS(status))
         {

@@ -190,6 +190,8 @@ public:
     bool IsPreparedForRemove() const
     { return m_RemovalInProgress; }
 
+    bool MatchProcess(ULONG pid);
+
     NTSTATUS WaitForAttachment()
     { return m_RedirectionCreated.Wait(true, -SecondsTo100Nanoseconds(120)); }
 
@@ -216,6 +218,7 @@ private:
     CWdmEvent m_RedirectionCreated;
     CWdmEvent m_RedirectionRemoved;
     CUsbDkFilterDevice *m_RedirectorDevice = nullptr;
+    ULONG m_OwnerPid = 0;
 
     bool m_RemovalInProgress = false;
 

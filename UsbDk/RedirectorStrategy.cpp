@@ -630,6 +630,7 @@ void CUsbDkRedirectorStrategy::OnClose()
 {
     USB_DK_DEVICE_ID ID;
     UsbDkFillIDStruct(&ID, *m_DeviceID->begin(), *m_InstanceID->begin());
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_REDIRECTOR, "%!FUNC!");
 
     auto status = m_ControlDevice->RemoveRedirect(ID);
     if (!NT_SUCCESS(status))

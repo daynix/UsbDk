@@ -2,6 +2,7 @@
 
 SETLOCAL EnableExtensions EnableDelayedExpansion
 
+set _f=UsbDk
 if [%1] EQU [MSIONLY] goto BUILD_MSI
 if [%2] EQU [NOSIGN] (SET DEBUG_CFG=Debug_NoSign) ELSE (SET DEBUG_CFG=Debug)
 
@@ -17,16 +18,40 @@ for %%x in (Win7, Win8, Win8.1, Win10, XP) do (
 )
 
 pushd Install
-"C:\Program Files (x86)\Windows Kits\10\bin\x86\tracepdb.exe" -s -o .\UsbDk.tmf
+call :maketmf Release
 if !ERRORLEVEL! NEQ 0 exit /B 1
 popd
 
 pushd Install_Debug
-"C:\Program Files (x86)\Windows Kits\10\bin\x86\tracepdb.exe" -s -o .\UsbDk.tmf
+call :maketmf Debug
 if !ERRORLEVEL! NEQ 0 exit /B 1
 popd
 
 if [%1] EQU [NOMSI] goto NOMSI
+goto BUILD_MSI
+
+:maketmf
+del *.tmf *.mof
+call :make1tmf x64\Win10%1
+call :make1tmf x86\Win10%1
+call :make1tmf x64\Win8.1%1
+call :make1tmf x86\Win8.1%1
+call :make1tmf x64\Win8%1
+call :make1tmf x86\Win8%1
+call :make1tmf x64\Win7%1
+call :make1tmf x86\Win7%1
+call :make1tmf x64\XP%1
+call :make1tmf x86\XP%1
+goto :eof
+
+:make1tmf
+pushd %1
+echo Making TMF in %1
+"C:\Program Files (x86)\Windows Kits\10\bin\x86\tracepdb.exe" -s -o .\%_f%.tmf
+popd
+type %1\%_f%.tmf >> %_f%.tmf
+del %1\%_f%.??f
+goto :eof
 
 :BUILD_MSI
 

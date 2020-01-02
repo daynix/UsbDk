@@ -1120,6 +1120,12 @@ void CUsbDkRedirection::Dump(LPCSTR message) const
                 m_DeviceID, m_InstanceID);
 }
 
+bool CUsbDkRedirection::MatchProcess(ULONG pid)
+{
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WDFDEVICE, "%!FUNC! pid 0x%X, owner 0x%X", pid, m_OwnerPid);
+    return pid == m_OwnerPid;
+}
+
 void CUsbDkRedirection::NotifyRedirectorCreated(CUsbDkFilterDevice *RedirectorDevice)
 {
     TraceEvents(TRACE_LEVEL_ERROR, TRACE_WDFDEVICE, "%!FUNC! Redirector created for");
@@ -1209,6 +1215,9 @@ NTSTATUS CUsbDkRedirection::CreateRedirectorHandle(HANDLE RequestorProcess, PHAN
         status = m_RedirectorDevice->CreateUserModeHandle(RequestorProcess, ObjectHandle);
         if (NT_SUCCESS(status))
         {
+            ULONG pid = (ULONG)(ULONG_PTR)PsGetCurrentProcessId();
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_WDFDEVICE, "%!FUNC! done for process 0x%X", pid);
+            m_OwnerPid = pid;
             return status;
         }
 

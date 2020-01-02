@@ -83,7 +83,11 @@ NTSTATUS CUsbDkFilterDeviceInit::Configure(ULONG InstanceNumber)
     SetIoInCallerContextCallback([](_In_ WDFDEVICE Device, WDFREQUEST  Request)
                                  { return Strategy(Device)->IoInCallerContext(Device, Request); });
 
-    SetFileEventCallbacks(WDF_NO_EVENT_CALLBACK,
+    SetFileEventCallbacks([](_In_ WDFDEVICE Device, _In_ WDFREQUEST Request, _In_ WDFFILEOBJECT FileObject)
+                          {
+                                UNREFERENCED_PARAMETER(FileObject);
+                                UsbDkFilterGetContext(Device)->UsbDkFilter->OnFileCreate(Request);
+                          },
                           [](_In_ WDFFILEOBJECT FileObject)
                           {
                                 WDFDEVICE Device = WdfFileObjectGetDevice(FileObject);
@@ -473,6 +477,15 @@ bool CUsbDkChildDevice::AttachToDeviceStack()
     }
 
     return true;
+}
+
+void CUsbDkFilterDevice::OnFileCreate(WDFREQUEST Request)
+{
+    WDF_REQUEST_SEND_OPTIONS options;
+    WDF_REQUEST_SEND_OPTIONS_INIT(&options, WDF_REQUEST_SEND_OPTION_SEND_AND_FORGET);
+    // in the log we'll see which process created the file
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC!");
+    WdfRequestSend(Request, IOTarget(), &options);
 }
 
 NTSTATUS CUsbDkFilterDevice::AttachToStack(WDFDRIVER Driver)

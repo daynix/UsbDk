@@ -175,6 +175,7 @@ public:
     void SetSerialNumber(ULONG Number)
     { m_SerialNumber = Number; }
 
+    void OnFileCreate(WDFREQUEST Request);
 private:
     ~CUsbDkFilterDevice()
     {

@@ -411,10 +411,18 @@ public:
     }
 
     template <typename TEntryId, typename TModifier>
-    bool ModifyOne(TEntryId *Id, TModifier ModifierFunc)
+    bool ModifyOne(TEntryId *Id, TModifier ModifierFunc, ULONG process = 0)
     {
         CLockedContext<TAccessStrategy> LockedContext(*this);
-        return !m_Objects.ForEachIf([Id](TEntryType *ExistingEntry) { return *ExistingEntry == *Id; },
+        return !m_Objects.ForEachIf([Id,process](TEntryType *ExistingEntry)
+                                    {
+                                        bool match = *ExistingEntry == *Id;
+                                        if (process && match)
+                                        {
+                                            match = ExistingEntry->MatchProcess(process);
+                                        }
+                                        return match;
+                                    },
                                     [&ModifierFunc](TEntryType *Entry) { ModifierFunc(Entry); return false; });
     }
 

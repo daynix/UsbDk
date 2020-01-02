@@ -1081,7 +1081,8 @@ bool CUsbDkControlDevice::NotifyRedirectorAttached(CRegText *DeviceID, CRegText 
 
 bool CUsbDkControlDevice::NotifyRedirectorRemovalStarted(const USB_DK_DEVICE_ID &ID)
 {
-    return m_Redirections.ModifyOne(&ID, [](CUsbDkRedirection *R){ R->NotifyRedirectionRemovalStarted(); });
+    ULONG pid = (ULONG)(ULONG_PTR)PsGetCurrentProcessId();
+    return m_Redirections.ModifyOne(&ID, [](CUsbDkRedirection *R){ R->NotifyRedirectionRemovalStarted(); }, pid);
 }
 
 bool CUsbDkControlDevice::WaitForDetachment(const USB_DK_DEVICE_ID &ID)

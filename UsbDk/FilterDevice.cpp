@@ -481,11 +481,19 @@ bool CUsbDkChildDevice::AttachToDeviceStack()
 
 void CUsbDkFilterDevice::OnFileCreate(WDFREQUEST Request)
 {
-    WDF_REQUEST_SEND_OPTIONS options;
-    WDF_REQUEST_SEND_OPTIONS_INIT(&options, WDF_REQUEST_SEND_OPTION_SEND_AND_FORGET);
+    CWdfRequest r(Request);
+    WdfRequestFormatRequestUsingCurrentType(Request);
     // in the log we'll see which process created the file
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%!FUNC!");
-    WdfRequestSend(Request, IOTarget(), &options);
+    r.SendWithCompletion(IOTarget(), [](WDFREQUEST Request, WDFIOTARGET Target, PWDF_REQUEST_COMPLETION_PARAMS Params, WDFCONTEXT Context)
+    {
+        UNREFERENCED_PARAMETER(Target);
+        CWdfRequest r(Request);
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_FILTERDEVICE, "%s: completed", (LPCSTR)Context);
+        r.SetStatus(Params->IoStatus.Status);
+        r.SetBytesWritten(Params->IoStatus.Information);
+    },
+    __FUNCTION__);
 }
 
 NTSTATUS CUsbDkFilterDevice::AttachToStack(WDFDRIVER Driver)

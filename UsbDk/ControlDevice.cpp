@@ -451,7 +451,7 @@ PDEVICE_OBJECT CUsbDkControlDevice::GetPDOByDeviceID(const USB_DK_DEVICE_ID &Dev
     return PDO;
 }
 
-NTSTATUS CUsbDkControlDevice::ResetUsbDevice(const USB_DK_DEVICE_ID &DeviceID)
+NTSTATUS CUsbDkControlDevice::ResetUsbDevice(const USB_DK_DEVICE_ID &DeviceID, bool ForceD0)
 {
     PDEVICE_OBJECT PDO = GetPDOByDeviceID(DeviceID);
     if (PDO == nullptr)
@@ -460,7 +460,7 @@ NTSTATUS CUsbDkControlDevice::ResetUsbDevice(const USB_DK_DEVICE_ID &DeviceID)
     }
 
     CWdmUsbDeviceAccess pdoAccess(PDO);
-    auto status = pdoAccess.Reset();
+    auto status = pdoAccess.Reset(ForceD0);
     ObDereferenceObject(PDO);
 
     return status;
@@ -707,7 +707,7 @@ void CUsbDkControlDevice::AddRedirectRollBack(const USB_DK_DEVICE_ID &DeviceId, 
         return;
     }
 
-    auto resetRes = ResetUsbDevice(DeviceId);
+    auto resetRes = ResetUsbDevice(DeviceId, false);
     if (!NT_SUCCESS(resetRes))
     {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! Roll-back reset failed. %!STATUS!", resetRes);
@@ -737,7 +737,7 @@ NTSTATUS CUsbDkControlDevice::AddRedirect(const USB_DK_DEVICE_ID &DeviceId, HAND
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE, "%!FUNC! Success. New redirections list:");
     m_Redirections.Dump();
 
-    auto resetRes = ResetUsbDevice(DeviceId);
+    auto resetRes = ResetUsbDevice(DeviceId, true);
     if (!NT_SUCCESS(resetRes))
     {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROLDEVICE, "%!FUNC! Reset after start redirection failed. %!STATUS!", resetRes);
@@ -1029,7 +1029,7 @@ NTSTATUS CUsbDkControlDevice::RemoveRedirect(const USB_DK_DEVICE_ID &DeviceId)
 {
     if (NotifyRedirectorRemovalStarted(DeviceId))
     {
-        auto res = ResetUsbDevice(DeviceId);
+        auto res = ResetUsbDevice(DeviceId, false);
         if (NT_SUCCESS(res))
         {
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROLDEVICE,

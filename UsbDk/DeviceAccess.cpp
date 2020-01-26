@@ -186,6 +186,23 @@ bool CWdmDeviceAccess::QueryPowerData(CM_POWER_DATA& powerData)
 #endif
 }
 
+static void PowerRequestCompletion(
+    _In_ PDEVICE_OBJECT DeviceObject,
+    _In_ UCHAR MinorFunction,
+    _In_ POWER_STATE PowerState,
+    _In_opt_ PVOID Context,
+    _In_ PIO_STATUS_BLOCK IoStatus
+)
+{
+    UNREFERENCED_PARAMETER(DeviceObject);
+    UNREFERENCED_PARAMETER(MinorFunction);
+    UNREFERENCED_PARAMETER(PowerState);
+    UNREFERENCED_PARAMETER(IoStatus);
+    CWdmEvent *pev = (CWdmEvent *)Context;
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVACCESS, "%!FUNC! -> D%d", PowerState.DeviceState - 1);
+    pev->Set();
+}
+
 PWCHAR CWdmDeviceAccess::MakeNonPagedDuplicate(BUS_QUERY_ID_TYPE idType, PWCHAR idData)
 {
     auto bufferLength = GetIdBufferLength(idType, idData);
@@ -233,9 +250,23 @@ NTSTATUS CWdmDeviceAccess::QueryForInterface(const GUID &guid, __out INTERFACE &
     return status;
 }
 
-NTSTATUS CWdmUsbDeviceAccess::Reset()
+NTSTATUS CWdmUsbDeviceAccess::Reset(bool ForceD0)
 {
     CIoControlIrp Irp;
+    CM_POWER_DATA powerData;
+    if (ForceD0 && QueryPowerData(powerData) && powerData.PD_MostRecentPowerState != PowerDeviceD0)
+    {
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVACCESS, "%!FUNC! device power state D%d", powerData.PD_MostRecentPowerState - 1);
+        POWER_STATE PowerState;
+        CWdmEvent Event;
+        PowerState.DeviceState = PowerDeviceD0;
+        auto status = PoRequestPowerIrp(m_DevObj, IRP_MN_SET_POWER, PowerState, PowerRequestCompletion, &Event, NULL);
+        if (NT_SUCCESS(status))
+        {
+            Event.Wait();
+        }
+    }
+
     auto status = Irp.Create(m_DevObj, IOCTL_INTERNAL_USB_CYCLE_PORT);
 
     if (!NT_SUCCESS(status))

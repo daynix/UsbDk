@@ -16,7 +16,9 @@ extern "C"
 #include <usb.h>
 
 #if !TARGET_OS_WIN_XP
+#include <initguid.h>
 #include <UsbSpec.h>
+#include <devpkey.h>
 #else
 #define USB_DEVICE_CLASS_AUDIO                  0x01
 #define USB_DEVICE_CLASS_COMMUNICATIONS         0x02

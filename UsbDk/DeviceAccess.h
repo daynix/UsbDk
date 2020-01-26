@@ -52,7 +52,7 @@ public:
     ULONG GetAddress();
     CRegText *GetDeviceID() { return new CRegSz(QueryBusID(BusQueryDeviceID)); }
     CRegText *GetInstanceID() { return new CRegSz(QueryBusID(BusQueryInstanceID)); }
-
+    bool QueryPowerData(CM_POWER_DATA& powerData);
 protected:
     PDEVICE_OBJECT m_DevObj;
 

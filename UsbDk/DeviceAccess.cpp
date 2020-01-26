@@ -168,6 +168,24 @@ SIZE_T CWdmDeviceAccess::GetIdBufferLength(BUS_QUERY_ID_TYPE idType, PWCHAR idDa
     }
 }
 
+bool CWdmDeviceAccess::QueryPowerData(CM_POWER_DATA& powerData)
+{
+    powerData.PD_Size = sizeof(powerData);
+#if !TARGET_OS_WIN_XP
+    ULONG dummy;
+    DEVPROPTYPE propType;
+    auto status = IoGetDevicePropertyData(m_DevObj, &DEVPKEY_Device_PowerData, LOCALE_NEUTRAL, 0,
+        sizeof(powerData), &powerData, &dummy, &propType);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVACCESS, "%!FUNC! Error %!STATUS!", status);
+    }
+    return NT_SUCCESS(status);
+#else
+    return false;
+#endif
+}
+
 PWCHAR CWdmDeviceAccess::MakeNonPagedDuplicate(BUS_QUERY_ID_TYPE idType, PWCHAR idData)
 {
     auto bufferLength = GetIdBufferLength(idType, idData);

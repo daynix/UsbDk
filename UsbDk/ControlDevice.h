@@ -266,7 +266,7 @@ public:
     { return ReloadPersistentHideRules(); }
 
     bool EnumerateDevices(USB_DK_DEVICE_INFO *outBuff, size_t numberAllocatedDevices, size_t &numberExistingDevices);
-    NTSTATUS ResetUsbDevice(const USB_DK_DEVICE_ID &DeviceId);
+    NTSTATUS ResetUsbDevice(const USB_DK_DEVICE_ID &DeviceId, bool ForceD0);
     NTSTATUS AddRedirect(const USB_DK_DEVICE_ID &DeviceId, HANDLE RequestorProcess, PHANDLE ObjectHandle);
 
     NTSTATUS AddHideRule(const USB_DK_HIDE_RULE &UsbDkRule);

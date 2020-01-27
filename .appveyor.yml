@@ -3,7 +3,7 @@ image: Visual Studio 2015
 version: build-{build}-{branch}
 
 before_build:
-  - copy /y  tools\AppVeyor\Microsoft.DriverKit.Build.Tasks.14.0.dll "C:\Program Files (x86)\Windows Kits\10\build\bin"
+  - tools\AppVeyor\before-build.cmd
 
 build_script: buildAll.bat
 

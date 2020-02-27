@@ -23,7 +23,7 @@ if !ERRORLEVEL! NEQ 0 exit /B 1
 popd
 
 pushd Install_Debug
-call :maketmf Debug
+call :maketmf %DEBUG_CFG%
 if !ERRORLEVEL! NEQ 0 exit /B 1
 popd
 

@@ -626,13 +626,13 @@ size_t CUsbDkRedirectorStrategy::GetRequestContextSize()
     return sizeof(USBDK_REDIRECTOR_REQUEST_CONTEXT);
 }
 
-void CUsbDkRedirectorStrategy::OnClose()
+void CUsbDkRedirectorStrategy::OnClose(ULONG pid)
 {
     USB_DK_DEVICE_ID ID;
     UsbDkFillIDStruct(&ID, *m_DeviceID->begin(), *m_InstanceID->begin());
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_REDIRECTOR, "%!FUNC!");
 
-    auto status = m_ControlDevice->RemoveRedirect(ID);
+    auto status = m_ControlDevice->RemoveRedirect(ID, pid);
     if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_REDIRECTOR, "%!FUNC! RemoveRedirect failed: %!STATUS!", status);

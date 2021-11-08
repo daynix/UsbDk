@@ -274,7 +274,7 @@ public:
 
     void ClearHideRules();
 
-    NTSTATUS RemoveRedirect(const USB_DK_DEVICE_ID &DeviceId);
+    NTSTATUS RemoveRedirect(const USB_DK_DEVICE_ID &DeviceId, ULONG pid);
     NTSTATUS GetConfigurationDescriptor(const USB_DK_CONFIG_DESCRIPTOR_REQUEST &Request,
                                         PUSB_CONFIGURATION_DESCRIPTOR Descriptor,
                                         size_t *OutputBuffLen);
@@ -309,7 +309,7 @@ public:
    }
 
     bool NotifyRedirectorAttached(CRegText *DeviceID, CRegText *InstanceID, CUsbDkFilterDevice *RedirectorDevice);
-    bool NotifyRedirectorRemovalStarted(const USB_DK_DEVICE_ID &ID);
+    bool NotifyRedirectorRemovalStarted(const USB_DK_DEVICE_ID &ID, ULONG pid);
     bool WaitForDetachment(const USB_DK_DEVICE_ID &ID);
 
 private:

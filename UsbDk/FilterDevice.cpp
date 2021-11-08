@@ -91,7 +91,8 @@ NTSTATUS CUsbDkFilterDeviceInit::Configure(ULONG InstanceNumber)
                           [](_In_ WDFFILEOBJECT FileObject)
                           {
                                 WDFDEVICE Device = WdfFileObjectGetDevice(FileObject);
-                                Strategy(Device)->OnClose();
+                                ULONG pid = (ULONG)(ULONG_PTR)PsGetCurrentProcessId();
+                                Strategy(Device)->OnClose(pid);
                           },
                           WDF_NO_EVENT_CALLBACK);
 

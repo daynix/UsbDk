@@ -62,7 +62,8 @@ public:
     CUsbDkControlDevice* GetControlDevice()
     { return m_ControlDevice; }
 
-    virtual void OnClose(){}
+    virtual void OnClose(ULONG pid)
+    { UNREFERENCED_PARAMETER(pid); }
 
 protected:
     CUsbDkFilterDevice *m_Owner = nullptr;

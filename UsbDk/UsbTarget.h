@@ -28,7 +28,7 @@
 #include "Urb.h"
 #include "WdfRequest.h"
 
-using USBDK_TARGET_REQUEST_CONTEXT = struct : public WDF_REQUEST_CONTEXT
+struct USBDK_TARGET_REQUEST_CONTEXT : public WDF_REQUEST_CONTEXT
 {
     ULONG64 RequestId;
 };

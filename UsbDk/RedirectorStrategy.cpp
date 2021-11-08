@@ -83,7 +83,7 @@ NTSTATUS CUsbDkRedirectorStrategy::Create(CUsbDkFilterDevice *Owner)
     return status;
 }
 
-using USBDK_REDIRECTOR_REQUEST_CONTEXT = struct : public USBDK_TARGET_REQUEST_CONTEXT
+struct USBDK_REDIRECTOR_REQUEST_CONTEXT : public USBDK_TARGET_REQUEST_CONTEXT
 {
     bool PreprocessingDone;
 

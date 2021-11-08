@@ -176,6 +176,9 @@ public:
     { m_SerialNumber = Number; }
 
     void OnFileCreate(WDFREQUEST Request);
+
+    CWdmRefCounter m_open_count;
+
 private:
     ~CUsbDkFilterDevice()
     {

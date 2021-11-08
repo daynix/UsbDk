@@ -86,12 +86,32 @@ NTSTATUS CUsbDkFilterDeviceInit::Configure(ULONG InstanceNumber)
     SetFileEventCallbacks([](_In_ WDFDEVICE Device, _In_ WDFREQUEST Request, _In_ WDFFILEOBJECT FileObject)
                           {
                                 UNREFERENCED_PARAMETER(FileObject);
-                                UsbDkFilterGetContext(Device)->UsbDkFilter->OnFileCreate(Request);
+                                auto filter = UsbDkFilterGetContext(Device)->UsbDkFilter;
+                                filter->m_open_count.AddRef();
+                                filter->OnFileCreate(Request);
                           },
                           [](_In_ WDFFILEOBJECT FileObject)
                           {
                                 WDFDEVICE Device = WdfFileObjectGetDevice(FileObject);
-                                ULONG pid = (ULONG)(ULONG_PTR)PsGetCurrentProcessId();
+                                auto filter = UsbDkFilterGetContext(Device)->UsbDkFilter;
+                                ULONG pid = 0; // zero means always match
+
+                                // Check PID only if there are multiple open references to the file.
+                                // If this was the last reference, always close the redirection.
+                                //
+                                // This callback function might run in a different process-context
+                                // than the initiator process, therefore the 'current process ID'
+                                // isn't always the ID of the 'owning' process.
+                                //
+                                // In the worst case, the USB redirection will be kept until the last
+                                // open file handle to the device is closed.
+                                //
+                                // From KMDF 1.21, there's a new method that should give us the expected ID:
+                                // WdfFileObjectGetInitiatorProcessId(FileObject)
+
+                                if (filter->m_open_count.Release()) {
+                                    pid = (ULONG)(ULONG_PTR)PsGetCurrentProcessId();
+                                }
                                 Strategy(Device)->OnClose(pid);
                           },
                           WDF_NO_EVENT_CALLBACK);

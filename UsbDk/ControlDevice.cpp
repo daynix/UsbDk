@@ -1025,9 +1025,9 @@ NTSTATUS CUsbDkControlDevice::AddRedirectionToSet(const USB_DK_DEVICE_ID &Device
     return STATUS_SUCCESS;
 }
 
-NTSTATUS CUsbDkControlDevice::RemoveRedirect(const USB_DK_DEVICE_ID &DeviceId)
+NTSTATUS CUsbDkControlDevice::RemoveRedirect(const USB_DK_DEVICE_ID &DeviceId, ULONG pid)
 {
-    if (NotifyRedirectorRemovalStarted(DeviceId))
+    if (NotifyRedirectorRemovalStarted(DeviceId, pid))
     {
         auto res = ResetUsbDevice(DeviceId, false);
         if (NT_SUCCESS(res))
@@ -1079,9 +1079,8 @@ bool CUsbDkControlDevice::NotifyRedirectorAttached(CRegText *DeviceID, CRegText 
     return m_Redirections.ModifyOne(&ID, [RedirectorDevice](CUsbDkRedirection *R){ R->NotifyRedirectorCreated(RedirectorDevice); });
 }
 
-bool CUsbDkControlDevice::NotifyRedirectorRemovalStarted(const USB_DK_DEVICE_ID &ID)
+bool CUsbDkControlDevice::NotifyRedirectorRemovalStarted(const USB_DK_DEVICE_ID &ID, ULONG pid)
 {
-    ULONG pid = (ULONG)(ULONG_PTR)PsGetCurrentProcessId();
     return m_Redirections.ModifyOne(&ID, [](CUsbDkRedirection *R){ R->NotifyRedirectionRemovalStarted(); }, pid);
 }
 

@@ -1,0 +1,19 @@
+name: Publish to Winget
+on:
+  release:
+    types: [released]
+
+jobs:
+  publish:
+    runs-on: windows-latest # Action can only run on Windows
+    steps:
+      - name: Extract version from tag
+        id: extract_version
+        run: |
+          $version = "${{ github.event.release.tag_name }}" -replace "v(\d+)\.(?:0*(\d+))-(\d+)", '$1.$2.$3'
+          Write-Output "version=$version" >> $GITHUB_OUTPUT
+      - uses: vedantmgoyal2009/winget-releaser@v2
+        with:
+          identifier: daynix.UsbDk
+          version: ${{ steps.extract_version.outputs.version }}
+          token: ${{ secrets.WINGET_TOKEN }}

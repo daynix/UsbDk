@@ -35,7 +35,7 @@ desired configuration.
 
 ## Installing and running
 
-UsbDk can be installed via Winget:
+UsbDk can be installed via Winget on desktop Windows:
 ```
 winget install daynix.UsbDk
 ```

@@ -1,0 +1,19 @@
+name: Publish to Winget
+on:
+  release:
+    types: [released]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract version from tag
+        id: extract_version
+        run: |
+          version=$(echo "${{ github.event.release.tag_name }}" | sed -E 's/v([0-9]+)\.0*([0-9]+)-([0-9]+)/\1.\2.\3/')
+          echo "version=$version" >> $GITHUB_OUTPUT
+      - uses: vedantmgoyal2009/winget-releaser@v2
+        with:
+          identifier: daynix.UsbDk
+          version: ${{ steps.extract_version.outputs.version }}
+          token: ${{ secrets.WINGET_TOKEN }}

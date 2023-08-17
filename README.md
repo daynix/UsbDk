@@ -35,6 +35,11 @@ desired configuration.
 
 ## Installing and running
 
+UsbDk can be installed via Winget on desktop Windows:
+```
+winget install daynix.UsbDk
+```
+
 Use UsbDkController.exe to install/uninstall and verify basic operation.
 Run UsbDkController.exe without parameters for command line options.
 
